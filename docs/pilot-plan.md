@@ -1,55 +1,44 @@
 # Eco Town: plan for a one-hour pilot
 
-**Draft 2, 14 November 2026.** Written in answer to the implementation brief of the same date (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
+**Draft 3, 14 November 2026.** Written in answer to the implementation brief of the same date (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
 
 **Decided by the user after draft 1:**
-- This repository (`ai-lab-v3-full-day`) is where the work happens. It is a **new live build**, deployed from here to a **new Cloudflare address** that the user will provide.
+- This repository (`ai-lab-v3-full-day`) is where the work happens. It is a **new live build**, deployed from here to a **new address** that the user will provide.
 - The brief's section on keeping a frozen test copy beside a development copy does not apply: it assumed work in the original repository. The original site is left alone and is not part of this plan.
 - The AI Lab as it stands (the town and its six missions) is taken to be **one hour**. Nothing is cut to fit.
-- The two Google documents will be pasted by the user. **Not yet received**; A7 and the P1 items will be checked against them.
+- The two Google documents will be pasted by the user. **Not yet received**; A6 and the P1 items will be checked against them.
+- Hosting and security are **out of this plan** (removed in draft 3 at the user's request). That covers where and how the site is deployed, the admin login, and the limits on wrong passcodes.
 
-**What was inspected:** all the code in `games/ecotown/` (copy of `bakshilabs/ai-lab-v3` at `a5fd92c`) and the live Cloudflare account, read-only. **What was not:** the two Google documents named in the brief (this session cannot open them) and the original repository.
+**What was inspected:** all the code in `games/ecotown/` (copy of `bakshilabs/ai-lab-v3` at `a5fd92c`). **What was not:** the two Google documents named in the brief (this session cannot open them) and the original repository.
 
 ---
 
 ## In short
 
-1. **This build has no site of its own yet.** The deploy script here is switched off and still names the original worker and stores. There is no version number anywhere in the game.
+1. **The game has no version number anywhere,** so feedback cannot be tied to a build.
 2. **A login today is one passcode for one device.** The server knows the code and nothing else. All progress lives in the browser. The server has no idea of an organisation, a group or a learner.
 3. **Progress survives a refresh,** because it is in the browser's storage. It does not survive a change of device, cleared storage or a private window, and two children on one browser share one town.
 4. **No child data leaves the device.** Florence's model runs in the browser. Nothing typed is sent anywhere. This is a strength to keep.
-5. **The pass/fail defects are real and specific.** Eleven are listed in A7. The cause is that rules are checked in five different places.
-6. **Scale is not the problem; one rule is.** The game is static files plus one small request a minute, so 1,000 learners is a light load. But ten wrong passcodes from one school's shared internet address lock the whole school out for ten minutes.
+5. **The pass/fail defects are real and specific.** Eleven are listed in A6. The cause is that rules are checked in five different places.
+6. **Scale looks light but is unmeasured.** The game is static files plus one small request a minute per learner. Nothing has been load-tested.
 
 ---
 
 ## A. What exists today
 
-### A1. Deployment
-
-| | Finding |
-|---|---|
-| This build | Not deployed anywhere. `worker/deploy.mjs` is switched off, and it names the original worker (`ecotown`) and the original media store (`ecotown-voice`). `worker/worker.js` carries the original admin login settings. All three must be given new names before a first deploy. |
-| How a deploy works | One API call uploads the built game over a named Cloudflare Worker. The passcode store (a Durable Object, one instance called `main`) and the media store (KV: voices, pictures, films) are tied to that worker. |
-| The original site | `ecotown.deltaops.workers.dev`, last deployed 11 Nov 2026 from the original repository. Not touched by this plan. |
-| Version label | None in the game, the page or the server. Feedback cannot be tied to a build. |
-
-### A2. Logging in and sessions (`worker/codes.js`, `worker/worker.js`)
+### A1. Logging in and sessions (`worker/codes.js`, `worker/worker.js`)
 
 - **A login is a passcode** such as `OTTER-1234`. The company makes codes in batches at `/admin`. A batch has a free-text "school" name, a note, a start date, an end date and up to 500 codes.
 - **One code, one device.** A new login with the same code replaces the earlier one ("newest login wins"). The earlier device sees a lock card within a minute. A code cannot be shared by a class.
 - **Session:** a cookie lasting 30 days. The game asks the server once a minute whether the session is still good. There is no log-out button except on the lock card.
 - **Dates** are whole days in UTC. An expired or switched-off batch shows a message and nothing else.
 - **No passwords, no reset, no email.** A lost code means asking the company.
-- **Wrong-code limit:** ten failures in ten minutes per internet address, after which every attempt from that address is refused, correct codes included. A school or club normally shares one address. This is the most likely thing to spoil a pilot session.
-- **Limit records are never deleted,** so internet addresses are kept for ever.
-- **A test back door is in the code** (`X-Admin-Test-Key`). It is inactive: the live worker has no such secret. It should be removed.
 
-### A3. Roles
+### A2. Roles
 
-Two exist: the company (admin, behind Cloudflare Access, one named person) and a player holding a code. There is no facilitator role and no organisation admin. The admin sees every batch of every customer on one page, with counts of codes used and active now.
+Two exist: the company (admin) and a player holding a code. There is no facilitator role and no organisation admin. The admin sees every batch of every customer on one page, with counts of codes used and active now.
 
-### A4. Where progress lives
+### A3. Where progress lives
 
 Everything is in the browser's `localStorage`. The server stores no progress.
 
@@ -72,21 +61,20 @@ Everything is in the browser's `localStorage`. The server stores no progress.
 | has storage cleared or blocked | Everything is gone, silently. |
 | plays across a new deploy | The save is read as it is. There is no version check or upgrade step; only a change of key name would drop old saves. |
 
-### A5. Separation between customers
+### A4. Separation between customers
 
 There is none in the data. A batch's "school" is a label. Every code of every customer sits in one store, and code names are drawn from one pool. No learner can see another's data, but only because no learner data reaches the server at all.
 
-### A6. Facilitator and sharing features
+### A5. Facilitator and sharing features
 
 - **Leader's page** (`game/leader.html`): a static printable page. It shows no learners.
 - **"Class mode":** a start-screen switch that puts the missions in order. It does not connect devices.
 - **Classroom:** a room inside the game where the child asks Florence questions. Answers come from a fixed list on the device.
 - **Town codes, QR, postcard, visit:** a town is packed into a code on the device and typed or scanned on another. No server, no free text, no typed names. The code does appear in the page address when a visit is opened by link.
 - **Club wall:** a list kept on one device. Not shared, not scoped, not on the server.
-- **Camera scan** is blocked by the site's own security header, so that button cannot work on the live site.
 - **No live view of learners exists** in any form.
 
-### A7. Pass/fail rules
+### A6. Pass/fail rules
 
 Rules are decided in five places: mission `pass` functions (`game/levels.js`), the check and retry flow (`game/game.js`), town goals (`game/progress.js`), challenges (`game/challenges.js`) and the report (`game/report.js`). They disagree in these ways.
 
@@ -106,29 +94,29 @@ Rules are decided in five places: mission `pass` functions (`game/levels.js`), t
 
 Tests cover the 15/16-minute and 160/161 t edges, but several test a copy of the rule, not the rule itself, and none covers items 1–3, 6, 8 or 11.
 
-### A8. Finding the next step
+### A7. Finding the next step
 
 - A "next step" line and bar exist. For carbon and walking the bar's numbers quietly switch to "goals met out of 8", and for some challenges they are an invented figure. The bar has no visible label.
 - The star count is stars left to spend, not stars earned.
 - Several buttons reload the page (challenge towns, another island, start again).
 - A recap exists (`game/finale.js`) but appears only once, after all six missions and a complete town. A one-hour session will rarely reach it.
 
-### A9. Load
+### A8. Load
 
 - The game is static files. Florence runs on the device. There are no model or outside API calls.
 - Per learner the server sees: one login, about a hundred file requests at first load (files with fixed names are then kept by the browser for a week), and one check a minute.
 - Every check goes through the single passcode store. At 1,000 learners that is about 17 requests a second, far below what one store handles.
-- **What would fail first, in order:** the shared-address lockout (A2); the account's daily request allowance if it is on Cloudflare's free plan (not confirmed, see D2); admin pages that read every code on each view, once codes number in the tens of thousands.
+- **Likely first limit as numbers grow:** admin pages read every code on each view, which slows once codes number in the tens of thousands.
 - **Nothing has been load-tested.** The figures above are reasoning from the design, not measurements.
 
-### A10. Privacy and data
+### A9. Privacy and data
 
 | | Finding |
 |---|---|
 | Sent to the server | The passcode at login; a cookie on each request. Nothing else. |
 | Typed by the child | Town name, mission instructions, questions to Florence, a comment, a reflection. All stay on the device. |
-| Stored on the server | Per code: batch, last login time, login count. Per internet address: failed-login count, kept for ever. |
-| Outside services | None. The site's security header forbids them. |
+| Stored on the server | Per code: batch, last login time, login count. |
+| Outside services | None. |
 | Link to a real child | Only if the company or facilitator keeps a list of who had which code. |
 | Shared towns | Carry tiles, score and a preset name only. |
 
@@ -136,13 +124,11 @@ Tests cover the 15/16-minute and 160/161 t edges, but several test a copy of the
 
 ## B. Proposed design
 
-Kept as small as the brief's questions allow, on the Cloudflare set-up already in use.
+Kept as small as the brief's questions allow.
 
-### B1. A new site with a version label
+### B1. A version label
 
-- **New names throughout:** a new worker, a new passcode store and a new media store, so nothing is shared with the original site. The admin page gets its own Cloudflare Access login.
-- **Address:** to be provided by the user. Until then the work is tested locally and with the unit tests.
-- **Version stamp:** the build writes a version, the commit and the date into the game. Shown small in the menu and at `/version`. Each release is recorded in `docs/RELEASES.md` with its fixes and known issues, so feedback can be tied to a build.
+The build writes a version, the commit and the date into the game, shown small in the menu. Each release is recorded in `docs/RELEASES.md` with its fixes and known issues, so feedback can be tied to a build.
 
 ### B2. Organisation, group, learner
 
@@ -163,7 +149,7 @@ Platform (the company)
 
 | Role | How they get in | Can see |
 |---|---|---|
-| Platform admin | Cloudflare Access (as now) | All organisations, groups, seat use, technical counts. |
+| Platform admin | The admin page (as now) | All organisations, groups, seat use, technical counts. |
 | Facilitator | A leader code for their organisation | Their own groups: join code, list of badges with stage and status. Nothing from another organisation. |
 | Learner | Join code | Their own town only. |
 
@@ -179,7 +165,7 @@ An organisation admin separate from the facilitator is not needed for a pilot; t
 - **A mission in progress** is saved at each step, so a refresh returns to the same mission step and not to the town.
 - **Save version:** each save carries the build version, and the game refuses to load a save from a newer build than itself.
 - **Another device:** join code plus badge restores the server copy (typed text excepted). Built in the pilot phase only if needed; the design allows it without rework.
-- **Retention:** learner records are deleted 30 days after the group's end date, and at once when the company deletes a group. Failed-login records are deleted after a day.
+- **Retention:** learner records are deleted 30 days after the group's end date, and at once when the company deletes a group.
 
 ### B4. One set of rules
 
@@ -203,12 +189,12 @@ In the brief's order, without its first item (a frozen copy beside a development
 
 | # | Change | Files | Smallest version | Risk | Done when |
 |---|---|---|---|---|---|
-| 1 | **A site of its own.** New worker and store names, version stamp, release log. | `worker/deploy.mjs`, `worker/worker.js`, `build.mjs`, `main.js` (menu line), new `docs/RELEASES.md`, root `CLAUDE.md` | As B1. The first deploy waits for the address. | Low. The script must be unable to reach the original worker: the old names are removed, not left as defaults. | The built game shows its version. The deploy script contains no original name. After the address arrives: the new site serves the game with its own codes and admin login. |
-| 2 | **Fix the rules.** | new `js/game/criteria.js`; `levels.js`, `progress.js`, `challenges.js`, `report.js`, `game.js`, `sim/sim.js`, `ai/targets.js`, `content.js` | As B4, covering all eleven defects in A7. | Medium. Stricter rules could make a mission impossible; the existing recipe tests that build every mission and challenge guard against that. | New tests: walk 15 passes and 16 fails through the real rule; carbon 160.0 passes, 160.4 fails; a child's 10-minute target with a 12-minute plan is "partly met" with no star; a meeting that breaks 70 t blocks completion until fixed; two limits at once; a fix turns "not met" into "met" and the saved state agrees. All 250 present tests still pass. |
+| 1 | **Version label.** Version stamp and release log. | `build.mjs`, `main.js` (menu line), new `docs/RELEASES.md` | As B1. | Low. | The built game shows its version, commit and date in the menu. |
+| 2 | **Fix the rules.** | new `js/game/criteria.js`; `levels.js`, `progress.js`, `challenges.js`, `report.js`, `game.js`, `sim/sim.js`, `ai/targets.js`, `content.js` | As B4, covering all eleven defects in A6. | Medium. Stricter rules could make a mission impossible; the existing recipe tests that build every mission and challenge guard against that. | New tests: walk 15 passes and 16 fails through the real rule; carbon 160.0 passes, 160.4 fails; a child's 10-minute target with a 12-minute plan is "partly met" with no star; a meeting that breaks 70 t blocks completion until fixed; two limits at once; a fix turns "not met" into "met" and the saved state agrees. All 250 present tests still pass. |
 | 3 | **Refresh safety.** | `game.js` (save points, learner-scoped key), `main.js` | Save on page hide; save mission step; version in the save. | Low. Saves made before this change must still load. | Refresh at any of the main steps of a mission returns to that step. A save made by today's build opens unchanged. |
-| 4 | **Groups and learners.** | `worker/codes.js`, `worker/store.js`, `worker/worker.js`, `worker/admin.html`, `tests/codes.test.mjs` | As B2, without the facilitator page. Wrong-code limit moved from "per address" to "per address and code", with a higher ceiling per address. Back door removed. | Medium to high: this replaces the store's layout. The new site starts with an empty store, so there is no live data to move. | Twenty learners on one join code get twenty ids and twenty separate towns. A learner of one organisation cannot read anything of another (tested by trying). A 21st learner on a 20-seat group is refused with a clear message. Thirty wrong codes from one address do not block a correct one. |
+| 4 | **Groups and learners.** | `worker/codes.js`, `worker/store.js`, `worker/worker.js`, `worker/admin.html`, `tests/codes.test.mjs` | As B2, without the facilitator page. | Medium to high: this replaces the store's layout. The new site starts with an empty store, so there is no live data to move. | Twenty learners on one join code get twenty ids and twenty separate towns. A learner of one organisation cannot read anything of another (tested by trying). A 21st learner on a 20-seat group is refused with a clear message. |
 | 5 | **Server copy of progress.** | `worker/worker.js`, `worker/store.js`, `game.js` | As B3. | Medium. A bad merge could overwrite a newer town: newest-wins by save time, and the device copy is never deleted. | Storage cleared on a device, then join code and badge: the town returns. Typed text is absent from every server record (checked by reading the store). |
-| 6 | **Load test.** | new `tests/load/` | A script that plays the server's part of N learners against the new site, before any group uses it: join, load files, check in each minute, save every 30 seconds. Run at 20, 100 and 1,000. | Low. Never pointed at the original site. | A table in `docs/LOAD.md`: success rate, errors, response times, store behaviour, and cost from Cloudflare's own figures. A claim about 1,000 is made only if the run supports it. |
+| 6 | **Load test.** | new `tests/load/` | A script that plays the server's part of N learners against a test copy of the site, before any group uses it: join, load files, check in each minute, save every 30 seconds. Run at 20, 100 and 1,000. | Low. Never pointed at the original site. | A table in `docs/LOAD.md`: success rate, errors, response times, store behaviour, and cost from Cloudflare's own figures. A claim about 1,000 is made only if the run supports it. |
 
 ### P1: before children use it
 
@@ -234,6 +220,4 @@ No new look, no change to the word-tile instruction builder, no accounts or emai
 
 ## D. Still open
 
-1. **The new Cloudflare address** (and whether it is on the same Cloudflare account as the original). Needed for the first deploy and the load test; nothing before that depends on it.
-2. **Which Cloudflare plan that account is on.** The free plan's daily request allowance would be the first limit a large group meets. It is shown in the dashboard under Workers & Pages → Plans.
-3. **The two Google documents,** to be pasted by the user.
+1. **The two Google documents,** to be pasted by the user.
