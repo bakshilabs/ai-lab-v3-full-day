@@ -1,0 +1,262 @@
+// Camera rig: sky orbit with pan, zoom-to-cursor, tilt that follows zoom (25–60°), directed flights between
+// poses, a walkable street view, turntable and follow shots. No shake, capped turn speed.
+// Street view (redesign, Nov 2026: "you are too low, and it is hard to walk around"): eye at child-on-a-bike
+// height, WASD/arrows walk and turn, drag looks, a tap on the ground walks there along open tiles (rig.streetNav,
+// set by streetpad.js, keeps you off buildings, the river and the rim), Home or Escape goes back up.
+// With reduce-motion every flight becomes a quick fade.
+// Input (camera review, Nov 2026): drag pans (mouse and one finger), right-drag / two-finger twist rotates,
+// two-finger drag up/down tilts, wheel / pinch zoom towards the cursor or pinch point, double-tap flies in.
+// Keys (only when the island has focus or nothing else does): WASD pan, Q/E or ←/→ rotate, ↑/↓ tilt, +/- zoom, Home resets.
+import * as THREE from 'three';
+import { clamp, lerp, ease } from '../engine/stage.js';
+
+const DEG = Math.PI / 180;
+const STREET = { eye: 3.4, fov: 60, speed: 7, turn: 1.9, pitch: [-0.55, 0.35], r: 0.7 }; // eye ≈ over hedges and parked cars
+const SKY_FOV = 22;                 // the diorama lens (frameDist always uses this, whatever the current view)
+const PAN = { x: [-45, 45], z: [-36, 32] };
+// portrait (phone) overview: seen from the south-west at a steeper yaw, the tile area (84 × 66) is ~68 wide
+// and ~80 deep on screen, matching an upright phone's free area; span/depth are the world units to fit
+const HOME_YAW = -40 * DEG;        // the island's starting direction (landscape screens)
+const PORTRAIT = { yaw: -88 * DEG, pitch: 52 * DEG, span: 64, depth: 78, target: [12, 1, 1] };
+export function createRig(stage, canvas, fadeEl) {
+  const cam = stage.camera;
+  const sky = { target: new THREE.Vector3(0, 1, -2), yaw: HOME_YAW, pitch: 34 * DEG, dist: 220, vy: 0, vp: 0, autoPitch: true };
+  const rig = {
+    // building: while a build tool is selected, taps must place tiles, not move the camera
+    mode: 'sky', reduce: false, locked: false, building: false, sky, onTap: null, onDoubleTap: null, onHover: null,
+    street: null, flight: null, turntable: 0, follow: null,
+    // the part of the screen the island should fill (the game sets this beside its side panels)
+    inset: { left: 0, right: 0, top: 0, bottom: 0 },
+    freeAspect() { const W = canvas.clientWidth || innerWidth, H = canvas.clientHeight || innerHeight; const w = Math.max(200, W - this.inset.left - this.inset.right), h = Math.max(200, H - this.inset.top - this.inset.bottom); return { aspect: w / h, fw: w / W, fh: h / H }; },
+    // distance that fits a span of the island in the free area (the island is ~100 × 75, with cliffs ~40 high)
+    // tall, narrow free areas (phones held upright): the island is width-limited, so the frame trims the margin
+    // (and the floating rocks) and looks down a little more steeply, letting the island fill more of the screen
+    portrait() { return this.freeAspect().aspect < 0.85; },
+    frameDist(span = this.portrait() ? 90 : 102, fill = 0.92) { // 102: the buildable land fills the free area; the rim's far rocks and the cliff's roots may run off it (112 left tiles 22 px wide on a laptop)
+      const { aspect, fw, fh } = this.freeAspect();
+      if (this.portrait()) {
+        // phones held upright: fit the buildable tiles (not the wild rim) across the width, seen from the
+        // portrait yaw where the island's long axis runs up the screen; the rim may run off the sides
+        const tx = Math.tan((SKY_FOV * DEG) / 2) * cam.aspect * fw, ty = Math.tan((SKY_FOV * DEG) / 2) * fh;
+        return Math.max(PORTRAIT.span / 2 / tx, PORTRAIT.depth / 2 / ty);
+      }
+      const vf = SKY_FOV * DEG * fh; const hf = 2 * Math.atan(Math.tan((SKY_FOV * DEG) / 2) * cam.aspect) * fw;
+      const f = Math.min(hf, vf * 1.25 * Math.min(1, aspect / 1.2 + 0.2));
+      return (span / 2 / fill) / Math.tan(f / 2) * 0.92;
+    },
+    // scripted distances were tuned on a 16:10 screen; scale them for this screen's shape
+    fit(d) { const ref = 280; /* a 1280×800 screen with the build panel */ return d * Math.max(0.8, this.frameDist() / ref); },
+    minDist() { return 26; },
+    maxDist() { return this.frameDist() * 1.35; },
+    skyPose(o = sky) {
+      const p = new THREE.Vector3(Math.sin(o.yaw) * Math.cos(o.pitch), Math.sin(o.pitch), Math.cos(o.yaw) * Math.cos(o.pitch)).multiplyScalar(o.dist).add(o.target);
+      return { pos: p, look: o.target.clone(), fov: SKY_FOV };
+    },
+    current() { return { pos: cam.position.clone(), look: this._look.clone(), fov: cam.fov }; },
+    _look: new THREE.Vector3(),
+    // a hard cut (classroom, inside a house) ends any flight still running, so it can't pull the camera back afterwards
+    cut(pose) { if (this.flight) { const f = this.flight; this.flight = null; f.res(); } this._modeGen = (this._modeGen || 0) + 1; this.apply(pose); },
+    apply(pose) { cam.position.copy(pose.pos); this._look.copy(pose.look); cam.lookAt(pose.look); if (cam.fov !== pose.fov) { cam.fov = pose.fov; cam.updateProjectionMatrix(); } },
+    // Fly from the current view to a pose. Sky-to-sky flights move along the orbit (shortest turn), others along
+    // a gentle arc. A new flight replaces the one in progress. Timed on the clock, so slow devices don't stretch it.
+    fly(to, dur = 1.5, { arc = 0.25, orbit = null } = {}) {
+      const from = this.current();
+      if (this.flight) { const f = this.flight; this.flight = null; f.res(); }
+      if (this.reduce) return this.fade(() => this.apply(to));
+      dur = Math.max(1.0, dur);
+      return new Promise((res) => { this.flight = { from, to, t0: performance.now(), dur, arc, res, orbit }; });
+    },
+    fade(mid) {
+      return new Promise((res) => { fadeEl.classList.add('on'); setTimeout(() => { mid(); fadeEl.classList.remove('on'); setTimeout(res, 220); }, 220); });
+    },
+    async toSky(o = {}, dur = 1.4) {
+      const before = this.mode === 'sky' && !this.flight ? { ...sky, target: sky.target.clone() } : null;
+      Object.assign(sky, { dist: o.dist ?? sky.dist, yaw: o.yaw ?? sky.yaw, pitch: clamp(o.pitch ?? sky.pitch, 25 * DEG, 60 * DEG) }); if (o.target) sky.target.copy(o.target);
+      clampTarget();
+      this.street = null; this.follow = null; this.turntable = 0;
+      if (before) { let dy = sky.yaw - before.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); dy = clamp(dy, -100 * DEG, 100 * DEG); sky.yaw = before.yaw + dy; }
+      const gen = this._modeGen = (this._modeGen || 0) + 1;
+      await this.fly(this.skyPose(), dur + (before ? Math.abs(sky.yaw - before.yaw) / (Math.PI / 2) * 0.3 : 0), { orbit: before ? { a: before, b: { ...sky, target: sky.target.clone() } } : null });
+      if (gen === this._modeGen) this.mode = 'sky'; // unless something else (the classroom, a house) took the camera meanwhile
+    },
+    // home: also turn back to the starting direction (after a mission's turntable, or the ⌂ button: a lost player wants
+    // the view they know; it used to keep whatever way the island had turned)
+    overview(dur = 1.4, home = false) {
+      sky.autoPitch = true;
+      if (this.portrait()) return this.toSky({ target: new THREE.Vector3(...PORTRAIT.target), dist: this.frameDist(), pitch: PORTRAIT.pitch, yaw: PORTRAIT.yaw }, dur);
+      return this.toSky({ target: new THREE.Vector3(0, 1, -2), dist: this.frameDist(), pitch: 34 * DEG, ...(home ? { yaw: HOME_YAW } : {}) }, dur);
+    },
+    focus(point, { dist = 70, pitch = 42 * DEG, yaw = sky.yaw } = {}, dur = 1.2) { return this.toSky({ target: point.clone(), dist: this.fit(dist), pitch, yaw }, dur); },
+    // frame a set of world points (a plan, the tiles a check found): fits their bounding sphere in the free area
+    frameBox(points, { pitch = 42 * DEG, pad = 1.25, dur = 1.3, yaw = sky.yaw } = {}) {
+      if (!points.length) return Promise.resolve();
+      const box = new THREE.Box3().setFromPoints(points); const sph = box.getBoundingSphere(new THREE.Sphere());
+      const { aspect, fh } = this.freeAspect(); const vf = SKY_FOV * DEG * fh; const f = Math.min(vf, 2 * Math.atan(Math.tan(vf / 2) * aspect));
+      const d = clamp(Math.max(16, sph.radius) / Math.tan(f / 2) * pad, this.minDist() * 1.5, this.maxDist()); // small plans keep their surroundings in view
+      return this.toSky({ target: sph.center, dist: d, pitch, yaw }, dur);
+    },
+    // Street view: stand at `pos` (raised to eye height over the ground there), facing `look`
+    async toStreet(pos, look, dur = 1.6) {
+      this.mode = 'flying'; this.turntable = 0; this.follow = null;
+      const nav = this.streetNav; const eye = pos.clone();
+      if (nav) {
+        // never start inside a building: step towards what we look at until the ground is open
+        const d = look.clone().sub(eye).setY(0); const n = Math.ceil(d.length());
+        for (let i = 0; i <= n && !nav.ok(eye.x, eye.z); i++) eye.addScaledVector(d, 1 / Math.max(1, n));
+        // and stand back far enough to see the whole building and a bit of the street (about 10 units away)
+        const back = d.clone().normalize().negate(); for (let i = 0; i < 16 && Math.hypot(look.x - eye.x, look.z - eye.z) < 12 && nav.ok(eye.x + back.x * 1.2, eye.z + back.z * 1.2); i++) eye.addScaledVector(back, 0.5);
+        const g = nav.ground(eye.x, eye.z); if (g != null) eye.y = g + STREET.eye;
+      }
+      const dir = look.clone().sub(eye); const yaw = Math.atan2(-dir.x, -dir.z); const pitch = clamp(Math.atan2(dir.y, Math.hypot(dir.x, dir.z)), STREET.pitch[0], STREET.pitch[1]);
+      const to = this.streetPose({ pos: eye, yaw, pitch });
+      await this.fly(to, dur, { arc: 0.45 });
+      this.street = { pos: eye, yaw, pitch, path: null, move: { f: 0, s: 0, turn: 0 } }; this.mode = 'street';
+    },
+    streetPose(st) { const c = Math.cos(st.pitch); return { pos: st.pos.clone(), look: st.pos.clone().add(new THREE.Vector3(-Math.sin(st.yaw) * c, Math.sin(st.pitch), -Math.cos(st.yaw) * c).multiplyScalar(10)), fov: STREET.fov }; },
+    // walk in street view: to a world point along open tiles (a tap on the ground)
+    walkTo(p) { const st = this.street, nav = this.streetNav; if (this.mode !== 'street' || !st || !nav) return false; const r = nav.route(st.pos, p); if (!r || !r.length) return false; st.path = r; return true; },
+    // the point on the ground under a screen position in street view
+    streetGround(n) { if (!this.street) return null; ray.setFromCamera(n, cam); const y = (this.streetNav?.ground(this.street.pos.x, this.street.pos.z) ?? this.street.pos.y - STREET.eye); const p = new THREE.Vector3(); return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -y), p) ? p : null; },
+    startTurntable(speed = 0.12) { this.turntable = this.reduce ? 0 : speed; },
+    followTarget(fn) { this.follow = fn; this.mode = 'follow'; },
+    // on-screen and keyboard helpers
+    zoomBy(f, at = null) { zoomTo(sky.dist * f, at); },
+    rotateBy(a) { if (this.mode !== 'sky') return; const to = sky.yaw + a; if (this.reduce) { sky.yaw = to; return; } this._snap = { from: sky.yaw, to, t0: performance.now() }; },
+    // pan by a screen drag (pixels): the ground follows the finger
+    panScreen(dx, dy) {
+      const wpp = (2 * sky.dist * Math.tan((SKY_FOV * DEG) / 2)) / (canvas.clientHeight || 800); const c = Math.cos(sky.yaw), s = Math.sin(sky.yaw);
+      const dxw = dx * wpp, dyw = (dy * wpp) / Math.max(0.45, Math.sin(sky.pitch));
+      sky.target.x += -c * dxw - s * dyw; sky.target.z += s * dxw - c * dyw; clampTarget();
+    },
+    // pan in world units: right/left and forward/back as seen from the camera
+    panBy(right, fwd) { const c = Math.cos(sky.yaw), s = Math.sin(sky.yaw); sky.target.x += c * right - s * fwd; sky.target.z += -s * right - c * fwd; clampTarget(); },
+    update(dt) {
+      if (this.flight) {
+        const f = this.flight; const k = ease.inOut(clamp((performance.now() - f.t0) / 1000 / f.dur));
+        if (f.orbit) {
+          // along the orbit: interpolate target, yaw, pitch and distance; the lens change finishes early
+          const a = f.orbit.a, b = f.orbit.b;
+          const o = { target: a.target.clone().lerp(b.target, k), yaw: lerp(a.yaw, b.yaw, k), pitch: lerp(a.pitch, b.pitch, k), dist: lerp(a.dist, b.dist, k) };
+          this.apply(this.skyPose(o));
+        } else {
+          const pos = f.from.pos.clone().lerp(f.to.pos, k); const lift = Math.sin(k * Math.PI) * f.arc * f.from.pos.distanceTo(f.to.pos) * 0.35; pos.y += lift;
+          const look = f.from.look.clone().lerp(f.to.look, k);
+          this.apply({ pos, look, fov: lerp(f.from.fov, f.to.fov, clamp(k / 0.4)) });
+        }
+        if (k >= 1) { this.flight = null; f.res(); }
+        return;
+      }
+      if (this.mode === 'sky') {
+        if (this.turntable) sky.yaw += this.turntable * dt;
+        if (this._snap) { const s = this._snap; const k = ease.inOut(clamp((performance.now() - s.t0) / 450)); sky.yaw = lerp(s.from, s.to, k); if (k >= 1) this._snap = null; }
+        sky.yaw += sky.vy; sky.pitch = clamp(sky.pitch + sky.vp, 25 * DEG, 60 * DEG);
+        // the tilt follows the zoom: close up you look more from the side (like a street), far away more from above
+        if (sky.autoPitch && !sky.vp) { const zf = clamp((sky.dist - this.minDist()) / (this.frameDist() - this.minDist())); const want = (lerp(32, 40, zf) + (this.portrait() ? 12 : 0)) * DEG; sky.pitch += (want - sky.pitch) * Math.min(1, dt * 3); }
+        const damp = this.building ? 0.00002 : 0.04; sky.vy *= Math.pow(damp, dt); sky.vp *= Math.pow(damp, dt); // no drifting while building
+        if (Math.abs(sky.vp) < 1e-5) sky.vp = 0;
+        this.apply(this.skyPose());
+      } else if (this.mode === 'street' && this.street) {
+        const st = this.street; const nav = this.streetNav; const k = keys; const m = st.move;
+        if (st.base && !st.pos) { const d = st.base.look.clone().sub(st.base.pos); Object.assign(st, { pos: st.base.pos.clone(), yaw: Math.atan2(-d.x, -d.z) + (st.yaw || 0), pitch: st.pitch || 0, move: { f: 0, s: 0, turn: 0 } }); } // (old callers set a base pose)
+        const f = (k.has('w') || k.has('arrowup') ? 1 : 0) - (k.has('s') || k.has('arrowdown') ? 1 : 0) + (m?.f || 0);
+        const sd = (k.has('d') ? 1 : 0) - (k.has('a') ? 1 : 0) + (m?.s || 0);
+        const tn = (k.has('arrowleft') || k.has('q') ? 1 : 0) - (k.has('arrowright') || k.has('e') ? 1 : 0) + (m?.turn || 0);
+        if (tn) st.yaw += clamp(tn, -1, 1) * STREET.turn * dt;
+        let dx = 0, dz = 0; const fw = new THREE.Vector2(-Math.sin(st.yaw), -Math.cos(st.yaw)), rt = new THREE.Vector2(Math.cos(st.yaw), -Math.sin(st.yaw));
+        if (f || sd) { st.path = null; dx = fw.x * f + rt.x * sd; dz = fw.y * f + rt.y * sd; const l = Math.hypot(dx, dz); dx *= STREET.speed * dt / l; dz *= STREET.speed * dt / l; }
+        else if (st.path?.length) {
+          // follow a tapped route; turn smoothly to face the way we walk
+          const w = st.path[0]; const ex = w.x - st.pos.x, ez = w.z - st.pos.z; const d = Math.hypot(ex, ez);
+          if (d < 0.4) st.path.shift(); else { const sp = Math.min(d, STREET.speed * dt); dx = ex / d * sp; dz = ez / d * sp; let dy = Math.atan2(-ex, -ez) - st.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); st.yaw += dy * Math.min(1, dt * 4); }
+        }
+        if (dx || dz) {
+          // slide along walls: try each axis on its own, checking a little ahead (a body radius)
+          const ok = (x, z) => !nav || nav.ok(x, z) || !nav.ok(st.pos.x, st.pos.z); const r = STREET.r;
+          if (ok(st.pos.x + dx + Math.sign(dx) * r, st.pos.z)) st.pos.x += dx; else if (st.path) st.path = null;
+          if (ok(st.pos.x, st.pos.z + dz + Math.sign(dz) * r)) st.pos.z += dz; else if (st.path) st.path = null;
+        }
+        const g = nav?.ground(st.pos.x, st.pos.z); if (g != null) st.pos.y += (g + STREET.eye - st.pos.y) * Math.min(1, dt * 6);
+        this.apply(this.streetPose(st));
+      } else if (this.mode === 'follow' && this.follow) {
+        const { pos, look } = this.follow(dt); const cur = this.current();
+        this.apply({ pos: cur.pos.lerp(pos, Math.min(1, dt * 2.5)), look: cur.look.lerp(look, Math.min(1, dt * 3)), fov: 36 });
+      }
+    },
+  };
+  function clampTarget() { sky.target.x = clamp(sky.target.x, PAN.x[0], PAN.x[1]); sky.target.z = clamp(sky.target.z, PAN.z[0], PAN.z[1]); }
+  // the point on the ground (y = 1) under a screen position (NDC), for zooming towards the cursor
+  const ray = new THREE.Raycaster(); const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
+  function groundAt(n) { ray.setFromCamera(n, cam); const p = new THREE.Vector3(); return ray.ray.intersectPlane(ground, p) ? p : null; }
+  function zoomTo(d, at = null) {
+    if (rig.mode !== 'sky') return;
+    const before = at ? groundAt(at) : null;
+    sky.dist = clamp(d, rig.minDist(), rig.maxDist()); rig.apply(rig.skyPose()); cam.updateMatrixWorld();
+    if (before) { const after = groundAt(at); if (after) { sky.target.add(before.sub(after).setY(0)); clampTarget(); } }
+    sky.autoPitch = true;
+  }
+  rig.zoomTo = zoomTo;
+
+  // ---------- input
+  const pts = new Map(); let downAt = 0, moved = 0, lastTap = 0, lastXY = null, pinch0 = 0, dist0 = 0, ang0 = 0, mid0 = null, button = 0;
+  const ndc = (e) => { const r = canvas.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); };
+  const ndcAt = (x, y) => { const r = canvas.getBoundingClientRect(); return new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1); };
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); downAt = performance.now(); moved = 0; button = e.button;
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = sky.dist; ang0 = Math.atan2(b.y - a.y, b.x - a.x); mid0 = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    const p = pts.get(e.pointerId);
+    if (!p) { if (rig.mode !== 'street') rig.onHover?.(ndc(e), e); return; }
+    const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+    if (rig.locked) return;
+    if (pts.size === 2 && rig.mode === 'sky') {
+      // pinch zooms towards the fingers; a twist rotates; moving both fingers up or down tilts
+      const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); const ang = Math.atan2(b.y - a.y, b.x - a.x); const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      if (pinch0) zoomTo(dist0 * (pinch0 / d), ndcAt(mid.x, mid.y));
+      let da = ang - ang0; da = Math.atan2(Math.sin(da), Math.cos(da)); sky.yaw -= da; ang0 = ang;
+      if (mid0) { sky.pitch = clamp(sky.pitch + (mid.y - mid0.y) * 0.004, 25 * DEG, 60 * DEG); sky.autoPitch = false; mid0 = mid; }
+      return;
+    }
+    if (rig.mode === 'sky' && moved > (rig.building ? 14 : 6)) {
+      if (button === 2 || e.shiftKey) { const cap = 0.06; sky.vy = clamp(-dx * 0.0045, -cap, cap); sky.vp = clamp(dy * 0.0035, -cap, cap); if (Math.abs(dy) > 1) sky.autoPitch = false; }
+      else rig.panScreen(dx, dy);
+    }
+    if (rig.mode === 'street' && rig.street && moved > 6) { rig.street.yaw += dx * 0.005; rig.street.pitch = clamp(rig.street.pitch + dy * 0.004, STREET.pitch[0], STREET.pitch[1]); } // drag to look (the view follows the finger)
+  });
+  const up = (e) => {
+    const was = pts.has(e.pointerId); pts.delete(e.pointerId); if (pts.size < 2) { pinch0 = 0; mid0 = null; }
+    if (button === 2) { if (was && moved <= 4 && performance.now() - downAt < 700) rig.onAltTap?.(ndc(e), e); return; } // a right-click (not a right-drag): erase while building
+    if (!was || moved > (rig.building ? 14 : 8) || performance.now() - downAt > 700) return;
+    const now = performance.now();
+    if (rig.mode === 'street') { const g = rig.streetGround(ndc(e)); if (g && !rig.walkTo(g)) rig.onStreetBlocked?.(); return; } // street view: tap the ground to walk there
+    // a double-tap is two taps on the same spot: quick taps on different tiles (a child building fast) each build
+    const near = lastXY && Math.hypot(e.clientX - lastXY[0], e.clientY - lastXY[1]) < 24;
+    if (now - lastTap < 320 && near) { rig.onDoubleTap?.(ndc(e), e); lastTap = 0; } else { lastTap = now; lastXY = [e.clientX, e.clientY]; rig.onTap?.(ndc(e), e); }
+  };
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', (e) => pts.delete(e.pointerId));
+  canvas.addEventListener('wheel', (e) => { if (rig.locked || rig.mode !== 'sky') return; e.preventDefault(); zoomTo(sky.dist * Math.exp(e.deltaY * 0.0012), ndc(e)); }, { passive: false });
+  // keyboard, only when the island has focus (or nothing in the interface does)
+  const STREET_KEYS = new Set(['w', 'a', 's', 'd', 'q', 'e', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']); const keys = new Set();
+  window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase())); window.addEventListener('blur', () => keys.clear());
+  window.addEventListener('keydown', (e) => {
+    const a = document.activeElement; if (rig.locked) return;
+    if (a && a !== document.body && a !== canvas) return;
+    const k = e.key.toLowerCase(); const step = 6;
+    // street view: WASD / arrows walk and turn (held keys, see update); Home or Escape goes back up
+    if (rig.mode === 'street' && rig.street) {
+      if (STREET_KEYS.has(k)) { keys.add(k); e.preventDefault(); }
+      if (k === 'home' || k === 'escape') { keys.clear(); if (rig.onStreetExit) rig.onStreetExit(); else rig.overview(1.2); }
+      return;
+    }
+    if (rig.mode !== 'sky') return;
+    if (k.startsWith('arrow') && rig.tileKeys?.()) return; // the arrows move the build cursor instead (game.js)
+    if (k === 'arrowleft' || k === 'q') sky.vy = 0.03; if (k === 'arrowright' || k === 'e') sky.vy = -0.03;
+    if (k === 'arrowup') { sky.vp = -0.02; sky.autoPitch = false; } if (k === 'arrowdown') { sky.vp = 0.02; sky.autoPitch = false; }
+    if (k === 'w') rig.panBy(0, step); if (k === 's') rig.panBy(0, -step); if (k === 'a') rig.panBy(-step, 0); if (k === 'd') rig.panBy(step, 0);
+    if (k === '+' || k === '=') zoomTo(sky.dist * 0.85); if (k === '-') zoomTo(sky.dist * 1.15);
+    if (k === 'home') rig.overview(1.2, true);
+  });
+  sky.dist = rig.frameDist(); rig.apply(rig.skyPose());
+  return rig;
+}

@@ -1,0 +1,302 @@
+// DOM interface: panels with a strict on-screen budget, the helper card, tray, alerts, centre cards,
+// the town flower, world-anchored labels and bubbles, captions and read-aloud.
+import * as THREE from 'three';
+import { PETALS } from '../sim/sim.js';
+import { speak, stopSpeech, canSpeak } from './voice.js';
+
+export const $ = (s, r = document) => r.querySelector(s);
+export function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const PETAL_COL = { homes: '#ff8a5c', food: '#ffc83d', nature: '#4caf50', health: '#ff7eb6', energy: '#2f9de0', community: '#b28cff', carbon: '#7a8a96' };
+const PETAL_ICON = { homes: '🏠', food: '🍎', nature: '🦋', health: '❤', energy: '⚡', community: '🤝', carbon: '☁' };
+// a solid paler shade (not see-through) for a petal that hasn't reached 'enough' yet
+const mixWhite = (hex) => { const n = parseInt(hex.slice(1), 16); const m = (c) => Math.round(c + (255 - c) * 0.55); return `rgb(${m(n >> 16)},${m((n >> 8) & 255)},${m(n & 255)})`; };
+
+export const LEVEL_ICONS = ['🗺', '🚲', '🏡', '🍎', '⚡', '🏫'];
+// the picture for each build category (and mission): rendered from the game's own voxel builds (tools/thumbs.mjs)
+export const TRACK_PICS = ['town', 'cycle', 'timber', 'orchard', 'wind', 'school'];
+export const thumb = (id) => `img/thumbs/${id}.png`;
+export function createUI(root, labelsRoot, opts) {
+  // Florence's face in her cards: the live 3D portrait when there is one (ui.portrait), else her picture
+  const pic = () => (ui.portrait ? '<span class="portrait" data-portrait></span>' : '<img class="portrait" src="img/florence.png" alt="Florence">');
+  const P = {};
+  const mk = (id, cls, html = '') => { const n = h(`<div id="${id}" class="panel hide ${cls}">${html}</div>`); root.appendChild(n); P[id] = n; return n; };
+  // one town card (top-left), one icon strip (top-right), one dock (bottom): the whole frame
+  // the town card: 🌼 goals, the town name, stars, the day (with pause) and credits, the next step
+  mk('card', 'from-left', `<div class="crow"><button class="ib" data-flower aria-label="Town goals" title="Town goals" aria-expanded="false"><svg viewBox="-60 -60 120 120"></svg><b class="flowermark" aria-hidden="true">🌼</b></button><span class="leaf">🌱</span><b class="brand">Eco Town</b><span class="band" data-sub></span><button class="stars" data-shop aria-label="Star shop" title="Star shop"><span class="star" aria-hidden="true">★</span><b data-stars>0</b><i class="shopnew" data-shopnew hidden>NEW</i></button><span class="dayc" data-day hidden><span data-dayt></span><button class="slot mini" data-pause aria-label="Pause" title="Pause">❚❚</button></span><span class="credits" data-credits hidden></span></div>
+    <div class="track" data-track>${TRACK_PICS.map((pic, i) => `<i data-l="${i + 1}" role="button" tabindex="0" aria-label="AI Lab mission ${i + 1}"><img src="img/thumbs/${pic}.png" alt=""></i>`).join('<em></em>')}</div><div class="goal" data-goal></div>`);
+  // lenses (once one is earned), the AI Lab (with how many missions are ready) and the menu
+  // each button has a short caption under its icon on laptops and boards (CSS hides it on phones), so nobody has to guess
+  mk('strip', 'from-right', `<button class="ib lensbtn" data-lensbtn aria-label="Lenses" title="Lenses" aria-expanded="false" hidden><b class="ico" data-ico>🔍</b><small class="cap">Lenses</small></button><button class="ib lab" data-lab aria-label="AI Lab" title="AI Lab"><img src="img/thumbs/ailab.png" alt=""><small class="cap">AI Lab</small></button><span class="sep"></span><button class="ib" data-menu aria-label="Menu" title="Menu"><b class="ico">☰</b><small class="cap">Menu</small></button>`);
+  mk('flowerpop', 'from-right', '<div class="fltop"><svg viewBox="-60 -60 120 120" aria-label="Town flower"></svg><div><div class="ttl"></div><div class="legend"></div></div></div><div class="goals" data-goals></div>');
+  mk('lenspop', 'from-right blk', '');
+  mk('dock', 'from-bottom', '<div class="head" data-head></div><div class="speaker" data-speaker></div><div class="actions" data-actions></div>');
+  mk('alert', 'pop', '<span class="x">✕</span><span data-t></span>');
+  mk('lensbar', 'from-top');
+  mk('modal', 'modal');
+  mk('settings', 'from-right');
+  mk('build', 'from-left blk');                      // free building: categories and builds, as a grid of pictures (left)
+  mk('florence', 'from-right blk');                  // Florence's portrait and her tips while building (right)
+  // camera buttons for whiteboards, trackpads and anyone who prefers buttons to gestures
+  // one 🎥 button that opens the controls (always open on touch screens and whiteboards)
+  // ui pass 6: every camera button has a short caption (.cap) and its glyph sits in .ico, which the CSS replaces with a drawn icon
+  mk('camctl', 'from-right blk', `<button class="ib camtog" data-camtog aria-label="Camera" title="Camera" aria-expanded="false"><b class="ico">🎥</b><small class="cap">Camera</small></button><span class="camrow"><button class="ib" data-cam="in" aria-label="Zoom in" title="Zoom in"><b class="ico">＋</b><small class="cap">Zoom in</small></button><button class="ib" data-cam="out" aria-label="Zoom out" title="Zoom out"><b class="ico">－</b><small class="cap">Zoom out</small></button><button class="ib" data-cam="left" aria-label="Turn left" title="Turn left"><b class="ico">⟲</b><small class="cap">Turn left</small></button><button class="ib" data-cam="right" aria-label="Turn right" title="Turn right"><b class="ico">⟳</b><small class="cap">Turn right</small></button><button class="ib" data-cam="home" aria-label="Back to the whole island" title="Back to the whole island"><b class="ico">⌂</b><small class="cap">Whole island</small></button><button class="ib" data-v="street" aria-label="Street view" title="Street view"><b class="ico">👟</b><small class="cap">Walk</small></button><button class="ib" data-v="inside" aria-label="Inside a home" title="Inside a home"><b class="ico">🏠</b><small class="cap">Inside</small></button></span>`);
+  const camOpen = (on) => { P.camctl.classList.toggle('open', on); P.camctl.querySelector('[data-camtog]').setAttribute('aria-expanded', on); };
+  camOpen(matchMedia('(pointer: coarse) and (min-width: 1600px)').matches); // whiteboards: open; everyone else opens it when needed
+  P.camctl.querySelector('[data-camtog]').addEventListener('click', () => { camOpen(!P.camctl.classList.contains('open')); requestAnimationFrame(() => ui.onCamToggle?.()); });
+  const D = { head: P.dock.querySelector('[data-head]'), speaker: P.dock.querySelector('[data-speaker]'), actions: P.dock.querySelector('[data-actions]') };
+  // facilitator notes live in their own card (top left, under the town card), whatever else is on screen
+  mk('facil', 'from-left facilcard'); const facilEl = P.facil; let facilText = null;
+  // a dimmed backdrop behind centre cards, so they are always readable and nothing behind them can be clicked
+  const backdrop = h('<div id="backdrop" class="hide"></div>'); root.appendChild(backdrop);
+  P.tray = D.actions; P.helper = D.speaker; P.tr = P.strip; P.views = P.camctl; P.flower = P.flowerpop; P.badge = P.card; P.task = P.card;
+  const dockState = { speaker: false, actions: false, head: false };
+  const syncDock = () => { P.dock.classList.toggle('hide', !(dockState.speaker || dockState.actions)); D.speaker.style.display = dockState.speaker ? '' : 'none'; D.actions.style.display = dockState.actions ? '' : 'none'; P.dock.classList.toggle('talk-only', dockState.speaker && !dockState.actions); P.dock.classList.toggle('actions-only', !dockState.speaker && dockState.actions); };
+
+  // the town card (top left) never runs under the icon strip (top right), which grows as lenses are earned
+  const fitStrip = () => requestAnimationFrame(() => { const w = P.strip.classList.contains('hide') ? 0 : P.strip.getBoundingClientRect().width; document.documentElement.style.setProperty('--stripw', Math.round(w || 520) + 'px'); });
+  addEventListener('resize', fitStrip); fitStrip();
+  // phones: Florence's tip sits just above the build tray and the facilitator note just above the mission dock,
+  // however tall those are (CSS reads --buildh and --dockh)
+  if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(() => { const s = document.documentElement.style; s.setProperty('--buildh', P.build.offsetHeight + 'px'); s.setProperty('--dockh', P.dock.offsetHeight + 'px'); }); ro.observe(P.build); ro.observe(P.dock); }
+  // focus follows the next step only for keyboard players (a mouse or touch player's screen doesn't jump)
+  let kbUser = false; addEventListener('keydown', (e) => { if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ') kbUser = true; }, true); addEventListener('pointerdown', () => (kbUser = false), true);
+  // emoji icons inside buttons are decoration: screen readers hear the word beside them ("Demolish", not "🧽 Demolish")
+  const quietIcons = (r) => r.querySelectorAll?.('button .ico:not([aria-hidden]), [role="button"] .ico:not([aria-hidden]), button .lock:not([aria-hidden])').forEach((n) => n.setAttribute('aria-hidden', 'true'));
+  if (typeof MutationObserver === 'function') new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) { quietIcons(n); if (n.matches?.('.ico, .lock') && n.closest('button')) n.setAttribute('aria-hidden', 'true'); } }).observe(root, { childList: true, subtree: true });
+  quietIcons(root);
+  // an open card or the settings sheet keeps Tab inside it (it used to escape to the HUD behind the card)
+  const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], video[controls], [tabindex]:not([tabindex="-1"])';
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.defaultPrevented) return;
+    // with nothing open, Tab wraps from the last control to the first (the page itself was an invisible stop in between)
+    const box = !P.modal.classList.contains('hide') ? P.modal : !P.settings.classList.contains('hide') ? P.settings : document.body;
+    const list = [...box.querySelectorAll(FOCUSABLE)].filter((n) => (n.offsetParent || n.getClientRects().length) && getComputedStyle(n).visibility !== 'hidden' && !n.closest('[inert], [aria-hidden="true"]')); if (!list.length) return;
+    const a = document.activeElement; const i = list.indexOf(a);
+    if (i < 0) { e.preventDefault(); (e.shiftKey ? list[list.length - 1] : list[0]).focus(); }
+    else if (!e.shiftKey && i === list.length - 1) { e.preventDefault(); list[0].focus(); }
+    else if (e.shiftKey && i === 0) { e.preventDefault(); list[list.length - 1].focus(); }
+  });
+  // when the mission dock's buttons run past its bottom edge (phones, Large text), a solid "More ▾" tab says so and scrolls on
+  const moreCue = () => {
+    const a = D.actions; if (!a.isConnected) return; let m = a.querySelector(':scope > .morecue');
+    const over = a.scrollHeight - a.clientHeight - a.scrollTop > 8 && a.clientHeight > 0;
+    if (!m && !over) return;
+    if (!m) { m = h('<button class="morecue" type="button" tabindex="-1" aria-hidden="true">More ▾</button>'); m.onclick = () => a.scrollBy({ top: Math.round(a.clientHeight * 0.7), behavior: 'smooth' }); a.appendChild(m); }
+    m.hidden = !over;
+  };
+  D.actions.addEventListener('scroll', moreCue, { passive: true }); addEventListener('resize', () => requestAnimationFrame(moreCue));
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => moreCue()).observe(D.actions);
+  const ui = {
+    P, readAloud: false,
+    show(id, on = true) {
+      if (id === 'helper') { dockState.speaker = on; return syncDock(); }
+      if (id === 'tray') { dockState.actions = on; return syncDock(); }
+      if (id === 'caption') { if (!on) D.head.classList.remove('on'); return; }
+      if (id === 'facil') { facilEl.classList.toggle('hide', !on); return; }
+      if (id === 'modal') backdrop.classList.toggle('hide', !on);
+      if (id === 'settings') root.classList.toggle('settings-open', on); // dim and lock what's behind the settings sheet
+      if (['badge', 'task', 'tr'].includes(id)) id = id === 'tr' ? 'strip' : 'card';
+      if (id === 'views' || id === 'flower') id = 'strip';
+      P[id]?.classList.toggle('hide', !on);
+      if (id === 'strip') P.camctl.classList.toggle('hide', !on); // the camera buttons come and go with the icon strip
+    },
+    only(ids) { for (const id of ['helper', 'tray', 'alert', 'lensbar', 'modal', 'settings', 'caption']) this.show(id, ids.includes(id)); this.closePops(); },
+    // the small pop-overs under the strip: only one open at a time
+    closePops(except) { for (const [pop, btn] of [[P.flowerpop, '[data-flower]'], [P.lenspop, '[data-lensbtn]']]) if (pop !== except) { pop.classList.add('hide'); root.querySelector(btn)?.setAttribute('aria-expanded', 'false'); } if (except !== P.settings && !P.settings.classList.contains('hide')) this.show('settings', false); },
+    togglePop(pop, btn) { const open = pop.classList.contains('hide'); this.closePops(open ? pop : null); pop.classList.toggle('hide', !open); root.querySelector(btn)?.setAttribute('aria-expanded', String(open)); },
+    // the day chip in the town card (free building only): text, paused?, onPause; null hides it
+    setDay(text, paused = false, onPause = null) {
+      const d = P.card.querySelector('[data-day]'); if (text == null) { d.hidden = true; return; }
+      d.hidden = false; d.querySelector('[data-dayt]').textContent = text;
+      const b = d.querySelector('[data-pause]'); b.textContent = paused ? '▶' : '❚❚'; b.setAttribute('aria-label', paused ? 'Play' : 'Pause'); b.title = paused ? 'Play' : 'Pause'; if (onPause) b.onclick = onPause;
+    },
+    setCredits(text) { const c = P.card.querySelector('[data-credits]'); c.hidden = !text; c.textContent = text || ''; },
+    // the goals list in the town-goals pop-over
+    setGoals(html) { P.flowerpop.querySelector('[data-goals]').innerHTML = html; },
+    setBadge(sub) { P.card.querySelector('[data-sub]').textContent = sub; this.show('card'); this.show('strip'); },
+    setTownName(name) { P.card.querySelector('.brand').textContent = name || 'Eco Town'; },
+    // n: the current level number (1–6); earlier levels show as done, the current one is highlighted
+    setTask(n, text) {
+      P.card.querySelector('[data-goal]').textContent = text; n = +n || 0;
+      P.card.querySelectorAll('[data-l]').forEach((e) => { const l = +e.dataset.l; e.classList.toggle('done', l < n); e.classList.toggle('on', l === n); });
+      this.show('card');
+    },
+    // free building: one clear next step with a bar under it; the bar pulses when it moves forward
+    setStep(text, have, need) {
+      const g = P.card.querySelector('[data-goal]'); const pct = Math.round(100 * Math.min(1, have / Math.max(1, need)));
+      const prev = +(g.dataset.have ?? -1); g.dataset.have = have;
+      g.innerHTML = `<span class="gt">${esc(text)}</span><span class="gbar" role="progressbar" aria-label="Progress on the next step" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${have}"><i style="width:${pct}%"></i><b>${have}/${need}</b></span>`;
+      if (prev >= 0 && have > prev) { g.classList.remove('bump'); void g.offsetWidth; g.classList.add('bump'); }
+      this.show('card');
+    },
+    // the six missions on the town card: 'done', 'on' (ready) or '' (not yet). Tapping one opens the AI Lab.
+    setTrack(states) { P.card.querySelectorAll('[data-l]').forEach((e, i) => { e.classList.toggle('done', states[i] === 'done'); e.classList.toggle('on', states[i] === 'on'); });
+      // 🧪 shows how many missions are ready to play
+      const n = states.filter((x) => x === 'on').length; const lab = P.strip.querySelector('[data-lab]'); if (n) lab.dataset.ready = n; else delete lab.dataset.ready; lab.setAttribute('aria-label', n ? `AI Lab: ${n} mission${n === 1 ? '' : 's'} ready` : 'AI Lab'); },
+    // lenses (one per AI Lab mission done) in one 🔍 pop-over: [{ id, icon, label, on }]
+    setLenses(list, title = 'Lenses') {
+      const btn = P.strip.querySelector('[data-lensbtn]'); btn.hidden = !list.length; const on = list.find((l) => l.on);
+      btn.classList.toggle('on', !!on); btn.querySelector('[data-ico]').textContent = on ? on.icon : '🔍'; btn.querySelector('.cap').textContent = on ? 'Lens on' : title; btn.setAttribute('aria-label', on ? `${title}: ${on.label}` : title);
+      P.lenspop.innerHTML = `<b class="poptitle">${esc(title)}</b>` + list.map((l) => `<button class="slot act ${l.on ? 'on' : ''}" data-lens="${l.id}" aria-pressed="${!!l.on}"><b class="ico">${l.icon}</b><span>${esc(l.label)}</span></button>`).join('');
+      if (!list.length) P.lenspop.classList.add('hide'); fitStrip();
+    },
+    // the stars chip shows the stars there are to spend (ui.wallet, set by the game) and opens the Star shop
+    setStars(n) { const b = P.card.querySelector('[data-stars]'); n = this.wallet ? this.wallet(n) : n; if (b.textContent !== String(n)) { b.textContent = n; b.parentElement.classList.remove('bump'); void b.offsetWidth; b.parentElement.classList.add('bump'); } this.show('card'); },
+    // T: SANDBOX[band].shop. canNew: something new is affordable (a small NEW tag, a word as well as a colour)
+    setShop(left, canNew, T) { const btn = P.card.querySelector('[data-shop]'); const lbl = T?.chip ? T.chip(left) : `Star shop: ${left} stars`; btn.setAttribute('aria-label', canNew && T?.newMark ? `${lbl}. ${T.newMark}` : lbl); btn.title = lbl; btn.querySelector('[data-shopnew]').hidden = !canNew; },
+    // Florence speaks in the dock: { tag, tagCls, html, sure, sureLabel, why, thinking, mini, say }
+    // mini: a small card kept on screen while the player checks her guess
+    helper(o) {
+      if (!o) { this.show('helper', false); P.dock.classList.remove('mini'); return; }
+      D.speaker.className = 'speaker' + (o.thinking ? ' thinking' : '') + (o.tagCls ? ' ' + o.tagCls : '') + (o.mini ? ' mini' : '');
+      P.dock.classList.toggle('mini', !!o.mini);
+      const line = o.say || (o.html ? h(`<div>${o.html}</div>`).textContent : '');
+      D.speaker.innerHTML = `<div class="avatar">${pic()}</div><div class="say"><div class="name">${esc(o.name || 'Florence')} <em class="${o.tagCls || ''}">${esc(o.tag || 'GUESS')}</em>${!o.thinking && line && canSpeak() ? '<button class="spk" data-spk aria-label="Read aloud" title="Read aloud">🔊</button>' : ''}</div>
+        <div class="text">${o.html || ''}</div>${o.sure != null ? `<div class="sure"><div class="bar"><i></i></div><span>${o.sure}% ${esc(o.sureLabel || 'sure')}</span></div>` : ''}${o.why ? `<div class="why">${o.why}</div>` : ''}</div>`;
+      this.show('helper'); this.portrait?.mount(D.speaker);
+      D.speaker.querySelector('[data-spk]')?.addEventListener('click', () => speak(line, { voice: 'helper', force: true }));
+      if (o.sure != null) requestAnimationFrame(() => requestAnimationFrame(() => { const i = D.speaker.querySelector('.sure .bar i'); if (i) i.style.width = o.sure + '%'; }));
+      if (o.say && !o.mini) this.say(o.say, o.voice || 'helper');
+      if (!o.thinking && !o.mini && line) this.talking(D.speaker, line);
+    },
+    // Florence talks: her portrait bobs and the 3D Florence nods while the line lasts (about 14 characters a second)
+    talking(el, line) {
+      const secs = Math.min(9, 0.8 + line.length / 14); const pic = el.querySelector('img.portrait');
+      this.portrait?.talk(secs); // the live portrait moves her mouth; the still picture bobs
+      if (pic) { pic.classList.add('talk'); clearTimeout(pic._t); pic._t = setTimeout(() => pic.classList.remove('talk'), secs * 1000); }
+      this.onTalk?.(secs);
+    },
+    // shrink Florence's card to her portrait (tap it to read the last tip again)
+    florenceMini(onOpen) {
+      if (P.florence.classList.contains('hide')) return;
+      P.florence.classList.add('mini'); P.florence.setAttribute('role', 'button'); P.florence.setAttribute('tabindex', '0'); P.florence.setAttribute('aria-label', 'Florence: show her last tip');
+      const open = (e) => { if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return; P.florence.onclick = P.florence.onkeydown = null; onOpen?.(); };
+      P.florence.onclick = open; P.florence.onkeydown = open;
+    },
+    // the build panel (left): html + bind, like the tray. Empty html hides it.
+    // keyboard focus stays on the same button when the panel redraws (choosing a build with Enter used to drop focus to the page start)
+    buildPanel(html, bind) {
+      if (!html) { P.build.classList.add('hide'); return P.build; }
+      const a = document.activeElement; const had = a && P.build.contains(a) ? ['data-t', 'data-cat', 'data-fold', 'data-play'].find((x) => a.hasAttribute(x)) : null;
+      const sel = had ? `[${had}${a.getAttribute(had) ? `="${CSS.escape(a.getAttribute(had))}"` : ''}]` : null;
+      P.build.innerHTML = html; P.build.classList.remove('hide'); bind?.(P.build);
+      if (sel) ([...P.build.querySelectorAll(sel)].find((x) => x.offsetParent) || P.build.querySelector('button'))?.focus({ preventScroll: true });
+      return P.build;
+    },
+    // Florence's card (right) while building: { tag, html, say } or null to hide
+    florence(o) {
+      if (!o) { P.florence.classList.add('hide'); return; }
+      const line = o.say || h(`<div>${o.html}</div>`).textContent;
+      P.florence.innerHTML = `<div class="fwrap">${pic()}<div><div class="fhead"><b>Florence</b>${o.tag ? `<em>${esc(o.tag)}</em>` : ''}${canSpeak() ? '<button class="spk" data-spk aria-label="Read aloud" title="Read aloud">🔊</button>' : ''}</div><div class="fbody">${o.html}</div></div></div>`;
+      this.portrait?.mount(P.florence); P.florence.classList.remove('hide', 'mini'); P.florence.onclick = null; P.florence.removeAttribute('role'); P.florence.removeAttribute('tabindex');
+      P.florence.querySelector('[data-spk]')?.addEventListener('click', () => speak(line, { voice: 'helper', force: true }));
+      if (o.say) this.say(o.say, 'helper');
+      this.talking(P.florence, line);
+      return P.florence;
+    },
+    tray(html, bind) {
+      // keyboard players keep their place: if focus was in the old tray (or fell back to the page), it moves to the new tray's first control
+      const a = document.activeElement; const lost = !a || a === document.body || D.actions.contains(a) || P.dock.contains(a);
+      D.actions.innerHTML = html; this.show('tray', !!html); bind?.(D.actions); requestAnimationFrame(moreCue);
+      if (html && lost && kbUser && !D.actions.contains(document.activeElement)) D.actions.querySelector('input:not([disabled]), button:not([disabled])')?.focus({ preventScroll: true });
+      return D.actions;
+    },
+    alert(text, good = false, ms = 0) {
+      P.alert.classList.toggle('good', good); P.alert.querySelector('.x').textContent = good ? '✓' : '✕'; P.alert.querySelector('[data-t]').textContent = text; this.show('alert');
+      this.say(text, 'narrator'); clearTimeout(this._at); if (ms) this._at = setTimeout(() => this.show('alert', false), ms);
+    },
+    lensbar(html) { if (!html) return this.show('lensbar', false); P.lensbar.innerHTML = html; this.show('lensbar'); },
+    // "Florence's plan" key, shown while her see-through plan is on the island
+    legend(kind) { if (kind !== 'plan') return this.lensbar(null); this.lensbar(`📐 FLORENCE’S PLAN <span class="legend"><span><i style="background:#ffe9a0;box-shadow:inset 0 0 0 3px #ffd23f"></i>Pale with a frame = planned, not built yet</span></span>`); },
+    facil(text) { facilText = text || null; this.refreshFacil(); },
+    refreshFacil() { if (!facilText || !opts.facilitator()) return this.show('facil', false); facilEl.innerHTML = `<small>FACILITATOR NOTE</small><p>${esc(facilText)}</p>`; this.show('facil'); },
+    async modal(html, { say, bind } = {}) {
+      // never open a card over one that is still closing (it would look see-through)
+      if (!P.modal.classList.contains('hide') || performance.now() - (this._mClosed || 0) < 420) await new Promise((r) => setTimeout(r, Math.max(0, 420 - (performance.now() - (this._mClosed || 0)))));
+      P.modal.innerHTML = html + (say && canSpeak() ? '<button class="spk modalspk" data-spk aria-label="Read aloud" title="Read aloud">🔊</button>' : ''); this.show('modal'); if (say) this.say(say, 'narrator');
+      P.modal.querySelector('[data-spk]')?.addEventListener('click', (e) => { e.stopPropagation(); speak(say, { voice: 'narrator', force: true }); });
+      bind?.(P.modal);
+      const first = P.modal.querySelector('button:not([data-spk])'); setTimeout(() => { first?.focus({ preventScroll: true }); P.modal.scrollTop = 0; }, 50); // the card opens at its top (stars and heading), not scrolled to its first button
+      return new Promise((res) => { P.modal.onclick = (e) => { const b = e.target.closest('[data-act]'); if (!b) return; P.modal.onclick = null; this.show('modal', false); this._mClosed = performance.now(); stopSpeech(); res(b.dataset.act); }; });
+    },
+    // short status line: shown as the dock's headline, or as a toast when the dock is hidden
+    caption(text, ms = 3500) {
+      if (!text) { D.head.classList.remove('on'); P.toast?.classList.add('hide'); return; }
+      const host = P.dock.classList.contains('hide') || P.dock.classList.contains('mini') ? (P.toast ||= (() => { const n = h('<div id="toast" class="panel hide pop"></div>'); root.appendChild(n); return n; })()) : D.head;
+      // the toast sits below the lens bar and any alert, never on top of them
+      if (host === P.toast) { let y = 92; for (const el of [P.lensbar, P.alert]) if (!el.classList.contains('hide')) { const r = el.getBoundingClientRect(); y = Math.max(y, r.bottom + 10); } P.toast.style.top = y + 'px'; }
+      // only one caption at a time: hide the other place, and give each place its own timer
+      const other = host === D.head ? P.toast : D.head; if (other) { other.classList.remove('on'); if (other === P.toast) other.classList.add('hide'); }
+      host.textContent = text; host.classList.add('on'); host.classList.remove('hide'); clearTimeout(host._t);
+      host._t = setTimeout(() => { host.classList.remove('on'); if (host === P.toast) host.classList.add('hide'); }, ms);
+    },
+    // read aloud (auto for 8–12; 🔊 buttons replay on demand for everyone). voice: 'narrator' or 'helper' (Florence)
+    say(text, voice = 'narrator') { if (!text) return; if (!this.readAloud) { globalThis.__sayLog?.push({ text, voice, missing: [], silent: true }); return; } speak(text, { voice }); },
+    views(active, enabled = ['sky', 'street', 'inside']) {
+      for (const b of P.camctl.querySelectorAll('[data-v]')) { b.classList.toggle('on', b.dataset.v === active); b.disabled = !enabled.includes(b.dataset.v); }
+      this.show('strip');
+    },
+    flower(petals, title, { open = null, flash = false } = {}) {
+      const R = 50; let s = `<circle r="${R * 0.62}" fill="none" stroke="#e3d5bb" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      PETALS.forEach((p, i) => {
+        const a = (i / PETALS.length) * Math.PI * 2 - Math.PI / 2, v = Math.max(0.08, petals[p] || 0), len = R * 0.62 * Math.min(1.45, v);
+        s += `<g transform="rotate(${(a * 180) / Math.PI + 90})"><ellipse cx="0" cy="${-len / 2}" rx="11" ry="${len / 2}" fill="${v >= 1 ? PETAL_COL[p] : mixWhite(PETAL_COL[p])}" ${flash === p || (Array.isArray(flash) && flash.includes(p)) ? 'class="pf" stroke="#fff" stroke-width="4"' : ''}/></g>`;
+        s += `<text x="${Math.cos(a) * (R + 1)}" y="${Math.sin(a) * (R + 1) + 4}" font-size="11" text-anchor="middle">${PETAL_ICON[p]}</text>`;
+      });
+      s += '<circle r="8" fill="#ffd23f"/>';
+      P.flowerpop.querySelector('svg').innerHTML = s; P.card.querySelector('[data-flower] svg').innerHTML = s;
+      P.flowerpop.querySelector('.ttl').textContent = title || '';
+      // 100% = enough for this town (the dashed ring); carbon is shown in tonnes against its limit, since lower is better
+      const c = this.carbonInfo;
+      P.flowerpop.querySelector('.legend').innerHTML = PETALS.map((p) => p === 'carbon' && c ? `<span>${PETAL_ICON[p]} carbon <b>${c.used} of ${c.limit} t</b></span>` : `<span>${PETAL_ICON[p]} ${p} <b>${Math.round(Math.min(1.5, petals[p] || 0) * 100)}%</b></span>`).join('')
+        + `<p class="key">100% (the dashed ring) means <b>enough</b> for the town: more is better. A full, bright petal has reached it. Carbon is the opposite: the town must stay under its ${c ? c.limit : ''} t limit, so its petal grows the further under the limit you are.</p>`;
+      this.show('strip');
+      if (open !== null) P.flowerpop.classList.toggle('hide', !open);
+      if (flash) { const btn = P.card.querySelector('[data-flower]'); btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump'); }
+    },
+  };
+  P.card.querySelector('[data-flower]').addEventListener('click', () => ui.togglePop(P.flowerpop, '[data-flower]'));
+  P.card.querySelector('[data-shop]').addEventListener('click', () => { ui.closePops(); ui.onShop?.(); });
+  P.strip.querySelector('[data-lensbtn]').addEventListener('click', () => ui.togglePop(P.lenspop, '[data-lensbtn]'));
+  P.strip.querySelector('[data-lab]').addEventListener('click', () => { ui.closePops(); ui.onLab?.(); });
+  P.lenspop.addEventListener('click', (e) => { const b = e.target.closest('[data-lens]'); if (b) { ui.closePops(); ui.onLens?.(b.dataset.lens); } });
+  // each mission on the track opens that mission (or the Lab board if it isn't ready yet)
+  const trackGo = (e) => { const i = e.target.closest('[data-l]'); ui.onTrack ? ui.onTrack(i ? +i.dataset.l - 1 : -1) : ui.onLab?.(); };
+  P.card.querySelector('[data-track]').addEventListener('click', trackGo);
+  P.card.querySelector('[data-track]').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trackGo(e); } });
+  P.flowerpop.addEventListener('click', (e) => { if (!e.target.closest('[data-goals]')) ui.closePops(); });
+
+
+  // ---------- world-anchored labels and bubbles
+  const anchored = []; const v3 = new THREE.Vector3();
+  ui.labels = {
+    set(list) { this.clear('lbl'); for (const l of list) add('lbl ' + (l.cls || ''), l); },
+    // numbers that float up from a tile and fade ("+4 👪  +1 🦋"), after a build
+    float(f) { add('float', f); const a = anchored[anchored.length - 1]; setTimeout(() => remove(a), f.ms || 1700); if (f.text) globalThis.__sayLog?.push({ text: f.text, voice: 'float', missing: [], silent: true }); },
+    bubble(b) { const cur = anchored.filter((a) => a.node.classList.contains('bub')); if (cur.length >= 2) remove(cur[0]); add('bub ' + (b.bad ? 'bad' : ''), b); if (!b.quiet) ui.say(b.text, 'narrator'); setTimeout(() => remove(anchored.find((a) => a.data === b)), b.ms || 4200); },
+    clear(kind) { for (const a of anchored.slice()) if (!kind || a.node.classList.contains(kind)) remove(a); },
+    has(kind) { return anchored.some((a) => a.node.classList.contains(kind)); },
+    spots(list) { this.clear('spot'); for (const l of list) add('spot', l); }, // Florence's good spots: a solid gold ⭐ pin over each tile
+    update(camera, canvas) {
+      const w = canvas.clientWidth, hgt = canvas.clientHeight;
+      // keep bubbles out from under the town card and the icon strip (top corners)
+      const avoid = [P.card, P.strip, P.facil, P.lensbar, P.alert].filter((e) => !e.classList.contains('hide')).map((e) => e.getBoundingClientRect());
+      for (const a of anchored) {
+        const p = typeof a.data.at === 'function' ? a.data.at() : a.data.at; if (!p) continue;
+        v3.copy(p).project(camera); const vis = v3.z < 1 && Math.abs(v3.x) < 1.1 && Math.abs(v3.y) < 1.1;
+        let x = ((v3.x + 1) / 2) * w, y = ((1 - v3.y) / 2) * hgt;
+        { const bw = a.node.offsetWidth || 160, bh = a.node.offsetHeight || 34; x = Math.max(bw / 2 + 8, Math.min(w - bw / 2 - 8, x)); for (const r of avoid) if (x + bw / 2 > r.left && x - bw / 2 < r.right && y - bh < r.bottom && y > r.top) y = r.bottom + bh + 6; } // never under the HUD, lens bar or alert
+        a.node.style.display = vis ? '' : 'none'; a.node.style.left = x + 'px'; a.node.style.top = y + 'px';
+      }
+    },
+  };
+  function add(cls, data) {
+    const n = h(`<div class="${cls}">${data.html || esc(data.text)}</div>`); labelsRoot.appendChild(n); anchored.push({ node: n, data });
+    // a pin that stands for its tile (Florence's ★ good spots): tapping the pin is a tap on the tile (it used to do nothing)
+    if (data.tap) { n.classList.add('tappable'); n.addEventListener('click', (e) => { e.stopPropagation(); data.tap(); }); }
+  }
+  function remove(a) { if (!a) return; a.node.remove(); anchored.splice(anchored.indexOf(a), 1); }
+  return ui;
+}
