@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eco Town Full-Day Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: the day as one proportional time bar, the six modules as a row of cards under it, then the shared spine. */
+:root{
+  --bg:#fbf4ea; --ink:#2b211c; --muted:#6f5f53; --line:#d9c6b0; --chip:#fffaf3; --rest:#eadccb;
+  --m1:#f6e6c3; --m1s:#b07d17; --m2:#dfe8d3; --m2s:#5f8048; --m3:#d8e5ef; --m3s:#44739a;
+  --m4:#f4dccd; --m4s:#b9532e; --m5:#ecdcea; --m5s:#855179; --m6:#d5e9e4; --m6s:#3c7f73;
+  --display:Fraunces,Georgia,serif; --body:Inter,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#211813; --ink:#f3e8da; --muted:#b9a696; --line:#5a483c; --chip:#2b211b; --rest:#3a2d25;
+  --m1:#3d3219; --m1s:#d9a23a; --m2:#283422; --m2s:#94b57c; --m3:#1f3140; --m3s:#7fa9cc;
+  --m4:#43281d; --m4s:#e08a66; --m5:#35263a; --m5s:#b98bb2; --m6:#1d3531; --m6s:#6fb8aa; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#211813; --ink:#f3e8da; --muted:#b9a696; --line:#5a483c; --chip:#2b211b; --rest:#3a2d25;
+  --m1:#3d3219; --m1s:#d9a23a; --m2:#283422; --m2s:#94b57c; --m3:#1f3140; --m3s:#7fa9cc;
+  --m4:#43281d; --m4s:#e08a66; --m5:#35263a; --m5s:#b98bb2; --m6:#1d3531; --m6s:#6fb8aa; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;margin:0}
+.page{max-width:1280px;margin:0 auto;padding-block:32px 44px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:26px}
+h1{font-family:var(--display);font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:20px;margin:0}
+.lede{margin:8px 0 0;max-width:68ch;color:var(--muted);font-size:16px}
+section{display:flex;flex-direction:column;gap:10px;min-width:0}
+.scroll{overflow-x:auto}
+.day{min-width:940px}
+.bar{display:flex;gap:3px;height:62px}
+.seg{display:flex;align-items:center;justify-content:center;border-radius:8px;border:1.5px solid var(--line);background:var(--rest);font-weight:700;font-size:13px;min-width:0;text-align:center;padding:0 4px}
+.seg.narrow span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:600;color:var(--muted)}
+.ticks{display:flex;gap:3px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:4px;position:relative}
+.m1{--f:var(--m1);--s:var(--m1s)} .m2{--f:var(--m2);--s:var(--m2s)} .m3{--f:var(--m3);--s:var(--m3s)}
+.m4{--f:var(--m4);--s:var(--m4s)} .m5{--f:var(--m5);--s:var(--m5s)} .m6{--f:var(--m6);--s:var(--m6s)}
+.seg.m1,.seg.m2,.seg.m3,.seg.m4,.seg.m5,.seg.m6{background:var(--f);border-color:var(--s)}
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1100px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.cards{grid-template-columns:1fr}}
+.card{background:var(--chip);border:1.5px solid var(--s);border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.card header{background:var(--f);padding:10px 12px;display:flex;gap:10px;align-items:center}
+.num{font-family:var(--display);font-size:26px;line-height:1;color:var(--s)}
+.card h3{margin:0;font-size:16px;line-height:1.2}
+.where{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.type{margin:10px 12px 0;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--s)}
+dl{margin:6px 12px 10px;display:flex;flex-direction:column;gap:2px;flex:1}
+dt{font-size:11.5px;color:var(--muted);margin-top:8px}
+dd{margin:0;font-size:13.5px}
+dd.idea{font-weight:700;font-size:14.5px}
+.state{margin:0;padding:7px 12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px}
+.flow li{position:relative;background:var(--chip);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+.flow li+li::before{content:"→";position:absolute;left:-19px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700}
+.flow span,.spine span{font-size:12.5px;color:var(--muted)}
+.spine{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;border:2px solid var(--m5s);background:var(--m5);border-radius:14px;padding:12px}
+.spine div{background:var(--chip);border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+@media (max-width:900px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))} .flow li+li::before{content:none} .spine{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.flow,.spine{grid-template-columns:1fr}}
+.note{color:var(--muted);font-size:13.5px;max-width:95ch;margin:0}
+</style>
+</head>
+<body>
+<div class="page">
+  <div>
+    <h1>The Eco Town full-day AI Lab</h1>
+    <p class="lede">A plan, before any new code. One island world, six modules, six ideas about AI. Eco Town is module 1; five new game environments fill the rest of the day.</p>
+  </div>
+  <section aria-label="The day">
+    <h2>The day, 9:00 to 16:00</h2>
+    <div class="scroll"><div class="day">
+      <div class="bar"><div class="seg x narrow" style="flex:15"><span>Welcome</span></div><div class="seg m1" style="flex:90"><span>1 · Eco Town</span></div><div class="seg x narrow" style="flex:15"><span>Break</span></div><div class="seg m2" style="flex:45"><span>2 · Wildlife Cam</span></div><div class="seg m3" style="flex:45"><span>3 · Weather Tower</span></div><div class="seg x" style="flex:45"><span>Lunch</span></div><div class="seg m4" style="flex:45"><span>4 · Delivery Dash</span></div><div class="seg m5" style="flex:45"><span>5 · Town Voices</span></div><div class="seg x narrow" style="flex:15"><span>Break</span></div><div class="seg m6" style="flex:45"><span>6 · Eco Town News</span></div><div class="seg x narrow" style="flex:15"><span>Showcase</span></div></div>
+      <div class="ticks"><div style="flex:15">9:00</div><div style="flex:90">9:15</div><div style="flex:15">10:45</div><div style="flex:45">11:00</div><div style="flex:45">11:45</div><div style="flex:45">12:30</div><div style="flex:45">13:15</div><div style="flex:45">14:00</div><div style="flex:15">14:45</div><div style="flex:45">15:00</div><div style="flex:15">15:45</div></div>
+    </div></div>
+  </section>
+  <section aria-label="The six modules">
+    <h2>Six modules, each a place on the island with its own kind of game</h2>
+    <div class="cards"><article class="card m1"><header><span class="num">1</span><div><h3>Eco Town</h3><p class="where">The town · 90 min</p></div></header>
+<p class="type">Build a town</p>
+<dl><dt>The AI idea</dt><dd class="idea">AI does what you say, not what you mean.</dd><dt>Florence’s confident mistake</dt><dd>“Best land” becomes the flattest land: the flood meadow, 82% sure.</dd><dt>Back to your town</dt><dd>The town itself. Every later module sends something back to it.</dd></dl>
+<p class="state">Built. Trim to the town and a first set of missions.</p></article><article class="card m2"><header><span class="num">2</span><div><h3>Wildlife Cam</h3><p class="where">The wild wood · 45 min</p></div></header>
+<p class="type">Teach and sort</p>
+<dl><dt>The AI idea</dt><dd class="idea">AI only knows what it has been shown.</dd><dt>Florence’s confident mistake</dt><dd>Taught with daytime photos only, the camera calls an otter at dusk “a log, 91% sure”.</dd><dt>Back to your town</dt><dd>The animals it finds are counted in your town’s nature score.</dd></dl>
+<p class="state">New</p></article><article class="card m3"><header><span class="num">3</span><div><h3>Weather Tower</h3><p class="where">The hilltop · 45 min</p></div></header>
+<p class="type">Plan a week ahead</p>
+<dl><dt>The AI idea</dt><dd class="idea">“% sure” is a forecast, not a promise.</dd><dt>Florence’s confident mistake</dt><dd>“Sunny all week, 90% sure”, learned from summer days only. Then a still winter night.</dd><dt>Back to your town</dt><dd>A storm-ready town: stored power and dry homes.</dd></dl>
+<p class="state">New</p></article><article class="card m4"><header><span class="num">4</span><div><h3>Delivery Dash</h3><p class="where">Roads and paths · 45 min</p></div></header>
+<p class="type">Coach a racing robot</p>
+<dl><dt>The AI idea</dt><dd class="idea">AI chases the score you set, and finds loopholes.</dd><dt>Florence’s confident mistake</dt><dd>One star per doorstep scan: the robot circles one door. Stars 47, parcels 0.</dd><dt>Back to your town</dt><dd>The delivery robot starts serving your town’s streets.</dd></dl>
+<p class="state">New</p></article><article class="card m5"><header><span class="num">5</span><div><h3>Town Voices</h3><p class="where">The town hall · 45 min</p></div></header>
+<p class="type">Run the town fairly</p>
+<dl><dt>The AI idea</dt><dd class="idea">An answer depends on who was counted.</dd><dt>Florence’s confident mistake</dt><dd>“Residents want more car parks, 82% sure.” It only asked drivers.</dd><dt>Back to your town</dt><dd>A town charter with three promises.</dd></dl>
+<p class="state">New</p></article><article class="card m6"><header><span class="num">6</span><div><h3>Eco Town News</h3><p class="where">The press room · 45 min</p></div></header>
+<p class="type">Team detectives</p>
+<dl><dt>The AI idea</dt><dd class="idea">Sounding right is not the same as being true.</dd><dt>Florence’s confident mistake</dt><dd>Florence writes a front page about your town. Some of it is made up.</dd><dt>Back to your town</dt><dd>Your checked front page goes on the club wall.</dd></dl>
+<p class="state">New</p></article></div>
+  </section>
+  <section aria-label="How a module runs">
+    <h2>Every new module runs the same way</h2>
+    <ol class="flow"><li><b>Florence’s brief</b><span>5 min, whole group, one screen</span></li><li><b>Play in pairs</b><span>about 25 min</span></li><li><b>Catch her mistake</b><span>check with evidence, not the “% sure”</span></li><li><b>Fix and retry</b><span>a clearer instruction, better examples or a fairer count</span></li><li><b>Talk it over</b><span>10 min, off screen, one question</span></li><li><b>Passport stamp</b><span>one per module</span></li></ol>
+  </section>
+  <section aria-label="What ties the day together">
+    <h2>What ties the day together</h2>
+    <div class="spine"><div><b>Your town</b><span>Built in module 1 and kept all day. Each module ends by changing it.</span></div><div><b>Florence</b><span>The same guide everywhere, with a new kind of mistake in each module.</span></div><div><b>Club passport</b><span>Six stamps, plus stars and medals, add up to the planner rank.</span></div><div><b>Leader’s page and club wall</b><span>One place to start each module, see who is where, and show every town at the end.</span></div></div>
+  </section>
+  <p class="note"><b>Build order.</b> First the island map that opens the six places, with the shared passport and leader’s page. Then modules 2 to 6 one at a time, each play-tested before the next is started. All six run from one site with one passcode and share Eco Town’s look, voices and Florence. <b>Still to decide:</b> the club’s real hours, and whether these five topics are the right five.</p>
+</div>
+</body>
+</html>
