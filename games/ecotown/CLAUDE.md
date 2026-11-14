@@ -88,7 +88,7 @@ Everything is merged to `main`. The working branch was `claude/focused-cori-qeov
 |---|---|
 | `worker.js` | Router, passcode page, Access token check for `/admin` |
 | `store.js` | Durable Object `CodeStore` (SQLite), binding `CODES` |
-| `codes.js` | Passcode logic: batches, `WORD-1234` codes, newest login wins, rate limit |
+| `codes.js` | Passcode logic: batches, `WORD-1234` codes, newest login wins. No limit on wrong guesses (removed in this copy at the user's request, 14 Nov 2026) |
 | `admin.html` | Admin console |
 
 - The game sends a heartbeat every 60 s from `game/js/main.js`.

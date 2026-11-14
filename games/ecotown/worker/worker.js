@@ -46,7 +46,7 @@ const sessionOf = (req) => (req.headers.get('Cookie') || '').match(new RegExp(CO
 const MESSAGES = {
   unknown: 'That passcode wasn’t recognised. Check it and try again.', revoked: 'This passcode has been switched off. Ask your teacher.',
   not_started: 'This passcode isn’t active yet. Ask your teacher when it starts.', expired: 'Your free access has ended. Ask your teacher.',
-  too_many: 'Too many tries. Please wait 10 minutes and try again.', none: 'Please log in with your passcode.', replaced: 'This passcode is now being used on another device. Log in again to play here.',
+  none: 'Please log in with your passcode.', replaced: 'This passcode is now being used on another device. Log in again to play here.',
 };
 
 export default {
@@ -75,7 +75,7 @@ export default {
     // ---------------- student API
     if (p === '/api/login' && req.method === 'POST') {
       let code = ''; try { code = (await req.json()).code; } catch { /* */ }
-      const r = await store(env).call('login', code, req.headers.get('CF-Connecting-IP') || 'unknown');
+      const r = await store(env).call('login', code);
       if (!r.ok) return json({ ok: false, reason: r.reason, message: MESSAGES[r.reason] || 'Sorry, that didn’t work.' }, 401);
       return json({ ok: true, ends: r.ends }, 200, { 'Set-Cookie': `${COOKIE}=${r.session}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000` });
     }

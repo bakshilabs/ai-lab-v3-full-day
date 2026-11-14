@@ -7,7 +7,8 @@
 - The brief's section on keeping a frozen test copy beside a development copy does not apply: it assumed work in the original repository. The original site is left alone and is not part of this plan.
 - The AI Lab as it stands (the town and its six missions) is taken to be **one hour**. Nothing is cut to fit.
 - The two Google documents will be pasted by the user. **Not yet received**; A6 and the P1 items will be checked against them.
-- Hosting and security are **out of this plan** (removed in draft 3 at the user's request). That covers where and how the site is deployed, the admin login, and the limits on wrong passcodes.
+- Hosting and security are **out of this plan** (removed in draft 3 at the user's request). That covers where and how the site is deployed and the admin login.
+- The lockout after ten wrong passcodes has been **removed from the game** (14 Nov 2026). Wrong guesses are no longer counted or limited.
 
 **What was inspected:** all the code in `games/ecotown/` (copy of `bakshilabs/ai-lab-v3` at `a5fd92c`). **What was not:** the two Google documents named in the brief (this session cannot open them) and the original repository.
 

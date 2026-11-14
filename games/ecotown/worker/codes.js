@@ -1,6 +1,6 @@
 // Passcode logic, independent of Cloudflare so it can be unit-tested in Node.
 // storage: { get(key), put(key, value), delete(key), list({ prefix }) -> Map } (Durable Object storage API).
-// Keys: b:<batchId> -> batch, c:<CODE> -> code record, rl:<ip> -> rate-limit record.
+// Keys: b:<batchId> -> batch, c:<CODE> -> code record.
 
 export const WORDS = ('OTTER MAPLE RIVER CEDAR FERN MEADOW HERON ACORN BADGER BEACON BIRCH BRAMBLE BREEZE BROOK CANYON CLOVER COMET CORAL CRANE '
   + 'DAISY DELTA DUNE EAGLE EMBER FALCON FINCH FJORD FLINT FOREST FOX GARDEN GLACIER GROVE HARBOR HAZEL HEDGE HILL HONEY IRIS ISLAND IVY '
@@ -10,7 +10,7 @@ export const WORDS = ('OTTER MAPLE RIVER CEDAR FERN MEADOW HERON ACORN BADGER BE
   + 'CHERRY COBALT CRICKET DOLPHIN DRAGONFLY ELK GECKO HEATHER JUNIPER KOALA LEMUR MANGO MARIGOLD MOOSE NUTMEG ORCA PANDA PEACH PENGUIN '
   + 'PEONY QUARTZ RAIN SEAL SPROUT STARLING SUMMIT SUNFLOWER TIGER TOPAZ TORTOISE TUNDRA WALRUS WHALE YARROW ZEBRA').split(' ');
 const DAY = 86400000;
-export const MAX_FAILS = 10, FAIL_WINDOW = 10 * 60 * 1000, SESSION_IDLE = 3 * 60 * 1000;
+export const SESSION_IDLE = 3 * 60 * 1000;
 
 export const normalise = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^([A-Z]+)(\d+)$/, '$1-$2');
 const dayStart = (d) => Date.parse(d + 'T00:00:00Z');
@@ -87,16 +87,14 @@ export function createStore(storage) {
 
     // ---------------- students
     // returns { ok, session, code, ends } or { ok:false, reason }
-    async login(rawCode, ip = 'unknown', now = Date.now()) {
-      const rk = 'rl:' + ip; const rl = (await storage.get(rk)) || { n: 0, t: now };
-      if (now - rl.t > FAIL_WINDOW) { rl.n = 0; rl.t = now; }
-      if (rl.n >= MAX_FAILS) return { ok: false, reason: 'too_many' };
-      const fail = async (reason) => { rl.n++; await storage.put(rk, rl); return { ok: false, reason }; };
+    // wrong guesses are not counted or limited: a whole class shares one internet address
+    async login(rawCode, now = Date.now()) {
+      const fail = (reason) => ({ ok: false, reason });
       const code = normalise(rawCode); const c = code && (await storage.get('c:' + code));
       if (!c) return fail('unknown');
       if (c.revoked) return fail('revoked');
       const b = await storage.get('b:' + c.batch); const st = batchState(b, now);
-      if (st !== 'active') return { ok: false, reason: st };      // a real code: don't count as a guess
+      if (st !== 'active') return { ok: false, reason: st };
       c.session = randId(); c.seen = now; c.lastLogin = now; c.logins++;   // newest login wins: replaces any earlier session
       await storage.put('c:' + code, c);
       return { ok: true, session: `${code}.${c.session}`, code, ends: b.ends };
