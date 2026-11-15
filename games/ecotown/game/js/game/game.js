@@ -38,6 +38,7 @@ import { townScore } from './score.js';
 import { passport } from './passport.js';
 import { reactionFor, speciesNews, ANIMALS } from './reactions.js';
 import { challenge, challengeState, challengeMedal, better, florenceTown, GOAL_TEXT } from './challenges.js';
+import { missionVerdict, brokenBy, townVerdict } from './criteria.js'; // the one place that decides whether a target is met
 import { answer as askFlorence, SUGGEST } from './qa.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -204,6 +205,8 @@ export function createGame(app) {
   async function checkAct(id, res, { auto = false } = {}) {
     const lv = LEVELS[id]; const sAfter = sim(res.after); const cx = ctxFor(res.after);
     const reveal = lv.reveal(sAfter, sim(), cx); const flawed = Object.keys(reveal).length > 0 || !lv.pass(sAfter, cx);
+    // targets the player wrote into the instruction that this plan does not meet (the town's own rules may still hold)
+    const own = missionVerdict(id, sAfter, cx, { junior: G.j, targets: res.plan.targets || [], minutes: app.briefMinutes }).brief.map((c) => c.label);
     if (auto) {
       const which = Object.keys(reveal)[0];
       if (!which) return { flawed: false };
@@ -219,6 +222,12 @@ export function createGame(app) {
         audio.bad(); help({ tag: G.C.ui.unfairTag, tagCls: 'bad', html: `<p>${esc(G.C.ui.unfair)}</p>`, say: G.C.ui.unfair, voice: 'helper' }); star(0, G.C.ui.checked);
         await sleep(1600); await continueBtn();
         return { flawed: false, missed: [G.j ? 'a school that is fair to every family' : 'a fair test: every household, not the richest'], tried };
+      }
+      if (!flawed && own.length) { // the rules hold but the player's own target does not: partly met, never "no problem" and never a first-time star
+        audio.bad(); ui.alert(G.C.ui.partly, false);
+        help({ tag: G.C.ui.partlyTag, tagCls: 'bad', html: `<p><b>${esc(G.C.ui.partly)}</b></p><ul>${own.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>`, say: `${G.C.ui.partly} ${own.join(' ')}`, voice: 'helper' });
+        await sleep(1600); await continueBtn(); ui.show('alert', false);
+        return { flawed: false, tried, partly: own };
       }
       if (!flawed) { // the plan really is fine
         // the plan passed; the brief earns "well specified first time" only if it really was one (not repeats, emoji, or a part she refused)
@@ -262,8 +271,9 @@ export function createGame(app) {
       if (!tried.includes(choice)) tried.push(choice);
       // this check showed no problem: say what it looked at and what it found, then let the player decide
       const summary = r.info?.summary || '';
-      ui.say(`${label(choice)}: ${summary}. ${G.C.ui.nothingHere}`, 'narrator');
-      const next = await new Promise((resolve) => ui.tray(`<h3>✓ ${esc(label(choice))}${summary ? `: ${esc(summary)}` : ''}</h3><p class="checknote">${G.j ? 'This checked' : 'Tested'}: ${esc(G.C.checkWhat[choice])}. ${esc(G.C.ui.nothingHere)}</p><div class="row" style="justify-content:flex-end"><button class="btn alt" data-again>🔎 ${esc(G.C.ui.checkAnother)}</button><button class="btn go" data-accept>✓ ${esc(G.C.ui.accept)}</button></div>`,
+      const nothing = own.length ? G.C.ui.nothingButOwn : G.C.ui.nothingHere; // a check that shows the player's own target missed is not an all-clear
+      ui.say(`${label(choice)}: ${summary}. ${nothing}`, 'narrator');
+      const next = await new Promise((resolve) => ui.tray(`<h3>✓ ${esc(label(choice))}${summary ? `: ${esc(summary)}` : ''}</h3><p class="checknote">${G.j ? 'This checked' : 'Tested'}: ${esc(G.C.checkWhat[choice])}. ${esc(nothing)}</p><div class="row" style="justify-content:flex-end"><button class="btn alt" data-again>🔎 ${esc(G.C.ui.checkAnother)}</button><button class="btn go" data-accept>✓ ${esc(G.C.ui.accept)}</button></div>`,
         (tr) => { tr.querySelector('[data-again]').onclick = () => resolve('again'); tr.querySelector('[data-accept]').onclick = () => resolve('accept'); }));
       await checks.leave();
       if (view) showCells(G.cells);
@@ -662,6 +672,9 @@ export function createGame(app) {
     if (!G.movedIn && s.homes.length) moveIn(s);
     renderBar(); renderCard(); milestones(s);
     if (!fresh.length) adviseSoon(400);
+    // a town that was celebrated as complete and has since slipped says so (the badge is kept; the status is live)
+    if (!CH && G.completeShown && sb.running) { const tv = townVerdict(s, ctxFor(G.cells), { was: true, labs: labsDone() });
+      if (tv.slipped && !sb.slipTold) { sb.slipTold = true; ui.alert(G.S.slipped(tv.failed.map((g) => G.S.goal[g.id](s)).join('; ')), false, 6000); } else if (!tv.slipped) sb.slipTold = false; }
     if (CH) challengeCheck(s);
     else if (!G.completeShown && !sb.celebrating && townComplete(s, ctxFor(G.cells)) && labsDone() >= 6) { sb.celebrating = true; setTimeout(celebrateTown, 1500); }
     if (!CH && labsDone() >= 6 && !sb.labsMarked) { sb.labsMarked = true; device((all) => { if (all.labs?.[G.band]) return false; (all.labs ||= {})[G.band] = true; }); }
@@ -1128,11 +1141,18 @@ export function createGame(app) {
     briefMin(res);
     const chk = await checkAct(id, res);
     const checkName = (c) => G.C.checks[c]?.label || c;
-    if (chk.missed) {
+    if (chk.partly) { // the town's rules are met, the player's own target is not: rewrite the instruction, or keep the plan as "partly met"
+      if ((await partlyChoice(chk.partly)) === 'fix') {
+        G.paths[id] = 'missed';
+        G.outcomes[id] = { kind: 'missed', detail: G.j ? `Florence’s plan kept the town’s rules but missed your own target. ${chk.partly.join(' ')} You wrote a clearer instruction.` : `The plan met the town’s rules but not the brief’s own target. ${chk.partly.join(' ')} Revised in a new instruction.` };
+        res = await retry(id, res, G.S.tellMissing, briefMin);
+        star(1, G.C.stars.missed[1]); if (!run.partly) star(2, G.C.stars.missed[2]);
+      } else { G.paths[id] = 'clean'; run.partly = chk.partly; G.outcomes[id] = { kind: 'partly', detail: '' }; star(2, G.C.ui.checked); }
+    } else if (chk.missed) {
       G.paths[id] = 'missed';
       G.outcomes[id] = { kind: 'missed', detail: G.j ? `Florence’s plan left out: ${chk.missed.join('; ')}. You told her what was missing.` : `The plan did not cover: ${chk.missed.join('; ')}. Added in a revised instruction.` };
       res = await retry(id, res, G.S.tellMissing, briefMin);
-      star(1, G.C.stars.missed[1]); star(2, G.C.stars.missed[2]);
+      star(1, G.C.stars.missed[1]); if (!run.partly) star(2, G.C.stars.missed[2]);
     } else if (!chk.flawed) {
       G.paths[id] = 'clean'; const guessed = await hiddenAct(id);
       G.outcomes[id] = { kind: 'clean', detail: `${G.j ? 'Florence’s first plan passed the' : 'First plan passed the'} ${chk.tried.map(checkName).join(', ')} check${chk.tried.length > 1 ? 's' : ''}. ${G.j ? '' : 'Unstated assumption: '}${guessed}${app.__lucky ? ` ${G.C.ui.lucky[app.__lucky]}` : ''}` };
@@ -1147,7 +1167,7 @@ export function createGame(app) {
       res = await retry(id, res, G.C.ui.tryClearer, briefMin);
       // the third star is for a fix that works within two rewrites. Retrying is still free and unlimited, but a string of
       // silly or unwise rewrites followed by a good one no longer earns the same three stars as a careful fix.
-      if ((run?.tries || 1) <= 2) star(2, G.C.stars.flawed[2]); else ui.caption(G.C.ui.manyTries(run.tries), 4200);
+      if (run.partly) { /* the fix still misses the player's own target: no third star */ } else if ((run?.tries || 1) <= 2) star(2, G.C.stars.flawed[2]); else ui.caption(G.C.ui.manyTries(run.tries), 4200);
       ui.facil(null);
     }
     // the fixed plan is built on the practice island, system by system, layer by layer
@@ -1158,26 +1178,33 @@ export function createGame(app) {
     if (id === 'heart') await biasCheck();
     // senior: a town meeting with an honest trade-off (it changes the player's real town numbers)
     if (!G.j && DILEMMAS[id]) {
-      const d = DILEMMAS[id]; const a = await ui.modal(`<div class="ribbon">Town meeting</div><h2>${esc(d.text)}</h2><div class="row" style="justify-content:center">${d.options.map((o, i) => `<button class="btn ${i ? 'alt' : 'go'}" data-act="${i}">${esc(o.label)}</button>`).join('')}</div>`);
-      const e = d.options[+a].effect; for (const k of ['families', 'carbon', 'winter', 'health', 'community', 'nature']) if (e[k]) G.extra[k] = (G.extra[k] || 0) + e[k];
-      if (e.credits && Number.isFinite(G.credits)) G.credits = Math.max(0, G.credits + e.credits);
-      run.meeting = `${d.options[+a].label}: ${meetingEffect(e)}`; G.diary.push(`Town meeting: ${run.meeting}.`);
-      // a choice can break the mission's own limit (a tester's extra concrete floor took 66 t to 96 t against 70 t, unremarked)
-      const xs = { natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 };
-      const sM = simulate(terrain, G.cells, { ...xs, addHomesCarbon: id === 'homes' ? e.carbon || 0 : 0 }); const sB = simulate(terrain, G.cells, { ...xs, addFamilies: (G.extra.families || 0) - (e.families || 0), addCarbon: (G.extra.carbon || 0) - (e.carbon || 0), addWinter: (G.extra.winter || 0) - (e.winter || 0) });
-      const okB = new Map(lv.needs(sB, ctxFor(G.cells), G.j).map((n, i) => [i, n.ok]));
-      const broke = lv.needs(sM, ctxFor(G.cells), G.j).filter((n, i) => !n.ok && okB.get(i)).map((n) => n.label.replace(/^\P{L}+/u, ''));
-      if (broke.length) {
-        run.broke = broke; run.meeting += `. ⚠ ${G.S.meetingBroke(broke.join('; '))}`;
-        audio.bad(); await ui.modal(`<div class="ribbon">Town meeting</div><h2>⚠ ${esc(G.S.meetingBrokeHead)}</h2><p>${esc(G.S.meetingBroke(broke.join('; ')))}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${esc(G.C.ui.ok || 'OK')}</button></div>`, { say: G.S.meetingBroke(broke.join('; ')) });
+      const d = DILEMMAS[id]; const KEYS = ['families', 'carbon', 'winter', 'health', 'community', 'nature'];
+      // a choice that breaks one of the mission's own limits is shown as such, and can be changed before the mission ends
+      for (;;) {
+        const a = await ui.modal(`<div class="ribbon">Town meeting</div><h2>${esc(d.text)}</h2><div class="row" style="justify-content:center">${d.options.map((o, i) => `<button class="btn ${i ? 'alt' : 'go'}" data-act="${i}">${esc(o.label)}</button>`).join('')}</div>`);
+        const e = d.options[+a].effect; const had = Number.isFinite(G.credits) ? G.credits : null;
+        const xsOf = () => ({ natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 });
+        const sB = simulate(terrain, G.cells, xsOf()); // the plan before this choice
+        for (const k of KEYS) if (e[k]) G.extra[k] = (G.extra[k] || 0) + e[k];
+        if (e.credits && had !== null) G.credits = Math.max(0, G.credits + e.credits);
+        const sM = simulate(terrain, G.cells, { ...xsOf(), addHomesCarbon: id === 'homes' ? e.carbon || 0 : 0 });
+        const broke = brokenBy(id, sB, sM, ctxFor(G.cells), G.j);
+        const line = `${d.options[+a].label}: ${meetingEffect(e)}`;
+        if (!broke.length) { run.meeting = line; G.diary.push(`Town meeting: ${line}.`); break; }
+        audio.bad();
+        const k = await ui.modal(`<div class="ribbon">Town meeting</div><h2>⚠ ${esc(G.S.meetingBrokeHead)}</h2><p>${esc(G.S.meetingBroke(broke.join('; ')))}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.meetingKeep)}</button><button class="btn go" data-act="again">↺ ${esc(G.S.meetingAgain)}</button></div>`, { say: G.S.meetingBroke(broke.join('; ')) });
+        if (k === 'keep') { run.broke = broke; run.meeting = `${line}. ⚠ ${G.S.meetingBroke(broke.join('; '))}`; G.diary.push(`Town meeting: ${run.meeting}.`); break; }
+        for (const kk of KEYS) if (e[kk]) G.extra[kk] = (G.extra[kk] || 0) - e[kk]; if (had !== null) G.credits = had; // choose again: undo this choice
       }
     }
     // the reward card, then: use Florence's plan in your town, or keep your town as it is
-    const s2 = sim(); audio.fanfare(); setMusic('celebrate'); world.confetti(new THREE.Vector3(10, 20, 8), 200); rewardView(true); rig.startTurntable(app.reduce ? 0 : 0.1);
+    // a mission that ends with a limit broken, or with the player's own target missed, is not shown as a clean success
+    const short = run.broke ? 'broke' : run.partly ? 'partly' : null; if (run.broke) run.marks[2] = false;
+    const s2 = sim(); if (short) audio.pass(); else { audio.fanfare(); world.confetti(new THREE.Vector3(10, 20, 8), 200); } setMusic('celebrate'); rewardView(true); rig.startTurntable(app.reduce ? 0 : 0.1);
     const stars = run.marks.filter(Boolean).length; const rules = G.C.stars[G.paths[id] || 'flawed'];
     const [statLabel, statVal] = lv.stat(s2, G.j); const oc = outcomeFor(id, s2);
-    const heading = pick(L.complete); const newLens = G.C.checks[LAB_LENS[id]];
-    const choice = await ui.modal(`<div class="ribbon green">🧪 ${esc(G.S.missionDone)} · ${esc(L.title)}</div><div class="stars3">${[0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</div><h2>${esc(heading)}</h2>
+    const heading = short ? G.C.ui.shortHead[short] : pick(L.complete); const newLens = G.C.checks[LAB_LENS[id]];
+    const choice = await ui.modal(`<div class="ribbon ${short ? '' : 'green'}">🧪 ${esc(short ? G.C.ui.shortRibbon[short] : G.S.missionDone)} · ${esc(L.title)}</div><div class="stars3">${[0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</div><h2>${esc(heading)}</h2>
       <ul class="starlist">${rules.map((r, i) => `<li class="${run.marks[i] ? 'got' : ''}">${run.marks[i] ? '★' : '☆'} ${esc(r)}</li>`).join('')}${run.bonus ? `<li class="got">★ Bonus: found Florence’s biased survey</li>` : ''}</ul>
       <div class="outcome ${oc.kind}"><small>${esc(G.C.ui.outcomeHead)}</small><b>${esc(G.C.ui.outcome[oc.kind])}</b><p>${esc(oc.detail)}</p></div>
       <div class="stats"><div><small>${esc(statLabel)}</small>${esc(statVal)}</div><div><small>${esc(G.S.newTool)}</small>${newLens.icon} ${esc(newLens.label)}</div><div><small>${G.j ? 'Fact' : 'Evidence'}</small>${esc(pick(L.fact))}</div>${run.meeting ? `<div><small>Town meeting</small>${esc(run.meeting)}</div>` : ''}</div>
@@ -1187,7 +1214,7 @@ export function createGame(app) {
     await app.episodes?.auto(`${id}-close`, G); // story episode: the closing film, the first time this mission is finished
     // keep the best run's stars
     G.levelStars[id] = Math.max(G.levelStars[id] || 0, stars); if (run.bonus) G.bonus[id] = 1;
-    G.labs[id] = { stars: G.levelStars[id] };
+    G.labs[id] = { stars: G.levelStars[id], ...(short ? { short } : {}) }; // short: finished with a limit broken ('broke') or the player's own target missed ('partly')
     const placements = res.plan.placements; run = null;
     await leaveLab(real, choice === 'use' ? placements : null, id);
     // the diary tells what happened in the player's own town (it used to describe the practice island even after "Keep my town")
@@ -1205,6 +1232,13 @@ export function createGame(app) {
         const sA = sim(res.after); const cx = ctxFor(res.after);
         if (lv.pass(sA, cx) && res.plan.contra) { const m = G.C.ui.contra(res.plan.contra[0]); help({ tag: G.j ? 'MIXED UP' : 'CONTRADICTORY', tagCls: 'bad', html: `<p>${esc(m)}</p>`, say: m, voice: 'helper' }); audio.bad(); heading = G.S.tellMissing; continue; } // a rewrite that says the opposite of its own key word never passes
         if (lv.pass(sA, cx) && res.plan.unfair) { help({ tag: G.C.ui.unfairTag, tagCls: 'bad', html: `<p>${esc(G.C.ui.unfair)}</p>`, say: G.C.ui.unfair, voice: 'helper' }); audio.bad(); heading = G.S.tellMissing; continue; } // the same biased words never pass on a retry
+        const own = lv.pass(sA, cx) ? missionVerdict(id, sA, cx, { junior: G.j, targets: res.plan.targets || [], minutes: app.briefMinutes }).brief.map((c) => c.label) : [];
+        if (own.length) { // the rules hold now, but a target the player wrote is still missed: say which, and let them choose
+          help({ tag: G.C.ui.partlyTag, tagCls: 'bad', html: `<p><b>${esc(G.C.ui.partly)}</b></p><ul>${own.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>`, say: `${G.C.ui.partly} ${own.join(' ')}`, voice: 'helper' }); audio.bad();
+          if ((await partlyChoice(own)) === 'fix') { heading = G.S.tellMissing; continue; }
+          if (run) run.partly = own; return res;
+        }
+        if (run) run.partly = null;
         if (lv.pass(sA, cx)) {
           audio.pass(); app.bot.proud(); world.confetti(app.bot.group.position.clone(), 90); ui.alert(G.C.ui.checked, true, 1800);
           help({ tag: G.C.ui.checked, tagCls: 'ok', html: `<ul>${res.plan.reading.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>`, sure: res.sure, sureLabel: G.C.ui.sure });
@@ -1221,6 +1255,8 @@ export function createGame(app) {
       help({ tag: 'STILL WRONG', tagCls: 'bad', html: `<p><b>${esc(G.j ? 'Still a problem' : 'Still failing')}${failed ? `: ${esc(failed)}` : ''}.</b></p><p>${esc(G.j ? 'I read your instruction as:' : 'Read as:')} <i>${esc(readAs)}</i></p><p>💡 ${esc(G.j ? 'Try adding:' : 'Add:')} <b>${esc(tip)}</b></p>`, say: line, voice: 'helper' });
     }
   }
+  // the plan keeps the town's rules but misses a target the player wrote: rewrite the instruction ('fix') or keep the plan ('keep')
+  const partlyChoice = (own) => ui.modal(`<div class="ribbon">${esc(G.C.ui.partlyTag)}</div><h2>${esc(G.C.ui.partlyHead)}</h2><ul class="starlist">${own.map((o) => `<li>✗ ${esc(o)}</li>`).join('')}</ul><p>${esc(G.C.ui.partlyAsk)}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.C.ui.partlyKeep)}</button><button class="btn go" data-act="fix">✎ ${esc(G.C.ui.partlyFix)}</button></div>`, { say: `${G.C.ui.partlyHead} ${own.join(' ')} ${G.C.ui.partlyAsk}` });
   // what to add to a brief after a check still finds a problem (the lens names the problem; this names the fix)
   const FIX_HINT = {
     flood: { j: 'the town land must stay dry in winter.', s: 'a constraint: no town land on the floodplain.' },
@@ -1374,9 +1410,8 @@ export function createGame(app) {
   // one plain sentence per mission for the reward card and the report: what happened to the brief, and who caught it
   function outcomeFor(id, s2) {
     const oc = { ...(G.outcomes[id] || { kind: 'clean', detail: '' }) };
-    const b = app.briefMinutes, W = TARGETS.walkMinutes;
-    if (id === 'heart' && b && s2.walkMax > b) oc.detail += ` ${G.j ? 'You' : 'The brief'} asked for a ${b}-minute walk; the longest route is ${s2.walkMax} minutes. That meets the town’s ${W}-minute rule, but not ${G.j ? 'your' : 'the'} brief.`;
-    if (run?.broke) oc.detail += ` ${G.S.meetingBroke(run.broke.join('; '))}`;
+    if (run?.partly) { oc.kind = 'partly'; oc.detail = `${oc.detail} ${G.C.ui.partly} ${run.partly.join(' ')}`.trim(); }
+    if (run?.broke) { oc.kind = 'broke'; oc.detail = `${oc.detail} ${G.S.meetingBroke(run.broke.join('; '))}`.trim(); }
     G.outcomes[id] = oc; return oc;
   }
 
@@ -1439,10 +1474,10 @@ export function createGame(app) {
     const s = sim(); if (G.completeShown || !chState(s).passed) return;
     G.completeShown = true; G.busy = true; stopBuilding(); save(); let a = null;
     try {
-      const r = scoreNow(s); const med = MEDAL[challengeMedal(r)]; const nx = r.next && r.total >= 60 ? MEDAL[r.next.id] : null;
+      const r = scoreNow(s); const med = MEDAL[challengeMedal(r)] || ['✓', G.j ? 'Passed: no medal yet (bronze starts at 60)' : 'Passed; no medal yet (bronze from 60)']; const nx = r.next && r.total >= 60 ? MEDAL[r.next.id] : null;
       audio.complete(app.reduce); app.bot?.cheer(); if (!app.reduce) world.confetti(new THREE.Vector3(10, 20, 8), 200);
       const lead = G.j ? `You did it: ${CH.name} is a whole town that works.` : CH.free ? `${CH.name}: every town goal is met.` : `${CH.name}: every town goal and the challenge rule are met.`;
-      a = await ui.modal(`<div class="ribbon green">${CH.icon} ${CH.free ? 'Town goals met' : 'Challenge passed'}</div><h2>${med[0]} ${med[1]} medal</h2><p>${esc(lead)}</p><p class="fscore"><b>Town score ${r.total} / 100</b>${nx ? `<small>${r.next.need} more for ${nx[0]} ${nx[1]}. Keep building to raise it.</small>` : ''}</p>
+      a = await ui.modal(`<div class="ribbon green">${CH.icon} ${CH.free ? 'Town goals met' : 'Challenge passed'}</div><h2>${med[0]} ${med[1]}${challengeMedal(r) ? ' medal' : ''}</h2><p>${esc(lead)}</p><p class="fscore"><b>Town score ${r.total} / 100</b>${nx ? `<small>${r.next.need} more for ${nx[0]} ${nx[1]}. Keep building to raise it.</small>` : ''}</p>
         <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn go" data-act="more">🏆 More challenges</button></div>`, { say: lead });
     } finally { G.busy = false; if (a !== 'more') startBuilding(); }
     if (a === 'more') location.search = '?challenges=1';

@@ -2151,3 +2151,6 @@ html[data-visit="on"] #card .goal .gt { font-weight: 800; }
   html #build .hlkey.mini { position: absolute; right: 0; top: 43px; height: 24px; margin: 0; z-index: 2; display: flex; align-items: center; justify-content: flex-end; }
   html #build .hlkey.mini:hover, html #build .hlkey.mini:focus-within, html #build .hlkey.mini:focus { bottom: auto; top: auto; bottom: calc(100% + 4px); right: 0; height: auto; flex-wrap: wrap; max-width: 92vw; padding: 6px 8px; border-radius: 10px; background: var(--p6-card, #fffaf0); box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 }
+
+/* a mission that ends partly met, or with a limit broken, is not shown in the "all met" green */
+.modal .outcome.partly, .modal .outcome.broke { background: #fff0ea; box-shadow: inset 0 0 0 2px #e9a58c; }

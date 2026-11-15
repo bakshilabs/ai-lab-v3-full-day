@@ -7,10 +7,16 @@ import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const here = path.dirname(new URL(import.meta.url).pathname);
 const SRC = path.join(here, 'game'), OUT = path.join(here, 'dist'), A = path.join(OUT, 'assets');
 const hash = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 10);
+
+// the build's label: the version from package.json, the commit it was built from and the date (shown in the ☰ menu, kept in docs/RELEASES.md)
+const pkg = JSON.parse(fs.readFileSync(path.join(here, 'package.json'), 'utf8'));
+let commit = 'unknown'; try { commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: here, encoding: 'utf8' }).trim() + (execFileSync('git', ['status', '--porcelain', '--', '.'], { cwd: here, encoding: 'utf8' }).trim() ? '+changes' : ''); } catch { /* not a git checkout */ }
+const BUILD = { version: pkg.version, commit, date: new Date().toISOString().slice(0, 10) };
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(A, 'fonts'), { recursive: true });
@@ -38,6 +44,7 @@ const vendor = path.join(SRC, 'vendor');
 const res = await build({
   entryPoints: [path.join(SRC, 'js', 'main.js')],
   bundle: true, format: 'esm', target: 'es2020', minify: true, legalComments: 'none', sourcemap: false, write: false,
+  define: { __ECO_BUILD__: JSON.stringify(BUILD) },
   charset: 'utf8',
   plugins: [{
     name: 'three-vendor',
@@ -74,4 +81,6 @@ for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(
 fs.copyFileSync(path.join(here, '_headers'), path.join(OUT, '_headers'));
 
 const total = fs.readdirSync(A, { recursive: true }).map((f) => path.join(A, f)).filter((f) => fs.statSync(f).isFile()).reduce((a, f) => a + fs.statSync(f).size, 0);
+fs.writeFileSync(path.join(OUT, 'version.json'), JSON.stringify(BUILD));
+console.log(`Eco Town ${BUILD.version} (${BUILD.commit}, ${BUILD.date})`);
 console.log(`dist/ built: index.html, assets/${jsName} (${(js.length / 1024).toFixed(0)} KB), assets/${cssName}, model, fonts — ${(total / 1024 / 1024).toFixed(1)} MB`);

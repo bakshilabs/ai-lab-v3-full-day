@@ -26,6 +26,7 @@ import { loadVoices, setSpeakingHook } from './ui/voice.js';
 // showing towns to other people (stage 4): the postcard, "Visit a town" and the club wall live in these two files
 import { shareParams, startButtons, visitCard, wallCard, openPostcard, go as shareGo } from './ui/share.js';
 import { runVisit } from './game/visit.js';
+import { BUILD, buildLabel } from './version.js'; // the build's version, shown at the foot of the ☰ menu
 import { createEpisodeViewer } from './ui/epviewer.js'; // story episodes: plays the recorded films (nothing is fetched until one plays)
 // while a 🔊 read-aloud plays, its button shows it (a tester couldn't tell whether anything was happening)
 let spkBtn = null;
@@ -120,7 +121,7 @@ function settingsSheet() {
     ${row('readAloud', 'Read aloud')}${row('episodes', 'Story episodes')}${row('reduce', 'Reduce motion')}${row('facilitator', 'Facilitator notes')}
     <div class="setrow"><span id="tsz">Text size</span><span class="seg" role="radiogroup" aria-labelledby="tsz">${['normal', 'large'].map((v) => `<button type="button" role="radio" data-tsize="${v}" aria-checked="${(s.text || 'normal') === v}">${v === 'large' ? 'Large' : 'Normal'}</button>`).join('')}</span></div>
     <label>Graphics<select data-k="quality">${['auto', 'low', 'mid', 'high'].map((q) => `<option ${s.quality === q ? 'selected' : ''}>${q}</option>`).join('')}</select></label>
-    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><button class="btn go" data-close>Done</button>`;
+    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><p class="buildline" style="font-size:.75em;color:#46596a;margin:4px 0 8px">Eco Town ${esc(buildLabel())}</p><button class="btn go" data-close>Done</button>`;
   P.querySelectorAll('[data-k]').forEach((i) => (i.onchange = () => { s[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.value; applySettings(); ui.refreshFacil(); }));
   // text size: two buttons, not a drop-down (a drop-down list opened over "Facilitator notes", and a tap meant for "Large" ticked it)
   P.querySelectorAll('[data-tsize]').forEach((b) => (b.onclick = () => { s.text = b.dataset.tsize; P.querySelectorAll('[data-tsize]').forEach((x) => x.setAttribute('aria-checked', String(x === b))); applySettings(); }));
@@ -247,7 +248,7 @@ async function start() {
       card.innerHTML = `<span class="chip">🏆 CHALLENGE TOWNS</span><h1>Pick a <span>challenge</span></h1><p class="sub">A new town with one special rule. Everything is unlocked. Meet the town goals and the rule to win a medal: ${medalsOf(b)} of ${CHALLENGES.length} so far.</p>
         ${chBands.length > 1 ? `<div class="opts"><span class="seg" role="radiogroup" aria-label="Age">${chBands.map((x) => `<button type="button" role="radio" data-chband="${x}" aria-checked="${x === b}">${x === 'junior' ? 'Ages 8–12' : 'Ages 13–17'}</button>`).join('')}</span></div>` : ''}
         ${[['home', CHALLENGES.filter((c) => !c.island)], ['delta', CHALLENGES.filter((c) => c.island === 'delta')], ['hills', CHALLENGES.filter((c) => c.island === 'hills')], ['free', ISLAND_TOWNS]].map(([isl, list]) => `${isl === 'home' ? '' : `<h2 class="chisle">${isl === 'free' ? '🏝 Free building on another island <small>no special rule, its own saved town</small>' : `${LAYOUTS[isl].icon} ${esc(LAYOUTS[isl].name)} <small>${isl === 'delta' ? 'flood meadow and marsh, little dry ground' : 'woods, slopes and a long beach, little flat field'}</small>`}</h2>`}<div class="chgrid">${list.map((c) => { const r = dev.ch?.[b]?.[c.id]; const sv = slotOf(c.id); const mine = sv && sv.band === b;
-          return `<button class="age chcard ${r ? 'won' : ''}" data-ch="${c.id}"><b class="chico" aria-hidden="true">${c.icon}</b><span><b>${esc(c.name)}</b><small>${esc(b === 'junior' ? c.rule.j : c.rule.s)}</small><em>${r ? `${MED[r.medal]} ${r.medal[0].toUpperCase() + r.medal.slice(1)} · score ${Math.round(r.score)}${r.medal !== 'gold' ? ' · go for a higher medal' : ''}` : mine ? '▶ Carry on' : 'Not tried yet'}</em></span></button>`; }).join('')}</div>`).join('')}
+          return `<button class="age chcard ${r ? 'won' : ''}" data-ch="${c.id}"><b class="chico" aria-hidden="true">${c.icon}</b><span><b>${esc(c.name)}</b><small>${esc(b === 'junior' ? c.rule.j : c.rule.s)}</small><em>${r ? `${r.medal ? `${MED[r.medal]} ${r.medal[0].toUpperCase() + r.medal.slice(1)}` : '✓ Passed'} · score ${Math.round(r.score)}${r.medal !== 'gold' ? ' · go for a higher medal' : ''}` : mine ? '▶ Carry on' : 'Not tried yet'}</em></span></button>`; }).join('')}</div>`).join('')}
         <p class="islenote">The AI Lab missions are on the home island. A town on another island opens after a short reload.</p>
         <div class="row" style="justify-content:center;margin-top:10px"><button class="btn alt" data-chback>← Back</button></div>`;
       card.scrollTop = 0;
@@ -317,7 +318,7 @@ async function start() {
   rig.startTurntable(0); setMusic('calm');
   await G.run();
 }
-window.__eco = { app, terrain, ready: () => !!app.G, modelReady, thumbExtras: () => ({ ailab: { mark: null, item: 'ailab', mods: [] } }) };
+window.__eco = { build: BUILD, app, terrain, ready: () => !!app.G, modelReady, thumbExtras: () => ({ ailab: { mark: null, item: 'ailab', mods: [] } }) };
 // Passcode sessions (only when served by the Eco Town Worker; local and GitHub Pages builds have no /api).
 // Every minute the game checks its session is still the active one for this passcode (newest login wins).
 (async function heartbeat() {

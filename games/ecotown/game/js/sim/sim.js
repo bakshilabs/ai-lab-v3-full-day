@@ -137,7 +137,7 @@ export function simulate(terrain, cells, extra = {}) {
   const need = Math.max(13, Math.ceil(R.families / 3));
   const natureStart = extra.natureStart || natureBaseline(terrain);
   R.count = count; R.hedges = hedges; R.woodIntact = woodIntact; R.meadowIntact = meadowIntact; R.wetIntact = wetIntact;
-  R.homesCarbon = homesCarbon; R.carbon = Math.round(carbon); R.food = food; R.foodNeed = need; R.nature = Math.round(nature * 10) / 10; R.natureStart = natureStart;
+  R.homesCarbon = homesCarbon; R.carbon = Math.round(carbon * 10) / 10; /* one decimal: 160.4 t used to round to 160 and pass a 160 t limit */ R.food = food; R.foodNeed = need; R.nature = Math.round(nature * 10) / 10; R.natureStart = natureStart;
   R.health = health; R.community = community; R.avgTemp = Math.round(avgTemp); R.cars = cars;
   R.drains = (count.raingarden || 0) + (count.reedbed || 0); R.waste = (count.compost || 0) + (count.repair || 0);
   R.carbonCeiling = TARGETS.carbonCeiling; R.carbonOK = R.carbon <= TARGETS.carbonCeiling;

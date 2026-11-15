@@ -9,6 +9,8 @@ const RULES = [
   { id: 'families', level: 'homes', re: new RegExp(`${NUM}\\s*(?:families|households|homes|people)`, 'i'), dir: 'min' },
   { id: 'carbon', level: 'homes', re: new RegExp(`(?:below|under|less than|at most|max(?:imum)?|no more than|within)\\s*${NUM}\\s*(?:t\\b|tonnes?|tons?)`, 'i'), dir: 'max' },
 ];
+// "below 50" means 49.9 passes and 50 does not; "at most 50" lets 50 pass
+const STRICT = /\b(?:below|under|less than)\s*\d/i;
 
 // -> [{ id, asked, dir }] for the rules that belong to this mission
 export function readTargets(level, text) {
@@ -18,7 +20,7 @@ export function readTargets(level, text) {
     if (r.level !== level) continue;
     const m = t.match(r.re); if (!m) continue;
     const n = +(m[1] ?? m[2]); if (!Number.isFinite(n) || n <= 0) continue;
-    out.push({ id: r.id, asked: n, dir: r.dir });
+    out.push({ id: r.id, asked: n, dir: r.dir, ...(r.dir === 'max' && STRICT.test(m[0]) ? { strict: true } : {}) });
   }
   return out;
 }
@@ -28,16 +30,16 @@ const GOT = {
   food: (s) => ({ got: s.food, need: s.foodNeed }),
   power: (s) => ({ got: s.power?.winterSupply ?? 0, need: s.power?.demand ?? 0 }),
   families: (s) => ({ got: s.familiesSafe, need: null }),
-  carbon: (s) => ({ got: Math.round(s.homesCarbon ?? s.carbon ?? 0), need: null }),
+  carbon: (s) => ({ got: Math.round((s.homesCarbon ?? s.carbon ?? 0) * 10) / 10, need: null }), // compared as shown, to one decimal
 };
 export function checkTargets(targets, s) {
-  return targets.map((t) => { const g = GOT[t.id](s); return { ...t, ...g, met: t.dir === 'min' ? g.got >= t.asked : g.got <= t.asked }; });
+  return targets.map((t) => { const g = GOT[t.id](s); return { ...t, ...g, met: t.dir === 'min' ? g.got >= t.asked : t.strict ? g.got < t.asked : g.got <= t.asked }; });
 }
 
 // one plain sentence per target, junior or senior wording
 const UNIT = { j: { food: 'baskets of food', power: 'units of power on a still winter night', families: 'families', carbon: 'tonnes of carbon' }, s: { food: 'food units', power: 'power units (still winter night)', families: 'households', carbon: 't embodied carbon' } };
 export function targetLine(t, j) {
-  const u = UNIT[j ? 'j' : 's'][t.id]; const want = t.dir === 'min' ? (j ? 'at least' : '≥') : (j ? 'at most' : '≤');
+  const u = UNIT[j ? 'j' : 's'][t.id]; const want = t.dir === 'min' ? (j ? 'at least' : '≥') : t.strict ? (j ? 'under' : '<') : (j ? 'at most' : '≤');
   const need = t.need != null && t.need !== t.asked ? (j ? ` (the town needs ${t.need})` : `; the town needs ${t.need}`) : '';
   if (j) return t.met ? `You asked for ${want} ${t.asked} ${u}. My plan gives ${t.got} ✓${need}.` : `You asked for ${want} ${t.asked} ${u}, but my plan only gives ${t.got} ✗${need}.`;
   return `Your target: ${want} ${t.asked} ${u}. Plan: ${t.got} ${t.met ? '✓ met' : '✗ not met'}${need}.`;

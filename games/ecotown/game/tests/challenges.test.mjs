@@ -118,5 +118,5 @@ test('the better of two results is kept', () => {
   assert.deepEqual(better(null, { medal: 'bronze', score: 61 }), { medal: 'bronze', score: 61 });
   assert.equal(better({ medal: 'silver', score: 80 }, { medal: 'bronze', score: 99 }).medal, 'silver');
   assert.equal(better({ medal: 'silver', score: 80 }, { medal: 'silver', score: 84 }).score, 84);
-  assert.equal(challengeMedal({ medal: null }), 'bronze');
+  assert.equal(challengeMedal({ medal: null }), null, 'no medal below the bronze score');
 });
