@@ -1,6 +1,6 @@
 # Eco Town: plan for a one-hour pilot
 
-**Draft 4, 15 November 2026.** Written in answer to the implementation brief of the same date (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
+**Draft 4, 15 November 2026.** Written in answer to the implementation brief of 14 November (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
 
 **Decided by the user after draft 1:**
 - This repository (`ai-lab-v3-full-day`) is where the work happens. It is a **new live build**, deployed from here to a **new address** that the user will provide.
