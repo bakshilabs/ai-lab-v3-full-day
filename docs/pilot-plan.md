@@ -1,16 +1,16 @@
 # Eco Town: plan for a one-hour pilot
 
-**Draft 3, 14 November 2026.** Written in answer to the implementation brief of the same date (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
+**Draft 4, 15 November 2026.** Written in answer to the implementation brief of the same date (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
 
 **Decided by the user after draft 1:**
 - This repository (`ai-lab-v3-full-day`) is where the work happens. It is a **new live build**, deployed from here to a **new address** that the user will provide.
 - The brief's section on keeping a frozen test copy beside a development copy does not apply: it assumed work in the original repository. The original site is left alone and is not part of this plan.
 - The AI Lab as it stands (the town and its six missions) is taken to be **one hour**. Nothing is cut to fit.
-- The two Google documents will be pasted by the user. **Not yet received**; A6 and the P1 items will be checked against them.
+- The first Google document (the product, safety and playtest review) was pasted on 15 Nov and is worked into this draft: see section E. The second is set aside for now at the user's request.
 - Hosting and security are **out of this plan** (removed in draft 3 at the user's request). That covers where and how the site is deployed and the admin login.
 - The lockout after ten wrong passcodes has been **removed from the game** (14 Nov 2026). Wrong guesses are no longer counted or limited.
 
-**What was inspected:** all the code in `games/ecotown/` (copy of `bakshilabs/ai-lab-v3` at `a5fd92c`). **What was not:** the two Google documents named in the brief (this session cannot open them) and the original repository.
+**What was inspected:** all the code in `games/ecotown/` (copy of `bakshilabs/ai-lab-v3` at `a5fd92c`). **What was not:** the original repository, and the detailed playtest evidence of 12 Nov that the review links to.
 
 ---
 
@@ -193,7 +193,7 @@ In the brief's order, without its first item (a frozen copy beside a development
 | 1 | **Version label.** Version stamp and release log. | `build.mjs`, `main.js` (menu line), new `docs/RELEASES.md` | As B1. | Low. | The built game shows its version, commit and date in the menu. |
 | 2 | **Fix the rules.** | new `js/game/criteria.js`; `levels.js`, `progress.js`, `challenges.js`, `report.js`, `game.js`, `sim/sim.js`, `ai/targets.js`, `content.js` | As B4, covering all eleven defects in A6. | Medium. Stricter rules could make a mission impossible; the existing recipe tests that build every mission and challenge guard against that. | New tests: walk 15 passes and 16 fails through the real rule; carbon 160.0 passes, 160.4 fails; a child's 10-minute target with a 12-minute plan is "partly met" with no star; a meeting that breaks 70 t blocks completion until fixed; two limits at once; a fix turns "not met" into "met" and the saved state agrees. All 250 present tests still pass. |
 | 3 | **Refresh safety.** | `game.js` (save points, learner-scoped key), `main.js` | Save on page hide; save mission step; version in the save. | Low. Saves made before this change must still load. | Refresh at any of the main steps of a mission returns to that step. A save made by today's build opens unchanged. |
-| 4 | **Groups and learners.** | `worker/codes.js`, `worker/store.js`, `worker/worker.js`, `worker/admin.html`, `tests/codes.test.mjs` | As B2, without the facilitator page. | Medium to high: this replaces the store's layout. The new site starts with an empty store, so there is no live data to move. | Twenty learners on one join code get twenty ids and twenty separate towns. A learner of one organisation cannot read anything of another (tested by trying). A 21st learner on a 20-seat group is refused with a clear message. |
+| 4 | **Groups and learners.** The review marks this **critical**: one device per login stopped a tester putting the game in front of his Saturday group. | `worker/codes.js`, `worker/store.js`, `worker/worker.js`, `worker/admin.html`, `tests/codes.test.mjs` | As B2, without the facilitator page. | Medium to high: this replaces the store's layout. The new site starts with an empty store, so there is no live data to move. | Twenty learners on one join code get twenty ids and twenty separate towns. A learner of one organisation cannot read anything of another (tested by trying). A 21st learner on a 20-seat group is refused with a clear message. |
 | 5 | **Server copy of progress.** | `worker/worker.js`, `worker/store.js`, `game.js` | As B3. | Medium. A bad merge could overwrite a newer town: newest-wins by save time, and the device copy is never deleted. | Storage cleared on a device, then join code and badge: the town returns. Typed text is absent from every server record (checked by reading the store). |
 | 6 | **Load test.** | new `tests/load/` | A script that plays the server's part of N learners against a test copy of the site, before any group uses it: join, load files, check in each minute, save every 30 seconds. Run at 20, 100 and 1,000. | Low. Never pointed at the original site. | A table in `docs/LOAD.md`: success rate, errors, response times, store behaviour, and cost from Cloudflare's own figures. A claim about 1,000 is made only if the run supports it. |
 
@@ -201,12 +201,14 @@ In the brief's order, without its first item (a frozen copy beside a development
 
 | # | Change | Files | Smallest version | Done when |
 |---|---|---|---|---|
-| 7 | **Next step is always plain.** | `game.js` (`nextStep`), `ui/ui.js`, `content.js`, `css/game.css` | One next-step line with a number that always means "this goal: now / needed". The next button to press pulses. Buttons that reload the page say where they go and return to the same town. Stars shown as earned. | A no-context play-through never stops for more than 20 seconds without a marked next action, on laptop and tablet. |
+| 7 | **Next step is always plain.** | `game.js` (`nextStep`), `ui/ui.js`, `content.js`, `css/game.css`, `intro.js` | One next-step line with a number that always means "this goal: now / needed". The next button to press pulses. Leaving a mission or a pathway always shows one marked way back. Buttons that reload the page say where they go and return to the same town. Stars shown as earned. A finished mission and an unfinished town are shown as two separate things ("Mission done. Town goals: 5 of 8"). Every instruction a child must follow is spoken as well as written and is one short sentence. The start screen makes the two age routes plain. No added blocks of text. | A no-context play-through never stops for more than 20 seconds without a marked next action, on laptop and tablet. With the sound on and the text ignored, a player can still tell what to do at each step. |
 | 8 | **Weak choices show.** | `game.js`, `advisor.js`, `criteria.js` | For each important choice: the consequence appears in the town (flooded homes, dark windows, a long walk shown on the street), the failed condition is named, one tap opens the revise step, and the result changes. | Each of the six missions has a tested "wrong choice → named failure → fix → met" path. |
 | 9 | **One-hour session.** | `game.js`, `main.js`, `content.js` | The lab as it stands is the hour: the town and its six missions. Added: two natural pause points and a clear finish that leads to the recap. No timers that block. A child who has not finished when time is up still gets a recap of what they did. | The pause points and the finish appear at the same places in every play-through, and can be skipped. |
-| 10 | **Facilitator cues and run sheet.** | `game/leader.html`, `LAB-GUIDE.md`, `game.js` | The leader's page rewritten as a one-hour run sheet: aim, timings, the question for each pause, common mistakes, where Florence is wrong on purpose, what a good answer sounds like, how to help without telling. In the game, two skippable "pause and talk" cards, off in self-directed use. | A facilitator who has never seen the code can run the hour from one printed page. |
+| 10 | **Facilitator cues and run sheet.** | `game/leader.html`, `LAB-GUIDE.md`, `game.js` | The leader's page rewritten as a one-hour run sheet: aim, start, middle and end with timings, the question for each pause, common mistakes, where Florence is wrong on purpose, what a good answer sounds like, how to help without telling, the places the game makes a child wait (a category that opens only after enough homes; builds that must be repeated), and a note to bring headphones. In the game, two skippable "pause and talk" cards, off in self-directed use. | A facilitator who has never seen the code can run the hour from one printed page. This is to be tried with an instructor new to the game; the review says it has not been. |
 | 11 | **Group status list.** | `worker/worker.js`, new `worker/leader.html` | One page behind the leader code: each badge with stage, minutes since last change, "needs help" (no progress for five minutes, or the same check failed three times), "a limit is missed", "finished". Refreshes each minute. No charts. | With five test learners the list matches what each screen shows within a minute, and shows nothing from another organisation. |
-| 12 | **Recap at the finish.** | `game/finale.js`, `ui/rewards.js` | "You practised" built from the learner's own record (mistakes caught, plans fixed, a missed limit put right), then key choices, consequences and the final result from the rules in B4. Available whenever the session finishes, not only at a complete town. No claims of measured learning. | Two different play-throughs produce two different, accurate recaps. |
+| 12 | **Recaps.** | `game/finale.js`, `ui/rewards.js`, `game.js` (mission reward card) | After each mission: two or three "You practised…" lines drawn from what the child did in that mission. At the finish: the same for the whole session, then key choices, consequences and the final result from the rules in B4, and two questions: "What changed your mind?" and "Where could you use this again?". Available whenever the session finishes, not only at a complete town. No claims of measured learning. | Two different play-throughs produce two different, accurate recaps. |
+| 12a | **Awkward-text test.** | new `tests/redteam.test.mjs`; `ai/brief.js`, `game/qa.js` if fixes are needed | A fixed list of things a child might type to Florence or into an instruction (rude words, personal details, upsetting or dangerous requests) is run through the question answers and the instruction reader in both age routes. Florence must give her standard "I can only answer about the town" reply, never repeat the words back, and point to a trusted adult where the text suggests a child needs one. | Every line in the list gets a safe reply. The list and results are kept in the repository. |
+| 12b | **Settings that are promised, work.** | `ui/ui.js`, `css/game.css`, `tests/playwright/a11y.mjs` | Large text, read-aloud, reduced motion and keyboard play each checked through one whole mission, and fixed where they fail. A screen-reader walk-through stays in P2. | Each setting has a recorded pass for one mission in each age route. |
 | 13 | **Full regression and load run** on the build proposed for the first group. | | | The checklist in section 23 of the brief (less its two items about a frozen test address), ticked item by item in `docs/RELEASES.md`. |
 
 ### P2: after the pilot blockers
@@ -221,4 +223,54 @@ No new look, no change to the word-tile instruction builder, no accounts or emai
 
 ## D. Still open
 
-1. **The two Google documents,** to be pasted by the user.
+1. **The detailed playtest evidence** of 12 Nov (linked from the review). The review mentions "parser issues" without saying which instructions were misread. Those cases are needed to fix and test them.
+2. **The second Google document,** set aside for now.
+
+---
+
+## E. Checked against the review document
+
+The review (parents' questions, children's motivations, safety triage, investor comparison, ComputerXplorers feedback of 13 Nov) was read against the code audit above.
+
+### E1. Where the review and the code agree
+
+| The review says | In the code | In this plan |
+|---|---|---|
+| A school-walk plan passed although it missed the child's 10-minute target. | Confirmed: defect 1 in A6. | P0 item 2 |
+| A housing plan completed although the carbon limit was missed; a town-meeting choice broke the limit after mission success. | Confirmed: defects 2 and 3. | P0 item 2 |
+| Feedback said "no problem" when a target was missed. | One line remains: "No problem shows up here. One check only tests one thing". It is true of the single check, but reads as an all-clear. | P0 item 2: the line names what was and was not checked. |
+| Mission completion is not told apart from unfinished town goals. | Confirmed: A7. | P1 item 7 |
+| Unsure what to do next, which button, how to get back. | Confirmed: A7. | P1 item 7 |
+| Cannot picture the start, middle and end of an hour. | No session shape exists in the game. | P1 items 9 and 10 |
+| Instructors cannot see where each child is. | No view of learners exists: A5. | P1 item 11 |
+| Cannot tell whether a poor choice has a real cost. | Results never go back once earned (defect 8); consequences are mostly text. | P1 item 8 |
+| One device per login blocks a real group. | Confirmed: A1. | P0 item 4 |
+| Keep the look; keep the word-tile builder. | Both untouched. | "Not proposed" |
+| Children will skip text; spoken guidance helps. | Recorded voices exist for most lines. | P1 item 7 |
+
+### E2. Safety triage: what the code can now answer
+
+The review marks several areas "untested". These are answers from reading the code. They are not a check of real network traffic, which needs the deployed site.
+
+| Area | Review status | From the code |
+|---|---|---|
+| Success and learning feedback | High | Confirmed and planned (P0 item 2). |
+| Privacy and data flows | Untested | Nothing a child types is sent anywhere. The only requests are the game's own files, the passcode at login and a once-a-minute "still here" with no content. No analytics or outside services. Details in A9. Still to do: watch the traffic on the deployed site, and write the retention and deletion rules in B3 into a privacy note. |
+| Unsafe or unsuitable AI output | Untested | Florence does not write free text. Her model only sorts a child's instruction into known choices; her words come from fixed templates and a fixed list of answers. One risk remains: some replies quote the child's own words back. Covered by P1 item 12a. |
+| Sharing, contact and user content | Untested | No comments, chat or contact exist. A shared town carries tiles, a score and one of six preset names. The Club Wall is a list on one device and is not on the server. Visiting needs a code typed or scanned in the room. There is nothing to moderate or report. |
+| Rewards, purchases and compulsive loops | Untested | No payment code exists. Stars are earned only by play and spent only on decorations. The older route's "credits" are play money inside the town. No streaks, daily rewards, timed offers or autoplay. |
+| Accessibility and frustration | Medium | Large text, read-aloud and reduced motion exist in the code; use with children is unverified. P1 item 12b checks each works; use with children who need them is outside what code can show. |
+| Age fit and child agency | Medium | The clock pauses when a menu or card is open. Fit with real children is a pilot question. |
+| Child pilot safeguarding | Untested | Not a code matter. See E3. |
+
+### E3. In the review but not in this plan
+
+These need people, documents or marketing, not changes to the game. They are listed so nothing is lost.
+
+- **Teaching materials:** curriculum map, lesson outline, vocabulary, discussion questions, assessment rubric, teacher observation sheet, reflection template.
+- **Parent-facing material:** landing page, brochure, the one-page "What your child practises", career examples, the walkthrough film.
+- **Research with children:** enjoyment, voluntary replay, age fit, understanding before and after, access needs.
+- **Before any session with children:** parent consent, child assent, a right to stop, anonymous feedback only, a safeguarding lead and an escalation route.
+- **Trial with an instructor new to the game.**
+- **A stable test version beside a development one:** set aside by the user, since this is a new build.
+- **Larger product ideas** the review itself marks as research first: a downloadable project record, an individual learner report, poster or pitch outputs, interactive careers content, new replay scenarios.
