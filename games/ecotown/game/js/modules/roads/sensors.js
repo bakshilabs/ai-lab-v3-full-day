@@ -37,7 +37,7 @@ export const answer = (q) => SENSORS.filter((s) => sees(s, q.target, q.cond) && 
 
 // the rounds, in order: each a weather, a few things in the street, one thing to find out, and what is asked of it
 export const ROUNDS = [
-  { id: 'light', cond: 'sun', ask: 'colour', target: { kind: 'light', x: 4.6, z: 26, lamp: 'red', lit: true },
+  { id: 'light', cond: 'sun', ask: 'colour', target: { kind: 'light', x: 4.4, z: 17, lamp: 'red', lit: true },
     things: [{ kind: 'car', x: -1.8, z: 30, colour: '#c8553d', mph: 0 }, { kind: 'person', x: 5.4, z: 16, colour: '#1c6fd0' }],
     q: { j: 'The traffic light ahead: is it red or green? Which sensors can tell?', s: 'Is the traffic light ahead red or green? Tick every sensor that can tell.' },
     why: { j: 'Only the camera sees colours. Radar and lidar show the light’s shape, but not which lamp is on.', s: 'Only the camera sees colour. Radar and lidar find the pole and the box, not which lamp is lit.' },

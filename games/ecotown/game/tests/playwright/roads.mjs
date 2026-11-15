@@ -123,7 +123,7 @@ await openMission(2);
 const L2 = await p.evaluate(async () => { const l = await import('./js/modules/roads/labels.js'); return [...l.EASY, ...l.HARD].map((pic) => pic.things.map((t) => [t.id, l.CASES[t.case].label])); });
 const tapThing = (id) => p.evaluate(([m, i]) => { const g = document.querySelector(`${m}[data-thing="${i}"]`); const r = g.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, [M, id]);
 for (let k = 0; k < L2.length; k++) {
-  if (k === 2) { await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary(); }   // train and test after the easy pictures
+  if (k === 2) { await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary(); }   // train and test after the easy pictures
   if (k === 2) { await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test1 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M); must('m2-firstTestMissesHardOnes', /4 of 9|4\/9/.test(checks.m2test1), checks.m2test1); await shot('m2-test1'); await layout('m2-test1'); await primary(); }
   await p.waitForSelector(M + '[data-thing]', { timeout: LONG });
   if (k === 0) { await p.click(tray('[data-act="done"]')); checks.m2miss = await hint(); must('m2-missNoLocationFirst', /Look again/.test(checks.m2miss) && !/left|right|van/.test(checks.m2miss), checks.m2miss); }

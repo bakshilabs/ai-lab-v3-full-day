@@ -30,7 +30,7 @@ export function makeKit(ctx) {
   K.measure = () => {
     placeTop(); measured = secs(); const c = canvas.getBoundingClientRect();
     const tTop = Math.max(top.getBoundingClientRect().bottom, back?.getBoundingClientRect().bottom || 0) + 8, tBot = tray.hidden ? innerHeight - 8 : tray.getBoundingClientRect().top - 8;
-    stage.style.top = `${Math.round(tTop)}px`; stage.style.height = `${Math.max(120, Math.round(tBot - tTop))}px`;
+    const room = `${Math.max(120, Math.round(tBot - tTop))}px`; stage.style.top = `${Math.round(tTop)}px`; stage.style.height = stage.dataset.fill ? room : 'auto'; stage.style.maxHeight = room;
     if (!c.width || !c.height) return; const t = tTop - c.top, b = tBot - c.top;
     K.free = b - t > 100 ? { l: 0.012, r: 0.988, t: t / c.height, b: b / c.height } : { l: 0, r: 1, t: 0, b: 1 };
   };
@@ -44,7 +44,10 @@ export function makeKit(ctx) {
   // wait for a press on a [data-act] button in the tray (or the stage)
   K.press = () => new Promise((res) => { const on = (e) => { const b = e.target.closest('[data-act]'); if (b && !b.disabled && !K.tooSoon(e)) { tray.onclick = stage.onclick = null; res(b.dataset.act); } }; tray.onclick = on; stage.onclick = on; });
   // the stage: a card between Florence and the tray, for the missions drawn in 2D. The 3D street stays behind it.
-  K.showStage = (html) => { if (html === null) { stage.hidden = true; stage.innerHTML = ''; } else { stage.hidden = false; stage.innerHTML = html; } K.measure(); };
+  // A picture to look at (.rd-view, .rd-map) fills the free space; a card is only as tall as its words, so the 3D street shows below it.
+  K.showStage = (html) => { if (html === null) { stage.hidden = true; stage.innerHTML = ''; } else { stage.hidden = false; stage.innerHTML = html; if (/class="rd-(view|map)"/.test(html)) stage.dataset.fill = '1'; else delete stage.dataset.fill; } K.measure(); };
+  // Florence's panel shows a short line while the whole text is read aloud (used where a card already shows the words)
+  K.sayShort = (shown, spoken) => { K.spoken = spoken; top.querySelector('p').textContent = shown; ctx.say(spoken); K.measure(); };
 
   // ---- the 3D set and its camera
   const set = createStreet(THREE, { reduce: K.reduce }); set.root.position.set(...ORIGIN); scene.add(set.root); K.set = set;

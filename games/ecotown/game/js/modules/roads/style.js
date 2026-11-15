@@ -143,4 +143,7 @@ ${P} .rd-mis.next { background: #fff3c9; box-shadow: inset 0 0 0 3px #b23a26, 0 
 ${P} .rd-mis[disabled] { background: #ece3d2; }
 ${P}.rd-large .rd-job, ${P}.rd-large .rd-how, ${P}.rd-large .rd-now, ${P}.rd-large .rd-did, ${P}.rd-large .rd-ask, ${P}.rd-large .rd-rules { font-size: 1.2rem; } ${P}.rd-large .rd-does, ${P}.rd-large .rd-replay, ${P}.rd-large .rd-log, ${P}.rd-large .rd-tests li small, ${P}.rd-large .rd-set > b, ${P}.rd-large .rd-table { font-size: 1.05rem; } ${P}.rd-large .rd-mis .rd-mt { font-size: 1.15rem; }
 @media (max-width: 820px) { ${P} .rd-missions { grid-template-columns: repeat(2, minmax(0, 1fr)); } ${P} .rd-set > b { flex-basis: 100%; } }
+${P} .rd-open { display: flex; gap: 16px; align-items: flex-start; }
+${P} .rd-bigico { flex: none; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 22px; background: #f3e4c6; box-shadow: inset 0 0 0 2px #b08a55; font-size: 48px; line-height: 1; }
+@media (max-width: 600px) { ${P} .rd-bigico { width: 60px; height: 60px; font-size: 34px; } }
 `;
