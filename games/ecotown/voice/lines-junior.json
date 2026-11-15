@@ -102,7 +102,8 @@
  {
   "s": "PLAN CHECKED",
   "voice": "narrator",
-  "key": "2e7fe8e6"
+  "key": "2e7fe8e6",
+  "said": 1
  },
  {
   "s": "You found the problem!",
@@ -197,7 +198,8 @@
  {
   "s": "Correct!",
   "voice": "narrator",
-  "key": "e7e96ed9"
+  "key": "e7e96ed9",
+  "said": 1
  },
  {
   "s": "Not quite.",
@@ -307,7 +309,8 @@
  {
   "s": "Correct!",
   "voice": "helper",
-  "key": "ae45f83a"
+  "key": "ae45f83a",
+  "said": 1
  },
  {
   "s": "Not quite.",
@@ -407,7 +410,8 @@
  {
   "s": "Took one word too far",
   "voice": "narrator",
-  "key": "2a9edaf6"
+  "key": "2a9edaf6",
+  "said": 1
  },
  {
   "s": "Florence planned for a normal day or a typical person, not for everyone or for the hardest day.",
@@ -417,7 +421,8 @@
  {
   "s": "Only thought of a normal day",
   "voice": "narrator",
-  "key": "376e1c34"
+  "key": "376e1c34",
+  "said": 1
  },
  {
   "s": "Florence didn’t have a fact she needed, so she couldn’t plan for it.",
@@ -522,22 +527,26 @@
  {
   "s": "Flood lens.",
   "voice": "narrator",
-  "key": "4bcc9ae6"
+  "key": "4bcc9ae6",
+  "said": 1
  },
  {
   "s": "See which land floods in winter.",
   "voice": "narrator",
-  "key": "cc40edbe"
+  "key": "cc40edbe",
+  "said": 1
  },
  {
   "s": "Families are coming!",
   "voice": "narrator",
-  "key": "98c81ad8"
+  "key": "98c81ad8",
+  "said": 1
  },
  {
   "s": "Florence will find land for 40 families.",
   "voice": "narrator",
-  "key": "8c6bbc6b"
+  "key": "8c6bbc6b",
+  "said": 1
  },
  {
   "s": "A day on your new town land",
@@ -547,7 +556,8 @@
  {
   "s": "The meadow floods every winter",
   "voice": "narrator",
-  "key": "b8943513"
+  "key": "b8943513",
+  "said": 1
  },
  {
   "s": "The old wood would be cut down",
@@ -577,7 +587,8 @@
  {
   "s": "Land chosen!",
   "voice": "narrator",
-  "key": "4f1e96b0"
+  "key": "4f1e96b0",
+  "said": 1
  },
  {
   "s": "Surveyors mark out the town with posts and flags.",
@@ -612,17 +623,20 @@
  {
   "s": "Rush-hour street view.",
   "voice": "narrator",
-  "key": "0aa2232b"
+  "key": "0aa2232b",
+  "said": 1
  },
  {
   "s": "Children need to get to the island school.",
   "voice": "narrator",
-  "key": "d4179d33"
+  "key": "d4179d33",
+  "said": 1
  },
  {
   "s": "Tell Florence how.",
   "voice": "narrator",
-  "key": "bcaf4417"
+  "key": "bcaf4417",
+  "said": 1
  },
  {
   "s": "A school morning on the new streets",
@@ -657,17 +671,20 @@
  {
   "s": "Florence guessed children take the shortest way.",
   "voice": "helper",
-  "key": "01d697b7"
+  "key": "01d697b7",
+  "said": 1
  },
  {
   "s": "Real children sometimes go a different way, so planners ask them!",
   "voice": "helper",
-  "key": "737e1fe2"
+  "key": "737e1fe2",
+  "said": 1
  },
  {
   "s": "Streets open!",
   "voice": "narrator",
-  "key": "dae7b7cb"
+  "key": "dae7b7cb",
+  "said": 1
  },
  {
   "s": "The road roller lays paths and lanes, tile by tile.",
@@ -702,22 +719,26 @@
  {
   "s": "Carbon lens.",
   "voice": "narrator",
-  "key": "f947ae57"
+  "key": "f947ae57",
+  "said": 1
  },
  {
   "s": "See how much carbon goes into building the homes.",
   "voice": "narrator",
-  "key": "3d272b78"
+  "key": "3d272b78",
+  "said": 1
  },
  {
   "s": "Florence will build the homes.",
   "voice": "narrator",
-  "key": "961e6e23"
+  "key": "961e6e23",
+  "said": 1
  },
  {
   "s": "What should they be like?",
   "voice": "narrator",
-  "key": "3f2e25ee"
+  "key": "3f2e25ee",
+  "said": 1
  },
  {
   "s": "Moving day in the new homes",
@@ -747,7 +768,8 @@
  {
   "s": "Homes built!",
   "voice": "narrator",
-  "key": "9f530643"
+  "key": "9f530643",
+  "said": 1
  },
  {
   "s": "Builders raise the homes, layer by layer.",
@@ -782,22 +804,26 @@
  {
   "s": "Nature lens.",
   "voice": "narrator",
-  "key": "9f4bccb9"
+  "key": "9f4bccb9",
+  "said": 1
  },
  {
   "s": "See where animals and bees live, and whether they stay.",
   "voice": "narrator",
-  "key": "302867c6"
+  "key": "302867c6",
+  "said": 1
  },
  {
   "s": "Everyone needs food.",
   "voice": "narrator",
-  "key": "7125203e"
+  "key": "7125203e",
+  "said": 1
  },
  {
   "s": "Tell Florence how to grow it.",
   "voice": "narrator",
-  "key": "b83d9686"
+  "key": "b83d9686",
+  "said": 1
  },
  {
   "s": "Harvest day in your town",
@@ -822,17 +848,20 @@
  {
   "s": "Florence guessed one basket of food feeds 3 families.",
   "voice": "helper",
-  "key": "797184be"
+  "key": "797184be",
+  "said": 1
  },
  {
   "s": "Real families eat different amounts!",
   "voice": "helper",
-  "key": "88e941d2"
+  "key": "88e941d2",
+  "said": 1
  },
  {
   "s": "First harvest!",
   "voice": "narrator",
-  "key": "64d54cd2"
+  "key": "64d54cd2",
+  "said": 1
  },
  {
   "s": "The tractor ploughs, sows and plants.",
@@ -877,22 +906,26 @@
  {
   "s": "Winter test.",
   "voice": "narrator",
-  "key": "a4cf6027"
+  "key": "a4cf6027",
+  "said": 1
  },
  {
   "s": "Test the town on the coldest, stillest winter night.",
   "voice": "narrator",
-  "key": "578026ce"
+  "key": "578026ce",
+  "said": 1
  },
  {
   "s": "Homes need power on the darkest winter night.",
   "voice": "narrator",
-  "key": "618cb61e"
+  "key": "618cb61e",
+  "said": 1
  },
  {
   "s": "Rain needs somewhere to go, and rubbish too.",
   "voice": "narrator",
-  "key": "6e53b1bb"
+  "key": "6e53b1bb",
+  "said": 1
  },
  {
   "s": "A snowy winter day in your town",
@@ -902,7 +935,8 @@
  {
   "s": "Still winter night: blackout",
   "voice": "narrator",
-  "key": "74da2c56"
+  "key": "74da2c56",
+  "said": 1
  },
  {
   "s": "The lights stay on!",
@@ -922,7 +956,8 @@
  {
   "s": "Lights on!",
   "voice": "narrator",
-  "key": "da04ea2d"
+  "key": "da04ea2d",
+  "said": 1
  },
  {
   "s": "Engineers raise the turbine and fit the panels.",
@@ -957,22 +992,26 @@
  {
   "s": "Walking-time lens.",
   "voice": "narrator",
-  "key": "8082ed75"
+  "key": "8082ed75",
+  "said": 1
  },
  {
   "s": "See how many minutes each home is from school.",
   "voice": "narrator",
-  "key": "da84792f"
+  "key": "da84792f",
+  "said": 1
  },
  {
   "s": "The little island school is full.",
   "voice": "narrator",
-  "key": "188fe423"
+  "key": "188fe423",
+  "said": 1
  },
  {
   "s": "Where should the new school go?",
   "voice": "narrator",
-  "key": "4372097a"
+  "key": "4372097a",
+  "said": 1
  },
  {
   "s": "Opening day at the new school",
@@ -992,17 +1031,20 @@
  {
   "s": "Florence guessed every child walks at the same speed.",
   "voice": "helper",
-  "key": "f2637def"
+  "key": "f2637def",
+  "said": 1
  },
  {
   "s": "Little ones and wheelchair users may take longer!",
   "voice": "helper",
-  "key": "81214ed1"
+  "key": "81214ed1",
+  "said": 1
  },
  {
   "s": "School planned!",
   "voice": "narrator",
-  "key": "2747182d"
+  "key": "2747182d",
+  "said": 1
  },
  {
   "s": "The new school is built, step by step.",
@@ -1042,17 +1084,23 @@
  {
   "s": "Hi!",
   "voice": "helper",
-  "key": "4420fc4b"
+  "key": "4420fc4b",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Start by marking town land.",
   "voice": "helper",
-  "key": "daf1e56a"
+  "key": "daf1e56a",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Pick 🗺 Land, then tap tiles on dry ground.",
   "voice": "helper",
-  "key": "678608fc"
+  "key": "678608fc",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Your town is cutting into the old wood, where the deer live.",
@@ -1067,17 +1115,20 @@
  {
   "s": "Homes are unlocked!",
   "voice": "helper",
-  "key": "70bd77a3"
+  "key": "70bd77a3",
+  "said": 1
  },
  {
   "s": "Families are waiting.",
   "voice": "helper",
-  "key": "6120bcf8"
+  "key": "6120bcf8",
+  "said": 1
  },
  {
   "s": "Try 🏡 Homes on your town land.",
   "voice": "helper",
-  "key": "3626445c"
+  "key": "3626445c",
+  "said": 1
  },
  {
   "s": "Children walking to school have to cross a busy car road.",
@@ -1117,12 +1168,14 @@
  {
   "s": "On a still winter night, the lights would go out.",
   "voice": "helper",
-  "key": "1e6ad2c7"
+  "key": "1e6ad2c7",
+  "said": 1
  },
  {
   "s": "Add a battery store or a wind turbine.",
   "voice": "helper",
-  "key": "413430bc"
+  "key": "413430bc",
+  "said": 1
  },
  {
   "s": "When it rains hard, where will the water go?",
@@ -1147,42 +1200,50 @@
  {
   "s": "Homes unlocked!",
   "voice": "helper",
-  "key": "e6326439"
+  "key": "e6326439",
+  "said": 1
  },
  {
   "s": "40 families are coming.",
   "voice": "helper",
-  "key": "8bde9aec"
+  "key": "8bde9aec",
+  "said": 1
  },
  {
   "s": "Build homes on your town land.",
   "voice": "helper",
-  "key": "c3fce61a"
+  "key": "c3fce61a",
+  "said": 1
  },
  {
   "s": "A new AI Lab mission is ready.",
   "voice": "helper",
-  "key": "5e36ac00"
+  "key": "5e36ac00",
+  "said": 1
  },
  {
   "s": "Food unlocked!",
   "voice": "helper",
-  "key": "0948408b"
+  "key": "0948408b",
+  "said": 1
  },
  {
   "s": "Farms, orchards and beehives can feed the families.",
   "voice": "helper",
-  "key": "3d6a82cf"
+  "key": "3d6a82cf",
+  "said": 1
  },
  {
   "s": "Power and water unlocked!",
   "voice": "helper",
-  "key": "f7534fda"
+  "key": "f7534fda",
+  "said": 1
  },
  {
   "s": "Keep the lights on, even on a cold, still night.",
   "voice": "helper",
-  "key": "0a30bfb5"
+  "key": "0a30bfb5",
+  "said": 1
  },
  {
   "s": "Town heart unlocked!",
@@ -1312,12 +1373,14 @@
  {
   "s": "Built!",
   "voice": "narrator",
-  "key": "5c41ca2f"
+  "key": "5c41ca2f",
+  "said": 1
  },
  {
   "s": "Now see it from the street.",
   "voice": "narrator",
-  "key": "2aed9684"
+  "key": "2aed9684",
+  "said": 1
  },
  {
   "s": "Complete.",
@@ -1367,7 +1430,8 @@
  {
   "s": "Everyone has enough food now!",
   "voice": "helper",
-  "key": "7bff9bad"
+  "key": "7bff9bad",
+  "said": 1
  },
  {
   "s": "The wildlife has room again.",
@@ -1377,7 +1441,8 @@
  {
   "s": "The lights will stay on all winter now.",
   "voice": "helper",
-  "key": "18425021"
+  "key": "18425021",
+  "said": 1
  },
  {
   "s": "The rain has somewhere to go now.",
@@ -1402,22 +1467,28 @@
  {
   "s": "More families are coming.",
   "voice": "helper",
-  "key": "eed02ca3"
+  "key": "eed02ca3",
+  "said": 1
  },
  {
   "s": "Try a Timber terrace on town land.",
   "voice": "helper",
-  "key": "12f125aa"
+  "key": "12f125aa",
+  "said": 1
  },
  {
   "s": "Families need food.",
   "voice": "helper",
-  "key": "6881f53f"
+  "key": "6881f53f",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Try a Mixed farm or an Orchard.",
   "voice": "helper",
-  "key": "a5b74197"
+  "key": "a5b74197",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Nature needs room.",
@@ -1442,7 +1513,8 @@
  {
   "s": "Give people places to meet: a Market square or a Community hall.",
   "voice": "helper",
-  "key": "45334fb9"
+  "key": "45334fb9",
+  "said": 1
  },
  {
   "s": "Cut carbon: swap concrete flats for timber or straw homes.",
@@ -1457,42 +1529,50 @@
  {
   "s": "Some homes are too far from the school.",
   "voice": "helper",
-  "key": "ae675c4b"
+  "key": "ae675c4b",
+  "said": 1
  },
  {
   "s": "A town has one school: build it again nearer those homes and it moves there, or add paths.",
   "voice": "helper",
-  "key": "b5c32b39"
+  "key": "b5c32b39",
+  "said": 1
  },
  {
   "s": "You can catch an AI’s mistakes now.",
   "voice": "narrator",
-  "key": "304ea95a"
+  "key": "304ea95a",
+  "said": 1
  },
  {
   "s": "Finish the sentence.",
   "voice": "narrator",
-  "key": "086f9e81"
+  "key": "086f9e81",
+  "said": 1
  },
  {
   "s": "Tap the ideas you will use, or write your own.",
   "voice": "narrator",
-  "key": "a967f0f1"
+  "key": "a967f0f1",
+  "said": 1
  },
  {
   "s": "Use this rule with any AI: at school, at home, anywhere.",
   "voice": "narrator",
-  "key": "4f5a073b"
+  "key": "4f5a073b",
+  "said": 1
  },
  {
   "s": "It is saved in your town report.",
   "voice": "narrator",
-  "key": "3cd14256"
+  "key": "3cd14256",
+  "said": 1
  },
  {
   "s": "Your town is not finished yet.",
   "voice": "narrator",
-  "key": "d14f60d0"
+  "key": "d14f60d0",
+  "said": 1
  },
  {
   "s": "Next:",
@@ -1502,12 +1582,14 @@
  {
   "s": "Florence’s plan keeps this promise on the practice island, but your own town doesn’t yet: it has grown differently.",
   "voice": "narrator",
-  "key": "de691996"
+  "key": "de691996",
+  "said": 1
  },
  {
   "s": "Tap 🌼 to see what your town still needs.",
   "voice": "narrator",
-  "key": "bad138e1"
+  "key": "bad138e1",
+  "said": 1
  },
  {
   "s": "“Cars only” = car roads to every home and a drop-off at the school gate.",
@@ -1692,12 +1774,14 @@
  {
   "s": "Goal done: homes for 40 families!",
   "voice": "narrator",
-  "key": "222e9a7d"
+  "key": "222e9a7d",
+  "said": 1
  },
  {
   "s": "Goal done: enough food for everyone!",
   "voice": "narrator",
-  "key": "2056445a"
+  "key": "2056445a",
+  "said": 1
  },
  {
   "s": "Goal done: plenty of room for nature!",
@@ -1707,17 +1791,21 @@
  {
   "s": "Goal done: a healthy town!",
   "voice": "narrator",
-  "key": "43a61b40"
+  "key": "43a61b40",
+  "said": 1
  },
  {
   "s": "Goal done: lights on all winter!",
   "voice": "narrator",
-  "key": "35ea0c14"
+  "key": "35ea0c14",
+  "said": 1
  },
  {
   "s": "Goal done: lots of places to meet!",
   "voice": "narrator",
-  "key": "8998fa2f"
+  "key": "8998fa2f",
+  "said": 1,
+  "mod": 1
  },
  {
   "s": "Goal done: carbon under the limit!",
@@ -1927,17 +2015,20 @@
  {
   "s": "Welcome to my classroom!",
   "voice": "helper",
-  "key": "c57666da"
+  "key": "c57666da",
+  "said": 1
  },
  {
   "s": "Ask me anything about building a green town, and I’ll show you on the big screen.",
   "voice": "helper",
-  "key": "3b8da3c6"
+  "key": "3b8da3c6",
+  "said": 1
  },
  {
   "s": "Or pick a mission to test my plans.",
   "voice": "helper",
-  "key": "900d9959"
+  "key": "900d9959",
+  "said": 1
  },
  {
   "s": "Check it with a lens",
@@ -2122,17 +2213,20 @@
  {
   "s": "I learn from patterns, not from looking at the real island.",
   "voice": "helper",
-  "key": "f147eba6"
+  "key": "f147eba6",
+  "said": 1
  },
  {
   "s": "So I can sound very sure and still be wrong!",
   "voice": "helper",
-  "key": "87f33b36"
+  "key": "87f33b36",
+  "said": 1
  },
  {
   "s": "That’s why you check my plans with a lens before you build.",
   "voice": "helper",
-  "key": "23db05ba"
+  "key": "23db05ba",
+  "said": 1
  },
  {
   "s": "Pick a lens: it shows what my plan would really do, like flooding or carbon.",
@@ -2207,12 +2301,14 @@
  {
   "s": "Bees carry pollen from flower to flower, so orchards and allotments grow more food.",
   "voice": "helper",
-  "key": "294e5434"
+  "key": "294e5434",
+  "said": 1
  },
  {
   "s": "Beehives and hedges help them.",
   "voice": "helper",
-  "key": "31c6983c"
+  "key": "31c6983c",
+  "said": 1
  },
  {
   "s": "Animals need wild places to live.",
@@ -2637,12 +2733,14 @@
  {
   "s": "“Best” = the flattest land, easiest to build on, next to water.",
   "voice": "helper",
-  "key": "4f860b1e"
+  "key": "4f860b1e",
+  "said": 1
  },
  {
   "s": "Florence turned “best” into “flattest” and forgot about floods and wildlife.",
   "voice": "helper",
-  "key": "730cc9c3"
+  "key": "730cc9c3",
+  "said": 1
  },
  {
   "s": "Flat land.",
@@ -2652,17 +2750,20 @@
  {
   "s": "Sunny, south-facing land.",
   "voice": "helper",
-  "key": "66b5a3dd"
+  "key": "66b5a3dd",
+  "said": 1
  },
  {
   "s": "Land that stays dry in winter.",
   "voice": "helper",
-  "key": "851404c6"
+  "key": "851404c6",
+  "said": 1
  },
  {
   "s": "Keep the meadow wild.",
   "voice": "helper",
-  "key": "6ba7b750"
+  "key": "6ba7b750",
+  "said": 1
  },
  {
   "s": "Keep the wood wild.",
@@ -2702,12 +2803,14 @@
  {
   "s": "Safe footpaths and crossings.",
   "voice": "helper",
-  "key": "bea84e98"
+  "key": "bea84e98",
+  "said": 1
  },
  {
   "s": "Cycle lanes.",
   "voice": "helper",
-  "key": "27ca37ba"
+  "key": "27ca37ba",
+  "said": 1
  },
  {
   "s": "A tram stop.",
@@ -2717,7 +2820,8 @@
  {
   "s": "Cars park at the edge of town.",
   "voice": "helper",
-  "key": "75bb2dc6"
+  "key": "75bb2dc6",
+  "said": 1
  },
  {
   "s": "No cars in town.",
@@ -2767,12 +2871,14 @@
  {
   "s": "“Strong” = concrete and steel.",
   "voice": "helper",
-  "key": "07668524"
+  "key": "07668524",
+  "said": 1
  },
  {
   "s": "Florence chased “strong” and chose concrete, forgetting carbon and warmth.",
   "voice": "helper",
-  "key": "1e62eb5e"
+  "key": "1e62eb5e",
+  "said": 1
  },
  {
   "s": "Timber terrace, Straw-bale cottages.",
@@ -2817,7 +2923,8 @@
  {
   "s": "Straw-bale cottages, Timber terrace.",
   "voice": "helper",
-  "key": "85e2c510"
+  "key": "85e2c510",
+  "said": 1
  },
  {
   "s": "4 Timber terraces instead, to house all 40 families.",
@@ -2937,12 +3044,14 @@
  {
   "s": "Keep the hedges.",
   "voice": "helper",
-  "key": "007cfb61"
+  "key": "007cfb61",
+  "said": 1
  },
  {
   "s": "Beehives and flowers for bees.",
   "voice": "helper",
-  "key": "1d1b8d8f"
+  "key": "1d1b8d8f",
+  "said": 1
  },
  {
   "s": "Leave room for wildlife.",
@@ -2962,7 +3071,8 @@
  {
   "s": "Enough food for 42 families (14 baskets).",
   "voice": "helper",
-  "key": "86e10049"
+  "key": "86e10049",
+  "said": 1
  },
  {
   "s": "Florence didn’t know the bees and deer live in the hedges.",
@@ -2972,17 +3082,20 @@
  {
   "s": "Enough clean power on an average day: solar roofs on every home.",
   "voice": "helper",
-  "key": "ba3772af"
+  "key": "ba3772af",
+  "said": 1
  },
  {
   "s": "Florence planned for an average sunny day, not for a still, dark winter night.",
   "voice": "helper",
-  "key": "9027e8f5"
+  "key": "9027e8f5",
+  "said": 1
  },
  {
   "s": "Enough power for a still winter night.",
   "voice": "helper",
-  "key": "9dc82f47"
+  "key": "9dc82f47",
+  "said": 1
  },
  {
   "s": "3 wind turbines.",
@@ -2992,22 +3105,26 @@
  {
   "s": "3 batteries to store energy for the night.",
   "voice": "helper",
-  "key": "3a33605f"
+  "key": "3a33605f",
+  "said": 1
  },
  {
   "s": "Solar roofs, with the sunshine stored in batteries.",
   "voice": "helper",
-  "key": "c35338fc"
+  "key": "c35338fc",
+  "said": 1
  },
  {
   "s": "1 wind turbine.",
   "voice": "helper",
-  "key": "2d8ba48b"
+  "key": "2d8ba48b",
+  "said": 1
  },
  {
   "s": "Rain gardens and a reed bed.",
   "voice": "helper",
-  "key": "456ffa7a"
+  "key": "456ffa7a",
+  "said": 1
  },
  {
   "s": "A repair café.",
@@ -3017,7 +3134,8 @@
  {
   "s": "A compost hub.",
   "voice": "helper",
-  "key": "78d85600"
+  "key": "78d85600",
+  "said": 1
  },
  {
   "s": "“The middle” = the centre of the island.",
@@ -3032,12 +3150,14 @@
  {
   "s": "School within a 15-minute walk of every home.",
   "voice": "helper",
-  "key": "8ff855fa"
+  "key": "8ff855fa",
+  "said": 1
  },
  {
   "s": "Footpaths so every home is within 15 minutes.",
   "voice": "helper",
-  "key": "7772c419"
+  "key": "7772c419",
+  "said": 1
  },
  {
   "s": "School next to the homes.",
@@ -3072,142 +3192,170 @@
  {
   "s": "🏡 Homes: unlocked!",
   "voice": "narrator",
-  "key": "5990a6bb"
+  "key": "5990a6bb",
+  "said": 1
  },
  {
   "s": "92 percent sure.",
   "voice": "helper",
-  "key": "a37acb14"
+  "key": "a37acb14",
+  "said": 1
  },
  {
   "s": "90 percent sure.",
   "voice": "helper",
-  "key": "86fe8b0a"
+  "key": "86fe8b0a",
+  "said": 1
  },
  {
   "s": "3 stars.",
   "voice": "narrator",
-  "key": "17b84dfa"
+  "key": "17b84dfa",
+  "said": 1
  },
  {
   "s": "Carbon cloud: 3.0× over the homes’ limit",
   "voice": "narrator",
-  "key": "6f53af27"
+  "key": "6f53af27",
+  "said": 1
  },
  {
   "s": "89 percent sure.",
   "voice": "helper",
-  "key": "b7086450"
+  "key": "b7086450",
+  "said": 1
  },
  {
   "s": "Food: unlocked!",
   "voice": "narrator",
-  "key": "61f3616a"
+  "key": "61f3616a",
+  "said": 1
  },
  {
   "s": "88 percent sure.",
   "voice": "helper",
-  "key": "219ad03b"
+  "key": "219ad03b",
+  "said": 1
  },
  {
   "s": "Nature lens: Deer, bees, otters, birds and frogs all stay.",
   "voice": "narrator",
-  "key": "daa6d843"
+  "key": "daa6d843",
+  "said": 1
  },
  {
   "s": "The families need more food: 8 of 14 baskets.",
   "voice": "helper",
-  "key": "e28cbe6a"
+  "key": "e28cbe6a",
+  "said": 1
  },
  {
   "s": "Build a mixed farm or orchard.",
   "voice": "helper",
-  "key": "0a60b09f"
+  "key": "0a60b09f",
+  "said": 1
  },
  {
   "s": "Power · Town heart: unlocked!",
   "voice": "narrator",
-  "key": "5dd463ea"
+  "key": "5dd463ea",
+  "said": 1
  },
  {
   "s": "75 percent sure.",
   "voice": "helper",
-  "key": "c64c776b"
+  "key": "c64c776b",
+  "said": 1
  },
  {
   "s": "Residents want more car parks.",
   "voice": "helper",
-  "key": "b042529a"
+  "key": "b042529a",
+  "said": 1
  },
  {
   "s": "I asked 10 people at the car park.",
   "voice": "helper",
-  "key": "2e027f64"
+  "key": "2e027f64",
+  "said": 1
  },
  {
   "s": "9 of them drive, so I’m very sure!",
   "voice": "helper",
-  "key": "ecb03f52"
+  "key": "ecb03f52",
+  "said": 1
  },
  {
   "s": "Most residents want safe paths and cycle lanes.",
   "voice": "helper",
-  "key": "fe53f940"
+  "key": "fe53f940",
+  "said": 1
  },
  {
   "s": "At the school gate, 9 of 10 walk or cycle.",
   "voice": "helper",
-  "key": "266f1613"
+  "key": "266f1613",
+  "said": 1
  },
  {
   "s": "I was 90 percent sure before because I only asked drivers.",
   "voice": "helper",
-  "key": "02f77ca3"
+  "key": "02f77ca3",
+  "said": 1
  },
  {
   "s": "Asking different people changed my answer!",
   "voice": "helper",
-  "key": "99d29013"
+  "key": "99d29013",
+  "said": 1
  },
  {
   "s": "Not yet: Every home within 15 minutes’ walk of school.",
   "voice": "narrator",
-  "key": "cf35140e"
+  "key": "cf35140e",
+  "said": 1
  },
  {
   "s": "Kept: Town carbon under the 160 t limit.",
   "voice": "narrator",
-  "key": "c63bf58a"
+  "key": "c63bf58a",
+  "said": 1
  },
  {
   "s": "Kept: Lights on through a still winter night.",
   "voice": "narrator",
-  "key": "c8798677"
+  "key": "c8798677",
+  "said": 1
  },
  {
   "s": "Before I trust an AI plan, I check it with a lens first, test the worst day, not a normal day and ask a friend to check it.",
   "voice": "narrator",
-  "key": "8b2a7a99"
+  "key": "8b2a7a99",
+  "said": 1
  },
  {
   "s": "Next: every home within 15 minutes of school (now 24)",
   "voice": "narrator",
-  "key": "7a6816d5"
+  "key": "7a6816d5",
+  "said": 1
  },
  {
   "s": "The farthest home is a 24-minute walk from school.",
   "voice": "helper",
-  "key": "d84bd593"
+  "key": "d84bd593",
+  "said": 1
  },
  {
   "s": "Move the school closer or add paths.",
   "voice": "helper",
-  "key": "1b985b83"
+  "key": "1b985b83",
+  "said": 1
  },
  {
   "s": "Pegging out the town",
   "voice": "narrator",
-  "key": "fbf99388"
+  "key": "fbf99388",
+  "said": 1
  },
  {
   "s": "Start with site selection: mark town land (🗺 Land), then connect it with paths.",
@@ -4478,5 +4626,6675 @@
   "s": "Tap 🔍 and pick a lens to check this town.",
   "voice": "helper",
   "key": "9df86a2c"
+ },
+ {
+  "s": "This check found nothing wrong.",
+  "voice": "narrator",
+  "key": "93163cc6",
+  "said": 1
+ },
+ {
+  "s": "It only tests one thing, so other problems could still be there: check another way, or use the plan if you are happy.",
+  "voice": "narrator",
+  "key": "76f91bce",
+  "said": 1
+ },
+ {
+  "s": "The town’s rule is kept here, but the plan misses a target you wrote yourself.",
+  "voice": "narrator",
+  "key": "64e459bf"
+ },
+ {
+  "s": "Check another way, or use the plan and see.",
+  "voice": "narrator",
+  "key": "2e3b619c"
+ },
+ {
+  "s": "Partly right: the town’s rules are kept, but not your own target.",
+  "voice": "narrator",
+  "key": "6e131364"
+ },
+ {
+  "s": "PARTLY RIGHT",
+  "voice": "narrator",
+  "key": "0b8a5024"
+ },
+ {
+  "s": "The plan misses your own target",
+  "voice": "narrator",
+  "key": "d59b2426"
+ },
+ {
+  "s": "You can write a clearer instruction, or keep the plan as it is.",
+  "voice": "narrator",
+  "key": "d5ec85a8"
+ },
+ {
+  "s": "Keep this plan",
+  "voice": "narrator",
+  "key": "6d41d80a"
+ },
+ {
+  "s": "Write it again",
+  "voice": "narrator",
+  "key": "9c7c9af8"
+ },
+ {
+  "s": "0 stars.",
+  "voice": "narrator",
+  "key": "99fa4a99"
+ },
+ {
+  "s": "1 stars.",
+  "voice": "narrator",
+  "key": "ac5feeb0"
+ },
+ {
+  "s": "2 stars.",
+  "voice": "narrator",
+  "key": "36d84253"
+ },
+ {
+  "s": "Mission finished: your own target was missed 0 stars.",
+  "voice": "narrator",
+  "key": "dc4ec8b9"
+ },
+ {
+  "s": "Mission finished: your own target was missed 1 stars.",
+  "voice": "narrator",
+  "key": "9ae88750"
+ },
+ {
+  "s": "Mission finished: your own target was missed 2 stars.",
+  "voice": "narrator",
+  "key": "9ee4b973"
+ },
+ {
+  "s": "Mission finished: your own target was missed 3 stars.",
+  "voice": "narrator",
+  "key": "da0d959a"
+ },
+ {
+  "s": "Mission finished: one rule is broken 0 stars.",
+  "voice": "narrator",
+  "key": "fe4ad172"
+ },
+ {
+  "s": "Mission finished: one rule is broken 1 stars.",
+  "voice": "narrator",
+  "key": "52d619eb"
+ },
+ {
+  "s": "Mission finished: one rule is broken 2 stars.",
+  "voice": "narrator",
+  "key": "bea68088"
+ },
+ {
+  "s": "Mission finished: one rule is broken 3 stars.",
+  "voice": "narrator",
+  "key": "3b7c5531"
+ },
+ {
+  "s": "Pause and talk.",
+  "voice": "narrator",
+  "key": "d0b705af"
+ },
+ {
+  "s": "Florence was very sure.",
+  "voice": "narrator",
+  "key": "5368e4f6"
+ },
+ {
+  "s": "Why did her plan still go wrong?",
+  "voice": "narrator",
+  "key": "8816dd61"
+ },
+ {
+  "s": "Which check changed your mind about a plan?",
+  "voice": "narrator",
+  "key": "cedc36f6"
+ },
+ {
+  "s": "What changed your mind today?",
+  "voice": "narrator",
+  "key": "904ca4fb"
+ },
+ {
+  "s": "Where else could you check before you trust a computer helper?",
+  "voice": "narrator",
+  "key": "04a2d7b5"
+ },
+ {
+  "s": "That sounds important, and I am only a helper in a game, so I can’t help with it.",
+  "voice": "helper",
+  "key": "91b0c13d"
+ },
+ {
+  "s": "Please tell a grown-up you trust, like your club leader, a teacher or someone at home.",
+  "voice": "helper",
+  "key": "592d646a"
+ },
+ {
+  "s": "You can also call Childline free on 0800 1111.",
+  "voice": "helper",
+  "key": "16f07538"
+ },
+ {
+  "s": "Please don’t tell me your name, where you live, your school or a phone number.",
+  "voice": "helper",
+  "key": "48b3a6a4"
+ },
+ {
+  "s": "I don’t need them.",
+  "voice": "helper",
+  "key": "3b81b8f0"
+ },
+ {
+  "s": "What you type stays on this device, but it is a good habit to keep those things private.",
+  "voice": "helper",
+  "key": "6fd60cda"
+ },
+ {
+  "s": "I can’t help with that.",
+  "voice": "helper",
+  "key": "52e1d55f"
+ },
+ {
+  "s": "If something is worrying you, talk to a grown-up you trust.",
+  "voice": "helper",
+  "key": "41b1514c"
+ },
+ {
+  "s": "I can answer questions about our town.",
+  "voice": "helper",
+  "key": "a2220ed2"
+ },
+ {
+  "s": "Welcome to the AI Lab.",
+  "voice": "narrator",
+  "key": "beb38a93",
+  "said": 1
+ },
+ {
+  "s": "Today you will plan a town, and then work with the machines of its future.",
+  "voice": "narrator",
+  "key": "b82c2ae4",
+  "said": 1
+ },
+ {
+  "s": "This is Florence, your AI helper.",
+  "voice": "narrator",
+  "key": "5645e6b5",
+  "said": 1
+ },
+ {
+  "s": "She is clever and she works fast.",
+  "voice": "narrator",
+  "key": "0f66a5d8",
+  "said": 1
+ },
+ {
+  "s": "She is not always right.",
+  "voice": "narrator",
+  "key": "0c65bdc0",
+  "said": 1
+ },
+ {
+  "s": "First, build your own town.",
+  "voice": "narrator",
+  "key": "7a554e63",
+  "said": 1
+ },
+ {
+  "s": "Florence makes plans.",
+  "voice": "narrator",
+  "key": "2575c3eb",
+  "said": 1
+ },
+ {
+  "s": "You check them with evidence before you trust them.",
+  "voice": "narrator",
+  "key": "6a4aa488",
+  "said": 1
+ },
+ {
+  "s": "Next, fly a delivery drone across your town.",
+  "voice": "narrator",
+  "key": "d99f321b",
+  "said": 1
+ },
+ {
+  "s": "Then write the steps so it can fly the route itself.",
+  "voice": "narrator",
+  "key": "6e773561",
+  "said": 1
+ },
+ {
+  "s": "Then train a robot.",
+  "voice": "narrator",
+  "key": "f254124c",
+  "said": 1
+ },
+ {
+  "s": "Show it examples, test it, and show it what it has not seen yet.",
+  "voice": "narrator",
+  "key": "83d8933a",
+  "said": 1
+ },
+ {
+  "s": "Last, redesign a street for self-driving cars, and decide what the old car park becomes.",
+  "voice": "narrator",
+  "key": "e5a0bc3a",
+  "said": 1
+ },
+ {
+  "s": "At the end you take home a page that shows what you made.",
+  "voice": "narrator",
+  "key": "28fed2f5",
+  "said": 1
+ },
+ {
+  "s": "Ready?",
+  "voice": "narrator",
+  "key": "ecf3a614",
+  "said": 1
+ },
+ {
+  "s": "Let us see how to get around.",
+  "voice": "narrator",
+  "key": "e5891602",
+  "said": 1
+ },
+ {
+  "s": "Four parts, in this order.",
+  "voice": "narrator",
+  "key": "832984ff",
+  "said": 1
+ },
+ {
+  "s": "Each one tells you what to do as you go.",
+  "voice": "narrator",
+  "key": "44e41881",
+  "said": 1
+ },
+ {
+  "s": "A shared car stops here to pick people up.",
+  "voice": "helper",
+  "key": "1086a54e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A car can only stop at a marked point.",
+  "voice": "helper",
+  "key": "0f0ad502",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "3 shared cars wait here, close to the homes.",
+  "voice": "helper",
+  "key": "830d9e5f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Cars with no bay wait far outside the street.",
+  "voice": "helper",
+  "key": "2fa51dde",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A marked place to cross, on foot or by bike.",
+  "voice": "helper",
+  "key": "cc456a7a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The cars always stop here for people.",
+  "voice": "helper",
+  "key": "715b2718",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A marked place for bikes to cross.",
+  "voice": "helper",
+  "key": "9f714589",
+  "mod": 1
+ },
+ {
+  "s": "Or choose a place here:",
+  "voice": "helper",
+  "key": "0ea7b463",
+  "mod": 1
+ },
+ {
+  "s": "Press a number to see where it happened.",
+  "voice": "helper",
+  "key": "1f1ced4d",
+  "mod": 1
+ },
+ {
+  "s": "Green flag: safe to cross.",
+  "voice": "helper",
+  "key": "4f1295e6",
+  "mod": 1
+ },
+ {
+  "s": "Orange flag: no marked crossing.",
+  "voice": "helper",
+  "key": "a398d05e",
+  "mod": 1
+ },
+ {
+  "s": "A car can stop there now.",
+  "voice": "helper",
+  "key": "6723c1c2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Add waiting bays and crossings where you think they help.",
+  "voice": "helper",
+  "key": "ab489d97",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then press Run the morning.",
+  "voice": "helper",
+  "key": "18ddba4d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Add waiting bays and crossings where they help, then run the morning.",
+  "voice": "helper",
+  "key": "9612fbd1",
+  "mod": 1
+ },
+ {
+  "s": "The street is clear.",
+  "voice": "helper",
+  "key": "86def224",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Start with a drop-off point.",
+  "voice": "helper",
+  "key": "d6d39deb",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Choose a piece, then tap a place on the street.",
+  "voice": "helper",
+  "key": "2fa1432a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tap a piece again to take it away.",
+  "voice": "helper",
+  "key": "70cdc566",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tap a piece again to remove it.",
+  "voice": "helper",
+  "key": "2712463f",
+  "mod": 1
+ },
+ {
+  "s": "Then run the morning.",
+  "voice": "helper",
+  "key": "6c50f8b0",
+  "mod": 1
+ },
+ {
+  "s": "A car can only stop at a marked drop-off point.",
+  "voice": "helper",
+  "key": "4dc30775",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tap the street outside the homes to put one in.",
+  "voice": "helper",
+  "key": "422ed665",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A car only stops at a marked drop-off point.",
+  "voice": "helper",
+  "key": "591344aa",
+  "mod": 1
+ },
+ {
+  "s": "Tap the street outside the homes to place one.",
+  "voice": "helper",
+  "key": "d9467022",
+  "mod": 1
+ },
+ {
+  "s": "Fewer cars each do more trips, but people may wait longer.",
+  "voice": "helper",
+  "key": "b698113b",
+  "mod": 1
+ },
+ {
+  "s": "This is Maple Street today.",
+  "voice": "helper",
+  "key": "81d3f180",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Parked cars fill it all day.",
+  "voice": "helper",
+  "key": "86653640",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Soon the town will share self-driving cars.",
+  "voice": "helper",
+  "key": "eaa13f13",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "They drive well, and they follow the street’s markings exactly.",
+  "voice": "helper",
+  "key": "59658893",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "So the street needs the right markings.",
+  "voice": "helper",
+  "key": "13c5e097",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That is your job.",
+  "voice": "helper",
+  "key": "37421c24",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The town is moving to shared self-driving cars.",
+  "voice": "helper",
+  "key": "f431cc9d",
+  "mod": 1
+ },
+ {
+  "s": "They drive well and keep exactly to the street’s markings.",
+  "voice": "helper",
+  "key": "3509123a",
+  "mod": 1
+ },
+ {
+  "s": "Designing those markings is your job.",
+  "voice": "helper",
+  "key": "e0ed1340",
+  "mod": 1
+ },
+ {
+  "s": "They charge on one plot at night.",
+  "voice": "helper",
+  "key": "1145bb54",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Plots A, B and C are free.",
+  "voice": "helper",
+  "key": "942366c2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Each is about the size of a tennis court.",
+  "voice": "helper",
+  "key": "6b08f29f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Choose what each one becomes.",
+  "voice": "helper",
+  "key": "942c895f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Plots A, B and C, 250 m² each, are free.",
+  "voice": "helper",
+  "key": "059c9d0f",
+  "mod": 1
+ },
+ {
+  "s": "Decide what each becomes.",
+  "voice": "helper",
+  "key": "232141e8",
+  "mod": 1
+ },
+ {
+  "s": "Choose a use for each plot.",
+  "voice": "helper",
+  "key": "487a5141",
+  "mod": 1
+ },
+ {
+  "s": "The cars have nowhere to stop yet.",
+  "voice": "helper",
+  "key": "e3217f74",
+  "mod": 1
+ },
+ {
+  "s": "Put in a drop-off point first.",
+  "voice": "helper",
+  "key": "d59b0ff1",
+  "mod": 1
+ },
+ {
+  "s": "The cars cannot stop anywhere yet.",
+  "voice": "helper",
+  "key": "4a4c3bd7",
+  "mod": 1
+ },
+ {
+  "s": "Place a drop-off point first.",
+  "voice": "helper",
+  "key": "1ef333ac",
+  "mod": 1
+ },
+ {
+  "s": "Will your street still work?",
+  "voice": "helper",
+  "key": "b3aaab39",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Run the morning with them and see.",
+  "voice": "helper",
+  "key": "9d1cfd83",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Run the morning with them to test the street.",
+  "voice": "helper",
+  "key": "4bd6d9b2",
+  "mod": 1
+ },
+ {
+  "s": "That is the side road.",
+  "voice": "helper",
+  "key": "53a36d7c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Nothing can go there.",
+  "voice": "helper",
+  "key": "c71e1d64",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That is the junction.",
+  "voice": "helper",
+  "key": "a628daf7",
+  "mod": 1
+ },
+ {
+  "s": "Nothing can be placed there.",
+  "voice": "helper",
+  "key": "39917644",
+  "mod": 1
+ },
+ {
+  "s": "Good: 1 of 5.",
+  "voice": "helper",
+  "key": "3be644af",
+  "mod": 1
+ },
+ {
+  "s": "That is the street, as you designed it.",
+  "voice": "helper",
+  "key": "d818565b",
+  "mod": 1
+ },
+ {
+  "s": "A shared car can only stop at a marked drop-off point.",
+  "voice": "helper",
+  "key": "39fffb34",
+  "mod": 1
+ },
+ {
+  "s": "A shared car always stops at a marked crossing.",
+  "voice": "helper",
+  "key": "d91c26b7",
+  "mod": 1
+ },
+ {
+  "s": "Nothing can go in the side road.",
+  "voice": "helper",
+  "key": "5a8bccf7",
+  "mod": 1
+ },
+ {
+  "s": "A shared car only stops at a marked drop-off point.",
+  "voice": "helper",
+  "key": "46a8be15",
+  "mod": 1
+ },
+ {
+  "s": "A shared car always gives way at a marked crossing.",
+  "voice": "helper",
+  "key": "166b85b3",
+  "mod": 1
+ },
+ {
+  "s": "Nothing can be placed in the junction.",
+  "voice": "helper",
+  "key": "6df5f53a",
+  "mod": 1
+ },
+ {
+  "s": "Now the rest of the morning, speeded up.",
+  "voice": "helper",
+  "key": "125e3b95",
+  "mod": 1
+ },
+ {
+  "s": "The rest of the half hour, speeded up.",
+  "voice": "helper",
+  "key": "7488e342",
+  "mod": 1
+ },
+ {
+  "s": "This robot will sort our town's rubbish.",
+  "voice": "helper",
+  "key": "bafc605c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It only knows what you show it.",
+  "voice": "helper",
+  "key": "91eabfef",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tap a thing, then tap its bin.",
+  "voice": "helper",
+  "key": "7e7ebad4",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "This robot will sort the town's waste.",
+  "voice": "helper",
+  "key": "f6f62c92",
+  "mod": 1
+ },
+ {
+  "s": "It learns only from examples.",
+  "voice": "helper",
+  "key": "992814c8",
+  "mod": 1
+ },
+ {
+  "s": "Then test it.",
+  "voice": "helper",
+  "key": "93c03bb5",
+  "mod": 1
+ },
+ {
+  "s": "It has one for every bin.",
+  "voice": "helper",
+  "key": "d007a55b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Show it more, or press Test the robot.",
+  "voice": "helper",
+  "key": "ede19e3d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Every bin has an example.",
+  "voice": "helper",
+  "key": "ebb6fb8a",
+  "mod": 1
+ },
+ {
+  "s": "Add more, or test the robot now.",
+  "voice": "helper",
+  "key": "d4ef7d3d",
+  "mod": 1
+ },
+ {
+  "s": "Pick the ones it lacked: they have a star.",
+  "voice": "helper",
+  "key": "75b4bba8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then test again.",
+  "voice": "helper",
+  "key": "e4994bc2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Choose the ones that fill the gaps: they are starred.",
+  "voice": "helper",
+  "key": "bddb238d",
+  "said": 1
+ },
+ {
+  "s": "The bench is full.",
+  "voice": "helper",
+  "key": "3f7f1921",
+  "mod": 1
+ },
+ {
+  "s": "Press Test again.",
+  "voice": "helper",
+  "key": "152743a4",
+  "mod": 1
+ },
+ {
+  "s": "Run the test again.",
+  "voice": "helper",
+  "key": "63d54ef1",
+  "mod": 1
+ },
+ {
+  "s": "Now a test.",
+  "voice": "helper",
+  "key": "cc4cca00",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Press the button to watch it sort each one.",
+  "voice": "helper",
+  "key": "22a93779",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Now test it.",
+  "voice": "helper",
+  "key": "326a1906",
+  "mod": 1
+ },
+ {
+  "s": "Step through and see which example it matches each time.",
+  "voice": "helper",
+  "key": "f66c65f1",
+  "mod": 1
+ },
+ {
+  "s": "The same test tray again.",
+  "voice": "helper",
+  "key": "495d14fe",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Watch what changes.",
+  "voice": "helper",
+  "key": "a9882bf1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The same test set again, so the two scores can be compared.",
+  "voice": "helper",
+  "key": "bedef1f8",
+  "said": 1
+ },
+ {
+  "s": "Every one in the right bin.",
+  "voice": "helper",
+  "key": "e9f9bd85",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It is ready for the street.",
+  "voice": "helper",
+  "key": "1787a01e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A full score on the test set.",
+  "voice": "helper",
+  "key": "90f4ad17",
+  "mod": 1
+ },
+ {
+  "s": "Time to try it in the street.",
+  "voice": "helper",
+  "key": "371c2052",
+  "mod": 1
+ },
+ {
+  "s": "Your robot is at work in your town.",
+  "voice": "helper",
+  "key": "ce721da6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Press Next to watch it sort each one.",
+  "voice": "helper",
+  "key": "f2a6bcd5",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The robot is at work in your town.",
+  "voice": "helper",
+  "key": "b6aa39c0",
+  "mod": 1
+ },
+ {
+  "s": "Press Next for each one.",
+  "voice": "helper",
+  "key": "50e77ca9",
+  "said": 1
+ },
+ {
+  "s": "Which delivery would you give the drone to fly by itself?",
+  "voice": "helper",
+  "key": "305c07d3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A job that comes round again suits a set of steps.",
+  "voice": "helper",
+  "key": "42207d1e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You plan it once and the drone repeats it.",
+  "voice": "helper",
+  "key": "b3a44912",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A new place needs new steps each time.",
+  "voice": "helper",
+  "key": "8cdece59",
+  "mod": 1
+ },
+ {
+  "s": "For a one-off, flying by hand can be quicker than planning.",
+  "voice": "helper",
+  "key": "75b63aef",
+  "mod": 1
+ },
+ {
+  "s": "The drone can fly this route every day now.",
+  "voice": "helper",
+  "key": "188bf8dd",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What would you still give a person to do?",
+  "voice": "helper",
+  "key": "5d9c4395",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The steps fit the town as it was when you wrote them.",
+  "voice": "helper",
+  "key": "ebe9602b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "When something new is built, a person looks again and changes the steps.",
+  "voice": "helper",
+  "key": "c94de0f3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone does the flying.",
+  "voice": "helper",
+  "key": "3c78ccf1",
+  "mod": 1
+ },
+ {
+  "s": "A person at the door can say hello and see that the parcel is the one that was wanted.",
+  "voice": "helper",
+  "key": "5405d5cb",
+  "mod": 1
+ },
+ {
+  "s": "Right bin.",
+  "voice": "helper",
+  "key": "6b1d6510",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Not the right bin yet.",
+  "voice": "helper",
+  "key": "81e9c700",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Asked for help.",
+  "voice": "helper",
+  "key": "b55f8c95",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "newspaper.",
+  "voice": "helper",
+  "key": "d1c1e0c4",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A newspaper.",
+  "voice": "helper",
+  "key": "5c0d805d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It could not choose between two bins, so it asks a person.",
+  "voice": "helper",
+  "key": "94e8a3f4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Paper and card.",
+  "voice": "helper",
+  "key": "e25a499e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown anything like this, so it asks a person.",
+  "voice": "helper",
+  "key": "9b281434"
+ },
+ {
+  "s": "It has not been shown anything for Paper and card yet.",
+  "voice": "helper",
+  "key": "c1d92906"
+ },
+ {
+  "s": "It has not been shown a newspaper yet.",
+  "voice": "helper",
+  "key": "c7d9c56e"
+ },
+ {
+  "s": "Nothing it was shown for Paper and card looks like this.",
+  "voice": "helper",
+  "key": "63601c1e"
+ },
+ {
+  "s": "An example in another bin looks just as much like it.",
+  "voice": "helper",
+  "key": "325fa99c"
+ },
+ {
+  "s": "A newspaper: into Paper and card.",
+  "voice": "helper",
+  "key": "2d24f5f2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper you showed it.",
+  "voice": "helper",
+  "key": "b2c95fc4",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Paper and card: it has not been shown one like this yet.",
+  "voice": "helper",
+  "key": "12b84648",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The newspaper goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "5e855b86",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Try that bin.",
+  "voice": "helper",
+  "key": "5195cb96",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A newspaper: into Glass.",
+  "voice": "helper",
+  "key": "3a265ded",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Glass: it has not been shown one like this yet.",
+  "voice": "helper",
+  "key": "9aaf3b3d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A newspaper: into Food scraps.",
+  "voice": "helper",
+  "key": "a5f5243b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Food scraps: it has not been shown one like this yet.",
+  "voice": "helper",
+  "key": "f1d545d7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "cardboard box.",
+  "voice": "helper",
+  "key": "22ba7b40",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cardboard box.",
+  "voice": "helper",
+  "key": "ea6dd3cd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a cardboard box yet.",
+  "voice": "helper",
+  "key": "35e884ea"
+ },
+ {
+  "s": "A cardboard box: into Paper and card.",
+  "voice": "helper",
+  "key": "fd856d02",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box you showed it.",
+  "voice": "helper",
+  "key": "396807d4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The cardboard box goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "ccfe4576",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cardboard box: into Glass.",
+  "voice": "helper",
+  "key": "29b7215d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cardboard box: into Food scraps.",
+  "voice": "helper",
+  "key": "1102742b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "comic.",
+  "voice": "helper",
+  "key": "56cffe12",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A comic.",
+  "voice": "helper",
+  "key": "81faaae3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a comic yet.",
+  "voice": "helper",
+  "key": "16eb6f34"
+ },
+ {
+  "s": "A comic: into Paper and card.",
+  "voice": "helper",
+  "key": "1ddea6b8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic you showed it.",
+  "voice": "helper",
+  "key": "893a5b46",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The comic goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "55c0e038",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A comic: into Glass.",
+  "voice": "helper",
+  "key": "f0542483",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A comic: into Food scraps.",
+  "voice": "helper",
+  "key": "01d9c1c1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "paper bag.",
+  "voice": "helper",
+  "key": "8a970735",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper bag.",
+  "voice": "helper",
+  "key": "9fc09ee4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a paper bag yet.",
+  "voice": "helper",
+  "key": "70f3a58b"
+ },
+ {
+  "s": "A paper bag: into Paper and card.",
+  "voice": "helper",
+  "key": "352c3da1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag you showed it.",
+  "voice": "helper",
+  "key": "dc0bc30d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The paper bag goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "97ae0a6d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper bag: into Glass.",
+  "voice": "helper",
+  "key": "90f227b4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper bag: into Food scraps.",
+  "voice": "helper",
+  "key": "6647bb9e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "paper ball.",
+  "voice": "helper",
+  "key": "667a3b36",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper ball.",
+  "voice": "helper",
+  "key": "e3190c2d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a paper ball yet.",
+  "voice": "helper",
+  "key": "15e7c068"
+ },
+ {
+  "s": "A paper ball: into Paper and card.",
+  "voice": "helper",
+  "key": "ac8c4162",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball you showed it.",
+  "voice": "helper",
+  "key": "8d8a591a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The paper ball goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "5d4588d6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper ball: into Glass.",
+  "voice": "helper",
+  "key": "649337bd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A paper ball: into Food scraps.",
+  "voice": "helper",
+  "key": "5577d38b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "clear jar.",
+  "voice": "helper",
+  "key": "a01aab15",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear jar.",
+  "voice": "helper",
+  "key": "5dcece38",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Glass.",
+  "voice": "helper",
+  "key": "5b1f18c1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown anything for Glass yet.",
+  "voice": "helper",
+  "key": "f0026765"
+ },
+ {
+  "s": "It has not been shown a clear jar yet.",
+  "voice": "helper",
+  "key": "b23f240b"
+ },
+ {
+  "s": "Nothing it was shown for Glass looks like this.",
+  "voice": "helper",
+  "key": "84b912af"
+ },
+ {
+  "s": "A clear jar: into Paper and card.",
+  "voice": "helper",
+  "key": "388825a5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar you showed it.",
+  "voice": "helper",
+  "key": "b4f60e71",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The clear jar goes in Glass in our town.",
+  "voice": "helper",
+  "key": "261c5752",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear jar: into Glass.",
+  "voice": "helper",
+  "key": "2f19dff0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear jar: into Food scraps.",
+  "voice": "helper",
+  "key": "471f7d2a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "clear bottle.",
+  "voice": "helper",
+  "key": "3d15cd56",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear bottle.",
+  "voice": "helper",
+  "key": "9f641269",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a clear bottle yet.",
+  "voice": "helper",
+  "key": "91df8348"
+ },
+ {
+  "s": "A clear bottle: into Paper and card.",
+  "voice": "helper",
+  "key": "8690f56e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle you showed it.",
+  "voice": "helper",
+  "key": "0161d7ba",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The clear bottle goes in Glass in our town.",
+  "voice": "helper",
+  "key": "c1a7d927",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear bottle: into Glass.",
+  "voice": "helper",
+  "key": "823108b1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A clear bottle: into Food scraps.",
+  "voice": "helper",
+  "key": "6d2f72ff",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "green bottle.",
+  "voice": "helper",
+  "key": "2b7399b0",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green bottle.",
+  "voice": "helper",
+  "key": "c5220547",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a green bottle yet.",
+  "voice": "helper",
+  "key": "343fee3a"
+ },
+ {
+  "s": "A green bottle: into Paper and card.",
+  "voice": "helper",
+  "key": "7b70b3fc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle you showed it.",
+  "voice": "helper",
+  "key": "91dcb170",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The green bottle goes in Glass in our town.",
+  "voice": "helper",
+  "key": "382b4341",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green bottle: into Glass.",
+  "voice": "helper",
+  "key": "1c555fff",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green bottle: into Food scraps.",
+  "voice": "helper",
+  "key": "ccf44cbd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "brown bottle.",
+  "voice": "helper",
+  "key": "cd77e987",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown bottle.",
+  "voice": "helper",
+  "key": "72deefec",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a brown bottle yet.",
+  "voice": "helper",
+  "key": "54141d4d"
+ },
+ {
+  "s": "A brown bottle: into Paper and card.",
+  "voice": "helper",
+  "key": "9db683a9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle you showed it.",
+  "voice": "helper",
+  "key": "5393b8a3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The brown bottle goes in Glass in our town.",
+  "voice": "helper",
+  "key": "66b5fa8e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown bottle: into Glass.",
+  "voice": "helper",
+  "key": "8cc4420c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown bottle: into Food scraps.",
+  "voice": "helper",
+  "key": "75af7de6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "blue jar.",
+  "voice": "helper",
+  "key": "8b9fab44",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue jar.",
+  "voice": "helper",
+  "key": "5779f35b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a blue jar yet.",
+  "voice": "helper",
+  "key": "92e1b82e"
+ },
+ {
+  "s": "A blue jar: into Paper and card.",
+  "voice": "helper",
+  "key": "e47e9130",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar you showed it.",
+  "voice": "helper",
+  "key": "4d5a329c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The blue jar goes in Glass in our town.",
+  "voice": "helper",
+  "key": "f6aa680d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue jar: into Glass.",
+  "voice": "helper",
+  "key": "75727ccb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue jar: into Food scraps.",
+  "voice": "helper",
+  "key": "78508bf9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "banana skin.",
+  "voice": "helper",
+  "key": "67b5588f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A banana skin.",
+  "voice": "helper",
+  "key": "a7ffaa9a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It belongs in Food scraps.",
+  "voice": "helper",
+  "key": "91fdda0f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown anything for Food scraps yet.",
+  "voice": "helper",
+  "key": "2a5ad253"
+ },
+ {
+  "s": "It has not been shown a banana skin yet.",
+  "voice": "helper",
+  "key": "419ab305"
+ },
+ {
+  "s": "Nothing it was shown for Food scraps looks like this.",
+  "voice": "helper",
+  "key": "e39de189"
+ },
+ {
+  "s": "A banana skin: into Paper and card.",
+  "voice": "helper",
+  "key": "d8e71977",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin you showed it.",
+  "voice": "helper",
+  "key": "f091939b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The banana skin goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "32176bfe",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A banana skin: into Glass.",
+  "voice": "helper",
+  "key": "be37b56a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A banana skin: into Food scraps.",
+  "voice": "helper",
+  "key": "0af2e1cc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "lettuce leaf.",
+  "voice": "helper",
+  "key": "b3a5855d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A lettuce leaf.",
+  "voice": "helper",
+  "key": "29236796",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a lettuce leaf yet.",
+  "voice": "helper",
+  "key": "6485af63"
+ },
+ {
+  "s": "A lettuce leaf: into Paper and card.",
+  "voice": "helper",
+  "key": "14219c03",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf you showed it.",
+  "voice": "helper",
+  "key": "379d9bc5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The lettuce leaf goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "07c69bc2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A lettuce leaf: into Glass.",
+  "voice": "helper",
+  "key": "eaa3c8fe",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A lettuce leaf: into Food scraps.",
+  "voice": "helper",
+  "key": "ea685bc0",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "apple core.",
+  "voice": "helper",
+  "key": "4054e272",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "An apple core.",
+  "voice": "helper",
+  "key": "86dbcb7b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown an apple core yet.",
+  "voice": "helper",
+  "key": "fbcdf718"
+ },
+ {
+  "s": "An apple core: into Paper and card.",
+  "voice": "helper",
+  "key": "6b53cdd0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core you showed it.",
+  "voice": "helper",
+  "key": "0ac3c9ba",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The apple core goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "3cf90c81",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An apple core: into Glass.",
+  "voice": "helper",
+  "key": "293832eb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An apple core: into Food scraps.",
+  "voice": "helper",
+  "key": "7f5fad19",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "orange peel.",
+  "voice": "helper",
+  "key": "176496b1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "An orange peel.",
+  "voice": "helper",
+  "key": "8d4955ae",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown an orange peel yet.",
+  "voice": "helper",
+  "key": "021afa0b"
+ },
+ {
+  "s": "An orange peel: into Paper and card.",
+  "voice": "helper",
+  "key": "4b5176bb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel you showed it.",
+  "voice": "helper",
+  "key": "f82f1bd5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The orange peel goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "0bfeda2c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An orange peel: into Glass.",
+  "voice": "helper",
+  "key": "62870646",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An orange peel: into Food scraps.",
+  "voice": "helper",
+  "key": "9eb7a1f8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "eggshell.",
+  "voice": "helper",
+  "key": "b59126cc",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "An eggshell.",
+  "voice": "helper",
+  "key": "531a69ad",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown an eggshell yet.",
+  "voice": "helper",
+  "key": "6f1660da"
+ },
+ {
+  "s": "An eggshell: into Paper and card.",
+  "voice": "helper",
+  "key": "5e6419e2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell you showed it.",
+  "voice": "helper",
+  "key": "ee80b29c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The eggshell goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "ddb7417f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An eggshell: into Glass.",
+  "voice": "helper",
+  "key": "0fbe1d3d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "An eggshell: into Food scraps.",
+  "voice": "helper",
+  "key": "691f8d0b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "teabag.",
+  "voice": "helper",
+  "key": "a2263c17",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A teabag.",
+  "voice": "helper",
+  "key": "5fd22514",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It has not been shown a teabag yet.",
+  "voice": "helper",
+  "key": "0e5a17fd"
+ },
+ {
+  "s": "A teabag: into Paper and card.",
+  "voice": "helper",
+  "key": "3dbf0f71",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag you showed it.",
+  "voice": "helper",
+  "key": "be1e7df7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The teabag goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "c1b493ec",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A teabag: into Glass.",
+  "voice": "helper",
+  "key": "dd5b0a64",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A teabag: into Food scraps.",
+  "voice": "helper",
+  "key": "b388924e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The families need more food: 0 of 13 baskets.",
+  "voice": "helper",
+  "key": "1902bfdd",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A parcel is waiting on the drone's landing pad at the AI Lab.",
+  "voice": "helper",
+  "key": "2f4b50ed",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It is for the timber terrace.",
+  "voice": "helper",
+  "key": "4fb3cb33",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Fly it there yourself first.",
+  "voice": "helper",
+  "key": "7edaf274",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Hold an arrow key to fly that way.",
+  "voice": "helper",
+  "key": "d0e03575",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Fly through the gold hoops, then on to the tall red marker at the timber terrace.",
+  "voice": "helper",
+  "key": "4899b27a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone cannot crash.",
+  "voice": "helper",
+  "key": "dbf22cb6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The parcel is delivered.",
+  "voice": "helper",
+  "key": "7a8c539d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You flew 11 tiles in 152 seconds, through 3 of 3 hoops.",
+  "voice": "helper",
+  "key": "fed96382",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Fly on for as long as you like.",
+  "voice": "helper",
+  "key": "b8a78a50",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then teach the drone to fly it without you.",
+  "voice": "helper",
+  "key": "83b2e544",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone does exactly what its steps say, in order.",
+  "voice": "helper",
+  "key": "7c766622",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It starts on its landing pad at the AI Lab.",
+  "voice": "helper",
+  "key": "bd9a5377",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Add steps that take the parcel to the timber terrace.",
+  "voice": "helper",
+  "key": "f8c020a6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then press Fly.",
+  "voice": "helper",
+  "key": "58d731ec",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone is flying your steps, one at a time.",
+  "voice": "helper",
+  "key": "251b913a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Step 1 says fly, but the drone is still on its landing pad.",
+  "voice": "helper",
+  "key": "8452c856",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It needs a \"Go up\" step first.",
+  "voice": "helper",
+  "key": "4535b7c3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tap the number 1 beside that step, then tap Go up.",
+  "voice": "helper",
+  "key": "f5eba433",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The new step goes in before it.",
+  "voice": "helper",
+  "key": "9091fe2f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone stopped where its steps ended.",
+  "voice": "helper",
+  "key": "6c5ae237",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "To reach the timber terrace, it still has to go north and west.",
+  "voice": "helper",
+  "key": "49b6684c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Count the squares on the map.",
+  "voice": "helper",
+  "key": "370637a7",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The parcel arrived.",
+  "voice": "helper",
+  "key": "41f2013c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone followed every step.",
+  "voice": "helper",
+  "key": "6d005e27",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "By hand you flew 11 tiles in 152 seconds.",
+  "voice": "helper",
+  "key": "cbc54249",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The planned route was 1 tile shorter.",
+  "voice": "helper",
+  "key": "a05e35f2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drone can fly these steps again and again, the same every time.",
+  "voice": "helper",
+  "key": "f493cf3f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A new order has come in: two parcels this time.",
+  "voice": "helper",
+  "key": "0c5f71b8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "One is for the straw-bale cottages and one is for the cohousing court.",
+  "voice": "helper",
+  "key": "8083ff40",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You know how the drone works now, so plan this one on the map straight away.",
+  "voice": "helper",
+  "key": "0870f285",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Add steps that take the parcels to the straw-bale cottages and the cohousing court.",
+  "voice": "helper",
+  "key": "aada6486",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Either parcel can go first.",
+  "voice": "helper",
+  "key": "13d22333",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Both parcels arrived.",
+  "voice": "helper",
+  "key": "2f23ff17",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You planned this one from the map alone, without flying it first.",
+  "voice": "helper",
+  "key": "afcbad8e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A parcel is waiting on the drone's landing pad at the ferry dock.",
+  "voice": "helper",
+  "key": "efad8d3f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It is for the town school.",
+  "voice": "helper",
+  "key": "592e8e44",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Homes open at 6 tiles of town land: mark 6 more",
+  "voice": "narrator",
+  "key": "92dc9b50",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Build homes for 12 more families to unlock Food",
+  "voice": "narrator",
+  "key": "51136906",
+  "said": 1
+ },
+ {
+  "s": "Build homes for 10 more families to unlock Power",
+  "voice": "narrator",
+  "key": "a21333b9",
+  "said": 1
+ },
+ {
+  "s": "Your families need food: grow 1 more basket to unlock Power",
+  "voice": "narrator",
+  "key": "e43ed30c",
+  "said": 1
+ },
+ {
+  "s": "24 families here call a car each morning.",
+  "voice": "helper",
+  "key": "e9067049",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:35.",
+  "voice": "helper",
+  "key": "66dcef14",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The first family gets into a shared car at the drop-off point by the car park.",
+  "voice": "helper",
+  "key": "b9b84d4e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:40.",
+  "voice": "helper",
+  "key": "e7f5f2b8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Only one car can load at a time.",
+  "voice": "helper",
+  "key": "24dfcf12",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:49.",
+  "voice": "helper",
+  "key": "0a0bee8d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That was the longest wait of the morning.",
+  "voice": "helper",
+  "key": "402df1e3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "People still cross by the shop, on the cycle track and by the school with no markings.",
+  "voice": "helper",
+  "key": "f0973ebd",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The cars stop at every marked crossing, so mark one there.",
+  "voice": "helper",
+  "key": "8868ce6a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "0 of 3 crossing places are safe.",
+  "voice": "helper",
+  "key": "a97f99c8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green flag has a marked crossing at it or next to it.",
+  "voice": "helper",
+  "key": "609fa0c6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "An orange flag has none.",
+  "voice": "helper",
+  "key": "bc871314",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:31.",
+  "voice": "helper",
+  "key": "c6d2f8d8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:45.",
+  "voice": "helper",
+  "key": "6a01f851",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "7:41.",
+  "voice": "helper",
+  "key": "09f866d5",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "This street works well, for the cars and for the people.",
+  "voice": "helper",
+  "key": "63a07f2d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You can keep it, or try another idea.",
+  "voice": "helper",
+  "key": "5893f58a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "8 shared cars now do the work of 40 parked cars.",
+  "voice": "helper",
+  "key": "56bc4cc1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Plot A: Homes, homes for 4 families.",
+  "voice": "helper",
+  "key": "96a4e714",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Plot B: Park, a play space the size of a tennis court.",
+  "voice": "helper",
+  "key": "064cd62d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Plot C: Garden, a market garden: vegetables for 3 families.",
+  "voice": "helper",
+  "key": "fa1b83ca",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The new homes bring 4 more families.",
+  "voice": "helper",
+  "key": "d3e28837",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Here we go.",
+  "voice": "helper",
+  "key": "29d86587",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You are riding in a shared car along your street.",
+  "voice": "helper",
+  "key": "1dc371ad",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Your crossing by the shop.",
+  "voice": "helper",
+  "key": "fea3c9dc",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The car stops and lets people cross.",
+  "voice": "helper",
+  "key": "6b498329",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The first of your 3 waiting bays, by the car park.",
+  "voice": "helper",
+  "key": "55735131",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Cars rest here until someone calls.",
+  "voice": "helper",
+  "key": "613a2e25",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Your drop-off point by the car park.",
+  "voice": "helper",
+  "key": "a6e6391b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The car stops here because you marked it.",
+  "voice": "helper",
+  "key": "dc90c4e3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "On the right, the old car park.",
+  "voice": "helper",
+  "key": "65893b23",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Another crossing, by the cycle track.",
+  "voice": "helper",
+  "key": "3d958239",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The car gives way again.",
+  "voice": "helper",
+  "key": "4ba565b1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Another drop-off point, by the school.",
+  "voice": "helper",
+  "key": "a88e122d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Another crossing, by the school.",
+  "voice": "helper",
+  "key": "74f53dd2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That is your street.",
+  "voice": "helper",
+  "key": "20087a46",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Every number is Good.",
+  "voice": "helper",
+  "key": "4b471578",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Well planned!",
+  "voice": "helper",
+  "key": "6ea8de80",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Show it at least one for each of the 3 bins.",
+  "voice": "helper",
+  "key": "9bf02efe",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Into Paper and card.",
+  "voice": "helper",
+  "key": "a0bacaa2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "bbde008f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "fad3da6b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Into Food scraps.",
+  "voice": "helper",
+  "key": "6bc32a4b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "7a336d70",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Into Glass.",
+  "voice": "helper",
+  "key": "7ee38ffd",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "775fab21",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It could not choose.",
+  "voice": "helper",
+  "key": "e78b3f2f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "This looks as much like the cardboard box (same colour) as the banana skin (same feel).",
+  "voice": "helper",
+  "key": "69e7a5c6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same colour.",
+  "voice": "helper",
+  "key": "96b92813",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same feel.",
+  "voice": "helper",
+  "key": "659a48b0",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "22cb6b75",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It sorted 6 of 8.",
+  "voice": "helper",
+  "key": "e214e78c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The others it had not been shown yet.",
+  "voice": "helper",
+  "key": "9e1bfb27",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Look at what was missing, then add examples.",
+  "voice": "helper",
+  "key": "f00c9b03",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "There is room for 4 more examples.",
+  "voice": "helper",
+  "key": "dbb0367b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "484ef9ac",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "253e5767",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "First test: 6 of 8.",
+  "voice": "helper",
+  "key": "656977ae",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Now: 8 of 8.",
+  "voice": "helper",
+  "key": "2253084c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Your new examples did that.",
+  "voice": "helper",
+  "key": "eff24221",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "These 5 things are new.",
+  "voice": "helper",
+  "key": "7b42d0c0",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "5 of 5 in the right bin.",
+  "voice": "helper",
+  "key": "dbbe38a3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A robot knows what it has been shown.",
+  "voice": "helper",
+  "key": "87c8bf72",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You can teach it more any time.",
+  "voice": "helper",
+  "key": "9c47fea4",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Talk it over with your teacher.",
+  "voice": "narrator",
+  "key": "73c8153c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Florence sounded sure.",
+  "voice": "narrator",
+  "key": "30555d7b"
+ },
+ {
+  "s": "When was she wrong, and how did you find out?",
+  "voice": "narrator",
+  "key": "cdf389ab"
+ },
+ {
+  "s": "Break time.",
+  "voice": "narrator",
+  "key": "2fb6fe4a"
+ },
+ {
+  "s": "Next: part 2, Drone delivery.",
+  "voice": "narrator",
+  "key": "be7510c8"
+ },
+ {
+  "s": "What was harder: flying by hand, or writing the steps?",
+  "voice": "narrator",
+  "key": "fdc43416",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Why?",
+  "voice": "narrator",
+  "key": "de473663",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What did the drone need from you to fly the route by itself?",
+  "voice": "narrator",
+  "key": "6dc422ce",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Where could a delivery drone help in a real town, and where should it not fly?",
+  "voice": "narrator",
+  "key": "c64aded3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Next: part 3, Robot training.",
+  "voice": "narrator",
+  "key": "f1ad99a1"
+ },
+ {
+  "s": "How did the robot learn which bin things go in?",
+  "voice": "narrator",
+  "key": "9f77d46b"
+ },
+ {
+  "s": "What did it get wrong, and why?",
+  "voice": "narrator",
+  "key": "849cfd69"
+ },
+ {
+  "s": "What would you show it next?",
+  "voice": "narrator",
+  "key": "60457dc4"
+ },
+ {
+  "s": "Next: part 4, Roads for self-driving cars.",
+  "voice": "narrator",
+  "key": "191fe17d"
+ },
+ {
+  "s": "What changed when the street had self-driving cars?",
+  "voice": "narrator",
+  "key": "bb273a3b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Who did your street work well for, and who did it not?",
+  "voice": "narrator",
+  "key": "d3505660",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What would you build on the old car park, and why?",
+  "voice": "narrator",
+  "key": "b5b84de7",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That is the end of today’s parts.",
+  "voice": "narrator",
+  "key": "3a1dc333"
+ },
+ {
+  "s": "How did your feedback change Florence’s film?",
+  "voice": "narrator",
+  "key": "324e28ac",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Which feedback worked best, and why?",
+  "voice": "narrator",
+  "key": "850a8e4e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What could Florence not do, and why?",
+  "voice": "narrator",
+  "key": "21e0ff2d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "When did homes go dark, and why?",
+  "voice": "narrator",
+  "key": "b8cc714b",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "How did you change your rules to fix it?",
+  "voice": "narrator",
+  "key": "cb04d394",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What should people decide, and not the machine?",
+  "voice": "narrator",
+  "key": "4554e4d3",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Where is your film set?",
+  "voice": "helper",
+  "key": "af8ba86e",
+  "mod": 1
+ },
+ {
+  "s": "You are the director.",
+  "voice": "helper",
+  "key": "e4e0e3f9",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "I work the camera.",
+  "voice": "helper",
+  "key": "e2e7c56f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "First, pick the place your film is about.",
+  "voice": "helper",
+  "key": "f8de7dec",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "You direct and I run the camera.",
+  "voice": "helper",
+  "key": "b6bfe2b0",
+  "mod": 1
+ },
+ {
+  "s": "First, choose the place the film is about.",
+  "voice": "helper",
+  "key": "eb051c38",
+  "mod": 1
+ },
+ {
+  "s": "Who is in your film?",
+  "voice": "helper",
+  "key": "a006cf9a",
+  "mod": 1
+ },
+ {
+  "s": "Now pick who is in it.",
+  "voice": "helper",
+  "key": "c3d8ea80",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "I can only film who is really in your town.",
+  "voice": "helper",
+  "key": "06d03feb",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "What is the mood?",
+  "voice": "helper",
+  "key": "f4ffecd0",
+  "mod": 1
+ },
+ {
+  "s": "Last one.",
+  "voice": "helper",
+  "key": "e04196a7",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Pick a mood.",
+  "voice": "helper",
+  "key": "e719cede",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It sets the music and the light.",
+  "voice": "helper",
+  "key": "b8b6b81d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That was my first try.",
+  "voice": "helper",
+  "key": "4409b6da",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A first cut is never the best one.",
+  "voice": "helper",
+  "key": "933f481d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Tell me one thing to change.",
+  "voice": "helper",
+  "key": "a86818c9",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "That was a first draft.",
+  "voice": "helper",
+  "key": "30097e51",
+  "mod": 1
+ },
+ {
+  "s": "Give me one piece of feedback and I will make a new cut.",
+  "voice": "helper",
+  "key": "0ee12c87",
+  "mod": 1
+ },
+ {
+  "s": "The marked shots are what your feedback changed.",
+  "voice": "helper",
+  "key": "f3d29003",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Change something else, or finish with this film.",
+  "voice": "helper",
+  "key": "99f49e74",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Your town is new, so I will use the island itself: the river, the old wood and the buildings that were here first.",
+  "voice": "helper",
+  "key": "7fe839d4",
+  "mod": 1
+ },
+ {
+  "s": "I did not change anything.",
+  "voice": "helper",
+  "key": "9c41d186",
+  "mod": 1
+ },
+ {
+  "s": "Press Next to see my first cut.",
+  "voice": "helper",
+  "key": "97df8d6d",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Press Watch to see the new cut, or tell me something else to change first.",
+  "voice": "helper",
+  "key": "83985164",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "There is power to spare right now.",
+  "voice": "helper",
+  "key": "97b4b23a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Charge would save it for later.",
+  "voice": "helper",
+  "key": "576ee365",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Homes have gone dark.",
+  "voice": "helper",
+  "key": "fa31c30a",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The town is short of power.",
+  "voice": "helper",
+  "key": "adcd264e",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Use battery can help.",
+  "voice": "helper",
+  "key": "8dd8f4be",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Charging takes its share first.",
+  "voice": "helper",
+  "key": "451bbd93",
+  "mod": 1
+ },
+ {
+  "s": "There is not enough left for every home.",
+  "voice": "helper",
+  "key": "c0757bda",
+  "mod": 1
+ },
+ {
+  "s": "The battery is empty.",
+  "voice": "helper",
+  "key": "cbb2d4ea",
+  "mod": 1
+ },
+ {
+  "s": "It can only give what was put in.",
+  "voice": "helper",
+  "key": "429746d4",
+  "mod": 1
+ },
+ {
+  "s": "The battery is full.",
+  "voice": "helper",
+  "key": "61bb1670",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Every home is lit again.",
+  "voice": "helper",
+  "key": "470b7948",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The sun is going down.",
+  "voice": "helper",
+  "key": "10f4453c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Watch the windows.",
+  "voice": "helper",
+  "key": "1d078cf6",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The battery fills up.",
+  "voice": "helper",
+  "key": "d5c968e4",
+  "mod": 1
+ },
+ {
+  "s": "It takes its share first.",
+  "voice": "helper",
+  "key": "c51cf52d",
+  "mod": 1
+ },
+ {
+  "s": "The battery waits.",
+  "voice": "helper",
+  "key": "c3dc1e69",
+  "mod": 1
+ },
+ {
+  "s": "The battery helps when the town is short.",
+  "voice": "helper",
+  "key": "a3fb528a",
+  "mod": 1
+ },
+ {
+  "s": "Windy morning.",
+  "voice": "helper",
+  "key": "c85fd31e",
+  "mod": 1
+ },
+ {
+  "s": "Sunny midday.",
+  "voice": "helper",
+  "key": "f1e1bad8",
+  "mod": 1
+ },
+ {
+  "s": "A still evening.",
+  "voice": "helper",
+  "key": "67e4e962",
+  "mod": 1
+ },
+ {
+  "s": "Strong wind all day.",
+  "voice": "helper",
+  "key": "24d7e3b7",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Grey sky.",
+  "voice": "helper",
+  "key": "959dd805",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The wind dies before lunch.",
+  "voice": "helper",
+  "key": "b0c4a98c",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Bright sun.",
+  "voice": "helper",
+  "key": "6b2cf9ed",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Cold.",
+  "voice": "helper",
+  "key": "e5a02971",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Dark early.",
+  "voice": "helper",
+  "key": "af85b322",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The wind fades in the afternoon.",
+  "voice": "helper",
+  "key": "1b90a6b5",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Each hour it reads from the top and follows the first rule that fits.",
+  "voice": "helper",
+  "key": "f4282953",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "If no rule fits: the battery waits.",
+  "voice": "helper",
+  "key": "fc89f359",
+  "mod": 1
+ },
+ {
+  "s": "For evening club.",
+  "voice": "helper",
+  "key": "cff8fc04",
+  "mod": 1
+ },
+ {
+  "s": "Without this it is last in line.",
+  "voice": "helper",
+  "key": "3c49e4bb",
+  "mod": 1
+ },
+ {
+  "s": "No home is off for long.",
+  "voice": "helper",
+  "key": "9416543b",
+  "mod": 1
+ },
+ {
+  "s": "Every home stayed lit.",
+  "voice": "helper",
+  "key": "6ea6fcd8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The rules did all this battery allows.",
+  "voice": "helper",
+  "key": "2b005c28",
+  "mod": 1
+ },
+ {
+  "s": "Look at the forecast.",
+  "voice": "helper",
+  "key": "8a28db23",
+  "mod": 1
+ },
+ {
+  "s": "Then choose: Charge, Hold or Use battery.",
+  "voice": "helper",
+  "key": "459758e5",
+  "mod": 1
+ },
+ {
+  "s": "Change it whenever you like.",
+  "voice": "helper",
+  "key": "ba60bd34",
+  "mod": 1
+ },
+ {
+  "s": "Read the forecast, then set the battery: Charge, Hold or Use.",
+  "voice": "helper",
+  "key": "95def1ef",
+  "mod": 1
+ },
+ {
+  "s": "Change it at any hour.",
+  "voice": "helper",
+  "key": "7eaa4c6b",
+  "mod": 1
+ },
+ {
+  "s": "Choose Charge, Hold or Use battery.",
+  "voice": "helper",
+  "key": "1ae94788",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then press Next hour.",
+  "voice": "helper",
+  "key": "10b471a8",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Set the battery, then press Next hour.",
+  "voice": "helper",
+  "key": "c5b3fe7c",
+  "mod": 1
+ },
+ {
+  "s": "That was one day by hand.",
+  "voice": "helper",
+  "key": "82a0520f",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Now write rules, so the system can do it by itself.",
+  "voice": "helper",
+  "key": "9479cac1",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Next, write rules so the system can run by itself.",
+  "voice": "helper",
+  "key": "8f8e196f",
+  "mod": 1
+ },
+ {
+  "s": "Add one rule first.",
+  "voice": "helper",
+  "key": "fa75a758",
+  "mod": 1
+ },
+ {
+  "s": "Add at least one rule.",
+  "voice": "helper",
+  "key": "debb56a2",
+  "mod": 1
+ },
+ {
+  "s": "Otherwise, hold the battery.",
+  "voice": "helper",
+  "key": "7ba67e1e",
+  "mod": 1
+ },
+ {
+  "s": "The same test tray.",
+  "voice": "helper",
+  "key": "b1e1dce2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The robot has still not been shown these.",
+  "voice": "helper",
+  "key": "a25382fb",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Press Run the test and watch what changes.",
+  "voice": "helper",
+  "key": "cb25cb79",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "The same test set, still unseen, so the two scores can be compared.",
+  "voice": "helper",
+  "key": "70d64d5a",
+  "mod": 1
+ },
+ {
+  "s": "Run it: it stops at each change.",
+  "voice": "helper",
+  "key": "f9c86127",
+  "mod": 1
+ },
+ {
+  "s": "One more thing to try: switch off something the robot looks at, and watch the score.",
+  "voice": "helper",
+  "key": "1045f16c",
+  "mod": 1
+ },
+ {
+  "s": "Press Start to watch it sort each one.",
+  "voice": "helper",
+  "key": "5029f9ce",
+  "mod": 1
+ },
+ {
+  "s": "Press Start.",
+  "voice": "helper",
+  "key": "ec89cdd0",
+  "mod": 1
+ },
+ {
+  "s": "Nothing it has been shown matches this, so it asks a person.",
+  "voice": "helper",
+  "key": "31d75556",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "Nothing it has been shown matches this, so it did not guess.",
+  "voice": "helper",
+  "key": "ade282fb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same shape.",
+  "voice": "helper",
+  "key": "eeb91952",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "229691db",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same feel.",
+  "voice": "helper",
+  "key": "95ceabc7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the newspaper it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "9aa5a1fc",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same colour.",
+  "voice": "helper",
+  "key": "68c67323",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same shape.",
+  "voice": "helper",
+  "key": "61f07dc2",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "848352ab",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same feel.",
+  "voice": "helper",
+  "key": "c7ee6d97",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "7a21296c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "259379bb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cardboard box it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "bc519f9f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same colour.",
+  "voice": "helper",
+  "key": "3d2b3ccd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same shape.",
+  "voice": "helper",
+  "key": "fd1f4bdc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "ab35aeed",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same feel.",
+  "voice": "helper",
+  "key": "df2ad8fd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "a52a08ba",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "d6d2f8f9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the comic it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "28811c3d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same colour.",
+  "voice": "helper",
+  "key": "e02d24ee",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same shape.",
+  "voice": "helper",
+  "key": "d13c1891",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "c53ad4da",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same feel.",
+  "voice": "helper",
+  "key": "5405413e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "d120cbff",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "ddd4c8f6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper bag it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "10333f6e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same colour.",
+  "voice": "helper",
+  "key": "6daf6361",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same shape.",
+  "voice": "helper",
+  "key": "3d414640",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "9d20b1c9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same feel.",
+  "voice": "helper",
+  "key": "d9db7481",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "0efa6b26",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "e4d84855",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the paper ball it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "fd068601",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "green egg box.",
+  "voice": "helper",
+  "key": "32675054",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green egg box.",
+  "voice": "helper",
+  "key": "b52e8781",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green egg box: into Paper and card.",
+  "voice": "helper",
+  "key": "b1492de6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box you showed it.",
+  "voice": "helper",
+  "key": "9093f978",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The green egg box goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "3dd5854a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green egg box: into Glass.",
+  "voice": "helper",
+  "key": "441a2e39",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green egg box: into Food scraps.",
+  "voice": "helper",
+  "key": "1d958b77",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same colour.",
+  "voice": "helper",
+  "key": "5e51dc87",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same shape.",
+  "voice": "helper",
+  "key": "cd34f896",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "4001f307",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same feel.",
+  "voice": "helper",
+  "key": "c41e621b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "8c48a1e8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "0dc7ead7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green egg box it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "63e20ad3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "grey egg box.",
+  "voice": "helper",
+  "key": "e02d1a7e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A grey egg box.",
+  "voice": "helper",
+  "key": "814b84d9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A grey egg box: into Paper and card.",
+  "voice": "helper",
+  "key": "51e7ddfe",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box you showed it.",
+  "voice": "helper",
+  "key": "227a319a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The grey egg box goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "8e1ff0c2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A grey egg box: into Glass.",
+  "voice": "helper",
+  "key": "df82caa1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A grey egg box: into Food scraps.",
+  "voice": "helper",
+  "key": "bd8293ef",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same colour.",
+  "voice": "helper",
+  "key": "c44fd3e1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same shape.",
+  "voice": "helper",
+  "key": "5c4763c0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "5ffbe649",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same feel.",
+  "voice": "helper",
+  "key": "bc655101",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "c1a534a6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "b9c648d5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the grey egg box it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "72641681",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "magazine.",
+  "voice": "helper",
+  "key": "5d1089b9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A magazine.",
+  "voice": "helper",
+  "key": "1c56fe6e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A magazine: into Paper and card.",
+  "voice": "helper",
+  "key": "5aab4ffb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine you showed it.",
+  "voice": "helper",
+  "key": "9b1a154d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The magazine goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "602624e3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A magazine: into Glass.",
+  "voice": "helper",
+  "key": "44f82a86",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A magazine: into Food scraps.",
+  "voice": "helper",
+  "key": "74fdd9b8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same colour.",
+  "voice": "helper",
+  "key": "066cf5ae",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same shape.",
+  "voice": "helper",
+  "key": "51a13851",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "dd1b719a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same feel.",
+  "voice": "helper",
+  "key": "9ffa65fe",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "98fc5fbf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "cafeb6b6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the magazine it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "a3d24d2e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "brown envelope.",
+  "voice": "helper",
+  "key": "b1829487",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown envelope.",
+  "voice": "helper",
+  "key": "e8a1ac5c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown envelope: into Paper and card.",
+  "voice": "helper",
+  "key": "0cc241b9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope you showed it.",
+  "voice": "helper",
+  "key": "f7359ba7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The brown envelope goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "0b959b65",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown envelope: into Glass.",
+  "voice": "helper",
+  "key": "88b876fc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown envelope: into Food scraps.",
+  "voice": "helper",
+  "key": "17d27456",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same colour.",
+  "voice": "helper",
+  "key": "ef4a39a0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same shape.",
+  "voice": "helper",
+  "key": "b41cc95b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "52e7e0a4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same feel.",
+  "voice": "helper",
+  "key": "afa73c7c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "6e95eb35",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "09ff7794",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown envelope it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "e605101c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "birthday card.",
+  "voice": "helper",
+  "key": "6c78acae",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A birthday card.",
+  "voice": "helper",
+  "key": "68bafcf7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A birthday card: into Paper and card.",
+  "voice": "helper",
+  "key": "da16cd4c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card you showed it.",
+  "voice": "helper",
+  "key": "247ae9b6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The birthday card goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "aa413c4c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A birthday card: into Glass.",
+  "voice": "helper",
+  "key": "72f9762f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A birthday card: into Food scraps.",
+  "voice": "helper",
+  "key": "f58c28ed",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same colour.",
+  "voice": "helper",
+  "key": "ab73063d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same shape.",
+  "voice": "helper",
+  "key": "ca6dc3ac",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "d503d0dd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same feel.",
+  "voice": "helper",
+  "key": "c13a3d2d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "be6510ca",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "22148d69",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the birthday card it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "48e4b2ad",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "cereal box.",
+  "voice": "helper",
+  "key": "486a42c0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cereal box.",
+  "voice": "helper",
+  "key": "539f75a7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cereal box: into Paper and card.",
+  "voice": "helper",
+  "key": "d9435e5c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box you showed it.",
+  "voice": "helper",
+  "key": "a9dfe9ac",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The cereal box goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "7eab68fc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cereal box: into Glass.",
+  "voice": "helper",
+  "key": "1a72fbdf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cereal box: into Food scraps.",
+  "voice": "helper",
+  "key": "1b3e639d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same colour.",
+  "voice": "helper",
+  "key": "85427bfb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same shape.",
+  "voice": "helper",
+  "key": "6e4d032a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "68fc1d23",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same feel.",
+  "voice": "helper",
+  "key": "9cb9272f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "0179c5b4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "f398a833",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cereal box it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "07582bf7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "white egg box.",
+  "voice": "helper",
+  "key": "dee7fbce",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A white egg box.",
+  "voice": "helper",
+  "key": "a8b623eb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A white egg box: into Paper and card.",
+  "voice": "helper",
+  "key": "483a9420",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box you showed it.",
+  "voice": "helper",
+  "key": "22ef094a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The white egg box goes in Paper and card in our town.",
+  "voice": "helper",
+  "key": "36876cc0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A white egg box: into Glass.",
+  "voice": "helper",
+  "key": "9ecb1c5b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A white egg box: into Food scraps.",
+  "voice": "helper",
+  "key": "f61a12c9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same colour.",
+  "voice": "helper",
+  "key": "f2142651",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same shape.",
+  "voice": "helper",
+  "key": "908dbc50",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "3c4e1839",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same feel.",
+  "voice": "helper",
+  "key": "a3bf4ff1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "3a96a0b6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "cc2777c5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the white egg box it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "9d9a3671",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same colour.",
+  "voice": "helper",
+  "key": "60f281a2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same shape.",
+  "voice": "helper",
+  "key": "6bd419a5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "21cfe916",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same feel.",
+  "voice": "helper",
+  "key": "ec150302",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "33cfff9b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "7c1c4522",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear jar it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "860885e2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same colour.",
+  "voice": "helper",
+  "key": "f2270801",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same shape.",
+  "voice": "helper",
+  "key": "d4af68e0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "e2d43369",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same feel.",
+  "voice": "helper",
+  "key": "5a7779a1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the clear bottle it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "754ae8c6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same colour.",
+  "voice": "helper",
+  "key": "055336bf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same shape.",
+  "voice": "helper",
+  "key": "52c33e1e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "d335d6ff",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same feel.",
+  "voice": "helper",
+  "key": "a7f16c93",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "7ce2bf10",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "89ed9e8f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green bottle it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "6f7f23cb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same colour.",
+  "voice": "helper",
+  "key": "75d381eb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same shape.",
+  "voice": "helper",
+  "key": "56f833fa",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "de216e13",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same feel.",
+  "voice": "helper",
+  "key": "da412f9f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "1d5c4484",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "0040d8a3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue jar it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "e03fd767",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "brown jar.",
+  "voice": "helper",
+  "key": "74a3c882",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown jar.",
+  "voice": "helper",
+  "key": "3fff3727",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown jar: into Paper and card.",
+  "voice": "helper",
+  "key": "17a062dc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar you showed it.",
+  "voice": "helper",
+  "key": "ea0b35c6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The brown jar goes in Glass in our town.",
+  "voice": "helper",
+  "key": "d6941d21",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown jar: into Glass.",
+  "voice": "helper",
+  "key": "8f6f055f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown jar: into Food scraps.",
+  "voice": "helper",
+  "key": "390e211d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same colour.",
+  "voice": "helper",
+  "key": "22bd0f4d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same shape.",
+  "voice": "helper",
+  "key": "7e53bf5c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "c1fa556d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same feel.",
+  "voice": "helper",
+  "key": "ea9ac77d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "a074d83a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "ce3c9b79",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown jar it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "52ec8ebd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same colour.",
+  "voice": "helper",
+  "key": "2aba92ec",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same shape.",
+  "voice": "helper",
+  "key": "5e89fdb7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "c2d677d8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same feel.",
+  "voice": "helper",
+  "key": "585ff1f8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "5afb5fa9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "ea5f2c38",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown bottle it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "42f21ac8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "green jar.",
+  "voice": "helper",
+  "key": "a5b49efb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green jar.",
+  "voice": "helper",
+  "key": "64690a42",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green jar: into Paper and card.",
+  "voice": "helper",
+  "key": "d9b50adf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar you showed it.",
+  "voice": "helper",
+  "key": "915093c3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The green jar goes in Glass in our town.",
+  "voice": "helper",
+  "key": "f4fb85d8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green jar: into Glass.",
+  "voice": "helper",
+  "key": "919620a2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A green jar: into Food scraps.",
+  "voice": "helper",
+  "key": "96bb1f94",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same colour.",
+  "voice": "helper",
+  "key": "6b98fd0c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same shape.",
+  "voice": "helper",
+  "key": "e6a185d7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "4fc84af8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same feel.",
+  "voice": "helper",
+  "key": "8fcd7418",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "99345f49",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "6c038cd8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the green jar it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "80d3d3e8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "blue bottle.",
+  "voice": "helper",
+  "key": "f7c5d535",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue bottle.",
+  "voice": "helper",
+  "key": "0566f810",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue bottle: into Paper and card.",
+  "voice": "helper",
+  "key": "9065699d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle you showed it.",
+  "voice": "helper",
+  "key": "de82dcad",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The blue bottle goes in Glass in our town.",
+  "voice": "helper",
+  "key": "e2130afa",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue bottle: into Glass.",
+  "voice": "helper",
+  "key": "c8414758",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue bottle: into Food scraps.",
+  "voice": "helper",
+  "key": "1137a1c2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same colour.",
+  "voice": "helper",
+  "key": "150bc68e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same shape.",
+  "voice": "helper",
+  "key": "d50bb5b1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "4a57527a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same feel.",
+  "voice": "helper",
+  "key": "a7f6acde",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "8ef2a71f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "a9302216",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue bottle it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "74bd0b0e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "drinking glass.",
+  "voice": "helper",
+  "key": "cbc654bd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A drinking glass.",
+  "voice": "helper",
+  "key": "504dec42",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A drinking glass: into Paper and card.",
+  "voice": "helper",
+  "key": "1490b0df",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass you showed it.",
+  "voice": "helper",
+  "key": "a7bc552d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The drinking glass goes in Glass in our town.",
+  "voice": "helper",
+  "key": "58ae41d8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A drinking glass: into Glass.",
+  "voice": "helper",
+  "key": "734562a2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A drinking glass: into Food scraps.",
+  "voice": "helper",
+  "key": "1ce05194",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same colour.",
+  "voice": "helper",
+  "key": "23c3d70e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same shape.",
+  "voice": "helper",
+  "key": "30dfb331",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "7a9726fa",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same feel.",
+  "voice": "helper",
+  "key": "8aa7295e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "b80a509f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "9d89c296",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the drinking glass it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "875a3b8e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "pink jar.",
+  "voice": "helper",
+  "key": "a43a1ca0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pink jar.",
+  "voice": "helper",
+  "key": "ac9208cf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pink jar: into Paper and card.",
+  "voice": "helper",
+  "key": "9b5e7ac4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar you showed it.",
+  "voice": "helper",
+  "key": "d0ee62ec",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The pink jar goes in Glass in our town.",
+  "voice": "helper",
+  "key": "c6659299",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pink jar: into Glass.",
+  "voice": "helper",
+  "key": "c408e857",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pink jar: into Food scraps.",
+  "voice": "helper",
+  "key": "f589cc25",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same colour.",
+  "voice": "helper",
+  "key": "4c48d1bb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same shape.",
+  "voice": "helper",
+  "key": "48e7e7ea",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "d90541e3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same feel.",
+  "voice": "helper",
+  "key": "c4bfd9ef",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "058ded74",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "47712df3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pink jar it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "ba87aeb7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same colour.",
+  "voice": "helper",
+  "key": "b87843c4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same shape.",
+  "voice": "helper",
+  "key": "336adc1f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "8f5b84f0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "d95b2b11",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the banana skin it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "e2c7a900",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same colour.",
+  "voice": "helper",
+  "key": "2be35b66",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same shape.",
+  "voice": "helper",
+  "key": "030e7119",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "873fea52",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same feel.",
+  "voice": "helper",
+  "key": "6b9b6096",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "1af336c7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "7c8b866e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the lettuce leaf it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "ef9efe86",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same colour.",
+  "voice": "helper",
+  "key": "efc65a01",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same shape.",
+  "voice": "helper",
+  "key": "adee0ee0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "19f31569",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same feel.",
+  "voice": "helper",
+  "key": "af7dfba1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "c105bec6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "05c2fd75",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the apple core it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "ea777d21",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same colour.",
+  "voice": "helper",
+  "key": "398726b6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same shape.",
+  "voice": "helper",
+  "key": "680c3209",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "03ead522",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same feel.",
+  "voice": "helper",
+  "key": "47549366",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "24751c77",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "14a22b3e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the orange peel it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "2155bad6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same colour.",
+  "voice": "helper",
+  "key": "263201eb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same shape.",
+  "voice": "helper",
+  "key": "3a2fb3fa",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "e3b3ee13",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same feel.",
+  "voice": "helper",
+  "key": "2adbaf9f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "670fc484",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the eggshell it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "4def58a3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same colour.",
+  "voice": "helper",
+  "key": "1b9b9db0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same shape.",
+  "voice": "helper",
+  "key": "213dd84b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "2c800734",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same feel.",
+  "voice": "helper",
+  "key": "5ec0490c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "bed6e8a5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the teabag it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "c123d7e4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "brown eggshell.",
+  "voice": "helper",
+  "key": "f3485d38",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown eggshell.",
+  "voice": "helper",
+  "key": "1b2dda83",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown eggshell: into Paper and card.",
+  "voice": "helper",
+  "key": "f3f8f4d8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell you showed it.",
+  "voice": "helper",
+  "key": "6b0aa6fc",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The brown eggshell goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "b2966f87",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown eggshell: into Glass.",
+  "voice": "helper",
+  "key": "d64948a3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A brown eggshell: into Food scraps.",
+  "voice": "helper",
+  "key": "cb548a61",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same colour.",
+  "voice": "helper",
+  "key": "16031acb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same shape.",
+  "voice": "helper",
+  "key": "2aa76f5a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "05e8bcf3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same feel.",
+  "voice": "helper",
+  "key": "b8ec577f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "3e41f764",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "c8ac3783",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the brown eggshell it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "92246f47",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "herbal teabag.",
+  "voice": "helper",
+  "key": "ff2a4d1b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A herbal teabag.",
+  "voice": "helper",
+  "key": "dba4de16",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A herbal teabag: into Paper and card.",
+  "voice": "helper",
+  "key": "96943f83",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag you showed it.",
+  "voice": "helper",
+  "key": "0f174dbf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The herbal teabag goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "a9f4c042",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A herbal teabag: into Glass.",
+  "voice": "helper",
+  "key": "0743777e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A herbal teabag: into Food scraps.",
+  "voice": "helper",
+  "key": "c3969640",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same colour.",
+  "voice": "helper",
+  "key": "52d10218",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same shape.",
+  "voice": "helper",
+  "key": "81f6e683",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "3b7f395c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same feel.",
+  "voice": "helper",
+  "key": "d7c8d294",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "5855a57d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "1130accc",
+  "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the herbal teabag it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "a84c4254",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "melon rind.",
+  "voice": "helper",
+  "key": "9c3caec5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A melon rind.",
+  "voice": "helper",
+  "key": "c2eb3632",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A melon rind: into Paper and card.",
+  "voice": "helper",
+  "key": "d9c2c26f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind you showed it.",
+  "voice": "helper",
+  "key": "7c866ecd",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The melon rind goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "4b77f0f6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A melon rind: into Glass.",
+  "voice": "helper",
+  "key": "75d03d12",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A melon rind: into Food scraps.",
+  "voice": "helper",
+  "key": "98c30044",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same colour.",
+  "voice": "helper",
+  "key": "0552172e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same shape.",
+  "voice": "helper",
+  "key": "6d4280d1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "ff175f1a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same feel.",
+  "voice": "helper",
+  "key": "dfe34b7e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "519b2c3f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "df768836",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the melon rind it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "9f82ceae",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "cabbage leaf.",
+  "voice": "helper",
+  "key": "37a32f44",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cabbage leaf.",
+  "voice": "helper",
+  "key": "2daa122f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cabbage leaf: into Paper and card.",
+  "voice": "helper",
+  "key": "84f08a24",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf you showed it.",
+  "voice": "helper",
+  "key": "2c24e244",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The cabbage leaf goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "ff37374b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cabbage leaf: into Glass.",
+  "voice": "helper",
+  "key": "9e462bb7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A cabbage leaf: into Food scraps.",
+  "voice": "helper",
+  "key": "7e558505",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same colour.",
+  "voice": "helper",
+  "key": "b8552293",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same shape.",
+  "voice": "helper",
+  "key": "dcb3c4d2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "fc7aa05b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same feel.",
+  "voice": "helper",
+  "key": "44228247",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "7194697c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "9c64a4eb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the cabbage leaf it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "852d9b0f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "blue eggshell.",
+  "voice": "helper",
+  "key": "b54ecf72",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue eggshell.",
+  "voice": "helper",
+  "key": "938bd06f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue eggshell: into Paper and card.",
+  "voice": "helper",
+  "key": "464b2ae4",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell you showed it.",
+  "voice": "helper",
+  "key": "44b873b2",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The blue eggshell goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "dc257f0b",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue eggshell: into Glass.",
+  "voice": "helper",
+  "key": "a83d0477",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A blue eggshell: into Food scraps.",
+  "voice": "helper",
+  "key": "a8cea045",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same colour.",
+  "voice": "helper",
+  "key": "96f279d9",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same shape.",
+  "voice": "helper",
+  "key": "40abbda8",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "0983d4e1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same feel.",
+  "voice": "helper",
+  "key": "4e086c99",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "ebeb472e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "b627d9ad",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the blue eggshell it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "8139cd79",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "fruit teabag.",
+  "voice": "helper",
+  "key": "81bac655",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A fruit teabag.",
+  "voice": "helper",
+  "key": "52c43e6a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A fruit teabag: into Paper and card.",
+  "voice": "helper",
+  "key": "8f49a7e7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag you showed it.",
+  "voice": "helper",
+  "key": "751c884d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The fruit teabag goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "293e8aee",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A fruit teabag: into Glass.",
+  "voice": "helper",
+  "key": "12877b3a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A fruit teabag: into Food scraps.",
+  "voice": "helper",
+  "key": "0a0ab21c",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same colour.",
+  "voice": "helper",
+  "key": "b734f8ae",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same shape.",
+  "voice": "helper",
+  "key": "4f870951",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "7f5f0c9a",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same feel.",
+  "voice": "helper",
+  "key": "c1a3f0fe",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "411738bf",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "f0e419b6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the fruit teabag it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "2921102e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "pear core.",
+  "voice": "helper",
+  "key": "a204bde0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pear core.",
+  "voice": "helper",
+  "key": "ae8f7699",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pear core: into Paper and card.",
+  "voice": "helper",
+  "key": "e838473e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core you showed it.",
+  "voice": "helper",
+  "key": "4a5c1698",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The pear core goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "8aa58529",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pear core: into Glass.",
+  "voice": "helper",
+  "key": "67a9bfe1",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A pear core: into Food scraps.",
+  "voice": "helper",
+  "key": "ff0e39af",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same colour.",
+  "voice": "helper",
+  "key": "a40c6ca7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same shape.",
+  "voice": "helper",
+  "key": "896c5bb6",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "6b129ea7",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same feel.",
+  "voice": "helper",
+  "key": "f9f585bb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "dbc22e08",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "cac66b77",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the pear core it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "55f3f1f3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "potato peel.",
+  "voice": "helper",
+  "key": "d79feda0",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A potato peel.",
+  "voice": "helper",
+  "key": "4f17f145",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A potato peel: into Paper and card.",
+  "voice": "helper",
+  "key": "5760baba",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel you showed it.",
+  "voice": "helper",
+  "key": "60ea0b20",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "The potato peel goes in Food scraps in our town.",
+  "voice": "helper",
+  "key": "3542bd9d",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A potato peel: into Glass.",
+  "voice": "helper",
+  "key": "4d1313a5",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "A potato peel: into Food scraps.",
+  "voice": "helper",
+  "key": "36552023",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same colour.",
+  "voice": "helper",
+  "key": "954915af",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same shape.",
+  "voice": "helper",
+  "key": "45638b2e",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same colour and shape.",
+  "voice": "helper",
+  "key": "6f4eaa2f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same feel.",
+  "voice": "helper",
+  "key": "1a7cd3c3",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same colour and feel.",
+  "voice": "helper",
+  "key": "e2dc5a20",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same shape and feel.",
+  "voice": "helper",
+  "key": "d92c483f",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "It looks most like the potato peel it was shown: same colour, shape and feel.",
+  "voice": "helper",
+  "key": "53ca98fb",
+  "rare": 1,
+  "mod": 1
+ },
+ {
+  "s": "You flew 11 tiles in 154 seconds, through 3 of 3 hoops.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f73f49c4"
+ },
+ {
+  "s": "By hand you flew 11 tiles in 154 seconds.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "23fef497"
+ },
+ {
+  "s": "The market square.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "429527c9"
+ },
+ {
+  "s": "I am pointing the camera at it now.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5fd98b3c"
+ },
+ {
+  "s": "Press Next, or pick another place.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "22e06bdf"
+ },
+ {
+  "s": "There are no otters in your town.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "d80022af"
+ },
+ {
+  "s": "Otters come when the wetland is left wild.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "9e0d7769"
+ },
+ {
+  "s": "I can only film what is there.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "2c3e0ba2"
+ },
+ {
+  "s": "I can film a family or me instead.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "19c1f22a"
+ },
+ {
+  "s": "A family.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "7763da58"
+ },
+ {
+  "s": "I can see them by their home.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "2aef1933"
+ },
+ {
+  "s": "Press Next, or pick again.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "1a732307"
+ },
+ {
+  "s": "Calm: slow evening music and golden evening light.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "b0b59884"
+ },
+ {
+  "s": "Here is my first cut: four shots of the market square, with a family.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "3cc8c5f6"
+ },
+ {
+  "s": "Press Watch to see it.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "e8205ba0"
+ },
+ {
+  "s": "An evening at the market square",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "82de2405"
+ },
+ {
+  "s": "Shorter.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "90a97f3a"
+ },
+ {
+  "s": "I cut “Circle round · the market square”.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "e83cba5d"
+ },
+ {
+  "s": "The film is now three shots.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "a481e3f1"
+ },
+ {
+  "s": "Now the film starts at the town school: a new first shot.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5886e97c"
+ },
+ {
+  "s": "Now the film ends by pulling back to show the whole town.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "2679ea75"
+ },
+ {
+  "s": "Livelier: now it has thoughtful music and soft morning light.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "492d370e"
+ },
+ {
+  "s": "Welcome back.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5195c566"
+ },
+ {
+  "s": "Here is your film so far: cut 2, five shots.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "8b23aace"
+ },
+ {
+  "s": "A morning at the market square",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "b287c467"
+ },
+ {
+  "s": "That was cut 2.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "51966085"
+ },
+ {
+  "s": "You practised: briefing a creative partner: a place, who is in it and a mood. improving a draft with four pieces of feedback, over two cuts. changing the plan when the town did not have what you asked for. watching each new cut to see what your feedback changed",
+  "voice": "narrator",
+  "said": 1,
+  "mod": 1,
+  "key": "de0664d0"
+ },
+ {
+  "s": "Welcome to the control room.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "119426f3"
+ },
+ {
+  "s": "From here you keep the lights on in your town.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "92c47910"
+ },
+ {
+  "s": "Your town has no homes or power yet.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "edd5a62b"
+ },
+ {
+  "s": "First, run one day by hand.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "009c095a"
+ },
+ {
+  "s": "Charge the battery when there is power to spare.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "1929579a"
+ },
+ {
+  "s": "Use it when the town is short.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "11598f96"
+ },
+ {
+  "s": "Your homes had 144 lit hours out of 144.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "77938d18"
+ },
+ {
+  "s": "The school too.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "511de272"
+ },
+ {
+  "s": "I watched you.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5a9025b7"
+ },
+ {
+  "s": "I wrote the first two rules from what you did.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "527490bb"
+ },
+ {
+  "s": "Add more, or change them.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "c2b10d7e"
+ },
+ {
+  "s": "A windy day.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "45ffe875"
+ },
+ {
+  "s": "A still day.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "708ae840"
+ },
+ {
+  "s": "A winter night.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "418f193d"
+ },
+ {
+  "s": "The system did exactly what your rules said.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "55f7ebd1"
+ },
+ {
+  "s": "On 2 days some homes went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "fffe3c4b"
+ },
+ {
+  "s": "Tap a day to see when.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5c2f1583"
+ },
+ {
+  "s": "At 7 pm, 5 practice homes went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "5e78ad5e"
+ },
+ {
+  "s": "No rule fitted 7 pm, so the battery waited.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "20d9e310"
+ },
+ {
+  "s": "It still had power in it.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "b284cbae"
+ },
+ {
+  "s": "Try: add a rule for that time.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "d5476019"
+ },
+ {
+  "s": "At 8 pm, 4 practice homes and the school went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f383f48a"
+ },
+ {
+  "s": "No rule fitted 8 pm, so the battery waited.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "ca8ae81f"
+ },
+ {
+  "s": "At 9 pm, 4 practice homes and the school went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f1c9d2fb"
+ },
+ {
+  "s": "No rule fitted 9 pm, so the battery waited.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "095de19e"
+ },
+ {
+  "s": "At 6 pm, 4 practice homes and the school went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "3da6de68"
+ },
+ {
+  "s": "No rule fitted 6 pm, so the battery waited.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "03b5add9"
+ },
+ {
+  "s": "Change a rule, add one, or move one up.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "00f633ec"
+ },
+ {
+  "s": "Choose when",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "dd1fecfa"
+ },
+ {
+  "s": "Choose what to do",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "7081970e"
+ },
+ {
+  "s": "Rule 1.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "9ab7c524"
+ },
+ {
+  "s": "If the wind drops, use the battery.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "ef23fe50"
+ },
+ {
+  "s": "Rule 2.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "9cb589b3"
+ },
+ {
+  "s": "At midday, charge the battery.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "e5fc39ba"
+ },
+ {
+  "s": "Rule 3.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "3ab2b0d6"
+ },
+ {
+  "s": "If the wind is strong, charge the battery.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "82523848"
+ },
+ {
+  "s": "Rule 4.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "1cb04305"
+ },
+ {
+  "s": "In the morning, let the battery wait.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "9bb5b267"
+ },
+ {
+  "s": "If the sun is bright, charge the battery.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "ee6d91cf"
+ },
+ {
+  "s": "After dark, light the school first: On.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "0d43d711"
+ },
+ {
+  "s": "On one day some homes went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "eebd2934"
+ },
+ {
+  "s": "That is 36 more lit hours than last time.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "b0aa7eda"
+ },
+ {
+  "s": "At 10 pm, 3 practice homes went dark.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "aad4cfb0"
+ },
+ {
+  "s": "Rule 2 said use the battery, but it was empty.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f583e229"
+ },
+ {
+  "s": "At 6 am there was power to spare, and no rule said charge.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "de890b1f"
+ },
+ {
+  "s": "Try: a rule that charges at that time.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "c0df294c"
+ },
+ {
+  "s": "Your rules did as well as you did by hand.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "a69d297c"
+ },
+ {
+  "s": "From tonight the town’s lights follow your rules.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "ecc0b505"
+ },
+ {
+  "s": "By hand, today: 144 lit hours out of 144.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "05852f63"
+ },
+ {
+  "s": "Your rules, on the same day: 144 out of 144.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f80bb364"
+ },
+ {
+  "s": "The same.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "f7f76886"
+ },
+ {
+  "s": "For the others, nothing it had been shown for the right bin was close enough.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "19dbaf1a"
+ },
+ {
+  "s": "Read why, then add examples. teabag.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "600de818"
+ },
+ {
+  "s": "It went into Paper and card: most like the cardboard box (same colour).",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "50e195c8"
+ },
+ {
+  "s": "Nothing it was shown for Food scraps has the same colour, shape or feel.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "ed8ba9b5"
+ },
+ {
+  "s": "Show it something for Food scraps with the same shape and feel.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "883e0937"
+ },
+ {
+  "s": "Look for a star.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "9e346dae"
+ },
+ {
+  "s": "Here are more things to show it.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "388591f6"
+ },
+ {
+  "s": "There is room for 4.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "269ebd4b"
+ },
+ {
+  "s": "The ones with a star are like the things it got wrong.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "763b0105"
+ },
+ {
+  "s": "This looks as much like the cardboard box (same shape) as the herbal teabag (same colour).",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "3e070beb"
+ },
+ {
+  "s": "Now: 7 of 8.",
+  "voice": "helper",
+  "said": 1,
+  "mod": 1,
+  "key": "eb81f105"
  }
 ]

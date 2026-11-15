@@ -42,12 +42,12 @@ The exact commands, from the repository root. The model, the voices and the clip
 3. Serve the game and play everything that speaks: the six missions (both ages), the welcome film and every afternoon
    module (both ages). `said-hook.mjs` records each run's speech log without changing the tests (it also skips their
    screenshots and lengthens their waits). Give the module tests to play as extra arguments; the default is
-   `drone roads robots`. A new module needs a browser test in `game/tests/playwright/<id>.mjs` that takes
+   `drone robots roads film power`. A new module needs a browser test in `game/tests/playwright/<id>.mjs` that takes
    `<baseUrl> <outDir>` and the age as `BAND=senior` or as the third argument.
 
    ```bash
    (cd games/ecotown/game && python3 -m http.server 8880 &)
-   bash games/ecotown/voice/playthroughs.sh http://localhost:8880/ $V/said drone roads robots
+   bash games/ecotown/voice/playthroughs.sh http://localhost:8880/ $V/said drone robots roads film power
    node --no-warnings games/ecotown/voice/coverage.mjs $V/said/*.json            # before: the share with a recording
    ```
 
