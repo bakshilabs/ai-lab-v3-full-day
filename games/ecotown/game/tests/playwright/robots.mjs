@@ -114,7 +114,7 @@ for (let k = 0; k < 8; k++) {
   for (const id of ids) {
     await tap(`#module .rb-sensor[data-s="${id}"]`);
     if (await p.locator('#module .rb-sensor.yes').count()) break;
-    if (!firstWrong) { firstWrong = true; const l = await line(); checks.m1MissNoAnswer = /Try another\.$/.test(l) && !/needs to know/.test(l); await shot('m1-miss'); await layout('m1-match'); }
+    if (!firstWrong) { firstWrong = true; const l = await p.evaluate(() => document.querySelector('#module .rb-m1a .rb-verdict')?.textContent || ''); checks.m1MissNoAnswer = /Try another\.$/.test(l) && !/needs to know/.test(l); await shot('m1-miss'); await layout('m1-match'); }
   }
   if (k === 0) await shot('m1-match');
   await goFoot('next');

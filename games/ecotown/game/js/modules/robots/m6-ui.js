@@ -16,7 +16,7 @@ export function streetSvg(street, res = null, upto = null) {
     return `${base}<text x="${x + W / 2}" y="214" font-size="13" font-weight="800" text-anchor="middle" fill="${INK}">${esc(PARTS[p].j)}</text>${mark}`; }).join('');
   const at = tried.length ? tried.length - 1 : -1; const last = tried[at]; const rx = 10 + Math.max(0, at) * W + (last && !last.ok ? 30 : 60); const sank = last && !last.ok && /sank|sink/i.test(last.why);
   const bot = `<g transform="translate(${res ? rx : 30} ${sank ? 122 : 98})"><rect x="0" y="0" width="34" height="22" rx="6" fill="#16c79a" stroke="${INK}" stroke-width="2.5"/><rect x="6" y="-12" width="20" height="12" rx="3" fill="#243447" stroke="${INK}" stroke-width="2"/><circle cx="20" cy="-6" r="3" fill="#ffd866"/></g>`;
-  const person = res?.found ? `<g transform="translate(${10 + (n - 1) * W + 58} 78)"><circle r="7" fill="#f2c531" stroke="${INK}" stroke-width="2"/><path d="M-8 6h16v14h-16z" fill="#d9533d" stroke="${INK}" stroke-width="2"/></g><text x="${10 + (n - 1) * W + 55}" y="40" font-size="13" font-weight="800" fill="#1f7a44" text-anchor="middle">Found!</text>` : '';
+  const person = res?.found ? `<g transform="translate(${10 + (n - 1) * W + 58} 78)"><circle r="7" fill="#f2c531" stroke="${INK}" stroke-width="2"/><path d="M-8 6h16v14h-16z" fill="#d9533d" stroke="${INK}" stroke-width="2"/></g><text x="${10 + (n - 1) * W + 55}" y="14" font-size="13" font-weight="800" fill="#1f7a44" text-anchor="middle">Found!</text>` : '';
   return `<svg class="rb-street2" viewBox="0 0 ${20 + n * W} 224" role="img" aria-label="${esc(street.j)}: ${street.parts.map((p) => PARTS[p].j).join(', ')}"><rect width="${20 + n * W}" height="224" rx="12" fill="#dfeaf3"/>${tiles}${bot}${person}</svg>`;
 }
 // The robot as designed, small

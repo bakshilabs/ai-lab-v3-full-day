@@ -98,9 +98,9 @@ export const css = `
 § .rb-sure b { position: absolute; top: -5px; bottom: -5px; width: 4px; margin-left: -2px; background: #243447; border-radius: 2px; }
 § .rb-pc { font-weight: 800; color: #2b3a55; }
 § .rb-m5 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; align-items: start; }
-§ .rb-plants { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+§ .rb-plants { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; } § .rb.large .rb-plants { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
 § .rb-plants li { display: grid; justify-items: center; gap: 3px; padding: 6px; border-radius: 12px; background: #f3ecd9; box-shadow: inset 0 0 0 2px #d7bf95; text-align: center; }
-§ .rb-plants li b { font-size: .88em; font-weight: 800; line-height: 1.1; } § .rb-plants li em { font-style: normal; font-size: .8em; font-weight: 800; padding: 1px 8px; border-radius: 999px; color: #fff; background: #1f7a44; }
+§ .rb-plants li b { font-size: .88em; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; } § .rb-plants li em { font-style: normal; font-size: .78em; font-weight: 800; line-height: 1.15; padding: 2px 6px; border-radius: 8px; color: #fff; background: #1f7a44; }
 § .rb-plants li em.miss { background: #b3501f; } § .rb-plants li em.ask { background: #8a6200; }
 § .rb-plants li.lost { background: #fde6cf; box-shadow: inset 0 0 0 3px #b3501f; } § .rb-plants li.gone .rb-plant { opacity: .45; }
 § .rb-sets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
