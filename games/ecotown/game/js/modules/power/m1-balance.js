@@ -70,9 +70,9 @@ export function flexWord(flex, j) {
   return j ? 'The battery rests' : 'Battery idle (0 kW)';
 }
 export function stateWord(diff, j) {
-  if (diff === 0) return j ? 'Level' : `Balanced: ${hz(0).toFixed(2)} Hz`;
-  if (diff < 0) return j ? `Short by ${-diff}` : `Short ${-diff * BLOCK_KW} kW: ${hz(diff).toFixed(2)} Hz`;
-  return j ? `${diff} too much` : `Surplus ${diff * BLOCK_KW} kW: ${hz(diff).toFixed(2)} Hz`;
+  if (diff === 0) return j ? 'Level' : 'Balanced';
+  if (diff < 0) return j ? `Short by ${-diff}` : `Short by ${-diff * BLOCK_KW} kW`;
+  return j ? `${diff} too much` : `Surplus of ${diff * BLOCK_KW} kW`;
 }
 export function stepSay(diff, j) {
   if (diff === 0) return j ? 'Level. Well balanced.' : 'Balanced at 50 Hz.';

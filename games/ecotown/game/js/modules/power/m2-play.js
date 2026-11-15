@@ -46,7 +46,7 @@ export async function playForecast(d) {
     if (!j && r >= 1) {
       const opts = energyChoices(hours, r); const tried = new Set();
       ctl.innerHTML = `<h4>${esc('Energy short over the day?')}</h4>${opts.map((o, n) => `<button type="button" data-kwh="${n}">${o.v} kWh</button>`).join('')}`;
-      d.say(energyAsk(hours, j)); d.focusFirst('[data-kwh]');
+      d.say(energyAsk(hours, j)); d.screen.querySelector('.pw-lines').insertAdjacentHTML('beforeend', `<li class="fix">${esc(energyAsk(hours, j))}</li>`); d.focusFirst('[data-kwh]');
       await new Promise((res) => d.setTap((b) => {
         if (b.dataset.kwh === undefined) return; const o = opts[Number(b.dataset.kwh)]; d.say(energySay(o, hours));
         if (o.ok) { kwh = true; d.setTap(null); res(); } else { tried.add(b.dataset.kwh); b.disabled = true; triesAll++; d.focusFirst('[data-kwh]:not([disabled])'); }

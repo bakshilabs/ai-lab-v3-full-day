@@ -56,7 +56,7 @@ test('mission 1: every step can be made level, the rounds get harder, and the fr
   assert.equal(darkFor(r, 3, 0, 6), 0); assert.ok(darkFor(r, 3, -2, 6) >= 1); assert.equal(darkFor(r, 3, 3, 6), 0, 'too much power darkens nobody');
   assert.ok(FLEX_MIN < 0 && FLEX_MAX > 0);
   assert.notEqual(balanceHint(1, judge(r, Array(8).fill(0)), true), balanceHint(2, judge(r, Array(8).fill(0)), true));
-  assert.ok(/Hz/.test(stateWord(-1, false)) && !/Hz|kW/.test(stateWord(-1, true)));
+  assert.ok(/kW/.test(stateWord(-1, false)) && !/Hz|kW/.test(stateWord(-1, true)));
   assert.equal(clockText(r, 0, true), '6:00 am'); assert.equal(clockText(BALANCE_ROUNDS[1], 3, false), '08:00');
 });
 
