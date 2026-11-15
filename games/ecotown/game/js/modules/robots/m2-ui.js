@@ -42,13 +42,15 @@ export async function playM2(ctx, sh, cur, keep) {
       const reset = () => { arm = startArm(task.tray); cursor = 0; verdict = null; stepTexts.length = 0; };
       function draw() {
         const now = flat()[cursor - 1]; const bad = fails >= 2 && !solved ? firstBad(task, prog, repeat) : -1;
-        sh.main.innerHTML = `<div class="rb-m2"><div class="rb-panel rb-armbox"><p class="rb-task">${esc(TASK_TEXT[task.id][j ? 'j' : 's'])}</p>${armSvg(arm, !j)}
+        sh.main.innerHTML = `<div class="rb-m2"><div class="rb-panel rb-armbox">${armSvg(arm, !j)}
             ${verdict ? `<p class="rb-verdict ${verdict.ok ? 'ok' : 'miss'}" aria-live="polite">${esc(verdict.text)}</p>` : now ? `<p class="rb-verdict" aria-live="polite">Step ${now.i + 1}${repeat > 1 ? ` (time ${now.r + 1} of ${repeat})` : ''}: ${esc(stepTexts[cursor - 1] || '')}</p>` : ''}</div>
-          <div class="rb-progbox rb-panel"><h3>Program<small>${prog.length} step${prog.length === 1 ? '' : 's'}${repeat > 1 ? `, repeated ${repeat} times: ${total()} steps run` : ''}</small></h3>
+          <div class="rb-progbox rb-panel"><h3>Step tiles<small>${j ? 'Tap one to add it.' : 'Tap to add.'}</small></h3>
+            <div class="rb-tiles" role="group" aria-label="Step tiles">${task.tiles.map((c, k) => `<button type="button" class="rb-tile" data-k="${k}">${esc(label(c, j))}</button>`).join('')}</div>
+            <h3>Program<small>${prog.length} step${prog.length === 1 ? '' : 's'}${repeat > 1 ? `, repeated ${repeat} times: ${total()} steps run` : ''}</small></h3>
             <ol class="rb-prog">${prog.map((c, i) => `<li class="${i === sel ? 'sel' : ''}${now && now.i === i ? ' run' : ''}${bad === i ? ' bad' : ''}"><button type="button" class="rb-pstep" data-i="${i}" aria-pressed="${i === sel}" aria-label="Step ${i + 1}: ${esc(label(c, j))}${i === sel ? '. New steps go after this one' : ''}"><i>${i + 1}</i>${esc(label(c, j))}</button><button type="button" class="rb-pdel" data-del="${i}" aria-label="Remove step ${i + 1}">✕</button></li>`).join('') || `<li class="rb-pempty">${j ? 'Tap a step tile below to add it.' : 'Empty: tap a tile to add a step.'}</li>`}</ol>
             ${task.repeat ? `<div class="rb-repeat"><b>Repeat</b><button type="button" class="rb-rep" data-rep="-1" aria-label="Fewer repeats" ${repeat <= 1 ? 'disabled' : ''}>−</button><span aria-live="polite">${repeat} time${repeat === 1 ? '' : 's'}</span><button type="button" class="rb-rep" data-rep="1" aria-label="More repeats" ${repeat >= SPOTS ? 'disabled' : ''}>+</button></div>` : ''}
             <p class="rb-addhint">${sel >= 0 && sel < prog.length - 1 ? `New steps go after step ${sel + 1}.` : 'New steps go at the end.'}</p>
-            <div class="rb-tiles" role="group" aria-label="Step tiles">${task.tiles.map((c, k) => `<button type="button" class="rb-tile" data-k="${k}">${esc(label(c, j))}</button>`).join('')}</div></div></div>`;
+</div></div>`;
         sh.main.querySelectorAll('.rb-pstep').forEach((b) => { b.onclick = () => { sel = +b.dataset.i; draw(); if (sh.keys()) sh.main.querySelector(`.rb-pstep[data-i="${sel}"]`)?.focus(); }; });
         sh.main.querySelectorAll('.rb-pdel').forEach((b) => { b.onclick = () => { if (running) return; const i = +b.dataset.del; prog.splice(i, 1); sel = Math.min(i - 1 < 0 ? 0 : i - 1, prog.length - 1); reset(); save(); draw(); foot(); sh.focusSoon('.rb-pstep, .rb-tile'); }; });
         sh.main.querySelectorAll('.rb-tile').forEach((b) => { b.onclick = () => { if (running) return; if (prog.length >= MAX_STEPS) { sh.say(j ? 'That is as many steps as fit. Remove one first.' : `At most ${MAX_STEPS} steps.`); return; } const c = { ...task.tiles[+b.dataset.k] }; prog.splice(sel + 1, 0, c); sel++; reset(); save(); draw(); foot(); if (sh.keys()) sh.main.querySelector(`.rb-tile[data-k="${b.dataset.k}"]`)?.focus(); }; });
@@ -63,8 +65,8 @@ export async function playM2(ctx, sh, cur, keep) {
       const fresh = sh.guard();
       function finish() {
         const v = judge(task, prog, repeat, j); verdict = { ok: v.done, text: v.text }; d.runs++;
-        if (v.done) { solved = true; if (task.id === 'debug') d.fixed = true; if (task.id === 'tray') { d.steps = prog.length; d.rep = repeat; } save(); sh.say(`${v.text} ${part === 2 ? (j ? `${prog.length} steps, repeated ${repeat} times, did ${prog.length * repeat} steps of work.` : `${prog.length} steps × ${repeat} = ${prog.length * repeat} steps run.`) : ''}`); }
-        else { fails++; sh.say(fails >= 2 && firstBad(task, prog, repeat) >= 0 ? `${v.text} ${j ? `Look closely at step ${firstBad(task, prog, repeat) + 1}.` : `Check step ${firstBad(task, prog, repeat) + 1}.`}` : v.text); }
+        if (v.done) { solved = true; if (task.id === 'debug') d.fixed = true; if (task.id === 'tray') { d.steps = prog.length; d.rep = repeat; } save(); ctx.say(`${v.text} ${part === 2 ? (j ? `${prog.length} steps, repeated ${repeat} times, did ${prog.length * repeat} steps of work.` : `${prog.length} steps × ${repeat} = ${prog.length * repeat} steps run.`) : ''}`); }
+        else { fails++; ctx.say(fails >= 2 && firstBad(task, prog, repeat) >= 0 ? `${v.text} ${j ? `Look closely at step ${firstBad(task, prog, repeat) + 1}.` : `Check step ${firstBad(task, prog, repeat) + 1}.`}` : v.text); }
         draw(); foot(); sh.focusSoon(solved ? '[data-next]' : '[data-reset]');
       }
       function stepOnce() {

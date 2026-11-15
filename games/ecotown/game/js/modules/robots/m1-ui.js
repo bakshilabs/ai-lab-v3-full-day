@@ -47,9 +47,9 @@ export async function playM1(ctx, sh, cur, keep) {
         const fresh = sh.guard();
         const choose = (id) => {
           if (!fresh()) return; const r = matchLine(job, id, tries, j);
-          if (r.ok) { if (!tries) d.mr++; draw(r.text, true); sh.say(r.text); keep(0, d);
+          if (r.ok) { if (!tries) d.mr++; draw(r.text, true); ctx.say(r.text); keep(0, d);
             sh.buttons(tries ? '' : (j ? 'First time!' : 'First try.'), [{ act: 'next', label: k < JOBS.length - 1 ? 'Next job' : 'Carry on', go: true }]).then(() => done()); }
-          else { tries++; wrong.add(id); draw(r.text, false); sh.say(r.text); sh.focusSoon('.rb-sensor:not([disabled])'); }
+          else { tries++; wrong.add(id); draw(r.text, false); ctx.say(r.text); sh.focusSoon('.rb-sensor:not([disabled])'); }
         };
         draw(); sh.say(j ? job.j : job.s); sh.foot.innerHTML = `<p class="rb-hint">${j ? 'Which sensor can do this job?' : 'Which sensor can measure what this job needs?'}</p>`; sh.focusSoon('.rb-sensor');
       });
@@ -79,12 +79,12 @@ export async function playM1(ctx, sh, cur, keep) {
         const g = await sh.buttons(`<b>Your turn:</b> ${esc(q)}`, [{ act: 'forward', label: 'Go forward' }, { act: 'turn', label: 'Turn right' }]);
         const ok = g === s.think; if (ok) d.pr++;
         const why = ok ? (j ? 'Right! The rule says so.' : 'Correct: the rule decides.') : (j ? `Not this time. ${s.think === 'turn' ? 'Something is right in front, so the rule says turn.' : 'There is room ahead, so the rule says go forward.'}` : `Not this time: ${s.think === 'turn' ? 'the reading is under 50 cm, so it turns' : 'the reading is 50 cm or more, so it goes forward'}.`);
-        sh.main.innerHTML = panel(3, { ok, text: why }); sh.say(why); keep(1, { ...d, pr: d.pr });
+        sh.main.innerHTML = panel(3, { ok, text: why }); ctx.say(why); keep(1, { ...d, pr: d.pr });
       } else { sh.main.innerHTML = panel(3); }
       st = s.st; if (s.think === 'forward') trail.push([st.x, st.y]);
       const last = i === trip.steps.length - 1;
       if (last) sh.say(endLine('home', 1, j));
-      await sh.buttons(last ? esc(endLine('home', 1, j)) : `Loop ${i + 1}`, [{ act: 'next', label: last ? 'Carry on' : 'Next loop', go: true }]);
+      await sh.buttons(`Loop ${i + 1} of ${trip.steps.length}`, [{ act: 'next', label: last ? 'Carry on' : 'Next loop', go: true }]);
     }
     part = 2; keep(2, d);
   }
@@ -111,7 +111,7 @@ export async function playM1(ctx, sh, cur, keep) {
       const go = () => {
         if (running || chosen === null || !fresh()) return; const t = chosen; const r = drive(ROOM, t); running = true; tried.add(t); d.tried = [...tried];
         const trail = [[startOf(ROOM).x, startOf(ROOM).y]]; let i = 0;
-        const fin = () => { running = false; result = r; if (r.end === 'home') homeSeen = true; keep(2, d); draw(); foot(); sh.say(endLine(r.end, t, j)); sh.focusSoon('[data-fin], [data-run]'); };
+        const fin = () => { running = false; result = r; if (r.end === 'home') homeSeen = true; keep(2, d); draw(); foot(); ctx.say(endLine(r.end, t, j)); sh.focusSoon('[data-fin], [data-run]'); };
         const stepOne = () => { const s = r.steps[i]; if (s.think === 'forward' && !s.bump) trail.push([s.st.x, s.st.y]); shown = { st: s.st, bump: s.bump, trail: [...trail] }; i++; };
         if (sh.still) { while (i < r.steps.length) stepOne(); fin(); return; }
         const tickOn = () => { if (ctx.signal.aborted) return; stepOne(); draw(); foot(); if (i < r.steps.length) sh.later(tickOn, 420); else sh.later(fin, 300); };

@@ -17,7 +17,7 @@ export function showMap(ctx, sh, prog) {
   const card = (m) => {
     const i = m.n - 1; const done = !!prog.done[i]; const can = open(prog.done, m.n); const now = !all && m.n === (cur || next);
     const state = done ? '<em class="rb-tick">✓ Done</em>' : now ? `<em class="rb-now">${cur === m.n ? 'Carry on' : 'Next'}</em>` : can ? '' : `<em class="rb-lock">🔒 After mission ${m.n - 1}</em>`;
-    const sumLine = done && prog.sum[m.n] ? `<small class="rb-did">${esc(missionLine(m.n, prog.sum[m.n], j))}</small>` : `<small>${esc(m.short)}</small>`;
+    const sumLine = done && prog.sum[m.n] ? `<small class="rb-did">${esc(missionLine(m.n, prog.sum[m.n], j))}</small>` : `<small>${esc(pick(m.skill, j))}</small>`;
     return `<button type="button" class="rb-mcard${done ? ' done' : ''}${now ? ' now' : ''}" data-n="${m.n}" ${can ? '' : 'disabled aria-disabled="true"'} aria-label="Mission ${m.n}: ${esc(m.use)}. ${done ? 'Done. Play again.' : now ? 'Next.' : can ? '' : `Opens after mission ${m.n - 1}.`}">
       <span class="rb-mnum">${m.n}</span><span class="rb-mico" aria-hidden="true">${m.icon}</span><b>${esc(m.use)}</b>${sumLine}${state}${done ? '<span class="rb-again">↻ Play again</span>' : ''}</button>`;
   };

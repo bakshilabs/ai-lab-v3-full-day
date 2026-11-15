@@ -42,7 +42,7 @@ export async function playM5(ctx, sh, cur, keep) {
       draw(); sh.say(j ? 'Is this a lettuce, or a weed?' : 'Crop or weed?');
       const ans = await sh.buttons('', [{ act: 'crop', label: '🥬 Lettuce (crop)' }, { act: 'weed', label: '🌼 Weed' }]);
       if ((ans === 'weed') === pl.weed) d.checks++;
-      draw(ans); sh.say(`It is ${pl.weed ? 'a weed' : 'a lettuce'}. The robot is ${sureWords(pl.p)}.${pl.hid ? ` ${whyUnsure[pl.hid]}` : ''}`); keep(0, d);
+      draw(ans); ctx.say(`It is ${pl.weed ? 'a weed' : 'a lettuce'}. The robot is ${sureWords(pl.p)}.${pl.hid ? ` ${whyUnsure[pl.hid]}` : ''}`); keep(0, d);
       await sh.buttons('', [{ act: 'n', label: k < CHECK.length - 1 ? 'Next plant' : 'Carry on', go: true }]);
     }
     part = 1; keep(1, d);
@@ -80,7 +80,7 @@ export async function playM5(ctx, sh, cur, keep) {
       const run = () => {
         if (pull === null || !fresh()) return; res = weed(field, pull, withAsk ? ask : null); d.tries++;
         ok = okRow(res); if (ok) { const keepIt = { pull, ask: withAsk ? ask : null, left: res.weedsLeft, weeds: res.weeds, best: best(field, withAsk).weedsLeft }; if (part === 1) d.f1 = keepIt; else d.f2 = keepIt; }
-        keep(part, d); draw(); foot(); sh.say(resultLine(field, res, j, withAsk)); sh.focusSoon(ok ? '[data-next]' : '.rb-set');
+        keep(part, d); draw(); foot(); ctx.say(resultLine(field, res, j, withAsk)); sh.focusSoon(ok ? '[data-next]' : '.rb-set');
       };
       draw(); foot(); sh.focusSoon('.rb-set');
     });
