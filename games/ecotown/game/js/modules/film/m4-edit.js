@@ -26,11 +26,11 @@ export function takeItems(TAKEPIC) {
 // ---- part 2: trim the rough cut. Seven clips from the camera, two of them not wanted.
 // art: the drawing (art.js SHOT_ART). keep: false for a clip the film does not need.
 export const ROUGH = [
-  { id: 'r1', art: 'wide-town', words: 'The town at dawn', keep: true },
-  { id: 'r2', art: 'ground', words: 'The camera filming the grass', keep: false, why: 'mistake' },
+  { id: 'r1', art: 'dawn', words: 'The town at dawn', keep: true },
+  { id: 'r2', art: 'ground', words: 'A clip with no name', keep: false, why: 'mistake' },
   { id: 'r3', art: 'market', words: 'The stall keepers set up', keep: true },
   { id: 'r4', art: 'clouds', words: 'Dark clouds roll in', keep: true },
-  { id: 'r5', art: 'clouds', words: 'Dark clouds roll in (again)', keep: false, why: 'repeat' },
+  { id: 'r5', art: 'clouds', words: 'Dark clouds roll in', keep: false, why: 'repeat' },
   { id: 'r6', art: 'cover', words: 'They cover the stalls', keep: true },
   { id: 'r7', art: 'sun', words: 'The sun comes out', keep: true },
 ];
@@ -88,8 +88,8 @@ export const musicItems = () => [
     ok: 'That makes the ending feel happy.', hint: 'The trouble is over. How should people feel now?' },
 ];
 // the trimmed film as shots for the town, with the music on the shots where it changes
-const PLACE_FOR = { 'wide-town': null, market: ['market', 'festival', 'hall', 'ailab'], clouds: null, cover: ['market', 'festival', 'hall', 'ailab'], sun: ['market', 'festival', 'hall', 'ailab'] };
-const MOVE_FOR = { 'wide-town': 'wide', market: 'street', clouds: 'glide', cover: 'push', sun: 'pull' };
+const PLACE_FOR = { dawn: null, market: ['market', 'festival', 'hall', 'ailab'], clouds: null, cover: ['market', 'festival', 'hall', 'ailab'], sun: ['market', 'festival', 'hall', 'ailab'] };
+const MOVE_FOR = { dawn: 'wide', market: 'street', clouds: 'glide', cover: 'push', sun: 'pull' };
 export function editCut(set, { lens = null, music = null, mood = 'cheerful' } = {}) {
   const shots = FINAL.map((c, i) => {
     const ids = PLACE_FOR[c.art]; const p = ids && (ids.find((x) => placeOf(set, x)) || set.offer[0]);

@@ -90,6 +90,7 @@ export function takePic(subject, fault = null, label = '') {
 // ---- the shots of mission 4's films and mission 5's scene
 export const SHOT_ART = {
   'wide-town': () => frame('day', island(false), { ground: false }),
+  'dawn': () => STORY_ART['m-dawn'](),
   'market': () => frame('day', at(80, 72, 1.5, stall(-18, false) + stall(18, false, '#3f8fd0')) + at(80, 84, 1, crowd(-50, 4) + crowd(20, 4))),
   'florence': () => FLO(),
   'otters': () => OTT(),

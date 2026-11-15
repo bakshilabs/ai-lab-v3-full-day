@@ -114,7 +114,7 @@ for (let guard = 0; guard < 900; guard++) {
   }
   if (st === 'trim') {
     await firstLook('edit-trim', 400); await click('#module [data-fm-clip="r1"]'); await click('#module [data-fm-check]'); checks.trimKeepLine = await said(); await click('#module [data-fm-clip="r1"]');
-    for (const c of await p.$$('#module [data-fm-clip][data-fm-right]')) await c.click();
+    for (const id of await p.$$eval('#module [data-fm-clip][data-fm-right]', (els) => els.map((e) => e.dataset.fmClip))) await click(`#module [data-fm-clip="${id}"]`); // the panel redraws on every tap
     await click('#module [data-fm-check]'); checks.trimLine = await said(); await click('#module [data-fm-next]'); continue;
   }
   if (st === 'pace') {
