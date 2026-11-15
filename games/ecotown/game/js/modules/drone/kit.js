@@ -49,12 +49,13 @@ export function createKit(ctx, { reduce }) {
     await choose(box); box.remove();
   }
   // ---- the card that ends a mission: what the child can now do, and what happened. Resolves with 'map' or 'next'.
-  async function closing(id, lines = [], { last = false } = {}) {
+  // finish: every mission is done, so the card offers the record straight away ('finish').
+  async function closing(id, lines = [], { last = false, finish = false } = {}) {
     const m = MISSIONS.find((x) => x.id === id); const n = MISSIONS.indexOf(m) + 1;
     const box = el(`<div class="dk-card done" data-dk-close="${id}" role="region" aria-label="Mission ${n} done"><div class="dk-cardico" aria-hidden="true">✓</div>
       <p class="dk-kicker">Mission ${n} done · ${esc(m.title)}</p><h2>${esc(m.after)}</h2>${lines.length ? `<ul>${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}
-      <div class="dk-row"><button type="button" class="dr-btn" data-k="map">Back to the missions</button>${last ? '' : `<button type="button" class="dr-btn go" data-k="next">Next: mission ${n + 1} ➜</button>`}</div></div>`);
-    root.appendChild(box); ctx.say(`${m.after} ${lines.join(' ')}`); focusFirst(box, last ? '[data-k]' : '[data-k="next"]');
+      <div class="dk-row"><button type="button" class="dr-btn" data-k="map">Back to the missions</button>${finish ? '<button type="button" class="dr-btn go" data-k="finish">All six done: see what you made ➜</button>' : last ? '' : `<button type="button" class="dr-btn go" data-k="next">Next: mission ${n + 1} ➜</button>`}</div></div>`);
+    root.appendChild(box); ctx.say(`${m.after} ${lines.join(' ')}`); focusFirst(box, finish ? '[data-k="finish"]' : last ? '[data-k]' : '[data-k="next"]');
     const k = await choose(box); box.remove(); return k;
   }
 
