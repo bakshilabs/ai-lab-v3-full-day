@@ -110,7 +110,9 @@ test('places: playing again goes somewhere else', () => {
       const drops = v.deliveries.flatMap((p) => p.drops.map((d) => d.k)); assert.equal(new Set(drops).size, drops.length);
       if (seen.length) { const prev = seen[seen.length - 1]; assert.ok(!drops.some((k) => prev.includes(k)), `visit ${round + 1} shares no drop-off with the one before`); assert.notEqual(visitKey(v), prev.key); }
       assert.deepEqual(pickVisit(cells, tiles, junior, usedOf(saved)), v, 'the same until the visit is finished: leaving and coming back resumes');
-      seen.push(Object.assign(drops, { key: visitKey(v) })); saved = JSON.parse(JSON.stringify(finishState(st, v)));
+      const first = v.deliveries[0].drops.map((d) => d.label.replace(/^the other /, 'the '));
+      if (seen.length) assert.ok(!first.some((l) => seen[seen.length - 1].names.includes(l)), `visit ${round + 1} starts at a place with a new name (${first} after ${seen[seen.length - 1].names})`);
+      seen.push(Object.assign(drops, { key: visitKey(v), names: first })); saved = JSON.parse(JSON.stringify(finishState(st, v)));
       assert.equal(saved.done, true); assert.equal(saved.round, round + 1); assert.ok(saved.used.length <= 8 && cleanState(saved));
     }
   }

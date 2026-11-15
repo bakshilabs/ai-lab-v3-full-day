@@ -56,13 +56,15 @@ export function pickVisit(cells, tiles, junior = true, used = []) {
   const raw = candidates(cells, tiles); const built = raw.map((c) => ({ ...c, label: qualify(c, raw, cells, tileOf) })); const builtKeys = new Set(built.map((c) => c.k));
   const land = tiles.filter((t) => t.zone !== 'river' && !builtKeys.has(t.k)).map((t) => ({ k: t.k, gx: t.gx, gz: t.gz, zone: t.zone, label: ZONE_PLACE[t.zone] || 'the far side of the island', icon: '📍', rank: 0 }));
   const pool = [...built, ...land]; const usedSet = new Set(Array.isArray(used) ? used : []); const taken = [];
+  // a place already flown to is avoided, and so is another tile with the same name ("the river meadow" again feels the same)
+  const usedNames = new Set(pool.filter((c) => usedSet.has(c.k)).map((c) => c.label));
   // a drop-off is best 8 to 10 tiles from the pad (a flight worth planning), in the child's own town, not next door to
   // another, and with a name of its own
   const score = (c, from, others, avoid) => {
     if (others.some((o) => manhattan(o, c) < 3)) return null;
     const d = manhattan(from, c); const far = Math.max(0, 80 - 12 * Math.max(0, Math.abs(d - 9) - 1));
-    const twoLegs = from.gx !== c.gx && from.gz !== c.gz ? 4 : 0; const sameName = others.some((o) => o.label === c.label) || taken.includes(c.label) ? -60 : 0;
-    return [-10, 10, 60, 90][c.rank] + far + twoLegs + sameName - (avoid.has(c.k) ? 200 : 0);
+    const twoLegs = from.gx !== c.gx && from.gz !== c.gz ? 4 : 0; const sameName = others.some((o) => o.label === c.label) || taken.includes(c.label) ? -150 : 0;
+    return [-10, 10, 60, 90][c.rank] + far + twoLegs + sameName - (avoid.has(c.k) ? 200 : 0) - (usedNames.has(c.label) ? 120 : 0);
   };
   const best = (from, others, avoid) => {
     let top = null, s = -Infinity;
@@ -82,7 +84,7 @@ export function pickVisit(cells, tiles, junior = true, used = []) {
   const avoid2 = new Set([...usedSet, ...drops1.map((d) => d.k)]); const drops2 = [];
   const a = best(from, [], avoid2); if (a) { drops2.push(a); taken.push(a.label); const b = best(from, [a], avoid2); if (b) drops2.push(b); }
   const names = new Map(); const seen = new Set();
-  for (const p of [from, ...drops1, ...drops2]) { if (names.has(p.k)) continue; let label = p.label; if (seen.has(label)) label = label.replace(/^the /, 'the other '); seen.add(label); names.set(p.k, label); }
+  for (const p of [from, ...drops1, ...drops2]) { if (names.has(p.k)) continue; let label = p.label; if (seen.has(label)) { const other = label.replace(/^the /, 'the other '); label = seen.has(other) ? `${label} on the ${sideWord(p)} side` : other; } seen.add(label); names.set(p.k, label); }
   const slim = ({ k, gx, gz, icon, item, fixed, zone }) => ({ k, gx, gz, label: names.get(k), icon, ...(item ? { item } : {}), ...(fixed ? { fixed } : {}), ...(zone ? { zone } : {}) });
   const mk = (drops, i) => { const p = { from: slim(from), drops: drops.map(slim) }; return junior ? p : addExtras(p, tileKeys, i > 0); };
   const deliveries = [mk(drops1, 0)]; if (drops2.length) deliveries.push(mk(drops2, 1));
