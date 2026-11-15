@@ -87,7 +87,7 @@ export function roundSay(res, j) {
 // After a missed round: a nudge, then a way to work it out, then Florence marks the level on the battery.
 export function balanceHint(tries, res, j) {
   if (tries <= 1) return res.short >= res.over
-    ? (j ? 'Most misses were short of power. When more power is used, press More before time runs out.' : 'Most misses were shortfalls: raise battery output as soon as demand rises.')
+    ? (j ? 'Most misses were short of power. When the town uses more, press More to keep up.' : 'Most misses were shortfalls: raise battery output as soon as demand rises.')
     : (j ? 'Some steps had too much power. When the sun or wind give more, press Less. Below zero, the battery stores it.' : 'Several steps were surpluses: lower the output when wind or sun rise; below zero the battery absorbs the surplus.');
   if (tries === 2) return j ? 'Count the blocks. Power used, take away the wind and sun blocks. What is left is what the battery must give.' : 'Work it out: battery output = demand − wind − solar. Negative means charge.';
   return j ? 'This time I will mark where the battery should be. Watch for the dotted line.' : 'I will mark the balancing output on the battery this round.';

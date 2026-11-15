@@ -10,16 +10,16 @@ const STEP_MS = { j: 10000, s: 8000 }; // how long one ten-minute step lasts on 
 export function scaleSvg(round, i, flex, j) {
   const w = round.wind[i], s = round.sun[i], u = round.use[i]; const diff = gap(round, i, flex);
   const tilt = Math.max(-14, Math.min(14, -diff * 3.5)); // more made than used: the left pan goes down
-  const blocks = (list, x0) => { let out = ''; let n = 0; for (const [count, col, stroke] of list) for (let k = 0; k < count; k++) { const cx = x0 + (n % 4) * 15, cy = -16 - Math.floor(n / 4) * 15; out += `<rect x="${cx}" y="${cy}" width="13" height="13" rx="2" fill="${col}" stroke="${stroke}" stroke-width="1.2"/>`; n++; } return out; };
-  const left = blocks([[w, C.wind, '#2f6aa3'], [s, C.sun, '#b07f22'], [Math.max(0, flex), C.battery, '#5b3696']], -30);
-  const right = blocks([[u, '#f2a33a', '#a8651a'], [Math.max(0, -flex), C.battery, '#5b3696']], -30);
+  const blocks = (list, x0) => { let out = ''; let n = 0; for (const [count, col, stroke] of list) for (let k = 0; k < count; k++) { const cx = x0 + (n % 4) * 18, cy = -19 - Math.floor(n / 4) * 18; out += `<rect x="${cx}" y="${cy}" width="16" height="16" rx="3" fill="${col}" stroke="${stroke}" stroke-width="1.2"/>`; n++; } return out; };
+  const left = blocks([[w, C.wind, '#2f6aa3'], [s, C.sun, '#b07f22'], [Math.max(0, flex), C.battery, '#5b3696']], -35);
+  const right = blocks([[u, '#f2a33a', '#a8651a'], [Math.max(0, -flex), C.battery, '#5b3696']], -35);
   const col = diff === 0 ? '#2e9b5a' : '#b5432c';
-  return `<svg class="pw-scale" viewBox="0 0 260 178" role="img" aria-label="${esc(`${j ? 'Scale' : 'Balance'}: ${stateWord(diff, j)}`)}" font-family="Inter, system-ui, sans-serif">
-    <rect x="122" y="40" width="16" height="118" rx="4" fill="#8a6238"/><rect x="88" y="154" width="84" height="16" rx="6" fill="#7a5a33"/>
+  return `<svg class="pw-scale" viewBox="0 0 260 200" role="img" aria-label="${esc(`${j ? 'Scale' : 'Balance'}: ${stateWord(diff, j)}`)}" font-family="Inter, system-ui, sans-serif">
+    <rect x="122" y="40" width="16" height="140" rx="4" fill="#8a6238"/><rect x="88" y="178" width="84" height="16" rx="6" fill="#7a5a33"/>
     <g class="pw-beam" style="transform: rotate(${tilt.toFixed(1)}deg); transform-origin: 130px 40px">
       <rect x="20" y="35" width="220" height="10" rx="5" fill="#5e4124"/><circle cx="130" cy="40" r="9" fill="${col}" stroke="#3b2a1e" stroke-width="2"/>
-      <g transform="translate(60 45)"><g class="pw-pan" style="transform: rotate(${(-tilt).toFixed(1)}deg)"><path d="M-44 58H44L36 68H-36Z" fill="#c79a62" stroke="#5e4124" stroke-width="2"/><path d="M-40 58L0 0L40 58" fill="none" stroke="#5e4124" stroke-width="1.5"/><g transform="translate(0 58)">${left}</g></g></g>
-      <g transform="translate(200 45)"><g class="pw-pan" style="transform: rotate(${(-tilt).toFixed(1)}deg)"><path d="M-44 58H44L36 68H-36Z" fill="#c79a62" stroke="#5e4124" stroke-width="2"/><path d="M-40 58L0 0L40 58" fill="none" stroke="#5e4124" stroke-width="1.5"/><g transform="translate(0 58)">${right}</g></g></g>
+      <g transform="translate(60 45)"><g class="pw-pan" style="transform: rotate(${(-tilt).toFixed(1)}deg)"><path d="M-46 80H46L38 90H-38Z" fill="#c79a62" stroke="#5e4124" stroke-width="2"/><path d="M-42 80L0 0L42 80" fill="none" stroke="#5e4124" stroke-width="1.5"/><g transform="translate(0 80)">${left}</g></g></g>
+      <g transform="translate(200 45)"><g class="pw-pan" style="transform: rotate(${(-tilt).toFixed(1)}deg)"><path d="M-46 80H46L38 90H-38Z" fill="#c79a62" stroke="#5e4124" stroke-width="2"/><path d="M-42 80L0 0L42 80" fill="none" stroke="#5e4124" stroke-width="1.5"/><g transform="translate(0 80)">${right}</g></g></g>
     </g>
     <text x="60" y="14" font-size="12" font-weight="800" fill="#3b2a1e" text-anchor="middle">${esc(j ? BAL.made.j : BAL.made.s)}</text><text x="200" y="14" font-size="12" font-weight="800" fill="#3b2a1e" text-anchor="middle">${esc(j ? BAL.used.j : BAL.used.s)}</text>
   </svg>`;

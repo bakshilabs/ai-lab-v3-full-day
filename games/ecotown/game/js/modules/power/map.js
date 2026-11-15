@@ -25,7 +25,7 @@ export async function missionMap(d, p) {
 }
 // Before a mission: the real job in one line, then how to play. Resolves 'start' or 'map'.
 export async function briefing(d, i) {
-  const { j, full } = d; const m = MISSIONS[i]; d.mode('full'); d.label(pk(m.use, j)); d.report(`Mission ${i + 1}: ${pk(m.use, j)}`);
+  const { j, full } = d; const m = MISSIONS[i]; d.mode('full'); d.idle(11); d.label(pk(m.use, j)); d.plate('Control room', `Mission ${i + 1}`); d.report(`Mission ${i + 1}: ${pk(m.use, j)}`);
   full.innerHTML = `<div class="pw-brief"><i aria-hidden="true">${m.icon}</i><div><p class="pw-kicker">${j ? 'Mission' : 'Mission'} ${i + 1} of 6</p><h2>${esc(pk(m.use, j))}</h2>
     <p class="pw-job"><b>${j ? 'The real job:' : 'In real life:'}</b> ${esc(pk(m.job, j))}</p><p class="pw-howto"><b>${j ? 'What to do:' : 'Your task:'}</b> ${esc(pk(m.how, j))}</p>
     <div class="pw-row"><button class="go" type="button" data-act="start">${j ? 'Start ➜' : 'Start ➜'}</button><button type="button" data-act="map">${j ? '← Missions' : '← Missions'}</button></div></div></div>`;
@@ -34,7 +34,7 @@ export async function briefing(d, i) {
 }
 // After a mission: what the child can now do, and what they did. Resolves 'next', 'map' or 'finish'.
 export async function debrief(d, i, lines, p) {
-  const { j, full } = d; const m = MISSIONS[i]; d.mode('full'); d.idle(12); const all = allDone(p.done); const n = nextMission(p.done);
+  const { j, full } = d; const m = MISSIONS[i]; d.mode('full'); d.idle(12); d.plate('Control room', `${doneCount(p.done)} of 6`); const all = allDone(p.done); const n = nextMission(p.done);
   full.innerHTML = `<div class="pw-brief done"><i aria-hidden="true">${m.icon}</i><div><p class="pw-kicker">✓ ${j ? 'Mission' : 'Mission'} ${i + 1} ${j ? 'done' : 'complete'}</p><h2>${esc(pk(m.can, j))}</h2>
     <ul class="pw-lines">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
     <div class="pw-row">${all ? `<button class="go" type="button" data-act="finish">${j ? 'Finish the hour ➜' : 'Finish ➜'}</button>` : `<button class="go" type="button" data-act="next">${j ? 'Next mission' : 'Next mission'}: ${esc(pk(MISSIONS[n].use, j))} ➜</button>`}<button type="button" data-act="map">${j ? 'Mission map' : 'Mission map'}</button></div></div></div>`;

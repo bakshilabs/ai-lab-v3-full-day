@@ -84,7 +84,7 @@ export function energyAsk(hours, j) {
 export function energySay(choice, hours) {
   const right = shortKwh(hours); const peak = peakGapKw(hours);
   if (choice.ok) return `Right: about ${right} kWh. That is the energy a battery would have to store in advance to cover it.`;
-  if (choice.why === 'peak') return `${peak} is the biggest gap in one hour, in kW. Energy is power for a time: add the gap for every short hour.`;
+  if (choice.why === 'peak') return `That mixes up kW and kWh. ${peak} kW is the biggest gap in a single hour. Energy (kWh) is power over time: add the gap for every short hour.`;
   if (choice.why === 'half') return 'That is only part of the spell. Add every short hour, to the end.';
   return 'That is too much. Add the gap for each short hour once.';
 }

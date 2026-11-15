@@ -26,6 +26,9 @@ const before = (id) => (id.endsWith('B') ? `${id[0]}A` : null);
 export function live(sw, { source = true } = {}) {
   const out = {}; for (const id of IDS) { const b = before(id); out[id] = !!source && !!sw[id] && (!b || out[b]); } return out;
 }
+// A B switch closed while the A switch before it is open: no power reaches it yet.
+export const waiting = (sw, id) => !!sw[id] && id.endsWith('B') && !sw[`${id[0]}A`];
+export const waitSay = (id, j) => (j ? `${id} is on, but no power reaches it until ${id[0]}A is on too.` : `${id} is closed, but ${id[0]}A upstream is open: no supply reaches it.`);
 export const loadOf = (sw, extra = {}) => IDS.reduce((n, id) => n + (live(sw)[id] ? SECTIONS[id].load * (extra[id] || 1) : 0), 0);
 // Is the broken section connected? Then the protection trips its line at the first switch (3A).
 export const faultConnected = (sw, fault = FAULT) => !!live(sw)[fault];

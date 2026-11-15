@@ -4,6 +4,7 @@ import { forecast, stepHour, isWinter, HOURS } from './model.js';
 import { T, clockWord, clockShort } from './words.js';
 import { FORECAST_ROUNDS, hoursOf, checkMarks, spells, energyChoices, FC, fcDay, fcNote, checkSay, energyAsk, energySay, shortKwh } from './m2-forecast.js';
 import { esc, SEED } from './shell.js';
+import { C } from './chart.js';
 
 export async function playForecast(d) {
   const { j, pick, kit, ctl } = d; let triesAll = 0, spellCount = 0, kwh = false;
@@ -11,7 +12,7 @@ export async function playForecast(d) {
     const dayId = FORECAST_ROUNDS[r]; const hours = hoursOf(kit, dayId, SEED); const fc = forecast(dayId, SEED);
     const marked = new Set(); let tries = 0; let rings = []; let focus = 0;
     d.mode('desk', 'notes'); d.report(`Forecasting: day ${r + 1} of 3`);
-    d.side.innerHTML = `<h3>${esc(fcDay(dayId, j))}</h3><p class="pw-note">${esc(fcNote(dayId, j))}</p><p class="pw-how">${esc(pick(FC.how))}</p>${d.keyRow()}${j ? '' : '<p class="pw-how">Short = supply bar below the demand line. Hours within 8% either way count either way.</p>'}`;
+    d.side.innerHTML = `<h3>${esc(fcDay(dayId, j))}</h3><p class="pw-note">${esc(fcNote(dayId, j))}</p><p class="pw-how">${esc(pick(FC.how))}</p><div class="pw-blocks left"><span><i style="background:${C.wind}"></i>${j ? 'wind power' : 'wind'}</span><span><i style="background:${C.sun}"></i>${j ? 'sun power' : 'solar'}</span><span><i class="line" style="background:${C.need}"></i>${j ? 'power needed' : 'demand'}</span><span><i style="background:${C.dark}"></i>${j ? 'marked short' : 'marked short'}</span></div>${j ? '' : '<p class="pw-how">Short = supply bar below the demand line. Hours within 8% either way count either way.</p>'}`;
     const atHour = (i) => { const h = stepHour(kit, fc[i], 0, 'hold', { winter: isWinter(dayId) }); d.view.setHour(fc[i].clock, isWinter(dayId)); d.view.setLit(d.allLit(), true); d.plate(pick(T.day[dayId]), clockWord(h.clock, j)); };
     const reveal = (i) => { const h = stepHour(kit, fc[i], 0, 'hold', { winter: isWinter(dayId) }); d.showHour(h, dayId); };
     const grid = () => `<div class="pw-hours" role="group" aria-label="${j ? 'Hours of the day' : 'Hours'}">${hours.map((h) => `<button type="button" data-h="${h.i}" aria-pressed="${marked.has(h.i)}" class="${rings.includes(h.i) ? 'ring' : ''}" aria-label="${esc(clockWord(h.clock, j))}${marked.has(h.i) ? ': short' : ''}"><b>${esc(clockShort(h.clock, j))}${j ? `<small>${h.clock < 12 ? 'am' : 'pm'}</small>` : ''}</b><span>${marked.has(h.i) ? esc(pick(FC.shortTag)) : ''}</span></button>`).join('')}</div>`;

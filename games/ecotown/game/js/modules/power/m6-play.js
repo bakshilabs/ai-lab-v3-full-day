@@ -1,6 +1,6 @@
 // Mission 6 on the page: storm night. Isolate the fault, restore by priority on the battery, then repair safely and
 // bring the last homes back one area at a time. The network, rules and words: m6-storm.js.
-import { SECTIONS, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SURGE, live, loadOf, indicators, r1Start, r1Flip, r1Done, r1Say, r1Hint, r2Start, r2Flip, r2Done, r2Best, r2Say, r2Hint, prioOn, crewSteps, crewShuffled, crewCheck, crewWord, crewSay, r3Start, r3Switch, r3Done, r3Say, STORM, WHO_ICON, whoWord } from './m6-storm.js';
+import { SECTIONS, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SURGE, live, loadOf, indicators, r1Start, r1Flip, r1Done, r1Say, r1Hint, r2Start, r2Flip, r2Done, r2Best, r2Say, r2Hint, prioOn, crewSteps, crewShuffled, crewCheck, crewWord, crewSay, r3Start, r3Switch, r3Done, r3Say, STORM, WHO_ICON, whoWord, waiting, waitSay } from './m6-storm.js';
 import { esc } from './shell.js';
 
 const HOMES_OF = ['north', 'medical', 'mill', 'river']; const SHARE = { north: 3, medical: 1, mill: 2, river: 3 };
@@ -50,7 +50,7 @@ export async function playStorm(d) {
     await new Promise((res) => {
       d.setTap((b) => {
         if (b.dataset.sw) {
-          const id = b.dataset.sw; const out = r1Flip(sw, id); sw = out.sw; let msg = r1Say(out.event, sw, id, mistakes, j);
+          const id = b.dataset.sw; const out = r1Flip(sw, id); sw = out.sw; let msg = waiting(sw, id) ? waitSay(id, j) : r1Say(out.event, sw, id, mistakes, j);
           if (out.event === 'tripped' || (out.event === 'opened' && id !== FAULT)) { mistakes++; if (out.event === 'tripped') trips++; if (mistakes >= 2) msg += ` ${r1Hint(mistakes, j)}`; }
           d.say(msg); draw(msg, r1Done(sw) ? '[data-act]' : `[data-sw="${id}"]`);
         }
@@ -67,6 +67,7 @@ export async function playStorm(d) {
       d.setTap((b) => {
         if (!b.dataset.sw) return; const id = b.dataset.sw; const out = r2Flip(sw, id); sw = out.sw; let msg = r2Say(out.event, sw, j, out.load);
         if (out.event === 'overload') { tries++; trips++; msg += ` ${r2Hint(tries, j)}`; }
+        else if (waiting(sw, id)) msg = waitSay(id, j);
         else if (!prioOn(sw) && out.event === 'closed' && !SECTIONS[id].prio && tries < 9) { msg = j ? `${whoWord(id, j)} are on. Is there anyone who needs power more?` : `${whoWord(id, j)} restored. Is all priority load on?`; }
         d.say(msg || (j ? `${loadOf(sw)} of ${BATTERY_ONLY} blocks used.` : `${loadOf(sw) * 10} of ${BATTERY_ONLY * 10} kW.`)); draw(msg, r2Done(sw) ? '[data-act]' : `[data-sw="${id}"]`);
         if (r2Done(sw) && r2Best(sw)) d.focusFirst('[data-act]');
