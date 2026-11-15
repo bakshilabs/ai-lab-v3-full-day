@@ -32,6 +32,10 @@ export async function openModule(app, id) {
     for (const off of shown) { try { off(); } catch (e) { console.error(e); } } shown = []; // what modules left in the town is put away while one is open; showInTown draws it again afterwards
     const j = G.j; const wrap = h(`<div id="module" data-module="${id}"><button class="modback" type="button">← ${j ? 'Back to my town' : 'Back to the town'}</button><div class="modroot"></div></div>`);
     document.getElementById('layer').appendChild(wrap); document.documentElement.dataset.module = id;
+    // the game underneath takes no keys or focus while a module is open (Tab used to wander into the hidden town panels)
+    // The 3D canvas itself stays live (a module may take taps on it); it is only taken out of the Tab order.
+    const inerted = [...document.getElementById('layer').children].filter((el) => el && el !== wrap && !el.inert); for (const el of inerted) el.inert = true;
+    const gl = document.getElementById('gl'); const glTab = gl?.getAttribute('tabindex'); gl?.setAttribute('tabindex', '-1');
     const root = wrap.querySelector('.modroot'); const ctl = new AbortController(); const leaves = []; let frame = null; let state = cleanState(G.modules?.[id]?.state);
     const left = new Promise((res) => { const go = () => { if (!ctl.signal.aborted) { ctl.abort(); res('left'); } }; wrap.querySelector('.modback').onclick = go; ctl.signal.addEventListener('abort', () => res('left')); });
     const camWas = { p: app.stage.camera.position.clone(), q: app.stage.camera.quaternion.clone(), fov: app.stage.camera.fov };
@@ -58,6 +62,8 @@ export async function openModule(app, id) {
     finally {
       if (!ctl.signal.aborted) ctl.abort();
       for (const fn of leaves) { try { fn(); } catch (e) { console.error(e); } }
+      for (const el of inerted) el.inert = false;
+      if (gl) { if (glTab === null) gl.removeAttribute('tabindex'); else gl.setAttribute('tabindex', glTab); }
       app.moduleFrame = null; wrap.remove(); delete document.documentElement.dataset.module;
       app.stage.camera.position.copy(camWas.p); app.stage.camera.quaternion.copy(camWas.q); app.stage.camera.fov = camWas.fov; app.stage.camera.updateProjectionMatrix();
     }
