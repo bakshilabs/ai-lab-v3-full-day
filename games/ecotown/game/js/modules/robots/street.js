@@ -11,6 +11,7 @@ const live = new Set();
 export const hideTownShows = (hide) => { for (const g of live) g.visible = !hide; };
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
 const HOME_YAW = -40 * Math.PI / 180; // the direction the island is usually seen from (the game's starting view)
+const SIGN_Y = 12;                    // the height of the robot sign left in the town, above roofs and trees
 
 function kit(THREE) {
   const geos = []; const mats = new Map();
@@ -80,12 +81,28 @@ export function buildScene(engine, sp, binIds, { still = false, town = false } =
   const robot = buildRobot(THREE, k); robot.g.position.set(home.x, 0, home.z); robot.g.scale.setScalar(ru); g.add(robot.g);
   let sign = null;
   if (town) { // a sign to find the robot by from far above: a tall pole with a robot's head on it, the face on all four sides
-    const px = 2.2; const pz = 2.0; k.box(g, 0.5, 0.2, 0.5, '#8a6336', px, 0.1, pz); k.box(g, 0.2, 7.2, 0.2, '#3b2a1e', px, 3.6, pz);
-    sign = new THREE.Group(); sign.position.set(px, 8.2, pz); sign.rotation.y = HOME_YAW - outer.rotation.y; g.add(sign);
+    const px = 2.2; const pz = 2.0; k.box(g, 0.7, 0.24, 0.7, '#8a6336', px, 0.12, pz); k.box(g, 0.3, 10.4, 0.3, '#3b2a1e', px, 5.2, pz);
+    sign = new THREE.Group(); sign.position.set(px, SIGN_Y, pz); sign.scale.setScalar(1.65); sign.name = 'robots-sign'; sign.rotation.y = HOME_YAW - outer.rotation.y; g.add(sign);
     k.box(sign, 2.3, 1.9, 2.3, '#16c79a'); k.box(sign, 2.5, 0.22, 2.5, '#0f9b78', 0, -1.0, 0); k.box(sign, 0.16, 0.6, 0.16, '#3b2a1e', 0, 1.25, 0); k.box(sign, 0.5, 0.5, 0.5, '#f08a2c', 0, 1.75, 0);
     for (let s = 0; s < 4; s++) { const f = new THREE.Group(); f.rotation.y = s * Math.PI / 2; sign.add(f); k.box(f, 1.8, 1.25, 0.06, '#243447', 0, 0, 1.16); for (const x of [-0.45, 0.45]) k.box(f, 0.4, 0.4, 0.06, '#bfeaff', x, 0.1, 1.2); k.box(f, 0.7, 0.12, 0.06, '#ffffff', 0, -0.36, 1.2); }
   }
   engine.scene.add(outer);
+
+  // ---------- passers-by: the town's people and animals keep walking, but none stands in the yard (or, for the module's
+  // own view, in the strip in front of it) while the robot works there. They are moved onto a layer the camera does not
+  // draw, never touched otherwise, and given back as soon as they walk on or the scene is removed.
+  const HIDE = 30; const hidden = new Set(); const loc = new THREE.Vector3();
+  const crowd = () => { const r = engine.life?.residents?.[0]?.g?.parent || engine.life?.family?.members?.[0]?.parent; return r && r !== engine.scene ? r : null; };
+  const setLayer = (o, on) => o.traverse((q) => { if (on) q.layers.set(HIDE); else q.layers.set(0); });
+  function tidy() {
+    const r = crowd(); if (!r) return;
+    for (const o of r.children) {
+      if (o.isPoints) continue; loc.setFromMatrixPosition(o.matrixWorld); outer.worldToLocal(loc);
+      const inYard = Math.abs(loc.x) < 3.3 && loc.z > -3.3 && loc.z < (town ? 3.3 : 9.5) && loc.y > -2 && loc.y < 8;
+      if (inYard && !hidden.has(o)) { setLayer(o, true); hidden.add(o); } else if (!inYard && hidden.has(o)) { setLayer(o, false); hidden.delete(o); }
+    }
+  }
+  const giveBack = () => { for (const o of hidden) setLayer(o, false); hidden.clear(); };
 
   // ---------- the robot's moves: a queue, run on real time. finish() ends every queued move at once.
   const acts = []; let last = now();
@@ -98,8 +115,9 @@ export function buildScene(engine, sp, binIds, { still = false, town = false } =
     a.step?.(e);
   };
   function update() {
+    tidy(); if (still && !acts.length) return;
     const t = now(); let dt = Math.max(0, t - last); last = t; const idle = !acts.length;
-    if (!still) { robot.head.rotation.z = idle ? Math.sin(t * 1.3) * 0.05 : 0; if (sign) sign.position.y = 8.2 + Math.sin(t * 1.1) * 0.18; }
+    if (!still) { robot.head.rotation.z = idle ? Math.sin(t * 1.3) * 0.05 : 0; if (sign) sign.position.y = SIGN_Y + Math.sin(t * 1.1) * 0.22; }
     while (acts.length) {
       const a = acts[0]; a.t = (a.t || 0) + dt; const q = a.dur > 0 ? Math.min(1, a.t / a.dur) : 1; run(a, q);
       robot.body.position.y = still || q >= 1 || a.x === undefined ? 0 : Math.abs(Math.sin(a.t * 12)) * 0.025;
@@ -143,7 +161,7 @@ export function buildScene(engine, sp, binIds, { still = false, town = false } =
   robot.g.rotation.y = 0.5;
   return { g: outer, robot, update, finish, sortOne, view, busy: () => acts.length > 0, same: cleared.same,
     hold(id) { const m = itemMesh(THREE, k, id); m.scale.setScalar(town ? 1.5 / ru : 1); robot.hold.add(m); },
-    remove() { acts.length = 0; engine.scene.remove(outer); k.dispose(); cleared.restore(); } };
+    remove() { acts.length = 0; giveBack(); engine.scene.remove(outer); k.dispose(); cleared.restore(); } };
 }
 
 // The robot left working in the town: it carries one thing after another to the bins. With reduced motion it stands
@@ -157,7 +175,7 @@ export function townScene(engine, sp, binIds, things, still) {
   const stillOpen = () => !L || !L.cellItem || LOW.has(L.cellItem);
   if (still) sc.hold(list[0]);
   const next = () => { if (gone) return; const id = list[n++ % list.length]; sc.sortOne(id, kind(id).bin, () => { timer = setTimeout(next, 1400); }, false); };
-  const tick = () => { if (gone) return; if (!stillOpen()) sc.g.visible = false; else if (!still && sc.g.visible) sc.update(); raf = frame(tick); };
+  const tick = () => { if (gone) return; if (!stillOpen()) sc.g.visible = false; else if (sc.g.visible) sc.update(); raf = frame(tick); };
   if (!still) next(); if (frame) raf = frame(tick);
   return () => { if (gone) return; gone = true; if (frame) cancelAnimationFrame(raf); clearTimeout(timer); live.delete(sc.g); sc.remove(); };
 }

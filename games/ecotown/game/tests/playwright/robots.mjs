@@ -231,7 +231,7 @@ checks.robotLeftInTown = after.scene === sceneBefore + 1;       // show() added 
 checks.cameraPutBack = after.fov < 30 && after.moduleGone;
 checks.everyStepSpoken = await p.evaluate(() => ['kept apart', 'new examples|added examples|Still \\d|lower than', 'at work in your town', 'in the right bin'].every((re) => window.__sayLog.some((s) => new RegExp(re).test(s.text))));
 // what it leaves in the town is drawn, in view from the usual island view, and not tiny
-{ const sign = await seen('robots-scene', 8.5); const bot = await seen('robots-robot', 1.0); notes.townResult = { sign, robot: bot };
+{ const sign = await seen('robots-sign', 0); const bot = await seen('robots-robot', 1.0); notes.townResult = { sign, robot: bot };
   checks.townResultDrawn = !!sign && sign.onScreen; checks.townResultNotHidden = !!sign && sign.blocked === 0; checks.townResultNotTiny = !!sign && sign.h >= Math.min(60, H * 0.07) && sign.w >= 24; }
 await shot('town-after');
 
