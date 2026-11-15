@@ -20,13 +20,19 @@ export const PIECES = {
 export const pieceName = (kind, j) => pick(PIECES[kind].name, j);
 
 // what stands beside each place on the street
+// Pieces stand on the homes' side (north). A place is named by both sides: "the homes opposite the car park".
+export function opposite(slot, j) {
+  if (slot === JUNCTION) return j ? 'the side road' : 'the junction';
+  if (slot === 0) return 'the shop';
+  if (CARPARK.includes(slot)) return 'the car park';
+  if (slot === 6) return 'the cycle track';
+  return 'the school';
+}
 export function beside(slot, j) {
   if (slot === JUNCTION) return { icon: '↘', text: j ? 'the side road' : 'the junction' };
-  if (slot === 0) return { icon: '🛒', text: 'the shop' };
-  if (CARPARK.includes(slot)) return { icon: '🅿', text: 'the car park' };
   if (slot === 6) return { icon: '🚲', text: 'the cycle track' };
-  if (slot >= 7) return { icon: '🏫', text: 'the school' };
-  return { icon: '🏠', text: 'homes' };
+  const icon = slot === 0 ? '🛒' : CARPARK.includes(slot) ? '🅿' : '🏫';
+  return { icon, text: `the homes opposite ${opposite(slot, j)}` };
 }
 // the helper strip's headings: what stands on the south side, and how many places each spans
 export const LANDMARKS = [{ icon: '🛒', text: 'Shop', span: 1 }, { icon: '🅿', text: 'Car park', span: 4 }, { icon: '↘', text: 'Side road', span: 1 }, { icon: '🚲', text: 'Cycle track', span: 1 }, { icon: '🏫', text: 'School', span: 3 }];
@@ -43,12 +49,14 @@ export const USE = {
 export function wait(sec, j) {
   if (sec === null || sec === undefined) return '—';
   if (j) { const m = Math.round(sec / 60); return m < 1 ? 'under 1 minute' : plural(m, 'minute'); }
-  const m = Math.floor(sec / 60), s = Math.round(sec % 60); return m ? `${m} min ${String(s).padStart(2, '0')} s` : `${s} s`;
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60); return m ? `${m}\u00a0min ${String(s).padStart(2, '0')}\u00a0s` : `${s}\u00a0s`;
 }
+// one car at a drop-off is not a queue
+export const queueText = (n) => (n <= 1 ? 'No queue' : plural(n, 'car'));
 export const GRADE = { good: 'Good', fair: 'Could be better', poor: 'Needs work' };
 
 export const T = {
-  title: { j: 'Roads for self-driving cars', s: 'Roads for self-driving cars' },
+  title: { j: 'Self-driving cars', s: 'Self-driving cars' },
   stage: { intro: 'Meeting the street', design: 'Designing the street', run: 'Running the morning', results: 'Reading the numbers', land: 'Choosing what the freed land becomes', rerun: 'Testing the street with the new homes', ride: 'Riding along the street', done: 'Street finished' },
   start: { j: 'Start ➜', s: 'Start ➜' },
   run: { j: '▶ Run the morning', s: '▶ Run the morning' },
@@ -111,7 +119,7 @@ export function measures(res, j, prev = null) {
     { id: 'wait', label: 'Longest wait for a car', value: wait(res.longestWait, j), grade: g.wait, was: pg ? wait(pg.longestWait, j) : null },
     { id: 'walk', label: 'Furthest walk to a drop-off', value: `${res.furthestWalk} m`, grade: g.walk, was: pg ? `${pg.furthestWalk} m` : null },
     { id: 'safe', label: j ? 'Safe crossings' : 'Crossing places made safe', value: `${res.safe} of ${res.lines}`, grade: g.safe, was: prev ? `${prev.safe} of ${prev.lines}` : null },
-    { id: 'queue', label: j ? 'Most cars in a queue' : 'Longest queue at a drop-off', value: plural(res.queue, 'car'), grade: g.queue, was: pg ? plural(pg.queue, 'car') : null },
+    { id: 'queue', label: j ? 'Most cars in a queue' : 'Longest queue at a drop-off', value: queueText(res.queue), grade: g.queue, was: pg ? queueText(pg.queue) : null },
   ];
   if (!j) {
     out.push({ id: 'avg', label: 'Average wait', value: wait(res.averageWait, false), grade: res.averageWait <= 60 ? 'good' : res.averageWait <= 180 ? 'fair' : 'poor', was: pg ? wait(pg.averageWait, false) : null });
@@ -143,8 +151,8 @@ export function whereSay(id, res, j) {
   const at = (d) => `the drop-off point by ${beside(d, j).text}`; const w = res.where;
   switch (id) {
     case 'wait': return !res.ran ? needDrop(j) : `The longest wait was at ${at(w.wait.drop)}: ${wait(res.longestWait, j)}.${res.carsOutside ? ` ${plural(res.carsOutside, 'car')} had no bay and started four minutes away.` : ''}`;
-    case 'walk': return !res.ran ? needDrop(j) : `The home by ${beside(w.walk.home, j).text} is furthest from a car: ${res.furthestWalk} m to ${at(w.walk.drop)}.`;
-    case 'queue': return !res.ran ? needDrop(j) : res.queue && w.queue ? `The longest queue was at ${at(w.queue.drop)}: ${plural(res.queue, 'car')} at ${clock(w.queue.t)}. One car loads at a time.` : 'No car had to queue at a drop-off point.';
+    case 'walk': return !res.ran ? needDrop(j) : `The home opposite ${opposite(w.walk.home, j)} is furthest from a car: ${res.furthestWalk} m to ${at(w.walk.drop)}.`;
+    case 'queue': return !res.ran ? needDrop(j) : res.queue > 1 && w.queue ? `The longest queue was at ${at(w.queue.drop)}: ${plural(res.queue, 'car')} at ${clock(w.queue.t)}. One car loads at a time.` : 'No car had to queue at a drop-off point.';
     case 'safe': return `${res.safe} of ${res.lines} crossing places are safe. A green flag has a marked crossing at it or next to it. An orange flag has none.`;
     case 'avg': return `All ${res.trips} waits added up and shared out: ${wait(res.averageWait, false)} each.`;
     case 'use': return `${res.trips} trips shared by ${res.fleet} cars: ${tripsPerCar(res)} trips for each car. Fewer cars each do more, but people may wait longer.`;
@@ -157,7 +165,7 @@ export function marks(res, j) {
   if (!res.ran) return out; const g = grade(res, j); const tone = (x) => (x === 'good' ? 'good' : x === 'fair' ? 'warn' : 'poor');
   out.push({ id: 'walk', slot: res.where.walk.home, to: res.where.walk.drop, text: `Furthest walk: ${res.furthestWalk} m`, tone: tone(g.walk) });
   out.push({ id: 'wait', slot: res.where.wait.drop, text: `Longest wait: ${j ? wait(res.longestWait, true) : wait(res.longestWait, false)}`, tone: tone(g.wait) });
-  if (res.queue && res.where.queue) out.push({ id: 'queue', slot: res.where.queue.drop, n: res.queue, text: `Longest queue: ${plural(res.queue, 'car')}`, tone: tone(g.queue) });
+  if (res.queue > 1 && res.where.queue) out.push({ id: 'queue', slot: res.where.queue.drop, n: res.queue, text: `Longest queue: ${plural(res.queue, 'car')}`, tone: tone(g.queue) });
   return out;
 }
 
@@ -196,6 +204,8 @@ export const newHomesAsk = (j, fam) => (j
   ? `The new homes bring ${fam} more families. Will your street still work? Run the morning with them and see.`
   : `The new homes add ${fam} families and ${fam} morning calls. Run the morning with them to test the street.`);
 export const withHomes = (j, fam) => (j ? `With the ${fam} new families: ` : `With ${fam} more families: `);
+// a comment after withHomes() starts in lower case (it follows a colon)
+export const afterColon = (text) => text.replace(/^[A-Z][a-z]* /, (w) => w.toLowerCase());
 
 // the ride: one caption for each stop, in order along the street. Waiting bays share one caption.
 export function rideStops(layout, plots, j, res = null) {
