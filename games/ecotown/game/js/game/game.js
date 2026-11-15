@@ -1210,7 +1210,7 @@ export function createGame(app) {
         if (!broke.length) { run.meeting = line; G.diary.push(`Town meeting: ${line}.`); break; }
         audio.bad();
         const k = await ui.modal(`<div class="ribbon">Town meeting</div><h2>⚠ ${esc(G.S.meetingBrokeHead)}</h2><p>${esc(G.S.meetingBroke(broke.join('; ')))}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="meet-keep">${esc(G.S.meetingKeep)}</button><button class="btn go" data-act="meet-again">↺ ${esc(G.S.meetingAgain)}</button></div>`, { say: G.S.meetingBroke(broke.join('; ')) });
-        if (k === 'meet-keep') { run.broke = broke; run.meeting = `${line}. ⚠ ${G.S.meetingBroke(broke.join('; '))}`; G.diary.push(`Town meeting: ${run.meeting}.`); break; }
+        if (k === 'meet-keep') { run.broke = broke; run.meeting = `${line}. ⚠ ${broke.join('; ')}`; /* the full sentence is in the outcome box; the tile only names the limit */ G.diary.push(`Town meeting: ${run.meeting}.`); break; }
         for (const kk of KEYS) if (e[kk]) G.extra[kk] = (G.extra[kk] || 0) - e[kk]; if (had !== null) G.credits = had; // choose again: undo this choice
       }
     }
