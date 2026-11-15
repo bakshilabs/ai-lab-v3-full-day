@@ -52,7 +52,7 @@ export function show(townCtx, data) {
   { const g = group(root, 4.1, 0.38, BZ); box(g, 2.6, 0.1, 1.9, '#7a8088', 0, 0, 0); box(g, 2.2, 0.1, 1.5, '#2c4a5e', 0, 1.5, 0); for (const dx of [-1, 1]) for (const dz of [-0.6, 0.6]) box(g, 0.1, 1.5, 0.1, '#5a6068', dx, 0.1, dz); pod(k, g, 0, 0, Math.PI / 2).scale.setScalar(0.62); }
   // a tall sign to find it by: a teal board with a white shared car on it, and the street's name
   box(root, 0.2, 5.4, 0.2, '#3b2a1e', 7.5, 0.38, BZ); box(root, 2.4, 1.6, 0.14, '#18a999', 7.5, 4.3, BZ); box(root, 1.5, 0.5, 0.2, '#f6f3ea', 7.5, 4.75, BZ); box(root, 1.1, 0.3, 0.2, '#2c4a5e', 7.5, 5.1, BZ); for (const dx of [-0.45, 0.45]) box(root, 0.34, 0.3, 0.22, '#22262a', 7.5 + dx, 4.55, BZ);
-  k.label(root, 'Shared-car street', { tone: 'plain', world: 1, x: 7.5, y: 6.1, z: BZ });
+  k.label(root, 'Shared-car street', { tone: 'plain', world: 2.2, x: 7.5, y: 6.1, z: BZ });   // big enough to read from the usual island view
   // one shared car drives along the street: it stops at the first drop-off point, goes on, turns and comes back
   const car = pod(k, root, 0, ROAD_Z); car.position.y = 0.44; car.scale.setScalar(0.8); car.name = 'roads-car';
   const stop = at(layout.indexOf('drop')); const A = -7.6, B = 7.6; car.position.x = stop;
