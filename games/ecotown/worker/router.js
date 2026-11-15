@@ -146,14 +146,14 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     if (p.startsWith('/api/')) return json({ error: 'not found' }, 404);
 
     // ---------------- game files: only with a valid session
-    const file = p === '/' ? '/index.html' : p;
+    const file = p === '/' ? '/index.html' : p; const page = file === '/index.html' || file === '/play.html'; // the start page and the game page: both show the join page without a session
     // The page itself and every heartbeat ask the organisation's store. The other files of one page load (about a hundred)
     // reuse a recent "yes" for a minute, so a class starting together is one store call each, not a hundred.
-    const hit = file !== '/index.html' && recent.get(sess);
-    const r = hit && now - hit < 60e3 ? { ok: true } : await S.check(sess, now, { touch: file === '/index.html' });
+    const hit = !page && recent.get(sess);
+    const r = hit && now - hit < 60e3 ? { ok: true } : await S.check(sess, now, { touch: page });
     if (r.ok && !hit) { if (recent.size > 5000) recent.clear(); recent.set(sess, now); } else if (!r.ok) recent.delete(sess);
     if (!r.ok) {
-      if (file === '/index.html') return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''));
+      if (page) return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''));
       return text('Login required', 403);
     }
     // recorded voices live in Workers KV (too big for the script); same session rule as every other game file

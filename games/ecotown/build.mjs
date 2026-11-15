@@ -44,7 +44,7 @@ const vendor = path.join(SRC, 'vendor');
 const res = await build({
   entryPoints: [path.join(SRC, 'js', 'main.js')],
   bundle: true, format: 'esm', target: 'es2020', minify: true, legalComments: 'none', sourcemap: false, write: false,
-  define: { __ECO_BUILD__: JSON.stringify(BUILD) },
+  define: { __ECO_BUILD__: JSON.stringify(BUILD), __ECO_HUB__: JSON.stringify('./'), __ECO_GAME__: JSON.stringify('play.html') },
   charset: 'utf8',
   plugins: [{
     name: 'three-vendor',
@@ -66,16 +66,23 @@ const css = cssRes.outputFiles[0].text.replaceAll('../fonts/', 'fonts/');
 const cssName = `app-${hash(css)}.css`;
 fs.writeFileSync(path.join(A, cssName), css);
 
-// 5. index.html: no import map, load the bundle
+// 5. the game page (play.html in the built site): no import map, load the bundle
 let html = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\n?/, '')
   .replace('href="fonts/inter.woff2"', 'href="assets/fonts/inter.woff2"')
   .replace('href="css/game.css"', `href="assets/${cssName}"`)
   .replace('<script type="module" src="js/main.js"></script>', `<script type="module" src="assets/${jsName}"></script>`)
   .replace('<head>', '<head>\n<meta name="robots" content="noindex, nofollow">');
-fs.writeFileSync(path.join(OUT, 'index.html'), html);
+fs.writeFileSync(path.join(OUT, 'play.html'), html);
+// 5a. the AI Lab start page is the site's front door (index.html): the welcome and the four parts
+const hubRes = await build({ entryPoints: [path.join(SRC, 'js', 'hub.js')], bundle: true, format: 'esm', target: 'es2020', minify: true, legalComments: 'none', sourcemap: false, write: false, charset: 'utf8',
+  define: { __ECO_BUILD__: JSON.stringify(BUILD), __ECO_HUB__: JSON.stringify('./'), __ECO_GAME__: JSON.stringify('play.html') } });
+const hubJs = hubRes.outputFiles[0].text; const hubName = `hub-${hash(hubJs)}.js`; fs.writeFileSync(path.join(A, hubName), hubJs);
+let hub = fs.readFileSync(path.join(SRC, 'start.html'), 'utf8');
+hub = hub.replaceAll('fonts/', 'assets/fonts/').replace('<script type="module" src="js/hub.js"></script>', `<script type="module" src="assets/${hubName}"></script>`).replaceAll('href="index.html', 'href="play.html');
+fs.writeFileSync(path.join(OUT, 'index.html'), hub);
 // 5b. the club leader's one-page plan: a plain page, no scripts beyond its print button
-for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(SRC, page))) fs.copyFileSync(path.join(SRC, page), path.join(OUT, page));
+for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(SRC, page))) fs.writeFileSync(path.join(OUT, page), fs.readFileSync(path.join(SRC, page), 'utf8').replaceAll('href="start.html"', 'href="./"').replaceAll('href="index.html"', 'href="play.html"'));
 
 // 6. security headers for Cloudflare Pages
 fs.copyFileSync(path.join(here, '_headers'), path.join(OUT, '_headers'));
@@ -83,4 +90,4 @@ fs.copyFileSync(path.join(here, '_headers'), path.join(OUT, '_headers'));
 const total = fs.readdirSync(A, { recursive: true }).map((f) => path.join(A, f)).filter((f) => fs.statSync(f).isFile()).reduce((a, f) => a + fs.statSync(f).size, 0);
 fs.writeFileSync(path.join(OUT, 'version.json'), JSON.stringify(BUILD));
 console.log(`Eco Town ${BUILD.version} (${BUILD.commit}, ${BUILD.date})`);
-console.log(`dist/ built: index.html, assets/${jsName} (${(js.length / 1024).toFixed(0)} KB), assets/${cssName}, model, fonts — ${(total / 1024 / 1024).toFixed(1)} MB`);
+console.log(`dist/ built: index.html (start page), play.html (game), assets/${jsName} (${(js.length / 1024).toFixed(0)} KB), assets/${cssName}, model, fonts — ${(total / 1024 / 1024).toFixed(1)} MB`);
