@@ -1,18 +1,25 @@
 // Collects every sentence the game can speak, for recording. Runs the game modules in a browser (they use
 // the three.js import map), harvests the fixed text, Florence's planner readings and the diary lines, and
 // merges the lines logged during play-throughs (said.json files). Writes voice/lines-<band>.json.
-// Usage: node voice/collect.mjs <baseUrl> <said.json ...>
+// Usage: node voice/collect.mjs <baseUrl> <said.json ...> [--fresh]
+// The lines files keep their old order and new sentences are added at the end, so render.py rewrites only the last
+// chunk or two of each pack (a new order renames every chunk: megabytes of churn in git). --fresh starts the lists anew.
+// The afternoon modules: every js/modules/<id>/words.js (and drone/route.js) is read for built-in sentences, spoken in
+// Florence's voice; put a new module's spoken lines in its words.js, or add its file to WORD_FILES.
 import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const here = path.dirname(new URL(import.meta.url).pathname);
-const [base = 'http://localhost:8765/', ...saidFiles] = process.argv.slice(2);
+const argv = process.argv.slice(2); const fresh = argv.includes('--fresh');
+const [base = 'http://localhost:8765/', ...saidFiles] = argv.filter((a) => a !== '--fresh');
+const modDir = path.join(here, '..', 'game', 'js', 'modules');
+const WORD_FILES = [...fs.readdirSync(modDir).filter((d) => fs.existsSync(path.join(modDir, d, 'words.js'))).map((d) => `./js/modules/${d}/words.js`), './js/modules/drone/route.js'];
 
-const b = await chromium.launch(); const p = await b.newPage();
-await p.goto(base + 'index.html?film=none');
-const out = await p.evaluate(async () => {
+const b = await chromium.launch(); const p = await b.newPage(); p.setDefaultTimeout(600000); // a busy machine is slow
+await p.goto(base + 'index.html?film=none', { waitUntil: 'domcontentloaded' });
+const out = await p.evaluate(async (WORD_FILES) => {
   const { CONTENT, LEVEL_TEXT, diaryLines, HELPER, SANDBOX } = await import('./js/game/content.js');
   const { RULES } = await import('./js/game/advisor.js');
   const { FILMS } = await import('./js/game/film.js');
@@ -89,6 +96,39 @@ const out = await p.evaluate(async () => {
         add(band, j ? `Welcome to ${h}! Someone else planned this town. Tap 🔍 and pick a lens: what did they get right, and what would you check?` : `This is ${h}, planned by someone else. Run the lenses: what holds up, and what would you question?`, 'helper'); }
       add(band, j ? 'Tap 🔍 and pick a lens to check this town.' : 'Run a lens on this town.', 'helper'); }
     add(band, S.classInvite, 'helper'); add(band, S.moveIn, 'narrator'); add(band, S.completeText, 'narrator'); add(band, S.planDidntFit, 'narrator');
+    // the full day (Nov 2026): the mission reward card, the pause cards, the session finish, Florence's careful replies
+    { const shortH = Object.values(C.ui.shortHead || {}); for (const L of Object.values(LEVEL_TEXT)) for (const hd of [pick(L.complete), ...shortH]) for (let n = 0; n <= 3; n++) add(band, `${hd} ${n} stars.`, 'narrator');
+      for (const q of S.pause || []) add(band, `${S.pauseRibbon}. ${q}`, 'narrator');
+      const { sessionRecap } = await import('./js/game/recap.js'); for (const t of sessionRecap({}, {}, j).talk) add(band, t, 'narrator');
+      const { CARE } = await import('./js/game/care.js'); for (const v of Object.values(CARE)) add(band, pick(v), 'helper'); }
+    // the welcome film and its guide (js/welcome.js, js/series.js)
+    { const { SCENES } = await import('./js/series.js'); for (const sc of SCENES) add(band, sc.say, 'narrator'); add(band, 'Four parts, in this order. Each one tells you what to do as you go.', 'narrator'); }
+    // the afternoon modules: every built-in sentence in their word files (strings, { j, s } pairs, and what functions
+    // return when given only the age). A sentence with a missing value in it (undefined, NaN) is left out.
+    for (const f of WORD_FILES) {
+      let M; try { M = await import(f); } catch { continue; }
+      const seen = new Set(); const bad = /undefined|NaN|\[object|\bnull\b|\btrue\b|\bfalse\b/;
+      const say = (t) => { if (/\s/.test(t) && /[.!?:]['’”)]?$/.test(t.trim())) for (const s of V.sentences(t)) if (!bad.test(s)) add(band, s, 'helper'); };
+      const walk = (v, d) => {
+        if (v == null || d > 4) return;
+        if (typeof v === 'string') return say(v);
+        if (typeof v === 'function') { if (d > 2 || v.length > 2) return; for (const a of [[j], []]) { try { walk(v(...a), d + 1); } catch { /* needs more than the age */ } } return; }
+        if (typeof v !== 'object' || seen.has(v) || v instanceof Promise) return; seen.add(v);
+        if ('j' in v && 's' in v) return walk(j ? v.j : v.s, d + 1);
+        for (const x of Object.values(v)) walk(x, d + 1);
+      };
+      for (const [name, v] of Object.entries(M)) if (name !== 'default') walk(v, 0);
+    }
+    // robot training: what the robot did with each thing, for every thing, bin and set of matching features
+    { const R = await import('./js/modules/robots/learn.js').catch(() => null); const W = await import('./js/modules/robots/words.js').catch(() => null);
+      if (R && W) { const h = (t) => { if (typeof t !== 'string') return; for (const s of V.sentences(t)) res[band].push({ s, voice: 'helper', rare: 1 }); }; // rare: recorded last (render.py --only) const ks = R.kindsFor(j).map((k) => k.id); const bins = R.binsFor(j).map((x) => x.id); const fs = R.featuresFor(j);
+        const subsets = []; for (let m = 1; m < 1 << fs.length; m++) subsets.push(fs.filter((_, i) => m & (1 << i)));
+        for (const t of ['Right bin', 'Not the right bin yet', 'Asked for help']) h(`${t}.`);
+        for (const k of ks) { const truth = R.kind(k).bin; h(`${R.kind(k).name}.`);
+          h(W.streetLine({ kind: k, got: null, why: 'tie', truth })); h(W.streetLine({ kind: k, got: null, truth })); h(W.verdict({ kind: k, got: null }).text);
+          for (const g of ['bin', 'nothing', 'closer']) h(W.lacked(k, { type: g }));
+          for (const b of bins) { h(W.streetLine({ kind: k, got: b, match: k, ok: false, truth: b })); h(W.streetLine({ kind: k, got: b, match: k, ok: true, truth: b })); h(W.wrongBin(k, j)); }
+          for (const same of subsets) { h(W.verdict({ kind: k, got: truth, match: k, ok: true, same }).text); h(W.verdict({ kind: k, got: truth, match: k, ok: false, truth, same }).text); } } } }
   }
   // Florence's readings for many instructions (both bands hear them in her voice)
   const terrain = makeTerrain(); let cells = new Map(); const SL = { land: ['best', 'flat', 'sunny', 'dry', 'keep_meadow', 'keep_wood', 'keep_wetland', 'near_water', 'near_coast', 'big'], move: ['easy_access', 'safe_walking', 'cycling', 'tram', 'cars_at_edge', 'no_cars', 'fast', 'everyone'], homes: ['strong', 'cheap', 'many', 'tall', 'low_carbon', 'warm', 'natural_materials', 'green_roofs', 'reuse'], food: ['max_food', 'enough_food', 'keep_hedges', 'bees', 'wildlife', 'local', 'allotments', 'orchard'], power: ['clean_power', 'enough_power', 'winter', 'night', 'storage', 'wind', 'solar', 'save_water', 'repair', 'compost'], heart: ['middle', 'walk_time', 'near_homes', 'nature_links', 'market', 'safe_route'] };
@@ -102,17 +142,19 @@ const out = await p.evaluate(async () => {
     cells = applyPlacements(cells, plan(lv, CLEAR[lv], { terrain, cells, numbers: { minutes: 15 } }).placements); for (const c of cells.values()) if (c.item) c.locked = true;
   }
   return { res, helper: HELPER };
-});
+}, WORD_FILES);
 // lines spoken during play-throughs, with the voice they were spoken in
 for (const f of saidFiles) {
   const band = /senior|\/s\d|-s\b|pt-s/.test(f) ? 'senior' : 'junior'; const said = JSON.parse(fs.readFileSync(f, 'utf8')).filter((x) => x.voice === 'narrator' || x.voice === 'helper'); // not the silent floating numbers
-  const sents = await p.evaluate(({ said }) => import('./js/ui/voice.js').then((V) => said.flatMap((x) => V.sentences(x.text).map((s) => ({ s, voice: x.voice })))), { said });
-  out.res[band].push(...sents);
+  const sents = await p.evaluate(({ said }) => import('./js/ui/voice.js').then((V) => said.flatMap((x) => V.sentences(x.text).map((s) => ({ s, voice: x.voice, said: 1 })))), { said });
+  out.res[band].push(...sents.filter((x) => !(/\d/.test(x.s) && x.s.length >= 60))); // a long sentence with a live number in it is one play-through’s own
 }
 for (const band of ['junior', 'senior']) {
   const keys = await p.evaluate((list) => import('./js/ui/voice.js').then((V) => list.map((x) => ({ ...x, key: V.keyOf(x.s, x.voice) }))), out.res[band]);
   const uniq = [...new Map(keys.filter((x) => !/\d{2,}|\d+ ?%|\d+ of \d+/.test(x.s) || x.s.length < 60).map((x) => [x.key, x])).values()];
-  fs.writeFileSync(path.join(here, `lines-${band}.json`), JSON.stringify(uniq, null, 1));
-  console.log(band, uniq.length, 'sentences', uniq.filter((x) => x.voice === 'helper').length, 'in Florence’s voice');
+  const file = path.join(here, `lines-${band}.json`); const old = !fresh && fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : [];
+  const had = new Set(old.map((x) => x.key)); const added = uniq.filter((x) => !had.has(x.key)); const all = [...old, ...added];
+  fs.writeFileSync(file, JSON.stringify(all, null, 1));
+  console.log(band, uniq.length, 'sentences found,', added.length, 'new;', all.length, 'in the list,', all.filter((x) => x.voice === 'helper').length, 'in Florence’s voice');
 }
 await b.close();
