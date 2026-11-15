@@ -2154,3 +2154,12 @@ html[data-visit="on"] #card .goal .gt { font-weight: 800; }
 
 /* a mission that ends partly met, or with a limit broken, is not shown in the "all met" green */
 .modal .outcome.partly, .modal .outcome.broke { background: #fff0ea; box-shadow: inset 0 0 0 2px #e9a58c; }
+/* the mission reward card: where the missions and the player's own town stand */
+.modal .townline { margin: 8px 0 0; font-weight: 800; color: var(--ink2); font-size: .9em; }
+/* "You practised…": the recap on the mission reward card and the session-finished card */
+.modal .practised { text-align: left; border-radius: 16px; padding: 10px 14px; margin: 10px 0; background: #eef4fb; box-shadow: inset 0 0 0 2px #c4d6ea; }
+.modal .practised.plain { background: #fffaf0; box-shadow: inset 0 0 0 2px #e6d3b0; }
+.modal .practised.talk { background: #fff3c9; box-shadow: inset 0 0 0 2px #ecd27a; }
+.modal .practised small { display: block; font-weight: 800; color: var(--ink2); letter-spacing: .04em; text-transform: uppercase; font-size: .7em; }
+.modal .practised ul { margin: 4px 0 0; padding-left: 1.1em; font-size: .92em; }
+.modal .practised li { margin: 2px 0; }

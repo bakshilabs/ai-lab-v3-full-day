@@ -14,7 +14,7 @@ const OWN = (k) => k.startsWith('ecotown.') && !k.startsWith(BOX) && k !== WHO &
 
 // Fields of a save that may go to the server: the town and its progress. Nothing typed, nothing that quotes typed words.
 const SAFE = ['band', 'li', 'at', 'fmt', 'badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'levelStars', 'starMarks', 'bonus',
-  'extra', 'credits', 'inputMode', 'paths', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'reflectDone', 'shop', 'chSeen', 'eps', 'session'];
+  'extra', 'credits', 'inputMode', 'paths', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'reflectDone', 'shop', 'chSeen', 'eps', 'pauses', 'sessionDone'];
 export function forServer(save) {
   if (!save || typeof save !== 'object') return null;
   const out = { cells: save.cells || [] };

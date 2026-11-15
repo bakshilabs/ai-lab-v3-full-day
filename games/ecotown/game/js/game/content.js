@@ -172,6 +172,8 @@ export const SANDBOX = {
       townLeft: 'Your town is not finished yet. Next:', toBuild: 'Back to building', toFinale: 'See my finished town',
     },
     meetingBroke: (what) => `That choice breaks a rule the plan had kept: ${what}.`, meetingBrokeHead: 'This choice breaks a rule', meetingKeep: 'Keep this choice', meetingAgain: 'Choose again', slipped: (what) => `Your town was complete. Now it needs: ${what}.`,
+    pause: ['Florence was very sure. Why did her plan still go wrong?', 'Which check changed your mind about a plan?'], pauseRibbon: 'Pause and talk', pauseHow: 'Screens down for a minute. Tell your partner or your leader what you think.', pauseGo: 'Carry on',
+    finishRibbon: 'Session finished', finishPractised: 'You practised', finishChoices: 'Your choices', finishResult: 'Your town now', finishStill: 'Still to do', finishTalk: 'Talk about it',
     planUsed: (n, skip) => `Florence built ${n} part${n === 1 ? '' : 's'} of her plan in your town.${skip ? ` ${skip} didn’t fit.` : ''}`, planLeft: (n) => `${n} more ${n === 1 ? 'is' : 'are'} yours to build: look for the ★.`, planDidntFit: 'Your town has no empty tiles for Florence’s plan yet. Mark more town land, then her ideas can fit!', townDiffers: (g) => `Still to do in your town: ${g}.`,
     completeRibbon: 'Town complete!', completeText: 'Every family has a home, there’s enough food, the lights stay on in winter and every home is close to school. Well done!', keepBuilding: 'Keep building',
     // the Star shop (js/ui/rewards.js): looks only, never the score
@@ -286,7 +288,9 @@ export const SANDBOX = {
       ruleHead: 'Your rule', keep: 'This applies to any AI output: essays, search answers, recommendations. It is saved in your town report.',
       townLeft: 'The town is not complete yet. Next:', toBuild: 'Back to the build', toFinale: 'View the finished town',
     },
-    meetingBroke: (what) => `That choice breaks a limit the plan had met: ${what}. Trade-offs are real: you can keep the choice, but the mission then ends with that limit broken.`, meetingKeep: 'Keep this choice', meetingAgain: 'Choose again', slipped: (what) => `The town was complete. It now fails: ${what}.`, meetingBrokeHead: 'This choice breaks a limit',
+    meetingBroke: (what) => `That choice breaks a limit the plan had met: ${what}. Trade-offs are real: you can keep the choice, but the mission then ends with that limit broken.`, meetingKeep: 'Keep this choice', meetingAgain: 'Choose again', slipped: (what) => `The town was complete. It now fails: ${what}.`,
+    pause: ['Florence was confident. Why did the plan still fail?', 'Which piece of evidence changed your decision about a plan?'], pauseRibbon: 'Pause and discuss', pauseHow: 'Screens down for a minute. Explain your answer to a partner or the leader.', pauseGo: 'Carry on',
+    finishRibbon: 'Session finished', finishPractised: 'You practised', finishChoices: 'Your decisions', finishResult: 'The town now', finishStill: 'Still open', finishTalk: 'Discuss', meetingBrokeHead: 'This choice breaks a limit',
     planUsed: (n, skip) => `Applied ${n} placement${n === 1 ? '' : 's'} from Florence’s plan, funded by the AI Lab (no credits spent).${skip ? ` ${skip} skipped (occupied or not allowed).` : ''}`, planLeft: (n) => `The Lab funds the first few buildings; the remaining ${n} ${n === 1 ? 'is' : 'are'} yours to build.`, planDidntFit: 'No free tiles for the plan’s placements. Designate more town land to make room.', townDiffers: (g) => `The plan passed on the practice island; your town differs (more homes or other builds). Still open here: ${g}.`,
     completeRibbon: 'Town complete', completeText: 'All petals at "enough", carbon under the ceiling, winter-night power secured, every home within 15 minutes of school.', keepBuilding: 'Keep building',
     shop: {
