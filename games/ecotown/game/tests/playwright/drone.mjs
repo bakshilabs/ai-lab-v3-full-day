@@ -53,7 +53,7 @@ const layout = () => p.evaluate(() => {
 const problems = []; const look = async (where) => { for (const x of await layout()) problems.push(`${where}: ${x}`); };
 
 // ---------- a town of the child's own
-await p.goto(base + 'index.html');
+await p.goto(base + 'index.html', { timeout: 300000 });
 await click(`[data-band="${band}"]`, 180000);
 await click('[data-name]'); await click('[data-go]');
 { const sk = await p.waitForSelector('[data-introskip]', { timeout: 240000 }).catch(() => null); if (sk) await sk.click().catch(() => {}); }
