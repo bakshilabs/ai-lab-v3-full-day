@@ -65,7 +65,8 @@ export function buildScene(engine, sp, binIds, { still = false, town = false } =
   let top = null; try { top = engine.world.tileTop(sp.key); } catch { top = null; } if (!top) return null;
   const THREE = engine.THREE; const k = kit(THREE); const outer = new THREE.Group(); outer.name = 'robots-scene'; outer.position.copy(top); outer.rotation.y = Math.atan2(sp.look[0], sp.look[1]); // the scene's front faces the camera side
   const [tx, tz] = sp.key.split(',').map(Number); const front = `${tx + sp.look[0]},${tz + sp.look[1]}`;
-  const cleared = clearTile(engine.world, sp.key, town ? [] : [front]);
+  const [lx, lz] = sp.look; const beside = [[lz, -lx], [-lz, lx]].flatMap(([px, pz]) => [`${tx + px},${tz + pz}`, `${tx + lx + px},${tz + lz + pz}`]); // the tiles either side, and either side of the camera's
+  const cleared = clearTile(engine.world, sp.key, town ? [] : [front, ...beside]);
   k.box(outer, 5.5, 0.5, 5.5, '#cdbf9f', 0, 0.05, 0); k.box(outer, 5.1, 0.06, 5.1, '#e9dfc6', 0, 0.33, 0);      // a paved yard over the tile, a step above the ground
   for (const [x, z] of [[-2.6, -2.6], [2.6, -2.6], [-2.6, 2.6], [2.6, 2.6]]) k.box(outer, 0.3, 0.3, 0.3, '#b3a17c', x, 0.42, z); // corner stones
   const g = new THREE.Group(); g.position.y = 0.36; outer.add(g);
