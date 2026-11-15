@@ -81,7 +81,8 @@ export function takePic(subject, fault = null, label = '') {
   if (fault === 'blur') { const id = nid('fmblur'); inner = `<defs><filter id="${id}" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.4"/></filter></defs><g filter="url(#${id})">${base}</g>`; }
   if (fault === 'shake') inner = `<g transform="rotate(-7 80 45) translate(-4 3) scale(1.12) translate(-8 -6)"><g opacity="0.5" transform="translate(5 -2)">${base}</g>${base}</g><path d="M6 30 l6 -3 M6 40 l6 -3 M148 52 l6 -3" stroke="${INK}" stroke-width="1"/>`;
   if (fault === 'dark') inner = `${base}<rect width="${FW}" height="${FH}" fill="#0b0a14" opacity="0.8"/>`;
-  if (fault === 'head') inner = `<g transform="translate(0 30)">${base}</g><rect width="${FW}" height="1" fill="${INK}"/>`;
+  // framed too close and too low: the top of the head runs off the top of the picture
+  if (fault === 'head') inner = `<rect width="${FW}" height="${FH}" fill="#8fd066"/><g transform="translate(80 90) scale(1.5) translate(-80 -96)">${base}</g>`;
   if (fault === 'thumb') inner = `${base}<ellipse cx="148" cy="80" rx="34" ry="28" fill="#c98f6a"/><ellipse cx="140" cy="72" rx="14" ry="10" fill="#e0a985" opacity="0.8"/>`;
   return svg(inner, label);
 }

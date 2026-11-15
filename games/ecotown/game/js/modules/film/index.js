@@ -38,6 +38,7 @@ export default {
     const ui = createUi(ctx, { junior, reduce, onPanel: (f) => player?.setLow(f) }); ctx.onLeave(() => ui.off());
     if (!set.places.length) { ctx.report({ stage: 'Nothing to film yet' }); ui.talk('There is nothing here to film yet. Go back to your town and try again.'); await ctx.left; return { finished: false }; }
     player = createPlayer(ctx, set, { reduce }); ctx.onLeave(() => player.dispose());
+    if (globalThis.__filmTest) globalThis.__filmCam = { player, set }; // the browser test frames each shot itself (tests/playwright/film-cam.mjs)
     const mui = createMissionUi(ctx, ui, { junior, onPanel: (f) => player?.setLow(f) }); ctx.onLeave(() => mui.off());
     const hour = restoreHour(ctx.saved); const save = () => ctx.save(hour);
     const env = { ctx, ui, mui, player, set, junior, reduce };
