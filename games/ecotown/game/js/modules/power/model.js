@@ -75,6 +75,7 @@ export function kitFrom(cells, tiles) {
   if (!school) { const t = all.find((x) => x && x.fixed === 'oldschool'); if (t) school = { k: t.k, built: false }; }
   const [sx, sz] = school ? xy(school.k) : [0, 0]; const far = (k) => { const [x, z] = xy(k); return Math.hypot(x - sx, z - sz); };
   homes.sort((a, b) => far(a.k) - far(b.k) || (a.k < b.k ? -1 : 1));
+  const built = homes.length;                                          // every home the town has; the desk runs the nearest MAX_HOMES
   if (homes.length > MAX_HOMES) homes.length = MAX_HOMES;
   const lent = { homes: 0, turbines: 0, roofs: 0, batteries: 0 };
   if (homes.length < MIN_HOMES) {
@@ -91,7 +92,7 @@ export function kitFrom(cells, tiles) {
   while (12 * (batteries + lent.batteries) < STORE_FLOOR * peak) lent.batteries++;
   const nT = turbines + lent.turbines, nB = batteries + lent.batteries;
   const cap = 3 * (ITEMS.battery.store || 4) * nB; // the battery gives up to a third of itself in an hour, and takes in a sixth
-  return { homes, school: school || { k: null, built: false }, turbines: nT, roofs: roofs + lent.roofs, batteries: nB, lent, gens,
+  return { homes, built, school: school || { k: null, built: false }, turbines: nT, roofs: roofs + lent.roofs, batteries: nB, lent, gens,
     wind: (ITEMS.wind.avg || 4) * nT, solar: 1.5 * (ITEMS.solar.avg || 2) * (roofs + lent.roofs), cap, rate: r2(cap / 3), fill: r2(cap / 6), peak };
 }
 

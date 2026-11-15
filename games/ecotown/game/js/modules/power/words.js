@@ -65,10 +65,12 @@ export const T = {
 // ---- the kit, said plainly (and what was lent for the exercise)
 export function kitLines(kit, j) {
   const own = { t: kit.turbines - kit.lent.turbines, b: kit.batteries - kit.lent.batteries, h: kit.homes.length - kit.lent.homes, r: kit.roofs - kit.lent.roofs };
-  const has = []; if (own.h) has.push(plural(own.h, 'home', 'homes')); if (own.t) has.push(plural(own.t, 'wind turbine', 'wind turbines')); if (own.r) has.push(plural(own.r, 'solar roof', 'solar roofs')); if (own.b) has.push(plural(own.b, 'battery', 'batteries'));
+  const has = []; if (own.h) has.push(plural(Math.max(own.h, kit.built || 0), 'home', 'homes')); if (own.t) has.push(plural(own.t, 'wind turbine', 'wind turbines')); if (own.r) has.push(plural(own.r, 'solar roof', 'solar roofs')); if (own.b) has.push(plural(own.b, 'battery', 'batteries'));
   const lent = []; if (kit.lent.homes) lent.push(plural(kit.lent.homes, 'practice home', 'practice homes')); if (kit.lent.turbines) lent.push(plural(kit.lent.turbines, own.t ? 'more turbine' : 'wind turbine', own.t ? 'more turbines' : 'wind turbines')); if (kit.lent.roofs) lent.push(plural(kit.lent.roofs, own.r ? 'more solar roof' : 'solar roof', own.r ? 'more solar roofs' : 'solar roofs')); if (kit.lent.batteries) lent.push(plural(kit.lent.batteries, own.b ? 'more battery' : 'battery', own.b ? 'more batteries' : 'batteries'));
   const out = [];
+  const most = (kit.built || 0) > kit.homes.length ? (j ? `The desk looks after the ${kit.homes.length} homes nearest the school.` : `The desk runs the ${kit.homes.length} homes nearest the school.`) : '';
   out.push(has.length ? `${j ? 'Your town has' : 'The town has'} ${list(has)}${j ? ', and the school' : ', plus the school'}.` : (j ? 'Your town has no homes or power yet.' : 'The town has no homes or generation yet.'));
+  if (most) out.push(most);
   if (lent.length) out.push(`${j ? 'For this exercise it is lent' : 'For this exercise it is lent'} ${list(lent)}.`);
   return out;
 }

@@ -1,8 +1,9 @@
 // A browser run of the "power" module (js/modules/power), from start to finish, with screenshots.
-// Usage: node tests/playwright/power.mjs [baseUrl] [outDir] [junior|senior] [width height] [empty|built]
+// Usage: node tests/playwright/power.mjs [baseUrl] [outDir] [junior|senior] [width height] [empty|built|full]
 //   MOTION=1 plays it with movement (the hours tick by themselves); otherwise reduced motion is on (Next hour).
 //   LARGE=1 turns large text on.   "built" puts homes, turbines and a battery in the town first; "empty" (the
-//   default) plays in a brand-new town, which is lent practice homes and kit.
+//   default) plays in a brand-new town, which is lent practice homes and kit. "full" builds thirty homes, a school,
+//   four turbines and two batteries.
 // It starts a town, opens the module, runs the day by hand (mouse and keyboard), tests the rules Florence drafted,
 // reads where homes went dark, changes the rules with the tiles, tests again, compares, finishes, and checks the
 // record, the scenery left in the town, that everything was put back, and that the page logged no errors and made no
@@ -42,6 +43,19 @@ await p.waitForTimeout(800);
 { const sk = await p.waitForSelector('[data-introskip]', { timeout: LONG }).catch(() => null); if (sk) await sk.click().catch(() => {}); }
 await p.waitForSelector('#build [data-cat="land"]', { timeout: LONG });
 await p.waitForFunction(() => window.__eco?.app?.G?.canMenu?.(), null, { timeout: LONG });
+if (townKind === 'full') { // a fully built town: thirty homes (the control room takes the 24 nearest the school), a school, turbines and batteries
+  checks.built = await p.evaluate(() => {
+    const { app, terrain } = window.__eco; const G = app.G; const free = (t) => !t.fixed && !t.hedge && !G.cells.get(t.k)?.item;
+    const far = (t) => Math.hypot(t.gx - 9, t.gz - 8); const put = (t, cell) => { G.cells.set(t.k, cell); app.world.setCell(t.k, cell); };
+    const open = [...terrain.tiles.values()].filter((t) => free(t) && ['field', 'coast', 'slope'].includes(t.zone)).sort((a, c) => far(a) - far(c));
+    const kinds = ['timber', 'straw', 'earth', 'reclaimed', 'cohousing']; let homes = 0;
+    put(open.shift(), { mark: 'town', item: 'school', mods: [], locked: false });
+    for (let i = 0; i < 30 && open.length > 6; i++) { put(open.shift(), { mark: 'town', item: kinds[i % 5], mods: i % 4 === 0 ? ['solar'] : [], locked: false }); homes++; }
+    for (const item of ['wind', 'wind', 'wind', 'wind', 'battery', 'battery']) if (open.length) put(open.pop(), { mark: null, item, mods: [], locked: false });
+    return { homes };
+  });
+  await p.waitForTimeout(1500);
+}
 if (townKind === 'built') { // a town with homes and some kit of its own, put straight into the game's own cells
   checks.built = await p.evaluate(() => {
     const { app, terrain } = window.__eco; const G = app.G; const open = [...terrain.tiles.values()].filter((t) => !t.fixed && !t.hedge && t.zone === 'field' && !G.cells.get(t.k)?.item);
@@ -197,8 +211,8 @@ checks.fits = allFit.filter((f) => !f.deskOnScreen || !f.noSideScroll || f.clipp
 
 const ok = checks.finished && checks.picture && checks.practised?.length >= 2 && checks.lines?.length >= 3 && checks.moduleGone && checks.viewRemoved && checks.townScenery === 1 && Object.values(checks.putBack).every(Boolean)
   && checks.saved?.done && checks.saved?.town === 'power-rules' && checks.backButton && checks.draft.length >= 1 && checks.testNeedsRule && checks.usedTileHidden && checks.schoolOn && checks.rules.length === 4 && checks.resultsChanged && checks.moreLit && checks.hourSteps
-  && (motion ? checks.pauseStops?.still : checks.keyChoosesCharge && checks.enterChoosesUse && checks.holdDarkens?.differs) && checks.during.view === 1 && checks.during.night > 0.45 && checks.nightLamps.lit + checks.nightLamps.dark === (townKind === 'built' ? 8 : 0) && checks.nightLamps.pools === checks.nightLamps.lit
-  && checks.hut?.drawn && checks.hut.onScreen && checks.hut.h >= 24 && checks.hut.lamps === (townKind === 'built' ? 8 : 0) && checks.focusOnStart && (motion || (checks.stillViews?.cuts && checks.stillViews.focus)) && (junior ? checks.noTurnsForJunior : checks.turnsOn && checks.focusStays)
+  && (motion ? checks.pauseStops?.still : checks.keyChoosesCharge && checks.enterChoosesUse && checks.holdDarkens?.differs) && checks.during.view === 1 && checks.during.night > 0.45 && checks.nightLamps.lit + checks.nightLamps.dark === checks.hut.lamps && checks.nightLamps.pools === checks.nightLamps.lit
+  && checks.hut?.drawn && checks.hut.onScreen && checks.hut.h >= 24 && checks.hut.lamps === (townKind === 'built' ? 8 : townKind === 'full' ? Math.min(24, checks.built.homes) : 0) && checks.focusOnStart && (motion || (checks.stillViews?.cuts && checks.stillViews.focus)) && (junior ? checks.noTurnsForJunior : checks.turnsOn && checks.focusStays)
   && checks.rulesKept && !checks.leftEarly.finished && checks.leftEarly.stillDone && checks.leftEarly.keptRecord && checks.leftEarly.savedRules === 3 && checks.leftEarly.moduleGone && checks.leftEarly.viewRemoved && checks.leftEarly.hour && checks.leftEarly.view
   && checks.fits.length === 0 && checks.noOutsideRequests && errors.length === 0;
 console.log(JSON.stringify({ band, motion, large, town: townKind, size: `${W}x${H}`, ok, checks, errors }, null, 2));

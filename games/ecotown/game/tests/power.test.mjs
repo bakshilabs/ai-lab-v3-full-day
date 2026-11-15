@@ -74,6 +74,11 @@ test('the floor: a town with no homes, generators or batteries is lent enough to
   const lines = kitLines(kitE, true).join(' '); assert.match(lines, /no homes or power yet/); assert.match(lines, /lent 6 practice homes, \d wind turbines?, \d solar roofs? and \d batter/);
   assert.match(kitLines(kitM, true).join(' '), /8 homes, 2 wind turbines, 3 solar roofs and 1 battery, and the school\. For this exercise it is lent \d more turbines? and \d more batter/);
   assert.equal(kitLines(kitF, true).length, 1, 'nothing lent, nothing said about lending');
+  // a big town: every home is counted in what Florence says, and she says which ones the desk runs
+  const BIG = [...Array(30)].map((_, i) => [`${3 + (i % 10)},${i < 10 ? 0 : i < 20 ? 1 : 10}`, cell('timber')]);
+  const kitB = kitFrom(BIG, tiles); assert.equal(kitB.homes.length, 24); assert.equal(kitB.built, 30);
+  const big = kitLines(kitB, true).join(' '); assert.match(big, /has 30 homes/); assert.match(big, /looks after the 24 homes nearest the school/);
+  assert.doesNotMatch(kitLines(kitM, true).join(' '), /nearest the school/);
 });
 
 test('one hour: charge, hold and use do what they say', () => {
