@@ -21,6 +21,7 @@ ${P} button.go { background: #1f7f49; color: #fff; box-shadow: inset 0 0 0 2px #
 ${P} button.go[disabled] { background: #c9d6c6; color: #4c5a4c; box-shadow: inset 0 0 0 2px #aab8a8; }
 ${P} .rd-say { flex: none; min-width: 44px; padding: 6px; }
 ${P} .rd-tray { position: absolute; left: 12px; right: 12px; bottom: 12px; margin: 0 auto; max-width: 980px; max-height: 56vh; overflow: auto; padding: 10px 12px; border-radius: 16px; background: #f3e4c6; box-shadow: inset 0 0 0 2px #b08a55, 0 4px 0 #7a5a33; }
+${P} .rd-tray.slim { left: auto; max-width: none; }
 ${P} .rd-tray h3 { margin: 0 0 6px; font-size: 1rem; line-height: 1.25; }
 ${P} .rd-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 ${P} .rd-row.end { justify-content: flex-end; margin-top: 8px; }
@@ -183,7 +184,7 @@ async function run(ctx) {
   // ================= 1. the street as it is: one screen, then straight to the first drop-off point
   async function meet() {
     report('intro'); set.setOld(true); set.setPlots('full'); set.setLayout(emptyLayout()); set.setMarks(null); setView(views.street, true);
-    say(intro(j)); swap(`<div class="rd-row end"><button class="go" type="button" data-primary data-act="next">${pick(T.start)}</button></div>`); await press();
+    say(intro(j)); tray.classList.add('slim'); swap(`<div class="rd-row end"><button class="go" type="button" data-primary data-act="next">${pick(T.start)}</button></div>`); await press(); tray.classList.remove('slim');
   }
 
   // ================= 2. design: the 3D street is the control; the strip under it is a labelled helper

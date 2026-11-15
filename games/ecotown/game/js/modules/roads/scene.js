@@ -207,9 +207,10 @@ export function createStreet(THREE, { reduce = false } = {}) {
   }
 
   // ---------- the morning: shared cars and people moved by the simulation's own times
-  const actors = group(root); let run = null; const sx = (s) => s * S + S / 2;
+  const actors = group(root); let run = null; const sx = (s) => s * S + S / 2; const runSigns = [];
+  const clearActors = () => { for (const sp of runSigns) { const i = labels.indexOf(sp); if (i >= 0) labels.splice(i, 1); } runSigns.length = 0; actors.clear(); };
   function startRun(sim) {
-    actors.clear(); setLayout(layoutNow, { idle: false });
+    clearActors(); setLayout(layoutNow, { idle: false });
     const cars = sim.cars.map((c) => {
       const perBay = sim.cars.filter((o) => o.bay === c.bay && o.i < c.i).length; const g = pod(k, actors, 0, 0); g.scale.set(0.9, 0.9, 0.9);
       const trips = sim.log.filter((t) => t.car === c.i).map((t) => { const from = c.bay === null ? EXIT : c.bay; const a = route(from, t.drop, layoutNow), o = route(t.drop, EXIT, layoutNow), b = c.bay === null ? null : route(EXIT, c.bay, layoutNow); return { t, from, a, o, b, aStart: t.arrive - a.dur, bStart: b ? t.back - b.dur : 0 }; });
@@ -221,6 +222,8 @@ export function createStreet(THREE, { reduce = false } = {}) {
     const walkers = Array.from({ length: 4 }, (_, i) => { const g = person(actors, i + 1, 0, 0); g.visible = false; return g; });
     // the people who cross every morning at the shop, the cycle track and the school
     const lines = sim.crossings.map((c, i) => { const g = c.who === 'cycle' ? cyclist(actors, i + 3, 0, 0) : person(actors, i + 3, 0, 0); g.scale.setScalar(1.15); const flag = group(actors); box(flag, 0.12, 2.8, 0.12, '#5a4a3a', 0, 0.25, 0); box(flag, 1.1, 0.7, 0.12, c.safe ? '#2e9b5a' : '#ff9d00', 0.6, 2.3, 0); if (!c.safe) { box(flag, 0.18, 0.34, 0.16, '#fff', 0.6, 2.58, 0); box(flag, 0.18, 0.12, 0.16, '#fff', 0.6, 2.38, 0); } flag.position.set(slotX(c.safe ? c.at : c.slot) - 0.4, 0, -4.3); return { c, g, x: slotX(c.safe ? c.at : c.slot) - 1.2, state: 'wait', since: -i * 0.9, dir: 1 }; });
+    // cars with no bay come in at the east end from four minutes away: say so where they appear
+    if (sim.carsOutside > 0) { const g = group(actors, 44.5, 0, -1.7); box(g, 0.16, 2.6, 0.16, '#5a4a3a', 0, 0.12, -1.6); box(g, 1.6, 0.5, 0.14, '#ffb000', -0.4, 2.2, -1.6); box(g, 0.5, 0.9, 0.14, '#ffb000', -1.3, 2, -1.6); const sp = label(g, `${sim.carsOutside} cars wait 4 minutes away`, { tone: 'warn', px: 22, x: -2.5, y: 3.2, z: -1.6 }); if (sp) { labels.push(sp); runSigns.push(sp); } }
     run = { sim, cars, people, waits, walkers, lines, last: null }; return updateRun(0, 0, true);
   }
   // time: seconds into the simulated morning. real: seconds on the wall (for the people crossing). slow: the opening.
@@ -265,7 +268,7 @@ export function createStreet(THREE, { reduce = false } = {}) {
     }
     return { waiting, cars: onStreet };
   }
-  function endRun() { run = null; actors.clear(); setLayout(layoutNow, { idle: true }); }
+  function endRun() { run = null; clearActors(); setLayout(layoutNow, { idle: true }); }
 
   // ---------- the ride: one shared car, and someone crossing in front of it
   const ride = group(root); const rideCar = pod(k, ride, 0, -1.5); const walker = person(ride, 2, 0, -4); const rider = cyclist(ride, 4, 0, -4); ride.visible = false;
