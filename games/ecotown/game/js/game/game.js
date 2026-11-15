@@ -38,7 +38,8 @@ import { townScore } from './score.js';
 import { passport } from './passport.js';
 import { reactionFor, speciesNews, ANIMALS } from './reactions.js';
 import { challenge, challengeState, challengeMedal, better, florenceTown, GOAL_TEXT } from './challenges.js';
-import { missionVerdict, brokenBy, townVerdict } from './criteria.js'; // the one place that decides whether a target is met
+import { missionVerdict, brokenBy, townVerdict } from './criteria.js';
+import { net, FMT } from '../net.js'; // the learner's session and the server's copy of their progress // the one place that decides whether a target is met
 import { answer as askFlorence, SUGGEST } from './qa.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -111,10 +112,14 @@ export function createGame(app) {
     const p = passport(dev, G.band); const was = sb.rankIdx; sb.rankIdx = p.rankIndex;
     if (was != null && p.rankIndex > was && sb.running) setTimeout(() => { audio.star?.(); app.bot?.cheer(); ui.alert(`${p.rank.icon} ${G.j ? `New rank: ${p.rank.name}!` : `Rank reached: ${p.rank.name}.`} ${G.j ? 'See your club passport in ☰.' : 'Club passport: ☰.'}`, true, 4200); }, 2600);
   }
-  function save() {
+  // now: the page is being hidden or closed, so the server's copy is sent at once
+  function save({ now = false } = {}) {
     recordMe(); rankCheck();
     if (app.inLab || G.full) return; // a mission's practice island is never saved as the player's town
-    try { const d = { cells: [...G.cells], li: 1 }; for (const k of KEEP) d[k] = G[k]; if (d.credits === Infinity) d.credits = null; localStorage.setItem(SLOT, JSON.stringify(d)); } catch { /* storage off: keep playing */ }
+    if (sb.newer) return; // this town was saved by a newer version of the game: never overwrite it
+    const d = { cells: [...G.cells], li: 1, at: Date.now(), fmt: FMT }; for (const k of KEEP) d[k] = G[k]; if (d.credits === Infinity) d.credits = null;
+    try { localStorage.setItem(SLOT, JSON.stringify(d)); } catch { /* storage off: keep playing */ }
+    if (!CH) net.push(d, { now }); // the server keeps the player's own town (challenge towns stay on the device)
   }
   G.load = (data) => { for (const k of KEEP) if (data[k] != null) G[k] = data[k]; if (G.credits == null) G.credits = G.j ? Infinity : 60; G.cells = new Map(data.cells || []); G.shop = shopState(G.shop); G.stars = totalStars(); };
   G.paths = {}; G.shop = shopState(null); G.save = save;
@@ -1131,6 +1136,7 @@ export function createGame(app) {
     // and a big "Carbon lens" heading, with the mission's name in a small bar underneath: testers read it as a prize screen.)
     const go = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)} · ${G.classMode ? `${esc(G.S.mission)} ${lv.n} OF 6` : esc(G.S.missionsDone(labsDone()))}</div><h2 class="mtitle">${esc(L.title)}</h2><p class="brief">${esc(pick(L.brief))}</p><div class="newtool"><b class="big" aria-hidden="true">${lens.icon}</b><span><small>${esc(N.test ? G.C.ui.newTest : G.C.ui.newLens)}</small><b>${esc(newLabel)}</b><em>${esc(pick(N))}</em></span></div><div class="levelbar"><span class="dots">${[1, 2, 3, 4, 5, 6].map((i) => `<i class="${i === lv.n ? 'now' : G.labs[LEVEL_ORDER[i - 1]] ? 'on' : ''}"></i>`).join('')}</span></div><p class="practice">${esc(pick(G.S.practice))}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="later">${esc(G.S.notNow)}</button><button class="btn go" data-act="go">${esc(G.C.ui.start)} ➜</button></div>`, { say: `${pick(L.brief)} ${newLabel}. ${pick(N)}` });
     if (go === 'later') return leaveLab(real);
+    sb.realCells = real; try { localStorage.setItem(SLOT + '.mission', id); } catch { /* storage off */ } // a refresh during the mission offers to carry on with it
     G.paths[id] = null; G.instructions[id] = []; G.mistakes = G.mistakes.filter((m) => m.level !== id); // only once the mission really starts again ("Not now" kept an empty row in the report)
     stage.setTime(12.5);
     // plan
@@ -1250,6 +1256,7 @@ export function createGame(app) {
       }
       // say exactly what failed, how she read the brief, and one thing to add (a tester typed the same fix four times)
       const failed = again.which && T(id).flaw[again.which] ? fmt(T(id).flaw[again.which], again.rv) : ''; const tip = FIX_HINT[again.which]?.[G.j ? 'j' : 's'] || (G.j ? 'Add what must be protected or tested.' : 'Add a limit or a test condition.');
+      if (run) run.problem = failed ? `Still failing: ${failed}`.slice(0, 80) : 'A check still fails'; // for the leader's list
       const readAs = res.plan.reading.join(' ');
       const line = G.j ? `Still a problem${failed ? `: ${failed}` : ''}. I read your instruction as: ${readAs} Try adding: ${tip}` : `Still failing${failed ? `: ${failed}` : ''}. Your brief was read as: ${readAs} Add: ${tip}`;
       help({ tag: 'STILL WRONG', tagCls: 'bad', html: `<p><b>${esc(G.j ? 'Still a problem' : 'Still failing')}${failed ? `: ${esc(failed)}` : ''}.</b></p><p>${esc(G.j ? 'I read your instruction as:' : 'Read as:')} <i>${esc(readAs)}</i></p><p>💡 ${esc(G.j ? 'Try adding:' : 'Add:')} <b>${esc(tip)}</b></p>`, say: line, voice: 'helper' });
@@ -1273,6 +1280,7 @@ export function createGame(app) {
   async function leaveLab(real, placements = null, id = null) {
     world.clearGhost(); ui.legend(null); ui.helper(null); ui.tray(''); ui.facil(null); await checks.leave();
     sb.lastSuggest = performance.now(); // her next idea for the town waits a while after a lesson
+    sb.realCells = null; try { localStorage.removeItem(SLOT + '.mission'); } catch { /* storage off */ }
     G.cells = real; app.inLab = false; app.levelId = null; app.briefMinutes = null; app.briefTargets = []; delete document.documentElement.dataset.lab; run = null;
     stage.setTime(app.hour = sb.hourWas ?? 12.5, 0); sb.hourWas = null; // (every mission used to reset the day to 12:30, so a whole game fitted inside Day 1)
     if (placements) {
@@ -1524,6 +1532,13 @@ export function createGame(app) {
     if (CH && sim().homes.length) milestones(sim(), { quiet: true });
     // a new town starts with Florence's guided first build
     if (!G.introDone && !G.full) await intro();
+    net.setStatus(G.status);
+    // the page was refreshed or closed in the middle of a mission: offer to go straight back into it
+    { let was = null; try { was = localStorage.getItem(SLOT + '.mission'); localStorage.removeItem(SLOT + '.mission'); } catch { /* storage off */ }
+      if (was && LEVELS[was] && !CH && labReady(was, G.ever, G.labs, G.classMode)) {
+        const a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>${esc(G.j ? `You were in the mission “${T(was).title}”` : `You were in “${T(was).title}”`)}</h2><p>${esc(G.j ? 'Your town is safe. The mission starts again from its first step.' : 'Your town is saved. The mission restarts from its first step.')}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="town">${esc(G.j ? 'Back to my town' : 'Back to the town')}</button><button class="btn go" data-act="go">${esc(G.j ? 'Carry on with the mission' : 'Resume the mission')} ➜</button></div>`);
+        if (a === 'go') { openLab(was); return; }
+      } }
     // the first tip comes straight away, so a new player knows where to begin
     sb.adv.last = -Infinity; adviseSoon(1200);
     // class mode: Florence invites the class to the first mission that is ready
@@ -1552,6 +1567,15 @@ export function createGame(app) {
     return { score: s.homes.length ? scoreNow(s) : null, step: nextStep(s).text, unlock: nu?.id || null, goal: g?.id || null, tool, spots: tool ? [...(sb.spots?.keys || [])] : [], why: tool ? spotLine() : '' }; };
   G.suggest = () => { const sg = suggestFor(sim()); if (sg) offerSuggestion(sg); return sg?.id || null; };
   G.act = act; G.event = (day) => { G.day = day; return townEvent(sim()); }; G.openLab = openLab; G.labBoard = labBoard; G.enterClassroom = enterClassroom; G.classAsk = classAsk; G.leaveClassroom = leaveClassroom; G.playVideo = playVideo; G.videoCard = videoCard; G.florenceTo = florenceTo; G.placeAt = (k, tool, o) => { const ok = placeAt(k, tool, o); if (ok) changed(); return ok; }; G.sim = sim; G.advisor = sb.adv;
-  G.saved = () => { try { const d = JSON.parse(localStorage.getItem(SLOT) || 'null'); return d && d.band === G.band ? d : null; } catch { return null; } };
+  G.saved = () => { try { const d = JSON.parse(localStorage.getItem(SLOT) || 'null'); if (d && (d.fmt || 0) > FMT) { sb.newer = true; return null; } return d && d.band === G.band ? d : null; } catch { return null; } };
+  // where this learner is, for the group leader's list (js/net.js statusOf): never anything typed
+  G.status = () => { let s = null, goals = []; try { s = sim(real0()); goals = townGoals(s, ctxFor(real0())); } catch { /* not built yet */ }
+    const id = app.inLab ? app.levelId : null; const short = LEVEL_ORDER.filter((l) => G.labs[l]?.short);
+    return { band: G.band, stage: id ? `Mission ${LEVELS[id].n} of 6: ${T(id).title}` : sb.finished ? 'Finished' : s ? nextStep(s).text : 'Starting', missionsDone: labsDone(), goalsMet: goals.filter((g) => g.ok).length,
+      state: sb.finished ? 'finished' : id ? 'mission' : 'building', stuck: !!(run && (run.tries || 0) >= 3),
+      problem: run?.problem || (short.length ? `Mission ended with a limit missed: ${T(short[0]).title}` : sb.slipTold ? 'Town was complete; a goal now fails' : null), finished: !!sb.finished || !!G.sessionDone };
+  };
+  const real0 = () => sb.realCells || G.cells; // the player's own town, also while a mission shows the practice island
+  G.flush = () => save({ now: true });
   return G;
 }

@@ -26,6 +26,7 @@ import { loadVoices, setSpeakingHook } from './ui/voice.js';
 // showing towns to other people (stage 4): the postcard, "Visit a town" and the club wall live in these two files
 import { shareParams, startButtons, visitCard, wallCard, openPostcard, go as shareGo } from './ui/share.js';
 import { runVisit } from './game/visit.js';
+import { net } from './net.js'; // the learner's session and the server's copy of their progress
 import { BUILD, buildLabel } from './version.js'; // the build's version, shown at the foot of the ☰ menu
 import { createEpisodeViewer } from './ui/epviewer.js'; // story episodes: plays the recorded films (nothing is fetched until one plays)
 // while a 🔊 read-aloud plays, its button shows it (a tester couldn't tell whether anything was happening)
@@ -121,7 +122,7 @@ function settingsSheet() {
     ${row('readAloud', 'Read aloud')}${row('episodes', 'Story episodes')}${row('reduce', 'Reduce motion')}${row('facilitator', 'Facilitator notes')}
     <div class="setrow"><span id="tsz">Text size</span><span class="seg" role="radiogroup" aria-labelledby="tsz">${['normal', 'large'].map((v) => `<button type="button" role="radio" data-tsize="${v}" aria-checked="${(s.text || 'normal') === v}">${v === 'large' ? 'Large' : 'Normal'}</button>`).join('')}</span></div>
     <label>Graphics<select data-k="quality">${['auto', 'low', 'mid', 'high'].map((q) => `<option ${s.quality === q ? 'selected' : ''}>${q}</option>`).join('')}</select></label>
-    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><p class="buildline" style="font-size:.75em;color:#46596a;margin:4px 0 8px">Eco Town ${esc(buildLabel())}</p><button class="btn go" data-close>Done</button>`;
+    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><p class="buildline" style="font-size:.75em;color:#46596a;margin:4px 0 8px">${net.badge() ? `You are ${esc(net.badge())} · ` : ''}Eco Town ${esc(buildLabel())}</p><button class="btn go" data-close>Done</button>`;
   P.querySelectorAll('[data-k]').forEach((i) => (i.onchange = () => { s[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.value; applySettings(); ui.refreshFacil(); }));
   // text size: two buttons, not a drop-down (a drop-down list opened over "Facilitator notes", and a tap meant for "Large" ticked it)
   P.querySelectorAll('[data-tsize]').forEach((b) => (b.onclick = () => { s.text = b.dataset.tsize; P.querySelectorAll('[data-tsize]').forEach((x) => x.setAttribute('aria-checked', String(x === b))); applySettings(); }));
@@ -206,6 +207,9 @@ async function start() {
     await runVisit(app, share.town.town, { from: share.from, onBack: (where) => shareGo(where === 'wall' ? '?wall=1' : '?carry=1') });
     return;
   }
+  // which learner this is (when the site has groups), their own things on this browser, and the newer copy of their town.
+  // Three seconds at most: a slow connection never holds up the start screen.
+  await Promise.race([net.pull(), new Promise((r) => setTimeout(r, 3000))]);
   const scr = h(`<div id="start"><div class="card">
     <span class="chip">A DELTAOPS LEARNING AI LAB</span><h1>Eco <span>Town</span></h1>
     <p style="font-weight:600;color:#46596a;margin:4px 0">Build your own town on a floating island. Florence, your AI helper, gives tips as you build. Step into the AI Lab to test her plans: she is clever, and sometimes confidently wrong. Can you catch her mistakes?</p>
@@ -213,6 +217,7 @@ async function start() {
     <p class="both">Both versions have six AI Lab missions, ending with a bias check: who did Florence forget to ask? Next: name your town and choose how the missions are played.</p>
     <p class="leaderlink">Running a club day? <a href="leader.html">The club leader’s one-page plan</a></p>
     <p data-resume style="display:none"></p>
+    ${net.badge() ? `<p class="badgeline" style="font-weight:800;color:#2b3a55;margin:8px 0 0">You are <span style="background:#fff3c9;border-radius:999px;padding:2px 12px">${esc(net.badge())}</span> <small style="font-weight:600;color:#46596a">Tell your leader this name if you need help.</small></p>` : ''}
   </div></div>`);
   $('#layer').appendChild(scr); setTimeout(() => scr.querySelector('[data-band]')?.focus(), 100);
   const ORDER = { free: 'Free: players build and open any AI Lab mission once it unlocks. Florence invites them when the town hits a problem a mission teaches.', class: 'In order: the class does the missions one by one. Only the next mission opens, and Florence invites players to it as soon as it is ready.' };
@@ -319,26 +324,21 @@ async function start() {
   await G.run();
 }
 window.__eco = { build: BUILD, app, terrain, ready: () => !!app.G, modelReady, thumbExtras: () => ({ ailab: { mark: null, item: 'ailab', mods: [] } }) };
-// Passcode sessions (only when served by the Eco Town Worker; local and GitHub Pages builds have no /api).
-// Every minute the game checks its session is still the active one for this passcode (newest login wins).
-(async function heartbeat() {
-  let first = true;
-  if (/^(localhost|127\.0\.0\.1)$|github\.io$/.test(location.hostname)) return; // no passcode server on local or GitHub Pages builds (a POST there only logs an error)
-  const beat = async () => {
-    let r; try { r = await fetch('/api/heartbeat', { method: 'POST', credentials: 'same-origin' }); } catch { return; }   // offline: keep playing
-    if (first && (r.status === 404 || r.status === 405 || r.status === 501)) return 'off';                               // no passcode server here
-    first = false;
-    if (r.status === 409) { let d = {}; try { d = await r.json(); } catch { /* */ } locked(d); return 'locked'; }
-  };
-  const lockedNow = await beat(); if (lockedNow) return;
-  const t = setInterval(async () => { if (await beat()) clearInterval(t); }, 60000);
-})();
+// The learner's session (only when served by the Eco Town Worker; local and static builds have no /api, and
+// js/net.js then does nothing). Every minute the game checks the session is still good and says where the learner
+// is, for the leader's list. The town is also saved when the page is hidden or closed, so a refresh loses nothing.
+net.onLock(locked);
+setInterval(() => { net.beat(); }, 60000);
+const flush = () => { try { app.G?.flush?.(); } catch { /* not started */ } };
+window.addEventListener('pagehide', flush);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
 function locked(d) {
   try { setSound(false); } catch { /* */ }
   const card = h(`<div style="position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:rgba(30,40,60,.55)"><div class="panel modal" style="position:relative;left:auto;top:auto;transform:none">
-    <div class="ribbon">Eco Town</div><div class="big">🔒</div><h2>${d.reason === 'expired' ? 'Your free access has ended' : d.reason === 'revoked' ? 'This passcode is switched off' : 'Playing on another device'}</h2>
-    <p>${esc(d.message || 'This passcode is now being used on another device.')}</p><button class="btn go" data-act="again">Log in again</button></div></div>`);
-  document.body.appendChild(card); card.querySelector('[data-act]').onclick = async () => { try { await fetch('/api/logout', { method: 'POST' }); } catch { /* */ } location.replace('/'); };
+    <div class="ribbon">Eco Town</div><div class="big">🔒</div><h2>${d.reason === 'expired' ? 'Your group’s time has ended' : d.reason === 'revoked' ? 'This group is switched off' : 'Playing on another device'}</h2>
+    <p>${esc(d.message || 'Your badge is now being used on another device. Your town is saved.')}</p><button class="btn go" data-act="again">Join again</button></div></div>`);
+  if (document.getElementById('lockcard')) return; card.id = 'lockcard';
+  document.body.appendChild(card); card.querySelector('[data-act]').onclick = async () => { await net.logout(); location.replace('/'); };
 }
 // light deterrents against casual copying (not real protection: the browser must have the code to run it)
 const typing = (e) => /INPUT|TEXTAREA/.test(e.target?.tagName);
