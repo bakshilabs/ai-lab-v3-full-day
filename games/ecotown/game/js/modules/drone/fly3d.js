@@ -15,6 +15,8 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   const root = new THREE.Group(); root.name = 'drone-module'; scene.add(root);
   const drone = makeDrone(SCALE); root.add(drone.group); drone.parcel.visible = false;
   const shadow = makeShadow(); shadow.scale.setScalar(0.75); root.add(shadow);
+  // a thin line straight down from the drone to its shadow, so where it is over the ground is easy to read from behind
+  const plumb = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1, 6), new THREE.MeshBasicMaterial({ color: '#3b2a1e' })); root.add(plumb);
   // ground height under a world point (the island's tile tops; 1 off the tiles)
   const groundAt = (x, z) => { const gx = Math.floor((x - X0) / T), gz = Math.floor((z - Z0) / T); const k = key(gx, gz); if (!tiles.has(k)) return 1; try { return world.tileTop(k).y; } catch { return 1; } };
   const S = { x: origin.x, y: 0, z: origin.z, vx: 0, vy: 0, vz: 0, floor: null, wind: { x: 0, z: 0 }, gone: false, t: 0, spin: false, still: null };
@@ -44,7 +46,8 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   function place() {
     drone.group.position.set(S.x, S.y + 0.6 * SCALE, S.z); drone.group.rotation.y = 0;
     drone.body.rotation.z = reduce ? 0 : -S.vx / SPEED * 0.25; drone.body.rotation.x = reduce ? 0 : S.vz / SPEED * 0.22;
-    shadow.position.set(S.x, groundAt(S.x, S.z) + 0.15, S.z);
+    const g = groundAt(S.x, S.z); shadow.position.set(S.x, g + 0.15, S.z);
+    const len = S.y + 0.2 - g; plumb.visible = len > 1; if (plumb.visible) { plumb.scale.y = len; plumb.position.set(S.x, g + len / 2, S.z); }
   }
   function view(dt) {
     if (S.still) { wantP.copy(S.still.p); wantL.copy(S.still.l); }
