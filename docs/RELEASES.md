@@ -27,11 +27,20 @@ Started 15 November 2026 from the copy of Eco Town v3.0. **This build has not be
 - **Leader's run sheet** for one hour (`game/leader.html`).
 - **Version label** in the menu.
 
+### New: Eco Town of the future (first versions)
+Three afternoon modules, each one playable loop, opened from Menu → Town of the future or by `?module=<id>`. Built against `docs/MODULES.md`. **None has been played by a person.**
+- **Drone delivery** (`drone`): fly one delivery by hand through the child's own town; write the drone's steps from tiles on a map; watch it fly them; compare the two flights. Ages 13–17 deliver two parcels. Leaves a drone flying its route in the town.
+- **Robot training** (`robots`): show a recycling robot examples; test it on a tray kept apart; see what it "had not been shown yet"; add examples; test again; watch it sort in the town. The sorting is real: it depends on which examples were shown.
+- **Roads for self-driving cars** (`roads`): redesign a close-up street with drop-off points, waiting bays and crossings; run the morning for real numbers; choose what the freed car-park land becomes; ride along it. Leaves a small model of the street in the town.
+- **Take-home page** (Menu → Take-home page, and on the Finish session card): a map of the town, what was made in each module, "I practised" lines, one question to ask at home, a line for a handwritten name. One A4 page. Nothing on it is sent anywhere.
+
 ### Removed
 - The lockout after ten wrong codes (at the user's request).
 - The unused admin test key.
 
 ### Known issues and things not done
+- **Modules:** no sound in any of them. Touch was not tried on a real tablet. Large text and resuming a half-played module were not run in a browser. What each leaves in the town is small at the usual zoom. The roads module's figures for freed land (4 homes, 250 m² of play space, vegetables for 3 families, 10 spaces a plot) are plausible estimates, not sourced. A child who presses "Back to my town" before the end keeps nothing from that visit beyond the module's own saved progress.
+- **Modules do not change the town's numbers.** What they leave in the town is scenery.
 - **Not deployed.** The deploy script is switched off and still names the original worker and stores.
 - **Load:** only local runs of the server logic (`docs/LOAD.md`). Nothing is known about the live site.
 - **A refresh during a mission** returns to the start of that mission, not to the same step.

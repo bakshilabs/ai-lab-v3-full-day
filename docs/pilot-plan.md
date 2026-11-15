@@ -310,3 +310,5 @@ The user decided that the full-day camp is Eco Town in the morning and "Eco Town
 - Each module has its own viewpoint and produces something for a take-home record.
 - The modules are built against one shared contract: `docs/MODULES.md` and `games/ecotown/game/js/modules/`.
 - The user's full plan for the afternoon is kept in `docs/afternoon-modules-plan.md`.
+
+**State on 15 November 2026:** all three first versions are merged, with the take-home page. What each contains, and what is not done, is in `docs/RELEASES.md`. Next, in the user's order: a person plays each module; only then decide which to grow.
