@@ -28,7 +28,7 @@ const outside = []; p.on('request', (r) => { if (!r.url().startsWith(base) && !r
 await p.addLocatorHandler(p.locator('#episode [data-skip]'), async (skip) => { await skip.click(); });
 const tag = `${band}-${W}x${H}-${town}${reduce ? '' : '-motion'}${large ? '-large' : ''}${touch ? '-touch' : ''}`; let n = 0; const shots = [];
 const shot = async (name, wait = 700) => { await p.waitForTimeout(wait); const f = `${out}/${tag}-${String(++n).padStart(2, '0')}-${name}.png`; try { await p.screenshot({ path: f, timeout: 180000 }); shots.push(f); } catch { shots.push(`(no picture: ${name})`); } };
-const click = async (sel, t = 120000) => { await p.waitForSelector(sel, { state: 'visible', timeout: t }); if (touch) await p.tap(sel); else await p.click(sel); };
+const click = async (sel, t = 120000) => { await p.waitForSelector(sel, { state: 'visible', timeout: t }); if (touch) await p.tap(sel, { timeout: t }); else await p.click(sel, { timeout: t }); };
 const checks = {}; const LONG = 900000;
 const stage = (s) => p.waitForSelector(`#module .modroot[data-dr-stage="${s}"]`, { timeout: LONG });
 const talk = () => p.evaluate(() => document.querySelector('#module .dr-talk:not([hidden]) p')?.textContent || '');

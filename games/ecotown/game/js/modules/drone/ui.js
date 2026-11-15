@@ -295,7 +295,7 @@ ${M} .dr-reply { margin-top: 8px !important; font-weight: 600 !important; }
 ${M} .dr-reply[hidden] { display: none; }
 ${M} .dr-ends { margin-top: 12px; }
 @media ${NARROW} {
-  ${M} .dr-plan { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(170px, 0.8fr) minmax(0, 1fr); }
+  ${M} .dr-plan { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(170px, 1fr) minmax(0, 1fr); }
   ${M} .dr-card { grid-template-columns: minmax(0, 1fr); }
   ${M} .dr-talk { max-width: none; }
 }
