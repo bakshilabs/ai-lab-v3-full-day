@@ -40,7 +40,8 @@ import { reactionFor, speciesNews, ANIMALS } from './reactions.js';
 import { challenge, challengeState, challengeMedal, better, florenceTown, GOAL_TEXT } from './challenges.js';
 import { missionVerdict, brokenBy, townVerdict } from './criteria.js';
 import { net, FMT } from '../net.js';
-import { missionRecap, sessionRecap } from './recap.js'; // "You practised…", from what the player actually did // the learner's session and the server's copy of their progress // the one place that decides whether a target is met
+import { missionRecap, sessionRecap } from './recap.js';
+import { careFor, CARE } from './care.js'; // typed text that needs a fixed, careful reply (never repeated back) // "You practised…", from what the player actually did // the learner's session and the server's copy of their progress // the one place that decides whether a target is met
 import { answer as askFlorence, SUGGEST } from './qa.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -178,6 +179,8 @@ export function createGame(app) {
     for (;;) {
       const { text } = await instruct(id, heading);
       app.bot.show(true);
+      // an instruction that is really a sign of needing help, or holds personal details: a fixed reply, and the words are not kept
+      { const care = careFor(text); if (care === 'help' || care === 'personal') { const m = CARE[care][G.j ? 'j' : 's']; audio.tap?.(); help({ tag: care === 'help' ? '💛' : '🔒', html: `<p>${esc(m)}</p>`, say: m, voice: 'helper' }); await sleep(1200); await continueBtn(); continue; } }
       help({ tag: 'THINKING', html: `<p>${esc('“' + text + '”')}</p>`, thinking: true });
       await sleep(app.reduce ? 100 : 650);
       const res = ask(id, text, { terrain, cells: G.cells });
