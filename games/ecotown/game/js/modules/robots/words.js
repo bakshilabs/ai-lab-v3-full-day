@@ -44,13 +44,14 @@ export const SAY = {
   teach0: (j, bins) => (j ? `This robot will sort our town's rubbish. It only knows what you show it. Tap a thing, then tap its bin. Show it at least one for each of the ${bins} bins.`
     : `This robot will sort the town's waste. It learns only from examples. Tap a thing, then its bin: at least one example for each of the ${bins} bins. Then test it.`),
   teachReady: (j) => (j ? 'It has one for every bin. Show it more, or press Test the robot.' : 'Every bin has an example. Add more, or test the robot now.'),
-  teachMore: (j, room, stars) => (stars ? (j ? `Here are more things to show it. There is room for ${room}. Pick the ones it had not seen: they have a star. Then test again.` : `More things to show. There is room for ${room}. The starred ones each fill a gap from the test. Then test again.`)
+  teachMore: (j, room, stars) => (stars ? (j ? `Here are more things to show it. There is room for ${room}. The ones with a star are like the things it got wrong. Then test again.` : `More things to show. There is room for ${room}. The starred ones each fill a gap from the test. Then test again.`)
     : (j ? `Here are more things to show it. There is room for ${room}. Then test again.` : `More things to show. There is room for ${room}. Then test again.`)),
   full: (j) => (j ? 'The bench is full. Press Test again.' : 'The bench is full. Run the test again.'),
   test1: (j, n) => (j ? `Now a test. These ${n} things were kept apart: the robot has not been shown them. Press the button to watch it sort each one.`
     : `Now test it. These ${n} things were kept apart from the examples, so the score is fair. Step through and see which example it matches each time.`),
   testAgain: (j) => (j ? 'The same test tray. The robot has still not been shown these. Press Run the test and watch what changes.' : 'The same test set, still unseen, so the two scores can be compared. Run it: it stops at each change.'),
-  review: (j, r, n) => (j ? `It sorted ${r} of ${n}. The others are not like anything it had been shown. Read why, then add examples.` : `Score: ${r} of ${n}. Each miss shows which examples were missing. Add examples to fill the gaps.`),
+  review: (j, r, n) => (r >= n ? (j ? `It sorted all ${n}. Show it more anyway, so it is ready for new things in the street.` : `Score: ${n} of ${n}. More examples still help with new things in the street.`)
+    : j ? `It sorted ${r} of ${n}. For the others, nothing it had been shown for the right bin was close enough. Read why, then add examples.` : `Score: ${r} of ${n}. Each miss shows which examples were missing. Add examples to fill the gaps.`),
   result: (j, a, b, n) => (b > a ? (j ? `First test: ${a} of ${n}. Now: ${b} of ${n}. Your new examples did that.` : `First test ${a} of ${n}, now ${b} of ${n}. The added examples made the difference.`)
     : b === a ? `Still ${b} of ${n}. Other examples may fill the gaps.`
       : `Now ${b} of ${n}: lower than ${a}. A new example can look like something from another bin. More examples settle it.`),

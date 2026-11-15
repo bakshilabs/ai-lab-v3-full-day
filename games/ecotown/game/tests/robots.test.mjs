@@ -162,7 +162,7 @@ test('no line says "lacked", and the lines about the tray and the street say wha
   const all = [];
   for (const j of [true, false]) all.push(SAY.teach0(j, 3), SAY.teachReady(j), SAY.teachMore(j, 4, true), SAY.teachMore(j, 4, false), SAY.full(j), SAY.test1(j, 8), SAY.testAgain(j), SAY.review(j, 5, 8), SAY.result(j, 5, 8, 8), SAY.result(j, 5, 5, 8), SAY.result(j, 5, 4, 8), SAY.resultFull(j), SAY.tune(), SAY.street(j, 5), SAY.streetEnd(j, { right: 3, of: 5, asked: 1, wrong: 1 }), stageLine('teach', { round: 1 }), stageLine('teach', { round: 0 }));
   for (const l of [...all, ...STEPS, css]) assert.doesNotMatch(l, /lack/i, l.slice(0, 80));
-  assert.match(SAY.testAgain(true), /still not been shown/); assert.match(SAY.street(true), /not on the bench or the test tray/); assert.match(SAY.teachMore(true, 4, true), /had not seen/);
+  assert.match(SAY.testAgain(true), /still not been shown/); assert.match(SAY.street(true), /not on the bench or the test tray/); assert.match(SAY.teachMore(true, 4, true), /like the things it got wrong/);
   for (const f of [SAY.teach0, SAY.test1, SAY.review, SAY.street]) for (const j of [true, false]) assert.ok(f(j, 3, 8).length > 20);
 });
 
