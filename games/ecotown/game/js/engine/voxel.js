@@ -6,19 +6,35 @@ export function hex(c) { return new THREE.Color(c); }
 
 // World-wide shader controls shared by every voxel mesh:
 //  clay (0..1) fades the world to a pale model for the data lenses;
-//  snow (0..1) whitens upward-facing surfaces for the winter test.
-export const WORLD = { clay: { value: 0 }, snow: { value: 0 } };
+//  snow (0..1) whitens upward-facing surfaces for the winter test;
+//  edge (0..1) scales the brick edges (a thin darker seam round every block face, a light bevel on top faces),
+//  so each block reads as its own brick and wide same-colour areas (fields, snow) do not merge into one.
+export const WORLD = { clay: { value: 0 }, snow: { value: 0 }, edge: { value: 1 } };
+// The brick edges use the vertex attribute aEdge: each face's corners at 2 or 3 along its two in-plane axes, so the
+// interpolated value minus 2 is the position across that one block face (0..1) in block units, whatever the mesh's
+// scale. Geometry without it reads 0,0 (or 1,1,1 left by another program) and gets no edges.
 function patch(mat) {
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uClay = WORLD.clay; sh.uniforms.uSnow = WORLD.snow;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vUp; varying vec3 vWPos;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvUp = normalize((modelMatrix * vec4(objectNormal, 0.0)).xyz).y; vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uClay; uniform float uSnow; varying float vUp; varying vec3 vWPos;')
+    sh.uniforms.uClay = WORLD.clay; sh.uniforms.uSnow = WORLD.snow; sh.uniforms.uEdge = WORLD.edge;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec2 aEdge; varying vec2 vEdge; varying float vUp; varying vec3 vWPos;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvEdge = aEdge; vUp = normalize((modelMatrix * vec4(objectNormal, 0.0)).xyz).y; vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uClay; uniform float uSnow; uniform float uEdge; varying vec2 vEdge; varying float vUp; varying vec3 vWPos;')
       .replace('#include <color_fragment>', `#include <color_fragment>
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.96, 0.97, 1.0), uSnow * smoothstep(0.5, 0.9, vUp));
         float lum = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));
         float rim = smoothstep(1.0, 1.12, length(vWPos.xz / vec2(41.0, 32.0)));
-        diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(0.82, 0.84, 0.84), vec3(0.30, 0.34, 0.40), rim) * (0.8 + 0.28 * lum), uClay);`);
+        diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(0.82, 0.84, 0.84), vec3(0.30, 0.34, 0.40), rim) * (0.8 + 0.28 * lum), uClay);
+        {
+          // brick edges: distance to the face's edges in block units, anti-aliased by the screen-space size of a pixel
+          // (fw) and faded out once a block is only a few pixels across, so far blocks never turn to noise or shimmer
+          vec2 e = vEdge - 2.0; vec2 fw = max(fwidth(e), vec2(1e-4)); vec2 dd = min(e, 1.0 - e);
+          float on = step(-0.5, vEdge.x - 2.0) * uEdge * (1.0 - smoothstep(0.12, 0.3, max(fw.x, fw.y)));
+          vec2 ws = max(vec2(0.05), 0.8 * fw), wb = max(vec2(0.14), 2.2 * fw);   // at least about a pixel wide
+          vec2 sx = smoothstep(ws - fw, ws + fw, dd), bx = smoothstep(wb - fw, wb + fw, dd);
+          float seam = 1.0 - sx.x * sx.y, bevel = (1.0 - bx.x * bx.y) - seam;
+          float top = smoothstep(0.5, 0.9, vUp);
+          diffuseColor.rgb *= 1.0 - on * (0.11 * seam - 0.07 * bevel * top);
+        }`);
   };
   mat.customProgramCacheKey = () => 'eco-voxel';
   return mat;
@@ -47,7 +63,7 @@ export class Vox {
   // Build a merged BufferGeometry mesh. scale = world size of one voxel.
   mesh({ scale = 1, offset = [0, 0, 0], castShadow = true, receiveShadow = true, emissive = null, jitter } = {}) {
     const J = jitter ?? this.jitter;
-    const pos = [], nor = [], col = [], idx = [];
+    const pos = [], nor = [], col = [], edge = [], idx = [];
     const faces = [
       { d: [1, 0, 0], c: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]], shade: 0.86 },
       { d: [-1, 0, 0], c: [[0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0]], shade: 0.80 },
@@ -74,6 +90,8 @@ export class Vox {
           const aoF = [0.42, 0.62, 0.82, 1][ao];
           pos.push((x + corner[0]) * scale + offset[0], (y + corner[1]) * scale + offset[1], (z + corner[2]) * scale + offset[2]);
           nor.push(dx, dy, dz);
+          // in-face position for the brick edges (see aEdge above): the two corner coordinates across the face
+          if (dx) edge.push(2 + corner[1], 2 + corner[2]); else if (dy) edge.push(2 + corner[0], 2 + corner[2]); else edge.push(2 + corner[0], 2 + corner[1]);
           tmp.copy(c).multiplyScalar(j * aoF * (0.35 + 0.65 * f.shade));
           col.push(tmp.r, tmp.g, tmp.b);
         }
@@ -84,6 +102,7 @@ export class Vox {
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    g.setAttribute('aEdge', new THREE.Float32BufferAttribute(edge, 2));
     g.setIndex(idx);
     const mat = emissive ? voxelMaterial(emissive) : sharedVoxelMaterial();
     const mesh = new THREE.Mesh(g, mat);
