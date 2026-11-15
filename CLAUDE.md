@@ -7,6 +7,7 @@ A **full-day kids' camp (AI Lab)**: **Eco Town in the morning, "Eco Town of the 
 
 Read first:
 - `docs/afternoon-modules-plan.md`: the user's plan for the afternoon modules, word for word.
+- **Work queue, in this order (15 Nov 2026):** (1) the live site at `bakshilabs.github.io/ai-lab-v3-full-day` (waits for the user to switch GitHub Pages on); (2) reviews of the drone, robots and roads modules, fixed and re-reviewed until every aspect scores 8 out of 10; (3) `docs/more-modules-plan.md`: two more modules, film studio and power control room, then the same review loop to 8; (4) `docs/grid-hero-plan.md`: the user's Grid Hero game as a "Finished early?" break game (report on it first, change nothing until then).
 - `docs/MODULES.md`: the shared contract every module is built against. **Do not change it while module work is in progress.**
 - `docs/pilot-plan.md`: the plan for the morning hour and the server (sections F and G say what is built). `docs/RELEASES.md`: what is in the current build and its known issues. `docs/LOAD.md`: load results (local runs only).
 - `games/ecotown/`: module 1, copied from `bakshilabs/ai-lab-v3` (`games/ecotown/`, commit `a5fd92c`, 14 Nov 2026). Its own notes are in `games/ecotown/CLAUDE.md`; they were written for the original repository.
