@@ -9,7 +9,7 @@ import { key, T, X0, Z0 } from './geo.js';
 const SPEED = 6, CLIMB = 3.2, DOWN_ACC = 4.5, DOWN_MAX = 6, SCALE = 1.1;
 
 // origin: { x, z } the world point the flying happens round. radius: how far from it the drone may go.
-export function createFly3d(ctx, { origin, radius = 40, cam = { up: 9, back: 17 } }) {
+export function createFly3d(ctx, { origin, radius = 40, cam = { up: 15, back: 14 } }) {
   const { scene, camera, world } = ctx.engine; const reduce = !!ctx.settings.reduceMotion;
   const tiles = ctx.town?.terrain?.tiles instanceof Map ? ctx.town.terrain.tiles : new Map();
   const root = new THREE.Group(); root.name = 'drone-module'; scene.add(root);
@@ -48,7 +48,7 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 9, back: 17 
   }
   function view(dt) {
     if (S.still) { wantP.copy(S.still.p); wantL.copy(S.still.l); }
-    else { wantP.set(S.x, S.y + cam.up, S.z + cam.back); wantL.set(S.x, S.y + 0.5, S.z - 6); }
+    else { wantP.set(S.x, S.y + cam.up, S.z + cam.back); wantL.set(S.x, S.y - 1.5, S.z - 3.5); }
     if (!camSet || reduce) { camP.copy(wantP); camL.copy(wantL); camSet = true; } else { const k = 1 - Math.exp(-dt * 6); camP.lerp(wantP, k); camL.lerp(wantL, k); }
     camera.position.copy(camP); camera.lookAt(camL); if (camera.fov !== 55) { camera.fov = 55; camera.updateProjectionMatrix(); }
   }

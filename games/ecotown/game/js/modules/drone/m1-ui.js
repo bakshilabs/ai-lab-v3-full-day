@@ -59,7 +59,7 @@ function mapSvg(plan, { junior, done = [] }) {
   o.push('<circle cx="462" cy="160" r="20" fill="#3b4752"/><text x="462" y="167" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="20" fill="#fffaf0">H</text>');
   // labels on a cream tag, kept short
   const tag = (x, y, t) => `<g><rect x="${x - t.length * 3.6 - 6}" y="${y - 13}" width="${t.length * 7.2 + 12}" height="19" rx="9" fill="#fffaf0" opacity="1"/><text x="${x}" y="${y + 1}" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#3b2a1e">${esc(t)}</text></g>`;
-  o.push(tag(155, 50, 'School'), tag(155, 205, 'Sports day'), tag(325, 30, 'Houses'), tag(460, 50, 'Hospital'), tag(480, 192, 'Helipad'), tag(548, 140, 'Seabirds nesting'), tag(110, 385, 'Old wood'), tag(330, 245, 'Hill'), tag(520, 392, 'Beach'));
+  o.push(tag(155, 50, 'School'), tag(155, 205, 'Sports day'), tag(325, 30, 'Houses'), tag(460, 50, 'Hospital'), tag(480, 192, 'Helipad'), tag(512, 136, 'Seabirds nesting'), tag(110, 385, 'Old wood'), tag(330, 245, 'Hill'), tag(520, 392, 'Beach'));
   // this plan's flight
   const path = MAPPATH[plan.id]; const you = YOU[plan.id] || [236, 312];
   if (path.length > 1) o.push(`<polyline points="${path.map((p) => p.join(',')).join(' ')}" fill="none" stroke="#e8743b" stroke-width="5" stroke-dasharray="10 7" stroke-linecap="round"/>`);
@@ -100,7 +100,7 @@ export async function runGround(ctx, kit, scope) {
         ${sel ? `<div class="dk-note" data-dk-look>${esc(look(sel, day.state[sel], junior))}</div>${marks[sel] ? '' : '<div class="dr-row"><button type="button" class="dr-btn" data-mark="ok">✓ Looks good</button><button type="button" class="dr-btn" data-mark="problem">⚠ Problem</button></div>'}` : ''}
         ${reply ? `<div class="dk-note ${reply.right ? 'good' : 'warn'}" role="status" data-dk-reply>${esc(reply.text)}</div>` : ''}
         ${all && unfixed.length ? `<div class="dr-row">${unfixed.map((c) => `<button type="button" class="dr-btn" data-fix="${c}">🔧 ${esc(fixFor(c, day.state[c]))}</button>`).join('')}</div>` : ''}
-        ${all && !unfixed.length && !decided ? '<p>All four are checked. Will the drone fly today?</p><div class="dr-row"><button type="button" class="dr-btn go" data-day="fly">✈ Fly today</button><button type="button" class="dr-btn" data-day="stay">✋ Keep it on the ground</button></div>' : ''}
+        ${all && !unfixed.length && !decided ? '<p>All four are checked. Will the drone fly today?</p><div class="dr-row"><button type="button" class="dr-btn" data-day="fly">✈ Fly today</button><button type="button" class="dr-btn" data-day="stay">✋ Keep it on the ground</button></div>' : ''}
         ${decided ? `<div class="dr-row"><button type="button" class="dr-btn go" data-k="next">${di < DAYS.length - 1 ? 'Next day ➜' : 'On to the map ➜'}</button></div>` : ''}`;
     };
     draw(); side(); kit.focusFirst(P.side, '[data-check]');
@@ -163,6 +163,8 @@ export async function runGround(ctx, kit, scope) {
 const M = '#module[data-module="drone"]';
 export const M1_CSS = `
 ${M} .dk-hot { cursor: pointer; }
+${M} .dk-pic > svg { margin: auto 0; }
+${M} .dk-pic svg { border-radius: 12px; }
 ${M} .dk-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 ${M} .dk-check { display: grid; gap: 2px; text-align: left; min-height: 58px; }
 ${M} .dk-check span { font-size: .88em; font-weight: 700; color: #5e4936; }
