@@ -31,7 +31,10 @@ export function createBench(ctx, env) {
     head.style.paddingLeft = under ? '0px' : `${Math.max(0, left - padL)}px`; head.style.paddingTop = under ? `${Math.max(0, b.bottom - e.top + 8 - padT)}px` : '0px';
     head.style.minHeight = under ? '0px' : `${Math.max(0, b.bottom - e.top - padT)}px`; el.classList.toggle('under', under);
   }
-  const onResize = () => fitHead(); window.addEventListener('resize', onResize); ctx.onLeave(() => window.removeEventListener('resize', onResize));
+  // when a page is taller than the room for it, its bottom edge fades out until the child scrolls to the end
+  const mainCue = () => { main.classList.toggle('more', main.scrollHeight - main.scrollTop - main.clientHeight > 8); };
+  main.addEventListener('scroll', mainCue, { passive: true }); const watch = new MutationObserver(() => requestAnimationFrame(mainCue)); watch.observe(main, { childList: true }); ctx.onLeave(() => watch.disconnect());
+  const onResize = () => { fitHead(); mainCue(); }; window.addEventListener('resize', onResize); ctx.onLeave(() => window.removeEventListener('resize', onResize));
   try { document.fonts?.ready?.then(() => { if (!ctx.signal.aborted) fitHead(); }); } catch { /* no font loading here */ }
   const step = (n) => { el.querySelectorAll('.rb-steps li').forEach((li, i) => { li.className = i < n ? 'done' : i === n ? 'on' : ''; if (i === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); }); fitHead(); };
   const focusSoon = (sel) => { if (keys) (main.querySelector(sel) || foot.querySelector(sel))?.focus(); };
@@ -272,6 +275,7 @@ export const css = `
 § .rb-say p { margin: 0; font-size: 1.04em; font-weight: 700; } § .rb-flo { flex: none; display: grid; }
 § .rb-main { min-height: 0; overflow: auto; }
 § .rb[data-stage="teach"] .rb-main { overflow: hidden; }
+§ .rb-main.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 46px), transparent); mask-image: linear-gradient(#000 calc(100% - 46px), transparent); }
 § .rb-panel, § .rb-card { background: #fffaf0; border-radius: 16px; padding: 10px 12px; box-shadow: inset 0 0 0 2px #d7bf95, 0 3px 0 #c9ae80; }
 § .rb-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; min-height: 54px; }
 § .rb-hint { margin: 0 auto 0 0; padding: 6px 12px; border-radius: 12px; background: #fffaf0; font-weight: 700; box-shadow: inset 0 0 0 2px #d7bf95; }
