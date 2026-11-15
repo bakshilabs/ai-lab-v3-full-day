@@ -37,12 +37,12 @@ export async function playM5(ctx, sh, cur, keep) {
         const right = ans !== null && (ans === 'weed') === pl.weed;
         sh.main.innerHTML = `<div class="rb-m5a"><div class="rb-panel rb-bigplant"><p class="rb-kicker">Plant ${k + 1} of ${CHECK.length}</p>${plantSvg(pl, 150)}${ans ? `<b>${esc(name(pl).replace(/^./, (c) => c.toUpperCase()))}: ${pl.weed ? 'a weed' : 'the crop'}</b>` : ''}</div>
           <div class="rb-panel rb-robotsays">${ans ? `<p class="rb-verdict ${right ? 'ok' : 'miss'}">${right ? 'You are right.' : 'Not this time.'} It is ${pl.weed ? 'a weed' : 'a lettuce, the crop'}.</p>
-            <h3>The robot</h3><div class="rb-surebig">${bar(pl.p, j)}</div><p><b>It is ${esc(sureWords(pl.p))}.</b>${pl.hid ? ` ${esc(whyUnsure[pl.hid])}` : ''}</p>` : `<h3>${j ? 'What do you think?' : 'Your label'}</h3><p>${j ? 'Is this the crop (a lettuce) or a weed?' : 'Crop (lettuce) or weed?'}</p>`}</div></div>`;
+            <h3>The robot</h3><div class="rb-surebig">${bar(pl.p, j)}</div><p><b>It ${esc(sureWords(pl.p))}.</b>${pl.hid ? ` ${esc(whyUnsure[pl.hid])}` : ''}</p>` : `<h3>${j ? 'What do you think?' : 'Your label'}</h3><p>${j ? 'Is this the crop (a lettuce) or a weed?' : 'Crop (lettuce) or weed?'}</p>`}</div></div>`;
       };
       draw(); sh.say(j ? 'Is this a lettuce, or a weed?' : 'Crop or weed?');
       const ans = await sh.buttons('', [{ act: 'crop', label: '🥬 Lettuce (crop)' }, { act: 'weed', label: '🌼 Weed' }]);
       if ((ans === 'weed') === pl.weed) d.checks++;
-      draw(ans); ctx.say(`It is ${pl.weed ? 'a weed' : 'a lettuce'}. The robot is ${sureWords(pl.p)}.${pl.hid ? ` ${whyUnsure[pl.hid]}` : ''}`); keep(0, d);
+      draw(ans); ctx.say(`It is ${pl.weed ? 'a weed' : 'a lettuce'}. The robot ${sureWords(pl.p)}.${pl.hid ? ` ${whyUnsure[pl.hid]}` : ''}`); keep(0, d);
       await sh.buttons('', [{ act: 'n', label: k < CHECK.length - 1 ? 'Next plant' : 'Carry on', go: true }]);
     }
     part = 1; keep(1, d);
@@ -62,7 +62,7 @@ export async function playM5(ctx, sh, cur, keep) {
         const out = (r) => (!r.did ? '' : r.did === 'pull' ? (r.weed ? '<em class="ok">Pulled ✓</em>' : '<em class="miss">Crop lost ✗</em>') : r.did === 'flag' ? (r.checked ? `<em class="ask">Flag: farmer ${r.weed ? 'pulled' : 'kept'}</em>` : '<em class="miss">Flag: no time</em>') : (r.weed ? '<em class="ask">Weed left</em>' : '<em class="ok">Kept ✓</em>'));
         const tb = res && !j ? table(res) : null;
         sh.main.innerHTML = `<div class="rb-m5"><div class="rb-panel rb-row"><h3>The ${esc(crop)} row<small>${j ? 'The bar shows how sure the robot is that it is a weed.' : 'Confidence that each plant is a weed.'}</small></h3>
-          <ol class="rb-plants">${rows.map((r) => `<li class="${r.did ? (r.did === 'pull' && !r.weed ? 'lost' : r.did === 'pull' ? 'gone' : '') : ''}" aria-label="${esc(name(r))}: robot is ${esc(sureWords(r.p))}${j ? '' : `, ${r.p}%`}">${plantSvg(r, 58)}<b>${esc(name(r))}</b>${bar(r.p, j, pull)}${out(r)}</li>`).join('')}</ol></div>
+          <ol class="rb-plants">${rows.map((r) => `<li class="${r.did ? (r.did === 'pull' && !r.weed ? 'lost' : r.did === 'pull' ? 'gone' : '') : ''}" aria-label="${esc(name(r))}: robot ${esc(sureWords(r.p))}${j ? '' : `, ${r.p}%`}">${plantSvg(r, 58)}<b>${esc(name(r))}</b>${bar(r.p, j, pull)}${out(r)}</li>`).join('')}</ol></div>
           <div class="rb-panel rb-setbox"><h3>${j ? 'Pull a plant when the robot is at least…' : 'Pull when confidence ≥'}</h3>
             <div class="rb-sets" role="radiogroup" aria-label="Pull setting">${SETTINGS.map((t) => `<button type="button" role="radio" class="rb-set${pull === t ? ' on' : ''}" data-t="${t}" aria-checked="${pull === t}">${j ? esc(SURE[t]) : `${t}%`}</button>`).join('')}</div>
             ${withAsk ? `<h3>Flag for the farmer from</h3><div class="rb-sets" role="radiogroup" aria-label="Flag setting"><button type="button" role="radio" class="rb-ask${ask === null ? ' on' : ''}" data-a="" aria-checked="${ask === null}">No flags</button>${SETTINGS.filter((t) => pull === null || t < pull).map((t) => `<button type="button" role="radio" class="rb-ask${ask === t ? ' on' : ''}" data-a="${t}" aria-checked="${ask === t}">${t}%</button>`).join('')}</div>` : ''}

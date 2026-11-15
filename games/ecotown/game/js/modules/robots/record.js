@@ -13,7 +13,7 @@ export function missionLine(m, s, j) {
   if (m === 2) return j ? `Programmed a robot arm, fixed a broken program, and packed all 4 seedlings with ${n(s.steps, 'step')} repeated ${s.rep} times.`
     : `Arm program: fixed a bug, then packed 4 seedlings with a ${s.steps}-step loop run ${s.rep} times.`;
   if (m === 3) { const safe = (s.rules || []).filter(([, a]) => a).length;
-    return j ? `Wrote ${n(safe, 'rule')} for a hospital robot that took medicine upstairs safely, with the most important rule first.`
+    return j ? `Wrote ${n(safe, 'rule')} for a hospital robot. It took the medicine safely on every trip, even upstairs.`
       : `Hospital robot: ${safe} ordered if-then rules; a safe delivery upstairs in ${s.secs} s.`; }
   if (m === 4) return j ? `Trained a recycling robot with ${n(s.ex, 'example')}: ${s.first} of ${s.of} right at first, then ${s.last} of ${s.of}. ${s.sr} of ${s.so} right in the street.`
     : `Sorter: ${s.ex} examples; unseen test ${s.first}/${s.of}, then ${s.last}/${s.of}; ${s.sr}/${s.so} new things in the street.`;

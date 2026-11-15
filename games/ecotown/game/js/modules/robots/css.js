@@ -73,21 +73,21 @@ export const css = `
 § .rb-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0 0 10px; }
 § .rb-tile { min-height: 48px; padding: 6px 10px; border: 0; border-radius: 12px; background: #16c79a; color: #10322a !important; font-weight: 800 !important; box-shadow: inset 0 -3px 0 #0f9c78, 0 3px 0 #0b6e55; }
 /* mission 3 */
-§ .rb-m3 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; align-items: start; }
-§ .rb-left3 { display: grid; gap: 8px; min-width: 0; } § .rb-planbox { display: grid; gap: 8px; } § .rb-plan { display: block; width: 100%; height: auto; max-height: min(40vh, 320px); }
+§ .rb-m3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 12px; align-items: start; }
+§ .rb-left3 { display: grid; gap: 8px; min-width: 0; } § .rb-planbox { display: grid; gap: 8px; } § .rb-plan { display: block; width: 100%; height: auto; max-height: min(36vh, 300px); } § .rb[data-stage="m3-r3"] .rb-plan { max-height: min(28vh, 240px); }
 § .rb-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-§ .rb-log li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 2px #e6d3b0; }
+§ .rb-log li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 4px 10px; font-size: .94em; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 2px #e6d3b0; }
 § .rb-log li span { font-size: 1.3em; } § .rb-log small { display: block; margin-top: 2px; font-weight: 800; color: #8f3a10; }
 § .rb-log li.unsafe, § .rb-log li.stuck { background: #fdf0e6; } § .rb-log li.late { background: #fff7dc; }
 § .rb-mk { font-style: normal; width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; background: #1f7a44; }
 § .rb-mk.unsafe, § .rb-mk.stuck { background: #b3501f; } § .rb-mk.late { background: #8a6200; }
-§ .rb-rlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-§ .rb-rlist > li { padding: 8px 10px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 2px #e6d3b0; }
+§ .rb-rlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+§ .rb-rlist > li { padding: 6px 8px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 2px #e6d3b0; }
 § .rb-rif { display: flex; align-items: center; gap: 8px; } § .rb-rif b { font-weight: 800; flex: 1; } § .rb-rif > span:not(.rb-rnum):not(.rb-order) { font-size: 1.3em; }
 § .rb-rnum { width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; background: #243447; color: #fff; font-weight: 800; font-size: .85em; flex: none; }
 § .rb-order { display: flex; gap: 4px; } § .rb-mv { min-width: 44px; min-height: 44px; border: 0; border-radius: 10px; background: #f3e9d2; font-weight: 800; box-shadow: inset 0 0 0 2px #d7bf95; } § .rb-mv:disabled { opacity: .4; cursor: default; }
-§ .rb-ract { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; } § .rb-ract small { font-weight: 800; color: #5e4936; }
-§ .rb-act { min-height: 44px; padding: 6px 12px; border: 0; border-radius: 12px; background: #f6edd8; font-weight: 700; box-shadow: inset 0 0 0 2px #d7bf95; }
+§ .rb-ract { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 4px; } § .rb-ract small { font-weight: 800; color: #5e4936; }
+§ .rb-act { min-height: 44px; padding: 4px 10px; font-size: .9em !important; border: 0; border-radius: 12px; background: #f6edd8; font-weight: 700; box-shadow: inset 0 0 0 2px #d7bf95; }
 § .rb-act.on { background: #e3f4e9; box-shadow: inset 0 0 0 3px #1f7a44; font-weight: 800; }
 /* mission 5 */
 § .rb-m5a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px; align-items: stretch; max-width: 980px; margin: 0 auto; }

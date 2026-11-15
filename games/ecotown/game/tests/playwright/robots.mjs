@@ -5,6 +5,7 @@
 // Usage: node tests/playwright/robots.mjs [baseUrl] [outDir]      (serve games/ecotown/game first, e.g. on port 8892)
 //   BAND=senior   ages 13–17 (default junior).    MOTION=1  leave reduced motion off (default: low graphics, reduced motion).
 //   W=768 H=1024  the window size (default 1280 × 800).    TOUCH=1  a touch screen (taps).    TEXT=large  Large text.
+//   FROM=4        start at mission 4 (the save says missions 1 to 3 are done), to check part of the hour on a slow machine.
 //   TOWN=small (default: four tiles of town land) | empty (nothing built) | built (Florence's practice town, every plan built)
 import { createRequire } from 'module';
 import fs from 'fs';
@@ -13,7 +14,7 @@ let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromiu
 
 const [base = 'http://localhost:8892/', out = 'shots-robots'] = process.argv.slice(2);
 const band = process.env.BAND === 'senior' ? 'senior' : 'junior'; const J = band === 'junior'; const motion = !!process.env.MOTION; const W = +(process.env.W || 1280); const H = +(process.env.H || 800);
-const town = process.env.TOWN || 'small'; const large = process.env.TEXT === 'large'; const touch = !!process.env.TOUCH;
+const town = process.env.TOWN || 'small'; const FROM = Math.max(1, Math.min(6, +(process.env.FROM || 1))); const large = process.env.TEXT === 'large'; const touch = !!process.env.TOUCH;
 fs.mkdirSync(out, { recursive: true });
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const cx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch });
@@ -82,22 +83,29 @@ async function openRobots(key = '__robots') {
 }
 const goFoot = (act) => tap(`#module .rb-foot [data-act="${act}"]`);
 async function startMission(nm) { // from the map or a closing card: through the opening card into the mission
-  await waitStage('^(map|done|brief)$');
+  await waitStage('^(map|done|brief)$'); if ((await stage()) === 'done' && nm > 1 && FROM === nm) await goFoot('map');
   if ((await stage()) === 'map') await goFoot('go'); else if ((await stage()) === 'done') await goFoot('next');
   await waitStage('^brief$'); checks[`m${nm}BriefSpoken`] = await said(`^Mission ${nm}\\.`);
-  if (nm === 1) { await layout('brief'); await shot('m1-brief'); }
+  if (nm === FROM) { await layout('brief'); await shot(`m${nm}-brief`); }
   await goFoot('start');
 }
 async function finishCard(nm) { await waitStage('^done$'); checks[`m${nm}Done`] = (await saved())?.done?.[nm - 1] === 1; await layout(`m${nm}-done`); if (nm === 1 || nm === 6) await shot(`m${nm}-done`); lap(`m${nm}`); }
 
 // ---------- the map
+if (FROM > 1) await p.evaluate(([from, j]) => { // a save with the missions before FROM done (summaries as the missions make them)
+  const sum = { 1: { mr: 6, mo: 8, pr: 3, po: 4, tried: [0, 1] }, 2: { fixed: true, steps: 8, rep: 4, runs: 5 }, 3: { rules: [['step', 'stop'], ['person', 'slow'], ['block', 'wait'], ['lift', 'call']], tests: 4, secs: 128 },
+    4: { ex: 10, first: 5, last: 8, of: 8, sr: 4, so: 5, asked: 1 }, 5: { checks: 4, of: 4, f1: { pull: 70, ask: null, left: 1, weeds: 5, best: 1 }, f2: { pull: 80, ask: null, left: 3, weeds: 6, best: 3 }, tries: 4 } };
+  const done = [1, 2, 3, 4, 5, 6].map((n) => (n < from ? 1 : 0)); const s = {}; for (let n = 1; n < from; n++) s[n] = sum[n];
+  const { G } = window.__eco.app; G.modules = { ...(G.modules || {}), robots: { at: Date.now(), state: { v: 3, j, plays: 0, done, sum: s, cur: null, m4: null, r4: 0, town: from > 4 ? { key: null, bins: ['paper', 'glass', 'food'], things: ['newspaper'], right: 8, of: 8 } : null } } }; G.save();
+}, [FROM, J]);
 await openRobots();
 checks.oneWayBack = (await p.locator('#module .modback').count()) === 1;
 checks.mapSixMissions = (await p.locator('#module .rb-mcard').count()) === 6;
-checks.mapLaterLocked = (await p.locator('#module .rb-mcard[disabled]').count()) === 5;
-checks.mapSpoken = await said('Start with mission 1');
+checks.mapLaterLocked = (await p.locator('#module .rb-mcard[disabled]').count()) === 6 - FROM;
+checks.mapSpoken = await said(FROM > 1 ? 'Next is mission|is next' : 'Start with mission 1');
 await layout('map'); await shot('map');
 
+if (FROM <= 1) {
 // ---------- mission 1: sensors, then the loop
 await startMission(1);
 await waitStage('^m1-match$'); let firstWrong = false;
@@ -125,6 +133,8 @@ await tap('#module .rb-rulebtn[data-t="1"]'); await tap('#module [data-run]'); a
 await layout('m1-rule'); await tap('#module [data-fin]');
 await finishCard(1);
 
+}
+if (FROM <= 2) {
 // ---------- mission 2: the arm
 await startMission(2);
 const tile = async (k) => tap(`#module .rb-tile[data-k="${k}"]`);
@@ -150,6 +160,8 @@ checks.m2Repeat = /All 4 seedlings/.test(await p.evaluate(() => document.querySe
 await shot('m2-tray'); await layout('m2-tray'); await tap('#module [data-next]');
 await finishCard(2);
 
+}
+if (FROM <= 3) {
 // ---------- mission 3: hospital rules (leave part way through, and come back)
 await startMission(3);
 const act = (cond, a) => p.evaluate(([c, x]) => { const li = [...document.querySelectorAll('#module .rb-rlist > li')].find((l) => l.querySelector(`.rb-act[data-a="${x}"]`) && l.textContent.includes(c)); return li ? [...li.querySelectorAll('.rb-act')].findIndex((b) => b.dataset.a === x) : -1; }, [cond, a]);
@@ -172,6 +184,8 @@ for (const i of [3, 2, 1]) await tap(`#module .rb-mv[data-mv="${i}"][data-dir="-
 await testRun(); await p.waitForSelector('#module [data-next]', { timeout: 30000 }); await layout('m3-r3'); await shot('m3-r3'); await tap('#module [data-next]');
 await finishCard(3);
 
+}
+if (FROM <= 4) {
 // ---------- mission 4: the recycling sorter, then its street scene in the town
 await startMission(4);
 await waitStage('^teach$'); checks.m4Spoken = await said('only knows what you show it|learns only from examples');
@@ -195,6 +209,8 @@ await waitStage('^street$'); await p.waitForTimeout(2500); await layout('m4-stre
 await finishCard(4);
 checks.m4StreetSceneRemoved = await p.evaluate(() => !window.__eco.app.stage.scene.getObjectByName('robots-scene'));
 
+}
+if (FROM <= 5) {
 // ---------- mission 5: the weeding robot
 await startMission(5);
 await waitStage('^m5-0$');
@@ -208,6 +224,8 @@ if (!J) checks.m5SeniorTable = (await p.locator('#module .rb-conf tbody tr').cou
 await layout('m5-carrot'); await shot('m5-carrot'); await tap('#module [data-next]');
 await finishCard(5);
 
+}
+if (FROM <= 6) {
 // ---------- mission 6: the flood robot
 await startMission(6);
 await waitStage('^m6-one$');
@@ -224,6 +242,7 @@ if (!(await p.locator('#module [data-next]').count())) { await opt('sensor', 'ca
 await p.waitForSelector('#module [data-next]', { timeout: 60000 }); await layout('m6-two'); await shot('m6-two'); await tap('#module [data-next]');
 await finishCard(6);
 
+}
 // ---------- the end of the hour: the map with Finish, the record, Talk it over, the break
 await goFoot('map'); await waitStage('^map$'); checks.mapAllTicked = (await p.locator('#module .rb-mcard.done').count()) === 6; await layout('map-done'); await shot('map-done');
 await goFoot('finish');

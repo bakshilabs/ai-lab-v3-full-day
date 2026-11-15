@@ -37,7 +37,7 @@ export function showMap(ctx, sh, prog) {
 export function showBrief(ctx, sh, m, again = false) {
   const j = sh.junior; const how = pick(m.how, j);
   sh.setup({ mission: m, stage: 'brief' });
-  sh.line.textContent = pick(m.job, j); ctx.say(`Mission ${m.n}. ${m.use}. ${pick(m.job, j)} ${how.join(' ')}`);
+  sh.line.textContent = j ? `Mission ${m.n}: ${m.use}. Read the job, then press Start.` : `Mission ${m.n}: ${m.use}. Read the brief, then Start.`; ctx.say(`Mission ${m.n}. ${m.use}. ${pick(m.job, j)} ${how.join(' ')}`);
   sh.main.innerHTML = `<div class="rb-brief rb-panel"><div class="rb-bico" aria-hidden="true">${m.icon}</div><div><p class="rb-kicker">Mission ${m.n} of 6${again ? ' · playing again' : ''}</p><h2>${esc(m.use)}</h2>
     <p class="rb-job">${esc(pick(m.job, j))}</p><h3>How to play</h3><ol class="rb-how">${how.map((h) => `<li>${esc(h)}</li>`).join('')}</ol></div></div>`;
   return sh.buttons('', [{ act: 'map', label: 'Back to the missions' }, { act: 'start', label: 'Start', go: true }]);

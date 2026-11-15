@@ -19,8 +19,8 @@ export const SURE = { 50: 'Half sure', 60: 'A bit sure', 70: 'Quite sure', 80: '
 export const FARMER_TIME = 3; // flags the farmer has time to check in a morning (ages 13–17, second field)
 // How sure, in words (ages 8–12 see words and a bar, never the number)
 export function sureWords(p) {
-  if (p >= 90) return 'very sure it is a weed'; if (p >= 75) return 'fairly sure it is a weed'; if (p >= 60) return 'thinks it is a weed';
-  if (p >= 40) return 'not sure'; if (p >= 20) return 'thinks it is a crop'; return 'very sure it is a crop';
+  if (p >= 90) return 'is very sure it is a weed'; if (p >= 75) return 'is fairly sure it is a weed'; if (p >= 60) return 'thinks it is a weed';
+  if (p >= 40) return 'is not sure'; if (p >= 20) return 'thinks it is a crop'; return 'is very sure it is a crop';
 }
 export const whyUnsure = { chewed: 'Its leaves are chewed by slugs, so it looks ragged, like a weed.', hidden: 'It is half hidden under leaves, so the camera sees only part of it.', small: 'It is tiny, so the camera sees few leaves.', feathery: 'Its feathery leaves look a lot like cow parsley, a weed.' };
 
