@@ -8,7 +8,8 @@ export const HOURS = 24;
 export const START = 6;                                   // the first hour of a day: 6 in the morning
 export const clockAt = (i) => (START + i) % 24;           // step 0..23 -> clock hour
 export const MODES = ['charge', 'hold', 'use'];
-export const DAY_IDS = ['today', 'windy', 'still', 'winter'];
+export const DAY_IDS = ['today', 'windy', 'still', 'winter', 'grey', 'front'];   // grey and front: forecasting practice (mission 2)
+export const isWinter = (dayId) => dayId === 'winter' || dayId === 'front';
 export const TEST_DAYS = ['windy', 'still', 'winter'];
 export const KW = 5;                                      // ages 13-17: one unit is shown as 5 kW (5 kWh in an hour)
 
@@ -23,9 +24,13 @@ const WIND = {
   windy:  [1.1, 1.1, 1.15, 1.1, 1.05, 1.1, 1.0, 1.05, 1.1, 1.15, 1.2, 1.2, 1.15, 1.1, 1.1, 1.15, 1.2, 1.2, 1.15, 1.1, 1.1, 1.05, 1.1, 1.1],
   still:  [0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.75, 0.75, 0.75, 0.7, 0.55, 0.4, 0.2, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.2, 0.2],
   winter: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.85, 0.85, 0.9, 0.9, 0.85, 0.85, 0.8, 0.75, 0.6, 0.45, 0.3, 0.28, 0.28, 0.28, 0.28, 0.28, 0.3, 0.3],
+  // a grey, still morning; a breeze from late morning that drops at teatime, and a windy night
+  grey:   [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.12, 0.12, 0.12, 0.15, 0.45, 0.75, 0.8, 0.8, 0.8, 0.75, 0.7, 0.45, 0.25, 0.25, 0.25, 0.3, 0.5, 0.9],
+  // winter: a windy morning, a calm afternoon and evening, and the wind coming back in the small hours
+  front:  [1.1, 1.1, 1.1, 1.1, 0.9, 0.5, 0.9, 0.9, 0.85, 0.8, 0.75, 0.7, 0.6, 0.45, 0.3, 0.2, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.2, 0.35],
 };
-const SUN_PEAK = { today: 0.9, windy: 0.35, still: 1.0, winter: 0.3 };
-const SUN_HOURS = { today: [7, 17], windy: [8, 17], still: [7, 17], winter: [9, 15] };   // the sun is down before the model's dusk
+const SUN_PEAK = { today: 0.9, windy: 0.35, still: 1.0, winter: 0.3, grey: 0.4, front: 0.3 };
+const SUN_HOURS = { today: [7, 17], windy: [8, 17], still: [7, 17], winter: [9, 15], grey: [8, 17], front: [9, 15] };   // the sun is down before the model's dusk
 export const WINTER_DEMAND = 1.25;                        // a winter night is cold: every home needs a quarter more
 export const WIND_STRONG = 0.6, WIND_LOW = 0.4, SUN_BRIGHT = 0.5;
 
@@ -42,7 +47,7 @@ export function forecast(dayId, seed = 1) {
     if ((base >= WIND_STRONG) !== (wind >= WIND_STRONG) || (base < WIND_LOW) !== (wind < WIND_LOW)) wind = base;
     const k = clock >= up && clock <= down ? Math.sin(((clock - up + 0.5) / (down - up + 1)) * Math.PI) : 0;
     const sun = r2(Math.max(0, SUN_PEAK[id] * k));
-    out.push({ i, clock, wind, sun, block: blockOf(clock), dark: afterDark(clock, id === 'winter') });
+    out.push({ i, clock, wind, sun, block: blockOf(clock), dark: afterDark(clock, isWinter(id)) });
   }
   return out;
 }
@@ -124,8 +129,8 @@ export function stepHour(kit, fc, level, mode, { winter = false, schoolFirst = f
 export const START_LEVEL = 0.25;   // every day starts with the battery a quarter full
 
 // Run a whole day. decide(info) -> { mode, rule } is asked once an hour; info is what the control desk can see.
-export function runDay(kit, dayId, decide, { seed = 1, schoolFirst = false, turns = false } = {}) {
-  const fc = forecast(dayId, seed); const winter = dayId === 'winter'; let level = r2(kit.cap * START_LEVEL); const hours = [];
+export function runDay(kit, dayId, decide, { seed = 1, schoolFirst = false, turns = false, startLevel = START_LEVEL } = {}) {
+  const fc = forecast(dayId, seed); const winter = isWinter(dayId); let level = r2(kit.cap * startLevel); const hours = [];
   for (const f of fc) {
     const d = decide({ i: f.i, clock: f.clock, block: f.block, wind: f.wind, sun: f.sun, dark: f.dark, battery: kit.cap ? level / kit.cap : 0 }) || {};
     const mode = MODES.includes(d.mode) ? d.mode : 'hold';

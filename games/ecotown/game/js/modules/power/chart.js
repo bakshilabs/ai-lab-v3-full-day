@@ -4,7 +4,7 @@
 //   bars       power made each hour (blue: wind, yellow: sun), with a line for the power needed
 //   purple     how full the battery is
 //   bottom row each hour that has happened: warm = every home lit, dark with a number = that many homes dark
-import { forecast, homeNeed, schoolNeed, HOURS, WIND_STRONG, WIND_LOW, SUN_BRIGHT, KW, BLOCKS, TEST_DAYS } from './model.js';
+import { forecast, homeNeed, schoolNeed, isWinter, HOURS, WIND_STRONG, WIND_LOW, SUN_BRIGHT, KW, BLOCKS, TEST_DAYS } from './model.js';
 import { T, clockShort } from './words.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -13,9 +13,9 @@ export const C = { wind: '#5b9bd5', windPale: '#cfe0f1', sun: '#f2b632', sunPale
 const FONT = 'Inter, system-ui, sans-serif';
 
 // what the town needs each hour of a kind of day (every home and the school)
-export function needLine(kit, dayId) {
-  const winter = dayId === 'winter';
-  return forecast(dayId).map((f) => kit.homes.reduce((n, h) => n + homeNeed(f.clock, h.base, winter), 0) + schoolNeed(f.clock, winter));
+export function needLine(kit, dayId, seed = 1) {
+  const winter = isWinter(dayId);
+  return forecast(dayId, seed).map((f) => kit.homes.reduce((n, h) => n + homeNeed(f.clock, h.base, winter), 0) + schoolNeed(f.clock, winter));
 }
 
 // One day as a group of shapes, w wide and h tall, at (x, y).
