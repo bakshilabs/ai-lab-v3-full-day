@@ -298,7 +298,8 @@ export const css = `
 § .rb-more { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); min-height: 36px; padding: 4px 16px; border: 0; border-radius: 999px; background: #243447; color: #fff !important; font-weight: 800 !important; font-size: .9em !important; box-shadow: 0 3px 0 rgba(36, 52, 71, .35), 0 0 0 3px #fffaf0; }
 § .rb-more[hidden] { display: none; }
 § .rb-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
-§ .rb-chips i { font-style: normal; font-size: .82em; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #efe3c8; color: #3b2a1e; }
+§ .rb-chips i { font-style: normal; font-size: .82em; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #efe3c8; color: #3b2a1e; white-space: nowrap; }
+§ .rb.large .rb-items .rb-chips i { font-size: .76em; padding: 1px 6px; }
 § .rb-chips i.same { background: #1f7a44; color: #fff; }
 § .rb-empty { margin: 8px; }
 § .rb-side { display: grid; gap: 10px; max-height: 100%; overflow-y: auto; padding-bottom: 5px; }
@@ -380,6 +381,7 @@ export const css = `
   § .rb-stagebox { grid-template-columns: minmax(0, 1fr); min-height: 0; } § .rb-arrow { display: none; } § .rb-thing .rb-pic { width: 84px; height: 84px; } § .rb-think .rb-robot { height: 100px; }
   § .rb-chart svg, § .rb.senior .rb-chart svg { max-height: 24vh; } § .rb-score { grid-template-columns: auto auto auto; align-items: center; justify-content: center; column-gap: 10px; } § .rb-score .rb-robot { height: 70px; width: auto; }
   § .rb-cap { grid-template-columns: auto 1fr; } § .rb-cap .rb-btn { grid-column: 1 / 3; }
+  § .rb-foot:has(.rb-btn ~ .rb-btn) .rb-hint { flex: 1 0 100%; margin: 0; }
 }
 @media (max-height: 640px) { § .rb-say { min-height: 0; padding: 4px 10px; } § .rb-flo svg { width: 32px; height: 32px; } }
 `.replace(/§/g, M);
