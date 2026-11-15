@@ -28,6 +28,7 @@ export async function openModule(app, id) {
   const G = app.G; const mod = await loadModule(id); if (!mod || !G?.hostModule) return null;
   return G.hostModule(async (host) => {
     style('base', BASE_CSS); if (mod.css) style(id, mod.css);
+    for (const off of shown) { try { off(); } catch (e) { console.error(e); } } shown = []; // what modules left in the town is put away while one is open; showInTown draws it again afterwards
     const j = G.j; const wrap = h(`<div id="module" data-module="${id}"><button class="modback" type="button">← ${j ? 'Back to my town' : 'Back to the town'}</button><div class="modroot"></div></div>`);
     document.getElementById('layer').appendChild(wrap); document.documentElement.dataset.module = id;
     const root = wrap.querySelector('.modroot'); const ctl = new AbortController(); const leaves = []; let frame = null; let state = cleanState(G.modules?.[id]?.state);
@@ -64,7 +65,9 @@ export async function openModule(app, id) {
       if (result.record?.made.picture) { try { localStorage.setItem(PIC(id), result.record.made.picture); } catch { /* storage off or full: the page shows the words */ } }
       G.modules = { ...(G.modules || {}), [id]: storedModule(G.modules?.[id], result, state) }; G.save();
       host.status(cleanReport(id, { stage: pick(mod.title, j), state: result.finished ? 'finished' : 'playing', finished: result.finished }));
+      const pic = result.record?.made.picture; const picHtml = !pic ? '' : pic.startsWith('data:image/png;base64,') ? `<img alt="" src="${pic}">` : pic; // already checked by cleanMade: inline SVG without script, or a PNG
       if (result.record) await app.ui.modal(`<div class="ribbon green">${esc(mod.icon)} ${esc(pick(mod.title, j))}</div><h2>${esc(result.record.made.title)}</h2>
+        ${picHtml ? `<div class="modpic" style="max-width:420px;margin:6px auto;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 0 2px #e6d3b0">${picHtml}</div>` : ''}
         ${result.record.made.lines.length ? `<div class="practised plain"><small>${j ? 'You made' : 'You made'}</small><ul>${result.record.made.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>` : ''}
         <div class="practised"><small>You practised</small><ul>${result.record.practised.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>
         <div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${j ? 'Back to my town' : 'Back to the town'} ➜</button></div>`, { say: `You practised: ${result.record.practised.join('. ')}` });

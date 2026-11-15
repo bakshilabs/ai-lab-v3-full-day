@@ -2,6 +2,14 @@
 
 **Contract 1, fixed on 15 November 2026. Do not change it while module work is in progress.** If something here proves wrong, tell the main session; do not work round it.
 
+**Notes added after the three first versions were merged (the interface itself is unchanged):**
+- `ctx.town.terrain.tiles` is a **Map** of key → tile, not a list.
+- `three` cannot be imported at the top of a module's `index.js`: the tests load `index.js` in Node, where `three` does not resolve. Use `ctx.engine.THREE`, or load the file that needs three.js with `import()` inside `run` and `show`.
+- `show()` has no frame hook. A module that animates its result in the town runs its own `requestAnimationFrame` and cancels it in the remover.
+- The game's own keys and pointer stay live under a module. The drone and roads modules block them themselves.
+- A child who presses "Back to my town" before finishing keeps nothing from that visit except what the module saved with `ctx.save`.
+- While a module is open, everything the modules left in the town is put away, and drawn again afterwards.
+
 The user's plan for the three modules is `docs/afternoon-modules-plan.md`. This page is how a module plugs into the game.
 
 ## In short
