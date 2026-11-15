@@ -85,7 +85,7 @@ for (let guard = 0; guard < 900; guard++) {
       checks.afterComingBack = await mapCount(); checks.comeBackLine = await said(); await shot('map-after-coming-back', 1200); continue;
     }
     if (missions === 1 && !checks.replayOffered) { checks.replayOffered = await p.evaluate(() => !!document.querySelector('#module .fm-mcard.done[data-fm-mission="0"]')); await click('#module [data-fm-mission="0"]'); await p.waitForSelector('#module [data-fm-intro="crew"]'); await click('#module [data-fm-tomap]'); continue; }
-    if (missions >= only) break;
+    if (only < 6 && missions >= only) break;
     if (await p.$('#module [data-fm-finish]')) { await shot('map-all-done', 800); await checkLayout('map done'); await click('#module [data-fm-finish]'); continue; }
     await click('#module [data-fm-carry]'); continue;
   }

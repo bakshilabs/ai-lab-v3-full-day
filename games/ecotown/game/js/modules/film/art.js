@@ -67,7 +67,7 @@ export const storyPic = (id, label = '') => svg((STORY_ART[id] || STORY_ART['m-d
 // ---- the takes (mission 4): the same shot, once good and once with a fault a camera operator can make
 const HALL = () => frame('day', at(80, 74, 1.9, ART.hall()) + at(30, 74, 0.9, ART.trees()) + cloud(40, 20));
 const FLO = () => frame('day', at(80, 80, 1.6, ART.florence()) + at(130, 72, 0.9, ART.trees()), { horizon: 66 });
-const OTT = () => frame('day', at(80, 70, 2.2, water(100, 16) + otter(-6) + otter(14, -1)), { horizon: 50 });
+const OTT = () => frame('day', at(80, 70, 2.2, water(100, 16) + otter(-20) + otter(22, -1)), { horizon: 50 });
 const SUBJ = { hall: HALL, florence: FLO, otters: OTT };
 export const FAULTS = {
   blur:  { label: 'It is blurry: out of focus', short: 'blurry' },
