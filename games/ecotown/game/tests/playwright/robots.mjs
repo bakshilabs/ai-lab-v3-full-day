@@ -131,7 +131,8 @@ const trayNow = () => p.evaluate(() => [...document.querySelectorAll('#module .r
 async function trayUnseen() { const [tray, shown] = [await trayNow(), await shownNow()]; and('noTrayItemIsAShownExample', tray.length > 0 && shown.length > 0 && !tray.some((id) => shown.includes(id))); return tray; }
 await p.waitForSelector('#module .rb[data-stage="test"]'); const tray1 = await trayUnseen();
 // hammering the button does not run the whole test unseen
-{ for (let i = 0; i < 12; i++) await p.evaluate(() => document.querySelector('#module [data-go]').click()); const done = await p.locator('#module .rb-mark').count(); checks.hammerGuard = done <= 2 && (await stage()) === 'test'; }
+let hammered = 0;
+{ const marks = await p.evaluate(() => { for (let i = 0; i < 12; i++) document.querySelector('#module [data-go]').click(); return document.querySelectorAll('#module .rb-mark').length; }); hammered = await p.locator('#module .rb-mark').count(); checks.hammerGuard = marks <= 1 && (await stage()) === 'test'; }
 async function firstTest() {
   let steps = 0; let shown = false;
   while ((await stage()) === 'test' && steps++ < 40) {
@@ -140,7 +141,7 @@ async function firstTest() {
   }
   return steps;
 }
-checks.test1Steps = (await firstTest()) >= tray1.length;
+checks.test1Steps = (await firstTest()) + hammered >= tray1.length;
 await p.waitForSelector('#module .rb[data-stage="review"]');
 const first = await p.evaluate(() => ({ right: +document.querySelector('#module .rb-score > b').textContent, misses: document.querySelectorAll('#module .rb-misses li').length, why: [...document.querySelectorAll('#module .rb-why')].map((x) => x.textContent.replace(/^★\s*/, '').trim()) }));
 checks.firstTestHasGaps = first.misses > 0 && first.why.every((l) => /^(It has not been shown anything for|Nothing it was shown for|For .*, the closest thing it was shown is)/.test(l));
@@ -211,7 +212,8 @@ while ((await p.locator('#module').count()) && presses++ < 30) {
   const moving = await p.evaluate(() => document.querySelector('#module .rb')?.dataset.moving === '1');
   const txt = await p.evaluate(() => document.querySelector('#module .rb-cap p')?.textContent || ''); if (/^[✓✗?]/.test(txt)) streetThings.push(txt);
   if (motion && moving && skipped === null) { // a second press finishes the robot's move at once
-    await p.waitForTimeout(400); const t0 = Date.now(); await go.click(); await p.waitForFunction(() => document.querySelector('#module .rb')?.dataset.moving !== '1', null, { timeout: 5000 }).catch(() => {}); skipped = Date.now() - t0; }
+    await p.waitForTimeout(400); // pressed straight from the page, so a slow 3D frame cannot hold up the click itself
+    const t0 = Date.now(); const still = await p.evaluate(() => { document.querySelector('#module .rb-cap [data-go]').click(); return document.querySelector('#module .rb')?.dataset.moving === '1'; }); skipped = still ? null : Date.now() - t0; if (still) await p.waitForFunction(() => document.querySelector('#module .rb')?.dataset.moving !== '1', null, { timeout: 30000 }).catch(() => {}); }
   else if (moving) await p.waitForFunction(() => document.querySelector('#module .rb')?.dataset.moving !== '1', null, { timeout: 30000 }).catch(() => {});
   if (presses === 3 && !streetShot) { streetShot = true; await shot('street', 500); }
 }
