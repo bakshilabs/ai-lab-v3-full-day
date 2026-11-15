@@ -48,9 +48,11 @@ export function poseFor(shot, set, u = 0.5, live = null) {
       pos = around(look, lerp(30 * far, D, k), lerp(24, 31, k), HOME); fov = lerp(34, 40, k); break;
     }
     case 'street': { // along the most open side of the place, at head height (or over the roofs if no side is open)
-      const [nx, nz] = SIDES_OUT[place?.side ?? 0]; const clear = place ? place.clear : true; const out = clear ? 7.4 : 11; const along = lerp(-8, 8, t);
-      const g = place ? P[1] - 2.6 : P[1]; pos = [P[0] + nx * out - nz * along, g + (clear ? 2.3 : 9.5), P[2] + nz * out + nx * along];
-      look = [P[0], g + (clear ? 2.8 : 2), P[2]]; fov = 52; break;
+      // across the street (the open tile beside the place, not the place's own edge), a little above head height and
+      // looking slightly down, so stalls and roofs in front do not fill the frame
+      const [nx, nz] = SIDES_OUT[place?.side ?? 0]; const clear = place ? place.clear : true; const out = clear ? 10 : 12; const along = lerp(-8, 8, t);
+      const g = place ? P[1] - 2.6 : P[1]; pos = [P[0] + nx * out - nz * along, g + (clear ? 3.6 : 10), P[2] + nz * out + nx * along];
+      look = [P[0], g + (clear ? 1.8 : 1.5), P[2]]; fov = 50; break;
     }
     case 'close': default: {
       if (id === 'otters') { pos = around(P, 18, 23, lerp(66, 104, t)); fov = 30; }           // from the east bank, following them down the river

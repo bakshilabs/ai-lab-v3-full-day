@@ -15,17 +15,17 @@ const require = createRequire(import.meta.url);
 let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
 
 const [base = 'http://localhost:8814/', out = 'shots-film'] = process.argv.slice(2);
-const band = process.env.BAND === 'senior' ? 'senior' : 'junior'; const reduce = process.env.REDUCE !== '0'; const empty = process.env.TOWN === 'empty'; const large = process.env.LARGE === '1';
+const band = process.env.BAND === 'senior' ? 'senior' : 'junior'; const reduce = process.env.REDUCE !== '0'; const empty = process.env.TOWN === 'empty'; const full = process.env.TOWN === 'full'; const large = process.env.LARGE === '1';
 const [W, H] = (process.env.SIZE || '1280x800').split('x').map(Number);
 fs.mkdirSync(out, { recursive: true });
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-const p = await b.newPage({ viewport: { width: W, height: H } });
+const p = await b.newPage({ viewport: { width: W, height: H } }); p.setDefaultTimeout(180000); // a busy machine in software 3D can take a while to answer a click
 await p.addInitScript(([r, l]) => { window.__sayLog = []; if (!r) window.__filmPace = 9; // with motion the film is stretched, so each moving shot can be photographed in slow software 3D
   localStorage.setItem('ecotown.prefs', JSON.stringify({ quality: 'low', reduce: r, ...(l ? { text: 'large' } : {}) })); }, [reduce, large]);
 const errors = []; p.on('pageerror', (e) => errors.push(e.message + ' ' + (e.stack || '').split('\n')[1])); p.on('console', (m) => m.type() === 'error' && !/404/.test(m.text()) && errors.push(m.text()));
 const outside = []; p.on('request', (r) => { if (!r.url().startsWith(base) && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) outside.push(r.url()); });
 await p.addLocatorHandler(p.locator('#episode [data-skip]'), async (skip) => { await skip.click(); });
-const tag = `${band}${reduce ? '' : '-motion'}${empty ? '-empty' : ''}${large ? '-large' : ''}-${W}`; let n = 0; const shots = [];
+const tag = `${band}${reduce ? '' : '-motion'}${empty ? '-empty' : full ? '-full' : ''}${large ? '-large' : ''}-${W}`; let n = 0; const shots = [];
 const shot = async (name, wait = 700) => { await p.waitForTimeout(wait); const f = `${out}/${tag}-${String(++n).padStart(2, '0')}-${name}.png`; const t0 = Date.now(); await p.screenshot({ path: f, timeout: 240000 }); shots.push(f); if (process.env.TIMES) console.error(name, Date.now() - t0, 'ms'); };
 const LONG = 600000;
 const click = async (sel, t = LONG) => { await p.waitForSelector(sel, { state: 'visible', timeout: t }); await p.click(sel); };
@@ -56,6 +56,9 @@ if (!empty) await p.evaluate((noOtters) => { const { G } = window.__eco.app;
   // paths over the wetland: the otters leave, so Florence has to say she cannot film them
   if (noOtters) for (const t of [...window.__eco.terrain.tiles.values()].filter((x) => x.zone === 'wetland')) G.placeAt(t.k, 'path', { free: true });
 }, band === 'junior');
+// TOWN=full: as much of the island built as a free tap allows (homes, food, power, a heart), to see the module over a crowded town
+if (full) await p.evaluate(() => { const { G } = window.__eco.app; const kinds = ['timber', 'straw', 'cohousing', 'mixed', 'orchard', 'wind', 'solar', 'park', 'earth', 'allot', 'hives', 'repair', 'heatpump', 'battery', 'compost', 'raingarden'];
+  let i = 0; for (const t of [...window.__eco.terrain.tiles.values()]) { if (t.zone === 'wetland' || G.cells.get(t.k)?.item) continue; const item = kinds[i++ % kinds.length]; G.placeAt(t.k, 'town', { free: true }); try { G.placeAt(t.k, item, { free: true, replace: true }); } catch {} } });
 await p.waitForFunction(() => window.__eco.app.G.canMenu(), null, { timeout: 120000 });
 const missing = empty ? 'family' : band === 'junior' ? 'otters' : null; const who = empty ? 'otters' : 'family';
 checks.town = await p.evaluate(() => ({ builds: [...window.__eco.app.G.cells].filter(([, c]) => c.item).length, otters: !!window.__eco.app.G.sim?.().species?.otters }));
@@ -96,6 +99,9 @@ checks.frameDrawings = await p.evaluate(() => [...document.querySelectorAll('#mo
 
 // ---------- 3. watch it. With reduced motion each shot is a still with Next; with motion it plays by itself.
 async function watch(name, { skipAfter = 99 } = {}) {
+  await p.evaluate(() => { window.__fmSeen = []; window.__fmObs?.disconnect(); const m = document.getElementById('module');
+    window.__fmObs = new MutationObserver(() => { const s = m.querySelector('[data-fm-film]')?.dataset.fmShot; if (s && window.__fmSeen[window.__fmSeen.length - 1] !== s) window.__fmSeen.push(s); });
+    window.__fmObs.observe(m, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-fm-shot'] }); });
   await click('#module [data-fm-watch]'); await stage('film'); const seen = [];
   await p.waitForSelector('#module [data-fm-film][data-fm-shot="title"]', { timeout: LONG }); seen.push('title'); await shot(`${name}-title`, 900); await checkLayout(`${name} title`);
   const total = (await board()) || null; void total;
@@ -107,7 +113,10 @@ async function watch(name, { skipAfter = 99 } = {}) {
     await shot(`${name}-shot-${+at + 1}`, reduce ? 900 : 9000); if (i === 0) await checkLayout(`${name} shot`);
     if (+at + 1 >= skipAfter) { await click('#module [data-fm-skip]'); seen.push('skipped'); break; }
   }
-  await stage('board'); return seen;
+  await stage('board');
+  // on a very busy machine a screenshot can take longer than the end card is shown: the page itself noted every card
+  const all = await p.evaluate(() => window.__fmSeen || []); if (!seen.includes('skipped')) for (const s of all) if (!seen.includes(s)) seen.push(s);
+  return seen;
 }
 checks.firstWatch = await watch('cut1');
 checks.afterFirstLine = await said(); const after1 = await board(); checks.feedbackTiles = after1.fb; checks.canFinishAfterWatching = after1.finish;

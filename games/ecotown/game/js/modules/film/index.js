@@ -42,7 +42,7 @@ export default {
         if (step === 'place') {
           if (st.brief.place) player.look({ move: 'push', sub: `place:${st.brief.place}` }, 0.4);
           r = await ui.choose({ step, of: [1, 3], q: STEPS.place.q, say: STEPS.place.ask(junior) + (set.empty ? ' ' + emptyTown : ''), picked: st.brief.place,
-            tiles: set.offer.map((id) => placeOf(set, id)).map((p) => ({ id: p.id, icon: p.icon, label: p.label.replace(/^the /, '') })),
+            tiles: set.offer.map((id) => placeOf(set, id)).map((p) => ({ id: p.id, icon: p.icon, label: p.label.replace(/^the (.)/, (_, c) => c.toUpperCase()) })),
             pick: (id) => { st.brief.place = id; keep(); player.look({ move: 'push', sub: `place:${id}` }, 0.4); return { ok: true, say: placePicked(placeOf(set, id)) }; } });
         } else if (step === 'who') {
           if (st.brief.who) player.look({ move: 'close', sub: `who:${st.brief.who}` });
