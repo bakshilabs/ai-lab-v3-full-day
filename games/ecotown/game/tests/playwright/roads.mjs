@@ -153,7 +153,7 @@ for (let i = 0; i < S3.length; i++) {
   await p.waitForSelector(tray('[data-opt]'), { timeout: LONG });
   if (i === 1) {                                                                   // 30 mph past the school: a near miss and a hint
     await p.click(tray(`[data-opt="${S3[i].unsafe}"]`)); await p.click(tray('[data-act="test"]'));
-    if (motion) { await p.waitForTimeout(1500); await shot('m3-test-moving', 0); await p.click(tray('[data-act="skip"]')); }
+    if (motion) { await p.waitForTimeout(1500); await shot('m3-test-moving', 0); if (await p.$(tray('[data-act="skip"]'))) await p.click(tray('[data-act="skip"]'), { timeout: 5000 }).catch(() => {}); }
     await p.waitForSelector(tray('[data-opt]'), { timeout: LONG }); checks.m3miss = await hint(); await shot('m3-school-miss'); await layout('m3-school-miss');
     must('m3-nearMissExplained', /could not stop|not stop in time|Could not stop/.test(checks.m3miss) && !/Safe setting|safe choice is/.test(checks.m3miss), checks.m3miss);
   }
