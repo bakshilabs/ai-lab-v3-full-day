@@ -85,8 +85,14 @@ const sceneBefore = await p.evaluate(() => window.__eco.app.stage.scene.children
 if (process.env.SHOT_TOWN) await shot('town-before');
 
 // ---------- open the module
-await p.evaluate(() => { window.__robots = 'open'; window.__eco.openModule('robots').then((r) => { window.__robots = r; }, (e) => { window.__robots = { error: String(e) }; }); });
-await p.waitForSelector('#module[data-module="robots"] .rb[data-stage="teach"]', { timeout: 120000 });
+// the game opens a module only when its menu could open (no card or film in the way): try again until it does
+for (let tries = 0; tries < 8; tries++) {
+  await p.evaluate(() => { window.__robots = 'open'; window.__eco.openModule('robots').then((r) => { window.__robots = r; }, (e) => { window.__robots = { error: String(e) }; }); });
+  await p.waitForFunction(() => document.querySelector('#module[data-module="robots"] .rb[data-stage="teach"]') || window.__robots !== 'open', null, { timeout: 300000 });
+  if (await p.locator('#module[data-module="robots"] .rb[data-stage="teach"]').count()) break;
+  notes.openRetries = tries + 1; await p.keyboard.press('Escape').catch(() => {}); await p.waitForTimeout(3000);
+}
+await p.waitForSelector('#module[data-module="robots"] .rb[data-stage="teach"]', { timeout: 60000 });
 checks.oneWayBack = (await p.locator('#module .modback').count()) === 1;
 checks.spokenFirstLine = await p.evaluate(() => window.__sayLog.some((s) => /only knows what you show it|learns only from examples/.test(s.text)));
 const bins = await p.evaluate(() => [...document.querySelectorAll('#module .rb-bin')].map((x) => x.dataset.bin));
@@ -191,7 +197,8 @@ await tap('#module [data-act="street"]');
 
 // ---------- the street: the robot sorts new things in the town, in plain view
 await p.waitForSelector('#module .rb[data-stage="street"]'); await p.waitForTimeout(2500);
-checks.cameraIsLow = await p.evaluate(() => { const c = window.__eco.app.stage.camera; return c.position.y < 30 && c.fov > 30; });
+// a close view: the camera stands within about two tiles of the robot (a tile is 6 units), not up in the sky
+checks.cameraIsClose = await p.evaluate(async () => { const THREE = await import('three'); const { stage: st } = window.__eco.app; const r = st.scene.getObjectByName('robots-robot'); if (!r) return false; const at = r.getWorldPosition(new THREE.Vector3()); return st.camera.position.distanceTo(at) < 13 && st.camera.position.y > at.y + 2 && st.camera.fov > 30; });
 { const r = await seen('robots-robot', 1.0); const c = await colours(); notes.street = { robot: r, ...c };
   checks.streetRobotOnScreen = !!r && r.onScreen; checks.streetRobotNotHidden = !!r && r.blocked === 0; checks.streetNotOneFlatColour = c.colours >= 12 && c.hues >= 2; }
 await layout('street'); await shot('street-start');
@@ -236,7 +243,12 @@ checks.everyStepSpoken = await p.evaluate(() => ['kept apart', 'new examples|add
 await shot('town-after');
 
 // ---------- open it again and leave early: nothing is left behind, and the finished record stays
-await p.evaluate(() => { window.__robots2 = 'open'; window.__eco.openModule('robots').then((r) => { window.__robots2 = r; }); });
+for (let tries = 0; tries < 8; tries++) {
+  await p.evaluate(() => { window.__robots2 = 'open'; window.__eco.openModule('robots').then((r) => { window.__robots2 = r; }); });
+  await p.waitForFunction(() => document.querySelector('#module[data-module="robots"] .rb[data-stage="teach"]') || window.__robots2 !== 'open', null, { timeout: 300000 });
+  if (await p.locator('#module[data-module="robots"] .rb[data-stage="teach"]').count()) break;
+  await p.keyboard.press('Escape').catch(() => {}); await p.waitForTimeout(3000);
+}
 await p.waitForSelector('#module[data-module="robots"] .rb[data-stage="teach"]', { timeout: 60000 });
 await tap('#module .modback'); await p.waitForFunction(() => window.__robots2 !== 'open', null, { timeout: 60000 }); await p.waitForTimeout(800);
 checks.leavingEarly = await p.evaluate((n0) => !document.querySelector('#module') && window.__eco.app.G.modules.robots.done === true && window.__eco.app.stage.scene.children.length === n0 + 1, sceneBefore);
