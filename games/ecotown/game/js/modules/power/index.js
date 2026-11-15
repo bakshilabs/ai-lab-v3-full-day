@@ -43,7 +43,7 @@ ${P} .pw-dial b { font-size: .8em; line-height: 1.1; color: #5e4936; }
 ${P} .pw-dial span { font: 800 1em Bricolage, Inter, system-ui, sans-serif; line-height: 1.15; white-space: nowrap; }
 ${P} .pw-dial.alert { box-shadow: inset 0 0 0 3px #b5432c; } ${P} .pw-dial.alert span { color: #9a3220; }
 ${P} .pw-needle, ${P} .pw-arc { transition: transform .45s ease, stroke-dashoffset .45s ease; transform-origin: 50px 54px; }
-${P}.pw-still .pw-needle, ${P}.pw-still .pw-arc, ${P}.pw-still .pw-bars u { transition: none; }
+${P}.pw-still .pw-needle, ${P}.pw-still .pw-arc, ${P}.pw-still .pw-bars u, ${P}.pw-fast .pw-needle, ${P}.pw-fast .pw-arc, ${P}.pw-fast .pw-bars u { transition: none; }
 ${P} .pw-bars { grid-column: 1 / -1; display: grid; gap: 4px; padding: 6px 8px; border-radius: 10px; background: #fffaf0; box-shadow: inset 0 0 0 2px #d2c4ac; }
 ${P} .pw-bars div { display: grid; grid-template-columns: 7.8em 1fr auto; align-items: center; gap: 6px; font-size: .8em; font-weight: 700; color: #5e4936; }
 ${P} .pw-bars i { display: block; height: 12px; border-radius: 6px; background: #e6d3b0; overflow: hidden; } ${P} .pw-bars u { display: block; height: 100%; width: 0; border-radius: 6px; transition: width .45s ease; }
@@ -160,7 +160,7 @@ async function run(ctx) {
   const key = (e) => { e.stopPropagation(); if (e.type === 'keydown' && onKey && !e.ctrlKey && !e.metaKey && !e.altKey && onKey(e)) e.preventDefault(); };
   document.addEventListener('keydown', key, true); document.addEventListener('keyup', key, true);
   const timers = new Set(); const later = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); return id; };
-  ctx.onLeave(() => { document.removeEventListener('keydown', key, true); document.removeEventListener('keyup', key, true); for (const id of timers) clearTimeout(id); timers.clear(); tick = null; onTap = null; onKey = null; waiting = null; view.dispose(); host?.classList.remove('pw-large', 'pw-still'); });
+  ctx.onLeave(() => { document.removeEventListener('keydown', key, true); document.removeEventListener('keyup', key, true); for (const id of timers) clearTimeout(id); timers.clear(); tick = null; onTap = null; onKey = null; waiting = null; view.dispose(); host?.classList.remove('pw-large', 'pw-still', 'pw-fast'); });
 
   // ---- the dials
   const needle = (id, v) => { const k = Math.max(0, Math.min(1, v)); const n = wrap.querySelector(`[data-needle="${id}"]`), a = wrap.querySelector(`[data-arc="${id}"]`); if (n) { n.removeAttribute('transform'); n.style.transform = `rotate(${(-90 + k * 180).toFixed(1)}deg)`; } if (a) a.style.strokeDashoffset = (125.7 * (1 - k)).toFixed(1); };
@@ -298,7 +298,7 @@ async function run(ctx) {
 
   // ================= 4. the rules run three days
   async function testRun() {
-    report('test'); keep('rules');
+    report('test'); keep('rules'); host?.classList.add('pw-fast'); // an hour every 420 ms: a dial that glides would never catch up
     const test = testRules(kit, st.rules, { seed: SEED }); st.tests++;
     const edited = !!st.tested && !sameRules(st.tested, st.rules);
     if (edited) { st.changed = true; if (st.test && test.litHours > st.test.litHours) st.improved = true; }
@@ -319,7 +319,7 @@ async function run(ctx) {
       for (let i = 0; i < HOURS && !skip; i++) { showHour(day.hours[i], day.dayId); screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours.slice(0, i + 1), cursor: i })}${keyRow()}`; await wait(TEST_MS); }
       if (!skip) { const at = day.worst >= 0 ? day.hours[day.worst] : day.hours[15]; showHour(at, day.dayId); screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours, cursor: at.i, mark: day.worst })}<ul class="pw-lines"><li>${esc(dayScore(day, j))}</li></ul>`; await wait(1500); }
     }
-    onTap = null;
+    onTap = null; host?.classList.remove('pw-fast');
   }
   async function results() {
     report('results'); const test = st.test; let sel = Math.max(0, test.days.findIndex((d) => !d.allLit)); if (test.allLit) sel = 1; let cur = 0;
