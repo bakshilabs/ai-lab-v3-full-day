@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Eco Town leader</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:500 15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;color:#1f2a37;background:#f4f1ea}
+header{background:#2b3a55;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}header b{font-size:1.2em}header span{opacity:.75;flex:1}
+main{max-width:1000px;margin:0 auto;padding:18px}section{background:#fff;border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+h2{margin:0 0 10px;font-size:1.1em}label{display:block;font-weight:700;font-size:.85em;margin-bottom:3px}input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid #cfd6de;width:100%}
+.grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}.login{display:grid;grid-template-columns:1fr auto;gap:10px;max-width:420px}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;background:#e8edf2}button.go{background:#2e9b5a;color:#fff}button.sel{background:#2b3a55;color:#fff}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #eef1f4;vertical-align:middle}
+th{font-size:.8em;color:#64748b;text-transform:uppercase;letter-spacing:.04em}.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.8em;font-weight:800;margin-right:4px}
+.active,.done{background:#dff3e6;color:#1f7a44}.expired,.revoked,.help{background:#fde3dc;color:#a3321f}.not_started,.limit{background:#fff3cf;color:#7a5a00}.away{background:#e8edf2;color:#64748b}
+.err{color:#a3321f;font-weight:700;min-height:1.2em}.muted{color:#64748b}.code{font-weight:800;letter-spacing:.05em;font-size:1.1em}
+@media (max-width:700px){.grid{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header><b>Eco Town</b><span id="orgName">Leader’s page</span><button id="out" style="display:none">Log out</button></header>
+<main>
+<section id="loginSec" style="display:none"><h2>Leader login</h2><form class="login" id="loginForm" autocomplete="off"><input id="code" placeholder="LEAD-OTTER-1234" maxlength="30" aria-label="Leader code"><button class="go" type="submit">Log in</button></form><div class="err" id="loginErr" role="status"></div></section>
+<div id="app" style="display:none">
+<section><h2>Your groups</h2><p class="muted" id="licence"></p>
+<table><thead><tr><th>Group</th><th>Join code</th><th>Dates</th><th>Status</th><th>Learners</th><th>Playing now</th><th></th></tr></thead><tbody id="groups"></tbody></table>
+<p class="muted">Children type the join code once on each device. Each child then gets a badge, such as “Heron 47”. Ask them to remember it: no names are stored.</p></section>
+<section><h2>Add a group</h2><form class="grid" id="addForm" autocomplete="off"><div><label for="gname">Name</label><input id="gname" placeholder="Saturday club" maxlength="60"></div>
+<div><label for="gstarts">From</label><input id="gstarts" type="date"></div><div><label for="gends">Until (inclusive)</label><input id="gends" type="date"></div><button class="go" type="submit">Add group</button></form><div class="err" id="err" role="status"></div></section>
+<section id="learnSec" style="display:none"><h2 id="learnTitle">Learners</h2>
+<table><thead><tr><th>Badge</th><th>Stage</th><th>Missions done</th><th>Minutes since last change</th><th>Notes</th></tr></thead><tbody id="learners"></tbody></table>
+<p class="muted" id="stamp"></p></section>
+</div></main>
+<script>
+const $=(id)=>document.getElementById(id), esc=(s)=>String(s??'').replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// every request is for the leader's own organisation: the server takes it from the login, never from this page
+const api=async(p,o={})=>{const r=await fetch('/api/leader'+p,{...o,headers:{'Content-Type':'application/json'},body:o.body?JSON.stringify(o.body):undefined});const d=await r.json().catch(()=>({}));
+ if(r.status===401&&p!=='/login'){show(false);throw new Error(d.message||'Please log in.');}if(!r.ok)throw new Error(d.message||d.error||'Error');return d;};
+let groups=[],current=null,org=null;
+function show(inside){$('loginSec').style.display=inside?'none':'';$('app').style.display=inside?'':'none';$('out').style.display=inside?'':'none';if(!inside){$('orgName').textContent='Leader’s page';$('code').focus();}}
+async function load(){const d=await api('/groups');org=d.org;groups=d.groups;show(true);$('orgName').textContent=org.name;
+ $('licence').textContent=`Licence: ${org.starts} to ${org.ends}. Seats: ${groups.reduce((a,g)=>a+g.learners,0)} of ${org.seats} used.`;
+ if(!$('gstarts').value){$('gstarts').value=org.starts;$('gends').value=org.ends;}$('gstarts').min=$('gends').min=org.starts;$('gstarts').max=$('gends').max=org.ends;
+ $('groups').innerHTML=groups.map((g)=>`<tr><td><b>${esc(g.name)}</b></td><td class="code">${esc(g.code)}</td><td>${g.starts} → ${g.ends}</td><td><span class="pill ${g.state}">${g.state.replace('_',' ')}</span></td><td>${g.learners}</td><td>${g.active}</td>
+<td><button data-id="${g.id}" class="${g.id===current?'sel':''}">Show learners</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted">No groups yet. Add one below.</td></tr>';
+ if(!current&&groups.length===1)current=groups[0].id;
+ if(current)await showLearners(current);}
+async function showLearners(id){current=id;const g=groups.find((x)=>x.id===id);if(!g){current=null;$('learnSec').style.display='none';return;}
+ const d=await api(`/groups/${id}/learners`);$('learnSec').style.display='';$('learnTitle').textContent=`Learners in ${g.name}`;
+ for(const b of $('groups').querySelectorAll('button'))b.className=b.dataset.id===id?'sel':'';
+ $('learners').innerHTML=d.learners.map((l)=>`<tr><td><b>${esc(l.badge)}</b></td><td>${esc(l.stage)||'<span class="muted">not started</span>'}</td><td>${l.missionsDone}</td><td>${l.minutes}</td>
+<td>${l.needsHelp?'<span class="pill help">needs help</span>':''}${l.limitMissed?`<span class="pill limit" title="${esc(l.problem)}">a limit is missed</span>`:''}${l.finished?'<span class="pill done">finished</span>':''}${l.active?'':'<span class="pill away">not playing now</span>'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nobody has joined yet.</td></tr>';
+ $('stamp').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. This list refreshes every minute.';}
+$('loginForm').onsubmit=async(e)=>{e.preventDefault();$('loginErr').textContent='';try{await api('/login',{method:'POST',body:{code:$('code').value}});$('code').value='';await load();}catch(err){$('loginErr').textContent=err.message;}};
+$('out').onclick=async()=>{try{await api('/logout',{method:'POST'});}catch{/* */}current=null;show(false);};
+$('addForm').onsubmit=async(e)=>{e.preventDefault();$('err').textContent='';try{const d=await api('/groups',{method:'POST',body:{name:$('gname').value,starts:$('gstarts').value,ends:$('gends').value}});$('gname').value='';current=d.group.id;await load();}catch(err){$('err').textContent=err.message;}};
+$('groups').onclick=async(e)=>{const t=e.target.closest('button');if(!t)return;try{await showLearners(t.dataset.id);}catch(err){$('err').textContent=err.message;}};
+load().catch(()=>{});setInterval(()=>{if($('app').style.display!=='none')load().catch(()=>{});},60000);
+</script></body></html>

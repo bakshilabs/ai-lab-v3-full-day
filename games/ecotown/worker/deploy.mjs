@@ -68,8 +68,8 @@ files.forEach((p, i) => {
 });
 index += '};\n';
 form.append('files.js', new Blob([index], { type: 'application/javascript+module' }), 'files.js');
-for (const m of ['worker.js', 'store.js', 'codes.js']) form.append(m, new Blob([fs.readFileSync(path.join(here, m))], { type: 'application/javascript+module' }), m);
-form.append('admin.html', new Blob([fs.readFileSync(path.join(here, 'admin.html'))], { type: 'text/plain' }), 'admin.html');
+for (const m of ['worker.js', 'router.js', 'store.js', 'codes.js']) form.append(m, new Blob([fs.readFileSync(path.join(here, m))], { type: 'application/javascript+module' }), m);
+for (const m of ['admin.html', 'leader.html']) form.append(m, new Blob([fs.readFileSync(path.join(here, m))], { type: 'text/plain' }), m);
 const upload = async (withMigration) => {
   const f = new FormData(); for (const [k, v] of form.entries()) f.append(k, v, k);
   f.append('metadata', new Blob([JSON.stringify({ main_module: 'worker.js', compatibility_date: '2025-01-01',
