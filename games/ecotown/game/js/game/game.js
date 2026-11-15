@@ -1266,12 +1266,16 @@ export function createGame(app) {
         ${r.choices.length ? `<div class="practised plain"><small>${esc(G.S.finishChoices)}</small><ul>${r.choices.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
         <div class="practised plain"><small>${esc(G.S.finishResult)}</small><ul>${r.result.map((x) => `<li>${esc(x)}</li>`).join('')}${failed.length ? `<li>${esc(G.S.finishStill)}: ${esc(failed.join('; '))}</li>` : ''}</ul></div>
         <div class="practised talk"><small>${esc(G.S.finishTalk)}</small><ul>${r.talk.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-        <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn go" data-act="report">📜 ${esc(G.S.finale.report)}</button></div>`, { say: `${G.S.finishPractised}: ${r.practised.join('. ')}. ${r.talk[0]}` });
+        <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn alt" data-act="page">🖨 ${G.j ? 'Take-home page' : 'Take-home page'}</button><button class="btn go" data-act="report">📜 ${esc(G.S.finale.report)}</button></div>`, { say: `${G.S.finishPractised}: ${r.practised.join('. ')}. ${r.talk[0]}` });
       sb.finished = false;
       if (a === 'report') { G.busy = false; return showReport(); }
+      if (a === 'page') setTimeout(() => G.takeHome?.(), 300);
     } finally { G.busy = false; if (!sb.running) startBuilding(); }
   }
   G.finishSession = finishSession;
+  // what the take-home page needs from the town (js/game/takehome.js). The page itself is opened by main.js.
+  G.takeHomeData = () => { const s = sim(); const goals = townGoals(s, ctxFor(G.cells)); const sc = s.homes.length ? scoreNow(s) : null;
+    return { townName: G.townName, labs: G.labs, modules: G.modules || {}, extra: { catches: G.catches || 0, trusted: G.trusted || 0, goalsMet: goals.filter((g) => g.ok).length, families: s.familiesSafe, score: sc?.total, medal: sc?.medal, complete: goals.every((g) => g.ok) && labsDone() >= 6 } }; };
   // An "Eco Town of the future" module runs on top of the town (js/modules/loader.js): building stops, the module gets a
   // copy of the town to read, and building starts again when it ends. fn(host) -> the module's result.
   G.hostModule = async (fn) => {
