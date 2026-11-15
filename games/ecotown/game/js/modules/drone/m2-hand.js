@@ -5,6 +5,10 @@
 import { ITEMS } from '../../world/catalog.js';
 import { tileXZ, SAFE_RX, SAFE_RZ } from './geo.js';
 
+// The hoops and the landing pad, round the training place: offsets in metres, height above the ground.
+const HOOPS = [{ dx: 0, dz: -14, h: 7 }, { dx: 13, dz: -8, h: 12 }, { dx: 13, dz: 8, h: 5 }, { dx: -1, dz: 13, h: 10 }];
+const LAND = { dx: -12, dz: 2 };
+
 // ---------------------------------------------------------------- where on the island to train
 // An open tile, as far as possible from buildings and the island's fixed buildings, and not on the river.
 // avoid: tile keys not to choose (another mission's place). Returns { gx, gz, x, z } or null.
@@ -16,7 +20,9 @@ export function pickOpen(cells, tiles, avoid = []) {
     if (t.zone === 'river' || t.fixed || no.has(t.k) || (cellOf.get(t.k)?.item && ITEMS[cellOf.get(t.k).item]?.kind === 'build')) continue;
     const [x, z] = tileXZ(t.gx, t.gz); const inner = Math.hypot(x / SAFE_RX, z / SAFE_RZ);
     const clear = solid.length ? Math.min(...solid.map((s) => Math.max(Math.abs(s.gx - t.gx), Math.abs(s.gz - t.gz)))) : 6;
-    const v = Math.min(clear, 4) * 10 - inner * 18 + (t.zone === 'meadow' || t.zone === 'field' ? 2 : 0);
+    // the course round it should fit on the island without being squeezed, and trees and slopes make a poor field
+    const squeezed = [...HOOPS, LAND].filter((o) => Math.hypot((x + o.dx) / (SAFE_RX - 5), (z + o.dz) / (SAFE_RZ - 5)) > 1).length;
+    const v = Math.min(clear, 3) * 10 - inner * 30 - squeezed * 12 + (t.zone === 'meadow' || t.zone === 'field' || t.zone === 'coast' ? 6 : t.zone === 'wood' || t.zone === 'slope' ? -12 : 0);
     if (v > best) { best = v; top = { gx: t.gx, gz: t.gz, x, z, k: t.k }; }
   }
   return top;
@@ -38,8 +44,6 @@ export function windAt(round, t) {
   return { x: dx * kmh * DRIFT, z: dz * kmh * DRIFT, kmh: Math.round(kmh) };
 }
 // The hoops and the landing pad, round the training place: offsets in metres, height above the ground.
-const HOOPS = [{ dx: 0, dz: -14, h: 7 }, { dx: 13, dz: -8, h: 12 }, { dx: 13, dz: 8, h: 5 }, { dx: -1, dz: 13, h: 10 }];
-const LAND = { dx: -12, dz: 2 };
 export function course(origin) {
   const at = (o) => { let x = origin.x + o.dx, z = origin.z + o.dz; const e = Math.hypot(x / (SAFE_RX - 5), z / (SAFE_RZ - 5)); if (e > 1) { x /= e; z /= e; } return { x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10 }; };
   const hoops = HOOPS.map((h, i) => { const p = at(h); const prev = i ? at(HOOPS[i - 1]) : { x: origin.x, z: origin.z }; return { ...p, h: h.h, facing: Math.atan2(p.x - prev.x, -(p.z - prev.z)) }; });

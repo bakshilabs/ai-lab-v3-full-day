@@ -125,7 +125,7 @@ export async function runSurvey(ctx, kit, scope) {
       ${t === 'advice' ? `<div class="dk-choices">${ADVICE.map((a) => `<button type="button" class="dr-btn" data-advice="${a.id}">${esc(a.label)}</button>`).join('')}</div>` : ''}
       ${reply ? `<div class="dk-note ${reply.right ? 'good' : 'warn'}" role="status" data-dk-reply>${esc(reply.text)}</div>` : ''}
       ${!t ? '<div class="dr-row"><button type="button" class="dr-btn go" data-k="done">Finish the survey ➜</button></div>' : ''}
-      ${t === 'dry' || t === 'sick' ? '<p class="dk-tip">Tap the map, or choose a place here:</p><div class="dk-choices" role="group" aria-label="Places on the map">' + [...PLOTS.map((p) => `<button type="button" class="dr-btn" data-at="${p.x + 1},${p.z + 1}">${esc(p.name.charAt(0).toUpperCase() + p.name.slice(1))}</button>`), ...(t === 'sick' ? [['9,2', 'west'], ['12,2', 'middle'], ['15,2', 'east']].map(([at, w]) => `<button type="button" class="dr-btn" data-at="${at}">The ${w} part of the barley</button>`) : [])].join('') + '</div>' : ''}`;
+      ${t === 'dry' || t === 'sick' ? '<p class="dk-tip">Tap the map, or choose a place here:</p><div class="dk-choices dk-places" role="group" aria-label="Places on the map">' + [...PLOTS.map((p) => `<button type="button" class="dr-btn" data-at="${p.x + 1},${p.z + 1}">${esc(p.name.charAt(0).toUpperCase() + p.name.slice(1))}</button>`), ...(t === 'sick' ? [['9,2', 'west'], ['12,2', 'middle'], ['15,2', 'east']].map(([at, w]) => `<button type="button" class="dr-btn" data-at="${at}">The ${w} part of the barley</button>`) : [])].join('') + '</div>' : ''}`;
   };
   draw(); side();
   const answer = (x, z) => {
@@ -159,5 +159,7 @@ export const M4_CSS = `
 ${M} .dk-farm svg { cursor: pointer; }
 ${M} .dk-legend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-weight: 700; font-size: .92em; }
 ${M} .dk-legend span { display: inline-block; width: 16px; height: 16px; border-radius: 4px; margin-right: -6px; }
+${M} .dk-places { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+${M} .dk-places .dr-btn { min-height: 40px; padding: 6px 10px; font-size: .92em; }
 ${M} .dk-tip { font-size: .85em; color: #5e4936; }
 `;

@@ -88,7 +88,7 @@ export async function runHand(ctx, ui, scope, { touch }) {
   ui.cheer(`All ${hoops.length} hoops`);
 
   // ---- land gently on the orange pad
-  ctx.report({ stage: 'Hand flying: landing' }); ui.setStage('m2-land'); fly.freeze(true); landPad.group.visible = true; fly.setWind(0, 0);
+  ctx.report({ stage: 'Hand flying: landing' }); ui.setStage('m2-land'); fly.freeze(true); landPad.group.visible = true; for (const h of hoops) h.mesh.group.visible = false; fly.setWind(0, 0);
   await ui.talk(`Last, the landing. Fly over the orange pad and come down slowly. Let go of Down just before the pad, so the drone touches down gently.`, { button: 'Go and land ➜' });
   ui.hush(); fly.freeze(false); let msg = ''; let landed = null;
   await fly.until((dt, info) => {
