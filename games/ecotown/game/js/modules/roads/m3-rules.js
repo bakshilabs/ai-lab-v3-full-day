@@ -23,7 +23,7 @@ function road(id) {
   return o.join('');
 }
 // the scene at progress p (0: before the test, 1: the end). v: the chosen setting, or null before a choice.
-export function scenePic(id, v, p, safe) {
+export function scenePic(id, v, p, safe, j = false) {
   const o = [road(id)]; const done = p >= 1;
   if (id === 'zebra') {
     const stop = v === 'stop'; const cx = stop ? lerp(80, 500, ease(p / 0.6)) : lerp(80, 860, p);
@@ -32,24 +32,31 @@ export function scenePic(id, v, p, safe) {
     if (done && v !== null) o.push(safe ? tick(582, 60) : warn(582, 60));
   }
   if (id === 'school') {
-    const stopAt = 504 + stopM(v ?? 20) * 8; const childY = lerp(300, 262, (p - 0.35) / 0.15);
-    const cx = p < 0.35 ? lerp(80, 504, p / 0.35) : lerp(504, Math.min(stopAt, 578), ease((p - 0.35) / 0.45));
-    o.push(person(600, p > 0.3 ? childY : 300, '#e0a020', true), car(cx, 240, '#2f6fd8', 0, true));
-    if (p > 0.35 && v !== null) o.push(`<line x1="504" y1="214" x2="600" y2="214" stroke="#ffd166" stroke-width="3" stroke-dasharray="6 5"/><text x="552" y="206" font-size="16" font-weight="800" text-anchor="middle" fill="#fff">12 m</text>`);
-    if (done && v !== null) o.push(safe ? tick(600, 196) : warn(600, 196));
+    // the child steps out when the car's front is 12 m away; the car then needs its stopping distance (8 px a metre)
+    const need = stopM(v ?? 20); const react = 504, stopFront = react + need * 8; const front = (x) => x + 34;
+    const endC = (v !== null && !safe ? Math.min(stopFront, 592) : stopFront) - 34;
+    const cx = p < 0.35 ? lerp(60, react - 34, p / 0.35) : lerp(react - 34, endC, ease((p - 0.35) / 0.45));
+    const childY = p > 0.3 ? lerp(300, 268, (p - 0.3) / 0.12) : 300;
+    o.push(car(cx, 238, '#2f6fd8', 0, true), person(612, childY, '#e0a020', true));
+    if (p > 0.35 && v !== null) {
+      o.push(`<line x1="${react}" y1="212" x2="604" y2="212" stroke="#ffd166" stroke-width="3" stroke-dasharray="6 5"/><text x="${(react + 604) / 2}" y="204" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">${j ? 'room to stop' : 'room: 12 m'}</text>`);
+      if (p > 0.6) o.push(`<line x1="${react}" y1="196" x2="${front(lerp(react - 34, stopFront - 34, ease((p - 0.35) / 0.45)))}" y2="196" stroke="${safe ? '#6dff9e' : '#ff8a70'}" stroke-width="5"/><text x="${react}" y="186" font-size="15" font-weight="800" fill="#fff">${j ? (safe ? 'stops in time' : 'needs more room') : `needs ${need} m to stop`}</text>`);
+    }
+    if (done && v !== null) o.push(safe ? tick(612, 330) : warn(612, 330));
   }
   if (id === 'cyclist' || id === 'narrow') {
-    const by = 278; const bx = lerp(260, 470, p); const passing = id === 'narrow' && v === 'wait' ? lerp(60, 760, Math.max(0, (p - 0.45) / 0.55) ** 1.1) : lerp(60, 760, p);
-    const gap = id === 'narrow' ? (v === 'wait' ? 1.5 : 0.6) : v ?? 1.5; const lateral = by - 26 - gap * 30;
-    const near = Math.abs(passing - bx) < 70; const cy = near ? lateral : lerp(LANE, lateral, 1 - Math.min(1, (Math.abs(passing - bx) - 70) / 80));
-    const hold = id === 'narrow' && v === 'wait' && p < 0.45 ? lerp(60, bx - 110, p / 0.45) : null;
-    const ox = id === 'narrow' ? lerp(820, -60, p) : null;
+    // the test ends at the moment of passing, so the last picture shows the gap
+    const by = 278; const bx = lerp(260, 470, p); const wait = id === 'narrow' && v === 'wait';
+    const passing = wait ? (p < 0.6 ? lerp(60, 330, p / 0.6) : lerp(330, 470, (p - 0.6) / 0.4)) : lerp(60, 470, ease(p));
+    const gap = id === 'narrow' ? (wait ? 1.5 : 0.6) : v ?? 1.5; const lateral = by - 27 - gap * 30;
+    const dist = Math.abs(passing - bx); const near = dist < 70; const cy = wait && p < 0.6 ? LANE : near ? lateral : lerp(LANE, lateral, 1 - Math.min(1, (dist - 70) / 90));
+    const ox = id === 'narrow' ? (wait ? lerp(820, -100, p / 0.6) : lerp(820, 470, p)) : null;
     const wob = !safe && v !== null && near ? Math.sin(p * 60) * 4 : 0;
     o.push(bike(bx, by, wob));
-    if (ox !== null) o.push(car(ox, OTHER, '#c8553d', 180));
-    o.push(car(hold ?? passing, hold !== null ? LANE : cy, '#2f6fd8', 0, true));
-    if (near && v !== null) o.push(`<line x1="${bx}" y1="${by - 12}" x2="${bx}" y2="${cy + 17}" stroke="#ffd166" stroke-width="3"/><text x="${bx + 8}" y="${(by + cy) / 2 + 2}" font-size="16" font-weight="800" fill="#fff">${gap} m</text>`);
-    if (done && v !== null) o.push(safe ? tick(bx, 330) : warn(bx, 330));
+    if (ox !== null && ox > -90) o.push(car(ox, wait ? OTHER : Math.min(OTHER, lateral - 40), '#c8553d', 180));
+    o.push(car(passing, cy, '#2f6fd8', 0, true));
+    if (near && v !== null) o.push(`<line x1="${bx}" y1="${by - 10}" x2="${bx}" y2="${cy + 17}" stroke="#ffd166" stroke-width="3"/><rect x="${bx + 6}" y="${(by + cy) / 2 - 10}" width="54" height="22" rx="6" fill="#3b2a1e"/><text x="${bx + 33}" y="${(by + cy) / 2 + 6}" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">${gap} m</text>`);
+    if (done && v !== null) o.push(safe ? tick(bx, 340) : warn(bx, 340));
   }
   if (id === 'rain') {
     const gapPx = { 1: 40, 2: 80, 4: 160 }[v] ?? 80; const lead = p < 0.3 ? lerp(380, 560, p / 0.3) : lerp(560, 600, ease((p - 0.3) / 0.3));
@@ -77,7 +84,7 @@ export async function rulesMission(K) {
   for (let i = 0; i < SCENES.length; i++) {
     const sc = SCENES[i]; let v = null, misses = 0;
     K.ctx.report({ stage: `Mission 3: ${sc.title.s} (${i + 1} of ${SCENES.length})` });
-    const pic = (val, p, safe) => `<svg class="rd-pic" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(pick(sc.title))}, seen from above" font-family="Inter, Arial, sans-serif">${scenePic(sc.id, val, p, safe)}</svg>`;
+    const pic = (val, p, safe) => `<svg class="rd-pic" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(pick(sc.title))}, seen from above" font-family="Inter, Arial, sans-serif">${scenePic(sc.id, val, p, safe, j)}</svg>`;
     K.showStage(`<div class="rd-view"><div class="rd-viewbar"><b><span aria-hidden="true">${sc.icon}</span> ${esc(pick(sc.title))}</b><span class="rd-step">${i + 1} of ${SCENES.length}</span></div><div class="rd-frame">${pic(null, 0, true)}</div></div>`);
     const frame = stage.querySelector('.rd-frame');
     say(pick(sc.ask));

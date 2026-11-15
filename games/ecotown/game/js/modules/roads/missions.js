@@ -29,7 +29,7 @@ export const MISSIONS = [
     job: { j: 'Transport planners decide how many shared cars a town needs, and where they wait and charge.', s: 'Fleet planners size a shared fleet and choose where it waits and charges, trading waiting time against idle cars.' },
     how: { j: 'Choose the number of cars, where they wait and where they charge. Run the morning and read the numbers.', s: 'Set fleet size, waiting places and charging hub; run the morning; read waits and empty driving.' },
     now: { j: 'Plan a fleet of shared cars and read waiting times.', s: 'Size a fleet and read the trade-off between waiting time and the number of cars.' } },
-  { n: 6, id: 'street', icon: '🛣', use: 'Redesigning the street',
+  { n: 6, id: 'street', icon: '🚏', use: 'Redesigning the street',
     job: { j: 'This is Maple Street. Parked cars fill it all day. Soon shared self-driving cars will run here, and they stop only where the street is marked. Street designers plan those markings, so the street works for everyone.', s: 'Maple Street today: parked cars and a 40-space car park. Shared self-driving cars will stop only where the street is marked. Street designers lay out stops, bays and crossings for passengers, walkers and cyclists.' },
     how: { j: 'Tap the 3D street to put in drop-off points, waiting bays and crossings. Run the morning, then choose what the old car park becomes.', s: 'Place stops, bays and crossings on the 3D street, run the morning, read the numbers, and decide what the car park becomes.' },
     now: { j: 'Design a street for everyone who uses it, and test it with real numbers.', s: 'Design a street for every user and test it against measured outcomes.' } },

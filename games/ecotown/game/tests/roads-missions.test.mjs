@@ -104,7 +104,7 @@ test('roads mission 5: more cars cut the wait, waiting near the homes cuts empty
   assert.ok(!meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'depot' }, { charge: true })), 'a charger at the depot means too much empty driving');
   assert.equal(curve({ cars: 4, spots: ['depot'] }, false).length, 13);
   assert.deepEqual(cleanPlan({ cars: 99, spots: ['x', 'shops', 'station', 'homesN'] }), { cars: 14, spots: ['shops', 'station'], charger: 'depot' });
-  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'about half');
+  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'just under half'); assert.equal(shareWords(54), 'about half');
 });
 
 test('roads missions: the hour’s record passes the contract and fits the save', () => {

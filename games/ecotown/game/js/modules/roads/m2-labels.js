@@ -2,7 +2,7 @@
 // test it on pictures it has never seen, then label the hard cases (edge cases) and test again.
 // Rules and words: labels.js. Pictures: art.js.
 import { LABELS, LABEL, CASES, EASY, HARD, test, missWhat, caseName, reviewSay, M2 } from './labels.js';
-import { cameraView, boxOf, svg, W, H } from './art.js';
+import { cameraView, boxOf, svg, svgCrop, W, H } from './art.js';
 import { esc } from './kit.js';
 
 const TEST_THING = { person: { kind: 'person', colour: '#7a4fb0' }, cyclist: { kind: 'cyclist', colour: '#2f6fd8' }, dog: { kind: 'dog' }, car: { kind: 'car', colour: '#1f7f49' }, hidden: { kind: 'person', colour: '#c8553d' }, chair: { kind: 'chair', colour: '#b23a26' }, child: { kind: 'child', colour: '#2f6fd8' }, mirror: { kind: 'mirror' }, poster: { kind: 'poster' } };
@@ -57,8 +57,9 @@ export async function labelsMission(K) {
   // the test: one small picture for each case, with what the car did
   async function showTest(res, line, more) {
     K.ctx.report({ stage: `Mission 2: testing the car (${res.right} of ${res.of})` });
-    const card = (r) => { const t = { ...TEST_THING[r.case], x: 0, z: 7 }; const pic = r.case === 'hidden' ? cameraView([{ kind: 'van', x: -0.6, z: 6.5 }, { ...t, x: 0.7, z: 7.2 }], 'sun') : cameraView([t], 'sun');
-      return `<li class="${r.ok ? 'ok' : 'no'}">${svg(pic, caseName(r.case, j))}<b>${r.ok ? '✓' : '✗'} ${esc(caseName(r.case, j).replace(/^./, (c) => c.toUpperCase()))}</b><small>${r.ok ? (j ? 'Recognised.' : 'Correct.') : esc(missWhat(r.case, j))}</small></li>`; };
+    const card = (r) => { const t = { ...TEST_THING[r.case], x: 0, z: 7 }; const things = r.case === 'hidden' ? [{ kind: 'van', x: -0.6, z: 6.5 }, { ...t, x: 0.7, z: 7.2 }] : [t];
+      const bx = things.map(boxOf).reduce((a, b) => ({ x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.max(a.x + a.w, b.x + b.w) - Math.min(a.x, b.x), h: Math.max(a.y + a.h, b.y + b.h) - Math.min(a.y, b.y) }));
+      return `<li class="${r.ok ? 'ok' : 'no'}">${svgCrop(cameraView(things, 'sun'), caseName(r.case, j), bx)}<b>${r.ok ? '✓' : '✗'} ${esc(caseName(r.case, j).replace(/^./, (c) => c.toUpperCase()))}</b><small>${r.ok ? (j ? 'Recognised.' : 'Correct.') : esc(missWhat(r.case, j))}</small></li>`; };
     K.showStage(`<div class="rd-card wide"><h3>${j ? `The car’s test: ${res.right} of ${res.of} right` : `Test on unseen pictures: ${res.right}/${res.of} (${Math.round((100 * res.right) / res.of)}%)`}</h3><ul class="rd-tests">${res.rows.map(card).join('')}</ul></div>`);
     say(line);
     swap(`<div class="rd-row end"><button class="go" type="button" data-primary data-act="next">${more ? (j ? 'Label the hard ones ➜' : 'Label the edge cases ➜') : 'Next ➜'}</button></div>`);

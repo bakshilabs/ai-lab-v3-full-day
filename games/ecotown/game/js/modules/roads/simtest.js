@@ -51,7 +51,7 @@ export function runSay(res, prev, ch, cfg, was, j) {
     : ch.length > 1 ? (j ? `You changed ${ch.length} things at once, so we cannot tell which one made the difference.` : `${ch.length} settings changed at once: we cannot tell which one caused the difference.`)
       : `${j ? 'You changed' : 'Changed'} ${(j ? SET[ch[0]].name.j : SET[ch[0]].name.s).toLowerCase()}: ${SET[ch[0]].label(was[ch[0]], j)} → ${SET[ch[0]].label(cfg[ch[0]], j)}. ${diffSay(res, prev, j)}`;
   if (!fails.length) return `${lead} ${j ? 'Every test passed!' : 'All tests passed.'}`;
-  return `${lead} ${j ? `${fails.length === 1 ? 'One test still fails' : `${fails.length} tests still fail`}. Tap it to watch the replay.` : `${fails.length} failing. Open a failure to see its replay.`}`;
+  return `${lead} ${j ? `${fails.length === 1 ? `One test ${prev ? 'still fails' : 'fails'}` : `${fails.length} tests ${prev ? 'still fail' : 'fail'}`}. Tap ${fails.length === 1 ? 'it' : 'one'} to watch the replay.` : `${fails.length} failing. Open a failure to see its replay.`}`;
 }
 function diffSay(res, prev, j) {
   const parts = []; for (const r of res) { const p = prev.find((x) => x.id === r.id); if (!p) continue; if (p.near !== r.near) parts.push(`${(j ? DAY[r.id].name.j : DAY[r.id].name.s)}: ${p.near} → ${r.near} near misses`); if (p.stops !== r.stops) parts.push(`${j ? 'needless stops' : 'needless stops'} ${p.stops} → ${r.stops}`); }

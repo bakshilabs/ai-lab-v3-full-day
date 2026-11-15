@@ -72,14 +72,14 @@ export function meets(round, r) { return r.longest <= round.goal.wait && (round.
 // the trade-off, for ages 13–17: the longest wait for every fleet size, with the rest of the plan as it is
 export const curve = (plan, charge) => Array.from({ length: CARS.max - CARS.min + 1 }, (_, i) => ({ cars: CARS.min + i, longest: simulate({ ...plan, cars: CARS.min + i }, { charge }).longest }));
 // ages 8–12 read shares as words, not percentages
-export const shareWords = (pct) => (pct < 40 ? 'less than half' : pct <= 55 ? 'about half' : pct < 70 ? 'more than half' : 'about three quarters');
+export const shareWords = (pct) => (pct < 40 ? 'less than half' : pct < 50 ? 'just under half' : pct <= 55 ? 'about half' : pct < 70 ? 'more than half' : 'about three quarters');
 export const idleWords = (busyPct) => (busyPct >= 80 ? 'hardly ever' : busyPct >= 60 ? 'sometimes' : 'often');
 
 const p = (o, j) => (j ? o.j : o.s);
 export const GOAL = {
   size: { j: 'Goal: nobody waits more than 15 minutes.', s: 'Goal: longest wait ≤ 15 min.' },
   where: { j: 'Goal: nobody waits more than 8 minutes, and less than half the driving is empty.', s: 'Goal: longest wait ≤ 8 min and empty driving ≤ 50%.' },
-  charge: { j: 'Goal: nobody waits more than 10 minutes, even with charging.', s: 'Goal: longest wait ≤ 10 min and empty driving ≤ 55%, with charging.' },
+  charge: { j: 'Goal: nobody waits more than 10 minutes, even with charging, and no more than about half the driving is empty.', s: 'Goal: longest wait ≤ 10 min and empty driving ≤ 55%, with charging.' },
 };
 export const M5 = {
   size: { j: 'The town’s shared cars all wait at the depot, at the edge of town. How many cars do we need? Choose a number and run the morning.', s: 'All cars start and wait at the depot on the edge of town. Choose the fleet size and run the morning.' },

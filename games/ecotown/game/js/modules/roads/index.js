@@ -41,6 +41,8 @@ async function run(ctx) {
   };
   async function play(n) {
     const m = MISSIONS[n - 1]; K.reset(); K.showStage(null);
+    // the street as it is today (parked cars along both kerbs) behind mission 6's opening, unless a street was already designed
+    if (n === 6) { const fresh = !street()?.layout.includes('drop'); K.set.setOld(fresh); K.set.setPlots('full'); K.set.setLayout(fresh ? Array(10).fill(null) : street().layout); }
     await opening(K, m); K.reset();
     let r;
     if (n === 1) r = await sensorsMission(K);

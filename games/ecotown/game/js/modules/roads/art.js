@@ -104,3 +104,8 @@ export function lidarView(things, cond, seen = () => true) {
   return out.join('');
 }
 export const svg = (inner, label, extra = '') => `<svg class="rd-pic" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${label}" font-family="Inter, Arial, sans-serif"${extra}>${inner}</svg>`;
+// the same picture, zoomed to a box (for the small test pictures): b = { x, y, w, h } in picture pixels
+export function svgCrop(inner, label, b) {
+  const h = Math.max(b.h * 1.5, 110), w = (h * W) / H; const x = b.x + b.w / 2 - w / 2, y = Math.min(H - h, b.y + b.h / 2 - h / 2);
+  return `<svg class="rd-pic" viewBox="${r2(x)} ${r2(y)} ${r2(w)} ${r2(h)}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${label}" font-family="Inter, Arial, sans-serif">${inner}</svg>`;
+}
