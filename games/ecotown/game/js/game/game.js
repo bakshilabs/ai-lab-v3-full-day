@@ -43,6 +43,7 @@ import { net, FMT } from '../net.js';
 import { missionRecap, sessionRecap } from './recap.js';
 import { careFor, CARE } from './care.js'; // typed text that needs a fixed, careful reply (never repeated back) // "You practised…", from what the player actually did // the learner's session and the server's copy of their progress // the one place that decides whether a target is met
 import { answer as askFlorence, SUGGEST } from './qa.js';
+import { endOfPart } from '../ui/talk.js'; // the discussion and break that end every part
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SAVE = 'ecotown.save.v3';
@@ -1265,9 +1266,10 @@ export function createGame(app) {
         <div class="practised"><small>${esc(G.S.finishPractised)}</small><ul>${r.practised.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
         ${r.choices.length ? `<div class="practised plain"><small>${esc(G.S.finishChoices)}</small><ul>${r.choices.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
         <div class="practised plain"><small>${esc(G.S.finishResult)}</small><ul>${r.result.map((x) => `<li>${esc(x)}</li>`).join('')}${failed.length ? `<li>${esc(G.S.finishStill)}: ${esc(failed.join('; '))}</li>` : ''}</ul></div>
-        <div class="practised talk"><small>${esc(G.S.finishTalk)}</small><ul>${r.talk.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-        <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn alt" data-act="page">🖨 ${G.j ? 'Take-home page' : 'Take-home page'}</button><button class="btn go" data-act="report">📜 ${esc(G.S.finale.report)}</button></div>`, { say: `${G.S.finishPractised}: ${r.practised.join('. ')}. ${r.talk[0]}` });
+        <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn alt" data-act="page">🖨 ${G.j ? 'Take-home page' : 'Take-home page'}</button><button class="btn go" data-act="report">📜 ${esc(G.S.finale.report)}</button></div>`, { say: `${G.S.finishPractised}: ${r.practised.join('. ')}.` });
       sb.finished = false;
+      // the discussion with the teacher, then the break (js/ui/talk.js, docs/full-day-plan.md)
+      if (a !== 'keep' && (await endOfPart(app, 'town', G.j)) === 'hub') return;
       if (a === 'report') { G.busy = false; return showReport(); }
       if (a === 'page') setTimeout(() => G.takeHome?.(), 300);
     } finally { G.busy = false; if (!sb.running) startBuilding(); }

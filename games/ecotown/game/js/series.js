@@ -44,3 +44,22 @@ export function progress(save, welcomeSeen = false) {
   };
 }
 export const LABEL = { done: '✓ Done', started: '▶ Carry on', new: 'Not started yet' };
+
+// The discussion section that ends every part (docs/full-day-plan.md): screens down, the teacher leads, the game shows
+// these questions large and waits. j: ages 8–12, s: ages 13–17. The take-home page and the leader's page use them too.
+export const TALK = {
+  town: { j: ['Florence sounded sure. When was she wrong, and how did you find out?', 'Which check changed your mind about a plan?', 'Where else could you check before you trust a computer helper?'],
+    s: ['Which piece of evidence changed your decision?', 'What did Florence assume because you did not tell her?', 'Where else would you test an AI’s answer before relying on it?'] },
+  drone: { j: ['What was harder: flying by hand, or writing the steps? Why?', 'What did the drone need from you to fly the route by itself?', 'Where could a delivery drone help in a real town, and where should it not fly?'],
+    s: ['What did your steps have to make exact that you judged by eye when you flew?', 'How did you find and fix a mistake in the route?', 'Who should decide where delivery drones may fly, and why?'] },
+  robots: { j: ['How did the robot learn which bin things go in?', 'What did it get wrong, and why?', 'What would you show it next?'],
+    s: ['Why did the robot get some new things wrong?', 'How did you choose which examples to show it?', 'What could go wrong if a robot like this were only shown examples from one place?'] },
+  roads: { j: ['What changed when the street had self-driving cars?', 'Who did your street work well for, and who did it not?', 'What would you build on the old car park, and why?'],
+    s: ['Which number did you give up some of to get more of another?', 'Who gains and who loses from your street?', 'Should a town plan for self-driving cars before it knows how people will use them?'] },
+  film: { j: ['How did your feedback change Florence’s film?', 'Which feedback worked best, and why?', 'What could Florence not do, and why?'],
+    s: ['What made your feedback useful to Florence?', 'Who made the film: you, Florence, or both?', 'What should a person check before sharing something an AI helped to make?'] },
+  power: { j: ['When did homes go dark, and why?', 'How did you change your rules to fix it?', 'What should people decide, and not the machine?'],
+    s: ['Where did your rules have a gap, and how did the data show it?', 'How did the days run by rules compare with the day you ran by hand?', 'What should a person still decide when a system runs by itself?'] },
+};
+// The part after this one in the day, or null at the end (for the break screen).
+export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };

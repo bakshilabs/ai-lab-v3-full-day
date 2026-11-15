@@ -3,6 +3,7 @@
 // writes the save itself and never edits the game's shared files.
 import * as THREE from 'three';
 import { h, esc } from '../ui/ui.js';
+import { endOfPart } from '../ui/talk.js';
 import { MODULE_IDS, ON_BOARD, CONTRACT, checkModule, cleanResult, cleanReport, cleanState, storedModule } from './contract.js';
 
 // One line per module. Each folder's index.js is that module (a placeholder until its builder replaces it).
@@ -78,6 +79,8 @@ export async function openModule(app, id) {
         ${result.record.made.lines.length ? `<div class="practised plain"><small>${j ? 'You made' : 'You made'}</small><ul>${result.record.made.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>` : ''}
         <div class="practised"><small>You practised</small><ul>${result.record.practised.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>
         <div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${j ? 'Back to my town' : 'Back to the town'} ➜</button></div>`, { say: `You practised: ${result.record.practised.join('. ')}` });
+      // every part ends with a discussion led by the teacher, then a break (docs/full-day-plan.md)
+      if (result.finished) await endOfPart(app, id, j);
     }
     return result;
   }).then(async (r) => { await showInTown(app); return r; });
