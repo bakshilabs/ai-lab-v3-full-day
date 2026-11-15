@@ -116,8 +116,8 @@ export async function runInspect(ctx, ui, kit, scope, { touch }) {
     ctx.report({ stage: 'Inspection: the footbridge' }); ui.setStage('m5-bridge');
     const b = bridgeShape(land); fly = createFly3d(ctx, { origin: { x: (b.xe + b.xf) / 2 - 2, z: b.z + 4 }, radius: 18, cam: { up: 4, back: 13, down: -1, ahead: 6 } }); fly.setInput(pad.input);
     fly.setFloor((x, z) => (x > b.xe - 1 && Math.abs(z - b.z) < 1.6 ? b.deck(x) + 0.2 : x > b.xe - 1 ? b.deck(b.xf) - 9 : fly.groundAt(x, z)));
-    fly.placeAt(b.xe - 5, b.z + 5);
-    await ui.talk(`Next, the footbridge to the village. Bridges are checked from every side, even from below. ${junior ? 'Fly to the three blue frames. Keep a safe distance.' : `Three frames again; keep over ${SAFE} m from the bridge.`}`, { button: 'Take off ➜' });
+    fly.placeAt((b.xe + b.xf) / 2, b.z + 12, land.y + 1); // in the air beside the bridge, looking at it
+    await ui.talk(`Next, the footbridge to the village. Bridges are checked from every side, even from below. ${junior ? 'Fly to the three blue frames. Keep a safe distance.' : `Three frames again; keep over ${SAFE} m from the bridge.`}`, { button: 'Start ➜' });
     ui.hush();
     const t2 = await flyPhotos(ctx, ui, fly, pad, { parts: b.parts, spots: bridgeSpots(b), what: 'the bridge', junior });
     sum.close += t2.close; sum.photos += 3;

@@ -67,7 +67,7 @@ export function lineFor(id, s = {}, junior = true) {
   switch (id) {
     case 'ground': {
       const fixed = s.fixed ? `, fixed ${plural(s.fixed, 'problem')}` : ''; const kept = s.grounded ? ` and kept ${plural(s.grounded, 'drone')} on the ground` : '';
-      return `Ground school: checked ${plural(s.checked || 3, 'drone')}${fixed}${kept}; judged ${plural(s.jobs || 5, 'flight plan')} against the Drone Code.`;
+      return `Ground school: checked ${plural(s.checked || 3, 'drone')}${fixed}${kept}; judged ${plural(s.jobs || 6, 'flight plan')} against the Drone Code.`;
     }
     case 'hand': {
       const hover = Number.isFinite(s.hover) ? (junior ? ` held a hover in the wind` : ` held a hover in a ${s.wind || 20} km/h crosswind`) : ' held a hover in the wind';
