@@ -9,7 +9,7 @@ import { key, T, X0, Z0 } from './geo.js';
 const SPEED = 6, CLIMB = 3.2, DOWN_ACC = 4.5, DOWN_MAX = 6, SCALE = 1.1;
 
 // origin: { x, z } the world point the flying happens round. radius: how far from it the drone may go.
-export function createFly3d(ctx, { origin, radius = 40, cam = { up: 15, back: 14 } }) {
+export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19 } }) {
   const { scene, camera, world } = ctx.engine; const reduce = !!ctx.settings.reduceMotion;
   const tiles = ctx.town?.terrain?.tiles instanceof Map ? ctx.town.terrain.tiles : new Map();
   const root = new THREE.Group(); root.name = 'drone-module'; scene.add(root);
