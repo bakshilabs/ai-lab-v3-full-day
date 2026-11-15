@@ -159,7 +159,7 @@ for (let i = 0; i < S3.length; i++) {
   }
   { const idx = await p.evaluate(([m, v]) => [...document.querySelectorAll(m + '[data-opt]')].findIndex((x) => x.dataset.opt === v), [M, S3[i].safe]); await p.keyboard.press(String(idx + 1)); }   // the number keys choose
   await p.click(tray('[data-act="test"]'));
-  if (motion) { await p.waitForSelector(tray('[data-act="skip"]'), { timeout: LONG }).catch(() => {}); await p.click(tray('[data-act="skip"]')).catch(() => {}); }
+  if (motion) { await p.click(tray('[data-act="skip"]'), { timeout: 3000 }).catch(() => {}); }
   await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); if (i === 2) await shot('m3-cyclist-safe'); await primary();
 }
 await p.waitForSelector(M + '.rd-rules', { timeout: LONG }); must('m3-rulesListed', (await p.$$(M + '.rd-rules li')).length === 6); await shot('m3-rules');
