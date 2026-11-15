@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { SAFE, STOP, SPOT_R, HOLD, STILL, clearance, TOWER, BLADE, HUB_Z, BLADE_ANGLES, turbineParts, turbineSpots, bridgeShape, bridgeSpots, isDamage, photoReply, ACTIONS, actionReply, photoSvg, DAMAGE } from './m5-inspect.js';
 import { windAt, pickOpen } from './m2-hand.js';
 import { createFly3d, createFlyPad } from './fly3d.js';
-import { makePad } from './model.js';
 import { arrowFor, bearing } from './geo.js';
 import { esc } from './kit.js';
 
@@ -98,12 +97,11 @@ export async function runInspect(ctx, ui, kit, scope, { touch }) {
   const sum = { photos: 0, close: 0, found: 0 };
   // ---- the wind turbine
   ctx.report({ stage: 'Inspection: the wind turbine' }); ui.setStage('m5-turbine');
-  fly = createFly3d(ctx, { origin: { x: spot.x, z: spot.z + 6 }, radius: 30 }); fly.setInput(pad.input);
+  fly = createFly3d(ctx, { origin: { x: spot.x, z: spot.z + 6 }, radius: 30, cam: { up: 5, back: 14, down: -1, ahead: 8 } }); fly.setInput(pad.input);
   const g = fly.groundAt(spot.x, spot.z); const base = { x: spot.x, y: g, z: spot.z };
   const tb = makeTurbine(); tb.position.set(base.x, base.y, base.z); fly.add(tb);
-  const start = makePad(0.35, '#2e7d4f'); const sx = spot.x, sz = spot.z + 15; start.group.position.set(sx, fly.groundAt(sx, sz), sz); fly.add(start.group);
-  fly.setFloor((x, z) => (Math.hypot(x - sx, z - sz) < 2.8 ? fly.groundAt(sx, sz) + 0.35 : fly.groundAt(x, z))); fly.placeAt(sx, sz);
-  await ui.talk(`This wind turbine has been stopped and locked, so it is safe to inspect. Fly to each blue frame and hold the drone still there to take a photo. ${junior ? 'Do not go too close to the turbine.' : `Keep at least ${SAFE} m from the turbine.`} ${pad.how}`, { button: 'Take off ➜' });
+  const sx = spot.x, sz = spot.z + 15; fly.placeAt(sx, sz, fly.groundAt(sx, sz) + 14); // already in the air, south of the turbine, facing it
+  await ui.talk(`This wind turbine has been stopped and locked, so it is safe to inspect. Fly to each blue frame and hold the drone still there to take a photo. ${junior ? 'Do not go too close to the turbine.' : `Keep at least ${SAFE} m from the turbine.`} ${pad.how}`, { button: 'Start the inspection ➜' });
   ui.hush();
   const t1 = await flyPhotos(ctx, ui, fly, pad, { parts: turbineParts(base), spots: turbineSpots(base), what: 'the turbine', junior });
   sum.close += t1.close; sum.photos += 3;
@@ -116,7 +114,7 @@ export async function runInspect(ctx, ui, kit, scope, { touch }) {
   const land = ctx.engine.world?.bridgeLanding;
   if (land) {
     ctx.report({ stage: 'Inspection: the footbridge' }); ui.setStage('m5-bridge');
-    const b = bridgeShape(land); fly = createFly3d(ctx, { origin: { x: (b.xe + b.xf) / 2 - 2, z: b.z + 4 }, radius: 18, cam: { up: 6, back: 14 } }); fly.setInput(pad.input);
+    const b = bridgeShape(land); fly = createFly3d(ctx, { origin: { x: (b.xe + b.xf) / 2 - 2, z: b.z + 4 }, radius: 18, cam: { up: 4, back: 13, down: -1, ahead: 6 } }); fly.setInput(pad.input);
     fly.setFloor((x, z) => (x > b.xe - 1 && Math.abs(z - b.z) < 1.6 ? b.deck(x) + 0.2 : x > b.xe - 1 ? b.deck(b.xf) - 9 : fly.groundAt(x, z)));
     fly.placeAt(b.xe - 5, b.z + 5);
     await ui.talk(`Next, the footbridge to the village. Bridges are checked from every side, even from below. ${junior ? 'Fly to the three blue frames. Keep a safe distance.' : `Three frames again; keep over ${SAFE} m from the bridge.`}`, { button: 'Take off ➜' });

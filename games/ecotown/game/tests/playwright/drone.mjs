@@ -208,7 +208,7 @@ const M = {
       await shot(`rescue-warm-${id}`); await click(`#module [data-kind="${kinds[id]}"]`); await click('#module .dk-side [data-k="go"]');
     }
     await shot('rescue-guide'); await look('rescue guide');
-    await click('#module [data-step="e"]'); checks.rescueRiver = await p.evaluate(() => document.querySelector('#module [data-dk-reply]')?.textContent || '');
+    await click('#module [data-step="s"]'); checks.rescueRiver = await p.evaluate(() => document.querySelector('#module [data-dk-reply]')?.textContent || '');
     const way = await p.evaluate(async () => { const m = await import('./js/modules/drone/m6-rescue.js'); const w = m.SPOTS.find((s) => s.id === 'walker'); const prev = new Map(); const q = [m.TEAM]; prev.set(`${m.TEAM.x},${m.TEAM.z}`, null);
       for (let i = 0; i < q.length; i++) { const c = q[i]; for (const [d, [dx, dz]] of Object.entries(m.STEPS)) { const x = c.x + dx, z = c.z + dz; const k = `${x},${z}`; if (!m.passable(x, z) || prev.has(k)) continue; prev.set(k, [`${c.x},${c.z}`, d]); q.push({ x, z }); } }
       const out = []; let k = `${w.x},${w.z}`; while (prev.get(k)) { const [from, d] = prev.get(k); out.unshift(d); k = from; } return out; });
@@ -254,7 +254,7 @@ const must = {
   openingsSayTheJob: play.every((id) => (checks[`${id}Opening`] || '').length > 40),
   ...(play.includes('ground') ? { groundHonest: /Look again/.test(checks.groundHint) && /Look at the checks again/.test(checks.groundGale) } : {}),
   ...(play.includes('survey') ? { surveyHonest: /gap/i.test(checks.surveyGaps) && /battery/i.test(checks.surveyBattery) } : {}),
-  ...(play.includes('rescue') ? { rescueHonest: /almost nothing/.test(checks.rescueCamera) } : {}),
+  ...(play.includes('rescue') ? { rescueHonest: /almost nothing/.test(checks.rescueCamera) && /outside/.test(checks.rescueRiver) } : {}),
   ...(all ? { finished: checks.finished === true && checks.lines?.length === 6 && checks.practised?.length >= 2 && checks.townKind === 'drone-route' && checks.picture > 0 && checks.sceneAfter === 'drone-route' && checks.moduleLayerGone } : {}),
   nothingClipped: problems.length === 0,
   quiet: !errors.length && !outside.length,

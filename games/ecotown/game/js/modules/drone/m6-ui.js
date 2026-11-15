@@ -125,6 +125,7 @@ ${M} .dk-view { display: grid; gap: 4px; }
 ${M} .dk-view svg { width: 100%; max-height: 220px; border-radius: 12px; }
 ${M} .dk-view p { margin: 0; font-weight: 700; text-align: center; }
 ${M} .dk-team svg { cursor: pointer; }
-${M} .dk-arrows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-${M} .dk-arrows [data-undo] { grid-column: 1 / -1; }
+${M} .dk-arrows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". n ." "w s e" "u u u"; gap: 6px; }
+${M} .dk-arrows [data-step="n"] { grid-area: n; } ${M} .dk-arrows [data-step="w"] { grid-area: w; } ${M} .dk-arrows [data-step="e"] { grid-area: e; } ${M} .dk-arrows [data-step="s"] { grid-area: s; }
+${M} .dk-arrows [data-undo] { grid-area: u; }
 `;

@@ -108,7 +108,8 @@ ${M} .dk-main svg { display: block; width: 100%; height: auto; max-height: 100%;
 ${M} .dk-side { display: flex; flex-direction: column; gap: 8px; }
 ${M} .dk-side h2 { margin: 0; font-size: 1.15em; font-weight: 800; }
 ${M} .dk-side p { margin: 0; line-height: 1.35; font-weight: 600; }
-${M} .dk-side .dr-row { margin-top: auto; }
+${M} .dk-side .dr-row { margin-top: 0; }
+${M} .dk-side > .dr-row:last-child { margin-top: auto; padding-top: 6px; }
 ${M} .dk-note { padding: 8px 10px; border-radius: 12px; background: #f6ecd6; font-weight: 600; line-height: 1.35; }
 ${M} .dk-note.good { background: #e6f5df; box-shadow: inset 0 0 0 2px #7cc06a; }
 ${M} .dk-note.warn { background: #ffe9b8; box-shadow: inset 0 0 0 2px #c98a1e; }
