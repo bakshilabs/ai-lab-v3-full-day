@@ -47,7 +47,11 @@ const KEEP = { 'Cache-Control': 'private, max-age=604800, immutable' };
 const hashed = (f) => /^\/assets\/(app|m)-[a-f0-9]{8,}\.[a-z]+$/.test(f) || /^\/voice\/pack-[a-z]+-[a-f0-9]{8,}\.bin$/.test(f);
 const cookie = (req, name) => (req.headers.get('Cookie') || '').match(new RegExp('(?:^|; ?)' + name + '=([^;]+)'))?.[1] || '';
 const setCookie = (name, value, age) => ({ 'Set-Cookie': `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${age}` });
+// A game page that was opened by one learner must never save or check in under another learner's session (a second
+// child joined in another tab of the same browser). The game sends its learner id; a mismatch is refused.
+const otherLearner = (body, sess) => !!(body && typeof body === 'object' && typeof body.learner === 'string' && body.learner !== String(sess || '').split('.')[1]);
 const MESSAGES = {
+  other: 'Another learner has joined on this device.',
   unknown: 'That code wasn’t recognised. Check it and try again.', revoked: 'This code has been switched off. Ask your leader.',
   not_started: 'This code isn’t active yet. Ask your leader when it starts.', expired: 'Your access has ended. Ask your leader.',
   full: 'This group is full. Tell your leader.', no_badge: 'That badge isn’t in this group. Check it and try again.',
@@ -124,6 +128,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     }
     if (p === '/api/heartbeat') {
       const b = (await readJson(req)).body; const status = b && typeof b === 'object' ? b.status : undefined;
+      if (otherLearner(b, sess)) return json({ ok: false, reason: 'other', message: MESSAGES.other }, 409);
       const r = await S.check(sess, now, status === undefined ? {} : { status });
       return r.ok ? json({ ok: true }) : json({ ok: false, reason: r.reason, message: MESSAGES[r.reason] || MESSAGES.replaced }, 409);
     }
@@ -132,6 +137,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     if (p === '/api/save' && req.method === 'PUT') {
       const b = await readJson(req, SAVE_MAX);
       if (b.status) return json({ ok: false, reason: b.status === 413 ? 'too_big' : 'bad', message: b.status === 413 ? 'That save is too big.' : 'That save could not be read.' }, b.status);
+      if (otherLearner(b.body, sess)) return json({ ok: false, reason: 'other', message: MESSAGES.other }, 409);
       const r = await S.putSave(sess, b.body, now);
       if (r.ok) return json(r);
       return r.reason === 'bad' ? json({ ok: false, reason: 'bad', message: 'That save could not be read.' }, 400) : refuse(r, 401);

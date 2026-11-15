@@ -64,6 +64,7 @@ async function call(path, opt = {}) {
   if (state.on === null && [404, 405, 501].includes(r.status)) { state.on = false; return null; }    // no session server here
   state.on = true;
   let d = {}; try { d = await r.json(); } catch { /* not JSON */ }
+  if (r.status === 409 && d.reason === 'other') { if (typeof location !== 'undefined') location.reload(); return null; } // another learner joined in this browser: start again as them (this learner's town stays in its box)
   if (r.status === 409) { state.onLock?.(d); return null; }
   return r.ok ? d : null;
 }
@@ -85,14 +86,14 @@ export const net = {
   // send the copy soon (at most one every 20 seconds), or now when the page is being hidden
   push(save, { now = false } = {}) {
     if (state.on === false || !state.me) return;
-    const send = () => { state.lastPush = Date.now(); const body = JSON.stringify({ at: save.at || Date.now(), v: FMT, data: forServer(save), status: state.statusFn ? statusOf(state.statusFn()) : undefined });
+    const send = () => { state.lastPush = Date.now(); const body = JSON.stringify({ learner: state.me.learner, at: save.at || Date.now(), v: FMT, data: forServer(save), status: state.statusFn ? statusOf(state.statusFn()) : undefined });
       if (body.length > 60000) return; call('/api/save', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body, keepalive: now && body.length < 60000 }); };
     clearTimeout(state.timer);
     if (now) return send();
     state.timer = setTimeout(send, Math.max(1500, 20000 - (Date.now() - state.lastPush)));
   },
   // every minute: still signed in? and where the learner is, for the leader's list
-  async beat() { return call('/api/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: state.statusFn ? statusOf(state.statusFn()) : undefined }) }); },
+  async beat() { return call('/api/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ learner: state.me?.learner, status: state.statusFn ? statusOf(state.statusFn()) : undefined }) }); },
   logout: () => call('/api/logout', { method: 'POST' }),
   get on() { return state.on === true; },
 };

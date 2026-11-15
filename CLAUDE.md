@@ -1,8 +1,14 @@
 # ai-lab-v3-full-day
 
-A **full-day kids' club (AI Lab)** built around the Eco Town game. Eco Town is **module 1** and fills one to two hours. Five new modules, each a new game environment in the Eco Town world, fill the rest of the day.
+A **full-day kids' camp (AI Lab)**: **Eco Town in the morning, "Eco Town of the future" in the afternoon** (decided by the user, 15 Nov 2026).
 
-- `docs/pilot-plan.md`: the current plan (draft, 14 Nov 2026): make Eco Town ready for a one-hour pilot with several organisations. **Read this first.** It answers the user's implementation brief; the user will revise it. Modules 2 to 6 are not to be built yet. The first full-day plan (six modules, 9:00 to 16:00) was deleted; do not assume its modules or timetable.
+- **Morning:** the existing Eco Town lab, taken to be one hour. Its lesson is "AI can be confidently wrong; check it". That lesson stops at the morning.
+- **Afternoon:** three new modules in the Eco Town world, about working with AI and machines: **drone delivery, robot training, roads for self-driving cars**. First versions only (one playable loop of about ten minutes each). Florence is a capable partner there, not something to catch out. This replaces the earlier instruction not to build modules 2 to 6.
+
+Read first:
+- `docs/afternoon-modules-plan.md`: the user's plan for the afternoon modules, word for word.
+- `docs/MODULES.md`: the shared contract every module is built against. **Do not change it while module work is in progress.**
+- `docs/pilot-plan.md`: the plan for the morning hour and the server (sections F and G say what is built). `docs/RELEASES.md`: what is in the current build and its known issues. `docs/LOAD.md`: load results (local runs only).
 - `games/ecotown/`: module 1, copied from `bakshilabs/ai-lab-v3` (`games/ecotown/`, commit `a5fd92c`, 14 Nov 2026). Its own notes are in `games/ecotown/CLAUDE.md`; they were written for the original repository.
 
 ## Rules for this repository
@@ -11,4 +17,6 @@ A **full-day kids' club (AI Lab)** built around the Eco Town game. Eco Town is *
 - The GitHub workflow only runs when started by hand. There is no public test site for this repository yet.
 - Research and the other lab concepts (`research/`, `games/PLAN.md`, `games/labs/`) stayed in the original repository. Some documents here still refer to them.
 - Plain British English for the user. No budget or coins for ages 8–12.
-- Module 1 unit tests: `cd games/ecotown/game && node --test tests/*.test.mjs` (250 pass).
+- Unit tests: `cd games/ecotown/game && node --test tests/*.test.mjs` (295 pass on 15 Nov 2026; `model.test.mjs` "predict is fast" is a timing test and can fail on a busy machine).
+- **Module rules:** a module adds files under `games/ecotown/game/js/modules/<id>/`. It does not edit `game.js`, `main.js`, `game.css`, `content.js` or anything under `worker/`. Nothing a child types leaves the device; no names; Florence only assembles from built-in choices.
+- **Access:** an organisation has groups; a group has a join code; each child becomes a learner with a made-up badge. Leaders have a leader code and a page at `/leader`. The words "passcode" and "batch" in older documents describe the system this replaced.

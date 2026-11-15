@@ -2,6 +2,8 @@
 
 > **This is the full-day club copy** (repository `bakshilabs/ai-lab-v3-full-day`), taken from `bakshilabs/ai-lab-v3` at commit `a5fd92c` on 14 Nov 2026. Read the root `CLAUDE.md` first. The notes below were written for the original repository: its live sites, deploy steps and "redeploy without asking" permission **do not apply here**. Nothing in this repository may deploy to `ecotown.deltaops.workers.dev`.
 
+> **15 Nov 2026:** much of what follows is out of date for this repository. Passcode batches were replaced by organisations, groups and learners (`worker/codes.js`, `router.js`, `leader.html`); the pass/fail rules now live in `game/js/game/criteria.js`; saving and the server copy are in `game/js/net.js`. See the root `CLAUDE.md` and `docs/RELEASES.md`.
+
 Eco Town is a browser game (three.js voxel) with two versions, for ages 8–12 and 13–17. Players build a sustainable town with **Florence**, an AI planner that is sometimes confidently wrong, and learn to catch its mistakes.
 
 | For | See |

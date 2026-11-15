@@ -135,3 +135,17 @@ test('the real admin check refuses a request with no Access login, and no test k
   const r = await handle(new Request('https://test.example/admin/api/orgs', { headers: { 'X-Admin-Test-Key': 'k' } }), env); assert.equal(r.status, 403);
   assert.equal((await handle(new Request('https://test.example/admin'), env)).status, 403);
 });
+
+test('a game page opened by one learner cannot save or check in under another learner’s session', async () => {
+  const { call } = app(); const { g: group } = await club(call);
+  const a = await call('POST', '/api/join', { body: { code: group.code } }); const b = await call('POST', '/api/join', { body: { code: group.code } });
+  // A's page is still open, but the browser's session is now B's: A's save and check-in are refused, and B's stays empty
+  const put = await call('PUT', '/api/save', { cookie: b.cookie, body: { learner: a.data.learner, at: Date.now(), v: 1, data: { cells: [['1,1', { item: 'timber' }]] } } });
+  assert.equal(put.status, 409); assert.equal(put.data.reason, 'other');
+  const beat = await call('POST', '/api/heartbeat', { cookie: b.cookie, body: { learner: a.data.learner, status: { stage: 'A was here', missionsDone: 3 } } });
+  assert.equal(beat.status, 409); assert.equal(beat.data.reason, 'other');
+  assert.equal((await call('GET', '/api/save', { cookie: b.cookie })).data.save, null);
+  // the right learner, and a game that sends no learner id (an older page), still work
+  assert.equal((await call('PUT', '/api/save', { cookie: b.cookie, body: { learner: b.data.learner, at: Date.now(), v: 1, data: { cells: [] } } })).status, 200);
+  assert.equal((await call('POST', '/api/heartbeat', { cookie: a.cookie, body: {} })).status, 200);
+});

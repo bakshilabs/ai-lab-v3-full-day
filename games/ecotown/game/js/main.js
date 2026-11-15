@@ -209,7 +209,10 @@ async function start() {
   }
   // which learner this is (when the site has groups), their own things on this browser, and the newer copy of their town.
   // Three seconds at most: a slow connection never holds up the start screen.
-  await Promise.race([net.pull(), new Promise((r) => setTimeout(r, 3000))]);
+  { let waited = false; const pulled = net.pull();
+    await Promise.race([pulled, new Promise((r) => setTimeout(() => { waited = true; r(); }, 4000))]);
+    // the server's copy arrived after the start screen was drawn: draw it again once, so "Carry on building" is offered
+    pulled.then((from) => { if (waited && from === 'server' && document.getElementById('start') && !sessionStorage.getItem('eco.repull')) { try { sessionStorage.setItem('eco.repull', '1'); } catch { return; } location.reload(); } }).catch(() => {}); }
   const scr = h(`<div id="start"><div class="card">
     <span class="chip">A DELTAOPS LEARNING AI LAB</span><h1>Eco <span>Town</span></h1>
     <p style="font-weight:600;color:#46596a;margin:4px 0">Build your own town on a floating island. Florence, your AI helper, gives tips as you build. Step into the AI Lab to test her plans: she is clever, and sometimes confidently wrong. Can you catch her mistakes?</p>

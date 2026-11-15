@@ -1,6 +1,6 @@
 # Eco Town: plan for a one-hour pilot
 
-**Draft 4, 15 November 2026.** Written in answer to the implementation brief of 14 November (section 22: audit, target design, work plan, questions). Nothing has been changed in the game yet. Treat this file as a proposal until the user has revised the brief.
+**Draft 5, 15 November 2026.** Written in answer to the implementation brief of 14 November. **Most of the work plan below has now been built: see section F for what is done and what is not.** Sections A to E are kept as they were written before the work, as the record of what was found and proposed.
 
 **Decided by the user after draft 1:**
 - This repository (`ai-lab-v3-full-day`) is where the work happens. It is a **new live build**, deployed from here to a **new address** that the user will provide.
@@ -274,3 +274,39 @@ These need people, documents or marketing, not changes to the game. They are lis
 - **Trial with an instructor new to the game.**
 - **A stable test version beside a development one:** set aside by the user, since this is a new build.
 - **Larger product ideas** the review itself marks as research first: a downloadable project record, an individual learner report, poster or pitch outputs, interactive careers content, new replay scenarios.
+
+---
+
+## F. Progress (15 November 2026)
+
+The user said "run the plan". Built on the branch, not deployed. Detail and known issues: `docs/RELEASES.md`. Load results: `docs/LOAD.md`.
+
+| # | Item | State |
+|---|---|---|
+| 1 | Version label | **Done.** Version 3.1.0, shown in the menu. |
+| 2 | Fix the rules | **Done,** with one change: the 70 t homes limit stays a mission limit (as a town goal it made four challenge towns impossible). |
+| 3 | Refresh safety | **Done,** except that a refresh in a mission returns to the mission's start, not the same step. |
+| 4 | Groups and learners | **Done** in code and tests. Not deployed. |
+| 5 | Server copy of progress | **Done.** Checked in a browser against the server run locally: nothing typed is sent. |
+| 6 | Load test | **Script done; local runs only.** No measurement of a live site. |
+| 7 | Next step is plain | **Partly.** Labelled numbers, stars earned, mission against town, spoken next step. Not done: saying where page-reloading buttons lead. |
+| 8 | Weak choices show | **Partly.** Named failures, "partly right", broken limits, a slipped town. No new in-world effects were added. |
+| 9 | One-hour session | **Done:** pause cards and Finish session. Timings untried with children. |
+| 10 | Run sheet and cues | **Done.** Untried with an instructor new to the game. |
+| 11 | Group status list | **Done** (the leader's page). |
+| 12 | Recaps | **Done.** |
+| 12a | Awkward-text test | **Done.** |
+| 12b | Settings work | **Not done.** |
+| 13 | Full regression and load run | **Partly:** all unit tests, both play-throughs and a joint browser test pass; no run on a deployed site. |
+
+**Two points for the user before a real group uses the site:** leader codes and join codes have no limit on wrong guesses; and a child who knows another child's badge can open that child's town.
+
+## G. Change of direction: three afternoon modules (15 November 2026)
+
+The user decided that the full-day camp is Eco Town in the morning and "Eco Town of the future" in the afternoon. **This replaces the brief's instruction not to build modules 2 to 6 yet,** and the "Not proposed" line above about modules.
+
+- Three new modules, first versions only (one playable loop of about ten minutes each): **drone delivery, robot training, roads for self-driving cars.**
+- The morning's lesson ("AI can be confidently wrong; check it") stops at the morning. In the afternoon Florence is a capable partner.
+- Each module has its own viewpoint and produces something for a take-home record.
+- The modules are built against one shared contract: `docs/MODULES.md` and `games/ecotown/game/js/modules/`.
+- The user's full plan for the afternoon is kept in `docs/afternoon-modules-plan.md`.
