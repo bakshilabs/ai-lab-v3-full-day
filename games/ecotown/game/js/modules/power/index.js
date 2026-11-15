@@ -174,7 +174,10 @@ async function run(ctx) {
     val('homes', `${h.litCount} of ${kit.homes.length}`); wrap.querySelector('[data-d="homes"]').classList.toggle('alert', h.dark > 0);
     for (const [id, v] of [['made', h.made], ['need', h.need]]) { wrap.querySelector(`[data-bar="${id}"]`).style.width = `${Math.min(100, (v / barMax) * 100).toFixed(1)}%`; wrap.querySelector(`[data-n="${id}"]`).textContent = j ? '' : `${Math.round(v * KW)} kW`; }
     const sp = wrap.querySelector('[data-spare]'); const spare = h.made - h.need;
-    sp.className = spare > 0.3 ? 'spare' : spare < -0.05 ? 'short' : ''; sp.textContent = spare > 0.3 ? (j ? '▲ Power to spare' : `▲ Surplus ${Math.round(spare * KW)} kW`) : spare < -0.05 ? (j ? '▼ Short of power' : `▼ Shortfall ${Math.round(-spare * KW)} kW`) : (j ? 'Just enough' : 'Balanced');
+    // when the battery makes up the whole gap, say so: "short of power" beside "every home lit" would read as a mistake
+    const covered = spare < -0.05 && h.fromBattery > 0.01 && h.dark === 0 && h.schoolLit;
+    sp.className = spare > 0.3 ? 'spare' : covered ? '' : spare < -0.05 ? 'short' : '';
+    sp.textContent = spare > 0.3 ? (j ? '▲ Power to spare' : `▲ Surplus ${Math.round(spare * KW)} kW`) : covered ? (j ? '🔋 The battery fills the gap' : `🔋 Battery covers ${Math.round(-spare * KW)} kW`) : spare < -0.05 ? (j ? '▼ Short of power' : `▼ Shortfall ${Math.round(-spare * KW)} kW`) : (j ? 'Just enough' : 'Balanced');
   }
   const plate = (dayId, clock) => { $('[data-day]').textContent = pick(T.day[dayId]); $('[data-clock]').textContent = clockWord(clock, j); };
   // show one hour everywhere: the sky, the windows, the dials and the clock
