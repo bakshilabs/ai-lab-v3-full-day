@@ -80,7 +80,7 @@ export const WHO = {
   health: { j: 'Health centre', s: 'Health centre' }, north: { j: 'North homes', s: 'North homes' }, shelter: { j: 'School: storm shelter', s: 'School (storm shelter)' },
   medical: { j: 'Homes with medical machines', s: 'Priority Services Register homes' }, mill: { j: 'Mill Lane homes', s: 'Mill Lane homes' }, river: { j: 'River Row homes', s: 'River Row homes' },
 };
-export const WHO_ICON = { health: '🏥', north: '🏠', shelter: '🏫', medical: '🫁', mill: '🏡', river: '🏘️' };
+export const WHO_ICON = { health: '🏥', north: '🏠', shelter: '🏫', medical: '🩺', mill: '🏡', river: '🏘️' };
 export const whoWord = (id, j) => pick(WHO[SECTIONS[id].who], j);
 export const CREW_WORD = {
   off: { j: 'Make sure the broken line is switched off', s: 'Isolate: confirm the line is switched off at its switch' },
