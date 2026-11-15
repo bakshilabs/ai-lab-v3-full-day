@@ -6,7 +6,7 @@
 // Drawings: chart.js. The window onto the town: view.js. What is left in the town: town.js.
 import { MODES, TEST_DAYS, HOURS, START_LEVEL, KW, WIND_STRONG, WIND_LOW, SUN_BRIGHT, kitFrom, forecast, stepHour, runModes } from './model.js';
 import { cleanRules, whensFor, maxRules, testRules, explain, draftFromHand, compare, sameRules } from './rules.js';
-import { T, clockWord, intro, handAsk, handAskStep, HINT, handSummary, handDoneSay, whenWord, whenNote, whenIcon, thenWord, rulesSpoken, rulesAsk, needRule, maxSay, testSay, gapLines, gapFix, resultsSay, unusedLine, dayScore, compareLines, compareSay, madeTitle, madeLines, practised, units } from './words.js';
+import { T, clockWord, intro, handAsk, handAskStep, HINT, handSummary, handDoneSay, whenWord, whenNote, whenIcon, thenWord, rulesSpoken, rulesAsk, needRule, maxSay, testSay, gapLines, gapFix, resultsSay, unusedLine, longestLine, dayScore, compareLines, compareSay, madeTitle, madeLines, practised, units } from './words.js';
 import { daySvg, legend, picture, dialSvg, C } from './chart.js';
 import { createView } from './view.js';
 import { show } from './town.js';
@@ -18,13 +18,13 @@ ${P}.pw-large { --pw-fs: 19px; }
 ${P} .pw-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; font-size: var(--pw-fs); touch-action: manipulation; }
 ${P} .pw-win { position: relative; flex: 1 1 auto; min-height: 150px; }
 ${P} .pw-win::before { content: ''; position: absolute; inset: 0; border: 12px solid #8a6238; border-bottom-width: 16px; border-radius: 0 0 22px 22px; box-shadow: inset 0 0 0 3px #5e4124, inset 0 0 0 6px #c79a62; pointer-events: none; }
-${P} .pw-plate { position: absolute; right: 26px; top: 24px; display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 2px 10px; padding: 8px 14px 9px; border-radius: 14px; background: #2b3358; color: #fff; box-shadow: inset 0 0 0 2px #151a33, 0 4px 0 #151a33; }
+${P} .pw-plate { position: absolute; right: 26px; top: 24px; display: grid; justify-items: end; gap: 0; padding: 6px 14px 8px; min-width: 7.2em; border-radius: 14px; background: #2b3358; color: #fff; box-shadow: inset 0 0 0 2px #151a33, 0 4px 0 #151a33; }
 ${P} .pw-label { position: absolute; left: 26px; bottom: 26px; padding: 4px 12px; border-radius: 9px; background: #c79a62; color: #3b2a1e; font: 800 .8em Bricolage, Inter, system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; box-shadow: inset 0 0 0 2px #8a6238, 0 2px 0 #5e4124; }
 ${P} .pw-plate b { font: 800 .85em Inter, system-ui, sans-serif; letter-spacing: .02em; color: #ffd66b; }
-${P} .pw-plate span { font: 800 1.45em Bricolage, Inter, system-ui, sans-serif; font-variant-numeric: tabular-nums; min-width: 4.2em; text-align: right; }
-${P} .pw-prog { grid-column: 1 / -1; display: block; height: 6px; border-radius: 3px; background: #4a5384; overflow: hidden; } ${P} .pw-prog u { display: block; height: 100%; width: 0; background: #ffd66b; }
+${P} .pw-plate span { font: 800 1.45em Bricolage, Inter, system-ui, sans-serif; font-variant-numeric: tabular-nums; line-height: 1.15; white-space: nowrap; }
+${P} .pw-prog { justify-self: stretch; margin-top: 3px; display: block; height: 6px; border-radius: 3px; background: #4a5384; overflow: hidden; } ${P} .pw-prog u { display: block; height: 100%; width: 0; background: #ffd66b; }
 ${P} .pw-prog[hidden] { display: none; }
-${P} .pw-top { position: absolute; left: 230px; right: 220px; top: 22px; max-width: 720px; display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 14px; background: #fffaf0; box-shadow: inset 0 0 0 2px #b08a55, 0 4px 0 #7a5a33; font-size: var(--pw-fs); }
+${P} .pw-top { position: absolute; left: 230px; right: 200px; top: 22px; max-width: 720px; display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 14px; background: #fffaf0; box-shadow: inset 0 0 0 2px #b08a55, 0 4px 0 #7a5a33; font-size: var(--pw-fs); }
 ${P} .pw-top b.who { flex: none; padding: 2px 10px; border-radius: 10px; background: #2e9b5a; color: #fff; font-weight: 800; font-size: .85em; }
 ${P} .pw-top p { margin: 0; flex: 1; font-size: 1em; line-height: 1.35; font-weight: 600; }
 ${P} .pw-top p small { display: block; margin-top: 4px; font-size: .88em; font-weight: 600; color: #5e4936; }
@@ -86,6 +86,7 @@ ${P} .pw-pick.then button { background: #fff3cf; box-shadow: inset 0 0 0 2px #d9
 ${P} .pw-pick button i { font-style: normal; font-size: 1.3em; grid-row: 1 / span 2; } ${P} .pw-pick button small { grid-column: 2; font-size: .72em; font-weight: 600; color: #5e4936; }
 ${P} .pw-pick button[aria-current="true"] { box-shadow: inset 0 0 0 4px #c8553d, 0 3px 0 #7a5a33; }
 ${P} .pw-toggle { display: grid; grid-template-columns: 1.6em 1fr auto; align-items: center; gap: 6px; text-align: left; line-height: 1.2; font-size: .92em; }
+${P} .pw-toggle small { display: block; font-size: .82em; font-weight: 600; color: #5e4936; margin-top: 2px; }
 ${P} .pw-toggle em { font-style: normal; padding: 2px 8px; border-radius: 9px; background: #d2c4ac; color: #3b2a1e; font-size: .9em; }
 ${P} .pw-toggle[aria-pressed="true"] { background: #dff3e4; box-shadow: inset 0 0 0 3px #2e9b5a, 0 3px 0 #1a5a34; } ${P} .pw-toggle[aria-pressed="true"] em { background: #2e9b5a; color: #fff; }
 ${P} .pw-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
@@ -98,8 +99,10 @@ ${P} .pw-cmp { display: grid; gap: 6px; } ${P} .pw-cmp div { display: grid; grid
 ${P} .pw-cmp i { display: block; height: 20px; border-radius: 10px; background: #2b3358; overflow: hidden; box-shadow: inset 0 0 0 2px #151a33; } ${P} .pw-cmp u { display: block; height: 100%; background: #f6c453; border-radius: 10px 0 0 10px; }
 ${P} .pw-cmp em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) {
-  ${P} .pw-top { left: 22px; right: 22px; top: 66px; } ${P} .pw-plate { top: 20px; right: 22px; padding: 5px 12px 7px; }
-  ${P} .pw-desk { grid-template-columns: 1fr; max-height: 62vh; overflow: auto; }
+  ${P} .pw-top { left: 22px; right: 22px; top: calc(4.2 * var(--pw-fs) + 26px); } ${P} .pw-plate { top: 20px; right: 22px; padding: 4px 12px 6px; }
+  ${P} .pw-desk { grid-template-columns: 1fr; grid-auto-rows: max-content; gap: 8px; max-height: 68vh; overflow: auto; }
+  ${P} .pw-dial svg { width: 58px; } ${P} .pw-chart svg { max-height: 21vh; } ${P} .pw-label { display: none; }
+  ${P} .pw-ctl { flex-direction: row; flex-wrap: wrap; align-items: stretch; } ${P} .pw-ctl > * { flex: 1 1 200px; } ${P} .pw-ctl > .pw-modes, ${P} .pw-ctl > h4, ${P} .pw-ctl > p { flex-basis: 100%; }
   ${P} .pw-dials { grid-template-columns: repeat(4, 1fr); } ${P} .pw-modes { flex-direction: row; } ${P} .pw-modes button { flex: 1 1 0; grid-template-columns: 1.6em 1fr; } ${P} .pw-modes button u { display: none; }
   ${P} .pw-screen { overflow: visible; }
 }
@@ -112,6 +115,7 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const SEED = 3;               // the same days every time, so a hand-run day and a rule-run day can be compared fairly
 const HOUR_MS = 2400;         // one hour of the hand-run day
+const STILL_MS = 1300;        // one still view of a rule-run day, with reduced motion
 const TEST_MS = 420;          // one hour while the rules run
 const LETTER = { c: 'charge', h: 'hold', u: 'use' };
 const readHand = (s) => (typeof s === 'string' && s.length === HOURS && [...s].every((c) => LETTER[c]) ? [...s].map((c) => LETTER[c]) : null);
@@ -143,12 +147,14 @@ async function run(ctx) {
   let onTap = null; let waiting = null;
   wrap.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return; if (b.dataset.act && waiting) { const w = waiting; waiting = null; w(b.dataset.act); return; } onTap?.(b); });
   const press = () => new Promise((res) => { waiting = res; });
-  const focusFirst = (sel) => { const b = wrap.querySelector(sel); if (b && document.activeElement && document.activeElement !== document.body) b.focus(); };
+  // when a panel's buttons are replaced the old focus is gone: put it on the new main control (the ring only shows for keyboard users)
+  const focusFirst = (sel) => { const b = wrap.querySelector(sel); if (b && !b.disabled) { try { b.focus({ preventScroll: true }); } catch { b.focus(); } } };
 
   // ---- the window onto the town
   const view = createView(ctx, kit);
   let tick = null; let since = 9;
-  ctx.engine.onFrame((dt) => { const d = Math.min(0.5, dt || 0); since += d; if (since > 0.4) { since = 0; view.setRect(win.getBoundingClientRect()); } if (tick) tick(d); view.frame(d); });
+  let lastT = performance.now(); // real time between frames (the game's own step is capped, which would slow the clock on a slow device)
+  ctx.engine.onFrame(() => { const now = performance.now(); const d = Math.min(1, Math.max(0, (now - lastT) / 1000)); lastT = now; since += d; if (since > 0.4) { since = 0; view.setRect(win.getBoundingClientRect()); } if (tick) tick(d); view.frame(d); });
   // the game's own keys and pointer are held off while the module is open (the page layer covers the 3D view)
   let onKey = null;
   const key = (e) => { e.stopPropagation(); if (e.type === 'keydown' && onKey && !e.ctrlKey && !e.metaKey && !e.altKey && onKey(e)) e.preventDefault(); };
@@ -246,11 +252,12 @@ async function run(ctx) {
         screen.innerHTML = `<h3>${esc(pick(T.rulesHead))}<small>${list.length} of ${max}</small></h3>
           <ol class="pw-rules">${list.map((r, n) => `<li><span class="pw-n" aria-hidden="true">${n + 1}</span>
             <button type="button" class="pw-tile when" data-edit="when" data-n="${n}" aria-label="Rule ${n + 1}, when: ${esc(whenWord(r.when, j))}. Change"><i aria-hidden="true">${whenIcon(r.when)}</i><span><small>${T.whenLabel}</small>${esc(whenWord(r.when, j))}</span></button><span class="pw-arrow" aria-hidden="true">➜</span>
-            <button type="button" class="pw-tile then" data-edit="then" data-n="${n}" aria-label="Rule ${n + 1}, do: ${esc(thenWord(r.then, j))}. Change"><i aria-hidden="true">${T.modeIcon[r.then]}</i><span><small>${T.thenLabel}</small>${esc(capital(thenWord(r.then, j)))}</span></button>
+            <button type="button" class="pw-tile then" data-edit="then" data-n="${n}" aria-label="Rule ${n + 1}, do: ${esc(thenWord(r.then, j))}. Change"><i aria-hidden="true">${T.modeIcon[r.then]}</i><span><small>${T.thenLabel}</small>${esc(pick(T.mode[r.then]))}</span></button>
             <span class="pw-ops"><button type="button" data-op="up" data-n="${n}" aria-label="${T.up}: rule ${n + 1}" ${n === 0 ? 'disabled' : ''}>▲</button><button type="button" data-op="down" data-n="${n}" aria-label="${T.down}: rule ${n + 1}" ${n === list.length - 1 ? 'disabled' : ''}>▼</button><button type="button" data-op="del" data-n="${n}" aria-label="${T.remove}: rule ${n + 1}">✕</button></span></li>`).join('')}
             <li class="pw-else"><span class="pw-n" aria-hidden="true">–</span><span>${esc(pick(T.noRuleRow))}</span></li></ol>
           <div class="pw-row"><button type="button" data-op="add" ${list.length >= max ? 'disabled' : ''}>${T.addRule}</button></div>`;
-        ctl.innerHTML = `<button type="button" class="pw-toggle" data-op="school" aria-pressed="${st.rules.school}"><span aria-hidden="true">🏫</span><span>${esc(pick(T.schoolRule))}</span><em>${st.rules.school ? T.on : T.off}</em></button><p>${esc(pick(T.schoolHint))}</p>
+        ctl.innerHTML = `<button type="button" class="pw-toggle" data-op="school" aria-pressed="${st.rules.school}"><span aria-hidden="true">🏫</span><span>${esc(pick(T.schoolRule))}<small>${esc(pick(T.schoolHint))}</small></span><em>${st.rules.school ? T.on : T.off}</em></button>
+          ${j ? '' : `<button type="button" class="pw-toggle" data-op="turns" aria-pressed="${st.rules.turns}"><span aria-hidden="true">🔁</span><span>${esc(pick(T.turnsRule))}<small>${esc(pick(T.turnsHint))}</small></span><em>${st.rules.turns ? T.on : T.off}</em></button>`}
           <button class="go" type="button" data-op="test" ${list.length ? '' : 'disabled'}>${pick(T.test)}</button>${list.length ? '' : `<p>${esc(needRule(j))}</p>`}`;
         if (focus) focusFirst(focus);
       };
@@ -275,9 +282,10 @@ async function run(ctx) {
           if (w && a) { list.push({ when: w, then: a }); changed(); ctx.say(`Rule ${list.length}. ${whenWord(w, j)}, ${thenWord(a, j)}.`); }
           onTap = mainTap; main('[data-op="add"]'); if (list.length >= max) focusFirst('[data-op="test"]'); return;
         }
-        if (op === 'up' && n > 0) { [list[n - 1], list[n]] = [list[n], list[n - 1]]; changed(); main(`[data-op="up"][data-n="${Math.max(1, n - 1)}"]`); if (n - 1 === 0) focusFirst('[data-op="down"][data-n="0"]'); return; }
-        if (op === 'down' && n < list.length - 1) { [list[n + 1], list[n]] = [list[n], list[n + 1]]; changed(); main(`[data-op="down"][data-n="${Math.min(list.length - 2, n + 1)}"]`); if (n + 1 === list.length - 1) focusFirst(`[data-op="up"][data-n="${n + 1}"]`); return; }
+        if (op === 'up' && n > 0) { [list[n - 1], list[n]] = [list[n], list[n - 1]]; changed(); main(n - 1 > 0 ? `[data-op="up"][data-n="${n - 1}"]` : '[data-op="down"][data-n="0"]'); return; }
+        if (op === 'down' && n < list.length - 1) { [list[n + 1], list[n]] = [list[n], list[n + 1]]; changed(); main(n + 1 < list.length - 1 ? `[data-op="down"][data-n="${n + 1}"]` : `[data-op="up"][data-n="${n + 1}"]`); return; }
         if (op === 'del') { list.splice(n, 1); changed(); main('[data-op="add"]'); return; }
+        if (op === 'turns' && !j) { st.rules.turns = !st.rules.turns; changed(); main('[data-op="turns"]'); ctx.say(`${pick(T.turnsRule)}: ${st.rules.turns ? T.on : T.off}.`); return; }
         if (op === 'school') { st.rules.school = !st.rules.school; changed(); main('[data-op="school"]'); ctx.say(`${pick(T.schoolRule)}: ${st.rules.school ? T.on : T.off}.`); return; }
         if (op === 'test' && list.length) { onTap = null; res(); }
       };
@@ -297,12 +305,14 @@ async function run(ctx) {
     for (let n = 0; n < TEST_DAYS.length && !skip; n++) {
       const day = test.days[n]; const last = n === TEST_DAYS.length - 1; const head = `<h3>${esc(pick(T.day[day.dayId]))}<small>${n + 1} of 3 · ${esc(pick(T.dayNote[day.dayId]))}</small></h3>`;
       say(testSay(day.dayId, j));
-      if (reduce) { // no sweep: the whole day at once, and the window cut to its darkest hour (or 9 in the evening)
-        const at = day.worst >= 0 ? day.hours[day.worst] : day.hours[15]; showHour(at, day.dayId);
+      if (reduce) { // no sweep: five still views of the day, cut one to the next, then the whole day with a Next button
+        ctl.innerHTML = `<h4>${esc(pick(T.byRules))}</h4><p>${esc(rulesSpoken(st.rules, j))}</p><button type="button" data-skip>${T.skipRun}</button>`; focusFirst('[data-skip]');
+        for (const i of [1, 6, 11, 14, 18]) { if (skip) break; showHour(day.hours[i], day.dayId); screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours.slice(0, i + 1), cursor: i })}${keyRow()}`; await wait(STILL_MS); }
+        skip = false; const at = day.worst >= 0 ? day.hours[day.worst] : day.hours[15]; showHour(at, day.dayId);
         screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours, cursor: at.i, mark: day.worst })}<ul class="pw-lines"><li>${esc(dayScore(day, j))}</li></ul>`;
         ctl.innerHTML = `<h4>${esc(pick(T.byRules))}</h4><button class="go" type="button" data-act="next">${last ? T.seeResults : T.nextDay}</button>`; focusFirst('[data-act]'); await press(); continue;
       }
-      ctl.innerHTML = `<h4>${esc(pick(T.byRules))}</h4><p>${esc(rulesSpoken(st.rules, j))}</p><button type="button" data-skip>${T.skipRun}</button>`;
+      ctl.innerHTML = `<h4>${esc(pick(T.byRules))}</h4><p>${esc(rulesSpoken(st.rules, j))}</p><button type="button" data-skip>${T.skipRun}</button>`; focusFirst('[data-skip]');
       for (let i = 0; i < HOURS && !skip; i++) { showHour(day.hours[i], day.dayId); screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours.slice(0, i + 1), cursor: i })}${keyRow()}`; await wait(TEST_MS); }
       if (!skip) { const at = day.worst >= 0 ? day.hours[day.worst] : day.hours[15]; showHour(at, day.dayId); screen.innerHTML = `${head}${chart(day.dayId, { hours: day.hours, cursor: at.i, mark: day.worst })}<ul class="pw-lines"><li>${esc(dayScore(day, j))}</li></ul>`; await wait(1500); }
     }
@@ -315,9 +325,9 @@ async function run(ctx) {
       const day = test.days[sel]; const h = day.hours[cur]; showHour(h, day.dayId); const gap = explain(kit, day, cur);
       const lines = gap ? gapLines(kit, day, gap, st.rules, j) : [`${capital(`at ${clockWord(h.clock, j)}`)}, ${j ? 'every home was lit.' : 'every home was supplied.'}`];
       const fix = gap ? gapFix(gap, j) : ''; const unused = test.used.findIndex((u) => u === 0);
-      screen.innerHTML = `<div class="pw-tabs" role="group" aria-label="Test days">${test.days.map((d, n) => `<button type="button" data-day="${n}" aria-pressed="${n === sel}"><b>${esc(pick(T.day[d.dayId]))}</b><small>${esc(dayScore(d, j))}</small><span class="tag ${d.allLit ? 'ok' : 'dark'}">${d.allLit ? '✓ all lit' : `● dark at ${esc(clockWord(d.hours[d.worst].clock, j))}`}</span></button>`).join('')}</div>
+      screen.innerHTML = `<div class="pw-tabs" role="group" aria-label="Test days">${test.days.map((d, n) => `<button type="button" data-day="${n}" aria-pressed="${n === sel}" aria-label="${esc(pick(T.day[d.dayId]))}: ${esc(dayScore(d, j))}"><b>${esc(pick(T.day[d.dayId]))}</b><small>${d.litHours} / ${d.total} lit</small><span class="tag ${d.allLit ? 'ok' : 'dark'}">${d.allLit ? '✓ all lit' : `● dark at ${esc(clockWord(d.hours[d.worst].clock, j))}`}</span></button>`).join('')}</div>
         ${chart(day.dayId, { hours: day.hours, cursor: cur, mark: day.worst, h: 132 })}
-        <ul class="pw-lines" aria-live="polite">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}${fix ? `<li class="fix">${esc(fix)}</li>` : ''}${unused >= 0 && cur === (day.worst >= 0 ? day.worst : 15) ? `<li class="note">${esc(unusedLine(unused + 1, j))}</li>` : ''}</ul>`;
+        <ul class="pw-lines" aria-live="polite">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}${fix ? `<li class="fix">${esc(fix)}</li>` : ''}${!j && day.longest ? `<li class="note">${esc(longestLine(day, st.rules.turns))}</li>` : ''}${unused >= 0 && cur === (day.worst >= 0 ? day.worst : 15) ? `<li class="note">${esc(unusedLine(unused + 1, j))}</li>` : ''}</ul>`;
       ctl.querySelector('.pw-hour b').textContent = clockWord(h.clock, j);
       if (focus) focusFirst(focus); return lines.concat(fix ? [fix] : []);
     };

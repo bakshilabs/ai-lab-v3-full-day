@@ -100,7 +100,7 @@ export function kitFrom(cells, tiles) {
 // Charge: the battery fills first, from what is being made; the town gets the rest. Use: the battery covers what is
 // missing, if it has it. Hold: the battery does nothing. Homes are lit in order, nearest the school first; without
 // the school-first rule the school is last in line.
-export function stepHour(kit, fc, level, mode, { winter = false, schoolFirst = false } = {}) {
+export function stepHour(kit, fc, level, mode, { winter = false, schoolFirst = false, turns = false } = {}) {
   const made = r2(kit.wind * fc.wind + kit.solar * fc.sun);
   const needs = kit.homes.map((h) => homeNeed(fc.clock, h.base, winter)); const sNeed = schoolNeed(fc.clock, winter);
   const need = r2(needs.reduce((a, b) => a + b, 0) + sNeed);
@@ -110,7 +110,9 @@ export function stepHour(kit, fc, level, mode, { winter = false, schoolFirst = f
   let left = made - toBattery + fromBattery + 1e-9; const lit = needs.map(() => false); let schoolLit = false;
   const first = schoolFirst && fc.dark;
   if (first && left >= sNeed) { schoolLit = true; left -= sNeed; }
-  for (let i = 0; i < needs.length; i++) if (left >= needs[i]) { lit[i] = true; left -= needs[i]; }
+  // turns (ages 13-17): the line starts one home further along each hour, so a shortfall is shared round
+  const n = needs.length; const from = turns && n ? fc.i % n : 0;
+  for (let k = 0; k < n; k++) { const i = (from + k) % n; if (left >= needs[i]) { lit[i] = true; left -= needs[i]; } }
   if (!first && left >= sNeed) { schoolLit = true; left -= sNeed; }
   const next = r2(Math.max(0, Math.min(kit.cap, level + toBattery - fromBattery)));
   const litCount = lit.filter(Boolean).length;
@@ -121,12 +123,12 @@ export function stepHour(kit, fc, level, mode, { winter = false, schoolFirst = f
 export const START_LEVEL = 0.25;   // every day starts with the battery a quarter full
 
 // Run a whole day. decide(info) -> { mode, rule } is asked once an hour; info is what the control desk can see.
-export function runDay(kit, dayId, decide, { seed = 1, schoolFirst = false } = {}) {
+export function runDay(kit, dayId, decide, { seed = 1, schoolFirst = false, turns = false } = {}) {
   const fc = forecast(dayId, seed); const winter = dayId === 'winter'; let level = r2(kit.cap * START_LEVEL); const hours = [];
   for (const f of fc) {
     const d = decide({ i: f.i, clock: f.clock, block: f.block, wind: f.wind, sun: f.sun, dark: f.dark, battery: kit.cap ? level / kit.cap : 0 }) || {};
     const mode = MODES.includes(d.mode) ? d.mode : 'hold';
-    const h = stepHour(kit, f, level, mode, { winter, schoolFirst }); h.rule = Number.isInteger(d.rule) ? d.rule : -1; hours.push(h); level = h.level;
+    const h = stepHour(kit, f, level, mode, { winter, schoolFirst, turns }); h.rule = Number.isInteger(d.rule) ? d.rule : -1; hours.push(h); level = h.level;
   }
   return { dayId, hours, ...tally(kit, hours) };
 }
@@ -141,9 +143,11 @@ export function tally(kit, hours) {
     if (h.dark > 0 || !h.schoolLit) { if (cur) { cur.to = h.i; cur.most = Math.max(cur.most, h.dark); if (!h.schoolLit) cur.school = true; if (h.dark > cur.worstDark) { cur.worstDark = h.dark; cur.worst = h.i; } } else { cur = { from: h.i, to: h.i, most: h.dark, worst: h.i, worstDark: h.dark, school: !h.schoolLit }; spells.push(cur); } }
     else cur = null;
   }
+  // the longest any one home went without power, in hours on end
+  let longest = 0; for (let i = 0; i < n; i++) { let run = 0; for (const h of hours) { run = h.lit[i] ? 0 : run + 1; if (run > longest) longest = run; } }
   const worst = hours.reduce((a, h) => (h.dark + (h.schoolLit ? 0 : 0.5) > a.dark + (a.schoolLit ? 0 : 0.5) ? h : a), hours[0]);
   const any = worst.dark > 0 || !worst.schoolLit;
-  return { homes: n, total: n * hours.length, litHours, darkHours: n * hours.length - litHours, schoolHours, share: n ? litHours / (n * hours.length) : 1, spells, worst: any ? worst.i : -1, allLit: !any };
+  return { homes: n, total: n * hours.length, litHours, darkHours: n * hours.length - litHours, schoolHours, share: n ? litHours / (n * hours.length) : 1, spells, longest, worst: any ? worst.i : -1, allLit: !any };
 }
 
 // An open tile for the control cabinet the module leaves in the town: the nearest free one to the town's battery or

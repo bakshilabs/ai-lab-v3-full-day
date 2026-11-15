@@ -1,7 +1,9 @@
-// What the "power" module leaves in the town: scenery only, the town's numbers and its own lights are untouched.
-//   by day    a small control cabinet with a battery gauge, on an open tile near the town's power kit
-//   at night  a porch lantern at every home: lit when the child's rules keep that home on at this hour, dark when
-//             the rules leave it without power (worked out with the same model the module uses, on a still day)
+// What the "power" module leaves in the town: scenery only. The town's numbers and its own lights are untouched.
+//   by day    a control hut with a tall battery gauge (big enough to find from the usual island view), on an open
+//             tile near the town's power kit, and a lantern post at every home
+//   at night  each lantern follows the child's rules: lit, with a warm pool on the ground, when the rules keep that
+//             home on at this hour; dark when the rules leave it without power (the same model the module uses, on
+//             a still day, or the winter night when the town is in winter). The gauge shows the battery at that hour.
 import { kitFrom, signSpot } from './model.js';
 import { cleanRules, runRules } from './rules.js';
 
@@ -19,28 +21,35 @@ export function show(townCtx, data) {
   const days = { still: runRules(kit, 'still', rules), winter: runRules(kit, 'winter', rules) };
   const group = new THREE.Group(); group.name = 'power-town'; scene.add(group); const bin = []; const keep = (x) => { bin.push(x); return x; };
   const box = keep(new THREE.BoxGeometry(1, 1, 1)); const lam = (c) => keep(new THREE.MeshLambertMaterial({ color: c })); const flat = (c) => keep(new THREE.MeshBasicMaterial({ color: c }));
-  const post = lam('#7a5a33'); const mats = { lit: flat(LIT), dark: flat(UNLIT), day: lam(DAY) };
-  // a lantern at each home
+  const post = lam('#7a5a33'); const mats = { lit: flat(LIT), dark: flat(UNLIT), day: lam(DAY), empty: lam('#cfc2a6'), full: flat('#8e5cd9') };
+  const poolG = keep(new THREE.CylinderGeometry(4.1, 4.1, 0.05, 8)); const poolM = keep(new THREE.MeshBasicMaterial({ color: '#d99a4e', polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }));
+  // a lantern at each home, and the pool of light it throws when lit
   for (const h of homes) {
-    const p = new THREE.Mesh(box, post); p.scale.set(0.22, 1.5, 0.22); p.position.set(h.pos.x + 2.55, h.pos.y + 0.75, h.pos.z + 2.55); group.add(p);
-    h.lamp = new THREE.Mesh(box, mats.day); h.lamp.scale.set(0.5, 0.5, 0.5); h.lamp.position.set(h.pos.x + 2.55, h.pos.y + 1.7, h.pos.z + 2.55); group.add(h.lamp);
-    const capM = new THREE.Mesh(box, post); capM.scale.set(0.66, 0.12, 0.66); capM.position.set(h.pos.x + 2.55, h.pos.y + 2.0, h.pos.z + 2.55); group.add(capM);
+    const x = h.pos.x + 2.5, z = h.pos.z + 2.5, y = h.pos.y;
+    const p = new THREE.Mesh(box, post); p.scale.set(0.3, 2.2, 0.3); p.position.set(x, y + 1.1, z); group.add(p);
+    h.lamp = new THREE.Mesh(box, mats.day); h.lamp.name = 'power-lamp'; h.lamp.scale.set(0.8, 0.8, 0.8); h.lamp.position.set(x, y + 2.55, z); group.add(h.lamp);
+    const capM = new THREE.Mesh(box, post); capM.scale.set(1.0, 0.16, 1.0); capM.position.set(x, y + 3.03, z); group.add(capM);
+    h.pool = new THREE.Mesh(poolG, poolM); h.pool.name = 'power-pool'; h.pool.position.set(h.pos.x, y + 0.05, h.pos.z); h.pool.rotation.y = Math.PI / 8; h.pool.visible = false; group.add(h.pool);
   }
-  // the control cabinet
-  const key = signSpot(cells, tiles, kit); const at = top(key); let cabinet = null; const bars = [];
+  // the control hut and its battery gauge
+  const key = signSpot(cells, tiles, kit); const at = top(key); let hut = null; const bars = [];
   if (at) {
-    cabinet = new THREE.Group(); cabinet.position.set(at.x, at.y, at.z);
-    const add = (mat, sx, sy, sz, x, y, z) => { const m = new THREE.Mesh(box, mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); cabinet.add(m); return m; };
-    add(lam('#b08a55'), 2.6, 0.3, 1.8, 0, 0.15, 0);                // plinth
-    add(lam('#2e9b5a'), 2.0, 1.9, 1.1, 0, 1.25, 0);                // cabinet
-    add(lam('#1f7442'), 2.3, 0.22, 1.4, 0, 2.3, 0);                // lid
-    add(lam('#fffaf0'), 1.5, 1.0, 0.1, 0, 1.45, 0.58);             // gauge plate
-    for (let n = 0; n < 4; n++) bars.push(add(mats.day, 0.26, 0.7, 0.1, -0.5 + n * 0.33, 1.45, 0.64));
-    add(flat('#f2b632'), 0.3, 0.3, 0.1, 0, 0.6, 0.58);             // the lightning badge
-    const mast = add(post, 0.16, 1.5, 0.16, 0.8, 3.1, 0); mast.name = 'mast'; add(flat('#ff6b4a'), 0.3, 0.3, 0.3, 0.8, 3.95, 0);
-    group.add(cabinet);
+    hut = new THREE.Group(); hut.name = 'power-hut'; hut.position.set(at.x, at.y, at.z);
+    const add = (mat, sx, sy, sz, x, y, z) => { const m = new THREE.Mesh(box, mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); hut.add(m); return m; };
+    add(lam('#b08a55'), 5.0, 0.3, 4.2, 0, 0.15, 0);                 // plinth
+    add(lam('#f2e2c4'), 2.6, 2.4, 2.6, -0.9, 1.5, -0.3);            // the hut
+    add(lam('#2e9b5a'), 3.0, 0.5, 3.0, -0.9, 2.95, -0.3);           // its green roof
+    add(lam('#1f7442'), 2.2, 0.4, 2.2, -0.9, 3.4, -0.3);
+    add(lam('#7a5a33'), 0.8, 1.5, 0.12, -0.9, 1.05, 1.02);          // door
+    add(flat('#f2b632'), 0.7, 0.7, 0.12, -0.9, 2.25, 1.02);         // the lightning badge over the door
+    add(post, 0.3, 6.6, 0.3, 1.5, 3.6, 0.2);                        // the gauge mast
+    add(lam('#3b2a1e'), 1.7, 4.3, 0.5, 1.5, 4.6, 0.6);              // gauge frame
+    add(lam('#3b2a1e'), 0.7, 0.35, 0.5, 1.5, 6.9, 0.6);             // the battery's cap
+    for (let n = 0; n < 4; n++) bars.push(add(mats.empty, 1.25, 0.8, 0.2, 1.5, 3.05 + n * 1.0, 0.82));
+    add(flat('#ff6b4a'), 0.5, 0.5, 0.5, 1.5, 7.3, 0.2);             // a beacon on top
+    group.add(hut);
   }
-  if (!homes.length && !cabinet) { scene.remove(group); for (const x of bin) x.dispose(); return nothing; }
+  if (!homes.length && !hut) { scene.remove(group); for (const x of bin) x.dispose(); return nothing; }
 
   const taken = () => { try { return !!key && typeof world.walkCost === 'function' && world.walkCost(key) === Infinity; } catch { return false; } };
   let sig = '';
@@ -48,9 +57,9 @@ export function show(townCtx, data) {
     const night = (stage?.night ?? 0) > 0.45; const clock = Math.floor((((stage?.hour ?? 12) % 24) + 24) % 24); const day = (stage?.winter ?? 0) > 0.5 ? days.winter : days.still;
     const hr = day.hours.find((x) => x.clock === clock) || day.hours[0]; const level = kit.cap ? hr.level / kit.cap : 0; const hide = taken();
     const next = `${night ? 1 : 0}${clock}${day.dayId}${hide ? 1 : 0}`; if (next === sig) return; sig = next;
-    for (const h of homes) h.lamp.material = !night ? mats.day : hr.lit[h.i] ? mats.lit : mats.dark;
-    bars.forEach((b, n) => { b.material = level > n / 4 + 0.02 ? mats.lit : mats.dark; });
-    if (cabinet) cabinet.visible = !hide;
+    for (const h of homes) { const on = !!hr.lit[h.i]; h.lamp.material = !night ? mats.day : on ? mats.lit : mats.dark; h.pool.visible = night && on; }
+    bars.forEach((b, n) => { b.material = level > n / 4 + 0.02 ? mats.full : mats.empty; });
+    if (hut) hut.visible = !hide;
   };
   draw();
   // show() has no frame hook: a slow loop of its own (twice a second is plenty; nothing here moves)

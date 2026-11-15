@@ -3,7 +3,7 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { HOURS, START, MODES, TEST_DAYS, DAY_IDS, WIND_STRONG, WIND_LOW, clockAt, blockOf, afterDark, forecast, homeNeed, schoolNeed, kitFrom, stepHour, runDay, runModes, tally, signSpot, START_LEVEL, WIND_FLOOR, STORE_FLOOR, PRACTICE_TO } from '../js/modules/power/model.js';
 import { TESTS, whensFor, maxRules, cleanRules, decide, runRules, testRules, explain, mainGap, draftFromHand, compare, sameRules } from '../js/modules/power/rules.js';
-import { T, clockWord, kitLines, intro, HINT, darkNames, handSummary, ruleLine, whenWord, whenNote, thenWord, gapLines, gapFix, resultsSay, compareLines, compareSay, madeTitle, madeLines, practised, rulesSpoken, unusedLine } from '../js/modules/power/words.js';
+import { T, clockWord, kitLines, intro, HINT, darkNames, handSummary, ruleLine, whenWord, whenNote, thenWord, gapLines, gapFix, resultsSay, compareLines, compareSay, madeTitle, madeLines, practised, rulesSpoken, unusedLine, longestLine } from '../js/modules/power/words.js';
 import { daySvg, picture, dialSvg, legend, needLine } from '../js/modules/power/chart.js';
 import { cleanResult, cleanMade, cleanTown } from '../js/modules/contract.js';
 import { ITEMS } from '../js/world/catalog.js';
@@ -16,7 +16,7 @@ const EMPTY = [];
 const MID = [['3,3', cell('timber', ['solar'])], ['3,4', cell('straw')], ['4,4', cell('earth', ['heatpump'])], ['5,4', cell('timber', ['solar'])], ['6,4', cell('cohousing')], ['6,5', cell('timber')], ['7,5', cell('reclaimed')], ['8,5', cell('timber', ['solar'])], ['0,1', cell('wind')], ['0,2', cell('wind')], ['1,2', cell('battery')]];
 const FULL = [...Array(14)].map((_, i) => [`${(i % 7) + 3},${3 + Math.floor(i / 7)}`, cell('timber', i % 2 ? ['solar'] : [])]).concat([...Array(6)].map((_, i) => [`0,${i}`, cell('wind')]), [...Array(8)].map((_, i) => [`1,${i}`, cell('battery')]), [['7,7', cell('school')]]);
 const kitE = kitFrom(EMPTY, tiles), kitM = kitFrom(MID, tiles), kitF = kitFrom(FULL, tiles);
-const R = (...pairs) => ({ list: pairs.map(([when, then]) => ({ when, then })), school: false });
+const R = (...pairs) => ({ list: pairs.map(([when, then]) => ({ when, then })), school: false, turns: false });
 const NAIVE = R(['calm', 'use'], ['midday', 'charge']);       // the plan's own two examples, in that order
 const GOOD = R(['morning', 'hold'], ['windy', 'charge'], ['sunny', 'charge'], ['always', 'use']);
 const darkMap = (day) => day.hours.map((h) => `${h.dark}${h.schoolLit ? '' : 's'}`).join(',');
@@ -130,7 +130,7 @@ test('the rule interpreter: first rule that fits, nothing else', () => {
   // what was saved is cleaned: unknown tiles go, the count is capped, a junior keeps no threshold rule
   const dirty = { list: [{ when: 'low', then: 'use' }, { when: 'calm', then: 'explode' }, { when: 'calm', then: 'use' }, null, ...Array(9).fill({ when: 'night', then: 'hold' })], school: 1 };
   assert.deepEqual(cleanRules(dirty, true).list.slice(0, 2), [{ when: 'calm', then: 'use' }, { when: 'night', then: 'hold' }]); assert.equal(cleanRules(dirty, true).list.length, maxRules(true)); assert.equal(cleanRules(dirty, true).school, true);
-  assert.equal(cleanRules(dirty, false).list[0].when, 'low'); assert.deepEqual(cleanRules(null, true), { list: [], school: false }); assert.deepEqual(cleanRules('x', true), { list: [], school: false });
+  assert.equal(cleanRules(dirty, false).list[0].when, 'low'); assert.deepEqual(cleanRules(null, true), { list: [], school: false, turns: false }); assert.deepEqual(cleanRules('x', true), { list: [], school: false, turns: false });
   assert.ok(sameRules(R(['calm', 'use']), R(['calm', 'use'])) && !sameRules(R(['calm', 'use']), R(['calm', 'hold'])) && !sameRules(R(['calm', 'use']), { ...R(['calm', 'use']), school: true }));
 });
 
@@ -172,6 +172,19 @@ test('a gap in the rules shows on the still day as dark homes at a particular ho
   // the school: last in line unless the rule says otherwise
   const noSchool = runRules(kit, 'still', R(['midday', 'charge'])), withSchool = runRules(kit, 'still', { ...R(['midday', 'charge']), school: true });
   assert.ok(withSchool.schoolHours > noSchool.schoolHours); assert.ok(withSchool.litHours <= noSchool.litHours, 'lighting the school first costs a home its light: a choice, not a mistake');
+});
+
+test('ages 13-17 have a deeper choice: when short, the same far homes go dark, or homes take turns', () => {
+  const kit = kitM; const base = R(['midday', 'charge']); const line = runRules(kit, 'still', base, { seed: 3 }), turns = runRules(kit, 'still', { ...base, turns: true }, { seed: 3 });
+  assert.ok(line.longest >= 5, `in line, the far homes are off for hours on end (${line.longest})`); assert.ok(turns.longest < line.longest, `taking turns, no home is off for as long (${turns.longest} < ${line.longest})`);
+  assert.ok(Math.abs(turns.litHours - line.litHours) <= 6, 'the total is about the same: it is a choice about who, not how much');
+  const offLine = kit.homes.map((_, i) => line.hours.filter((h) => !h.lit[i]).length), offTurns = kit.homes.map((_, i) => turns.hours.filter((h) => !h.lit[i]).length);
+  assert.equal(offLine[0], 0, 'in line, the nearest home never goes dark'); assert.ok(Math.max(...offTurns) - Math.min(...offTurns) < Math.max(...offLine) - Math.min(...offLine), 'turns spread the dark hours more evenly');
+  assert.equal(cleanRules({ list: base.list, turns: true }, false).turns, true); assert.equal(cleanRules({ list: base.list, turns: true }, true).turns, false, 'ages 8-12 do not have this choice');
+  assert.ok(!sameRules(base, { ...base, turns: true }));
+  assert.match(longestLine(line, false), /^Longest any one home was off: \d+ h in a row \(the same homes each hour\)\.$/); assert.match(longestLine(turns, true), /homes took turns/); assert.equal(longestLine(runRules(kit, 'windy', base), false), '');
+  assert.ok(madeLines({ ...GOOD, school: true, turns: true }, compare(kit, Array(24).fill('hold'), { ...GOOD, turns: true }), false, true).some((l) => /After dark, supply the school first\. When short, homes take turns\./.test(l)));
+  assert.equal(stepHour(kit, { i: 3, clock: 19, wind: 0.2, sun: 0, block: 'evening', dark: true }, 0, 'hold', { turns: true }).lit.indexOf(true), 3, 'the line starts further along each hour');
 });
 
 test('Florence drafts the first rules from the hand-run day, and the comparison is plain facts', () => {

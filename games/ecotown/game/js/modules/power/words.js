@@ -53,7 +53,9 @@ export const T = {
   whenLabel: 'When', thenLabel: 'Do',
   pickWhen: { j: 'Choose when', s: 'Choose a condition' }, pickThen: { j: 'Choose what to do', s: 'Choose an action' },
   schoolRule: { j: 'After dark, light the school first', s: 'After dark, supply the school first' },
-  schoolHint: { j: 'Evening club is on at the school. Without this it is last in line.', s: 'The school hosts evening clubs. Without this rule it is last in the queue.' },
+  schoolHint: { j: 'For evening club. Without this it is last in line.', s: 'For evening clubs. Otherwise it is last in the queue.' },
+  turnsRule: { j: 'When short, homes take turns', s: 'When short, homes take turns' },
+  turnsHint: { j: 'No home is off for long.', s: 'Shares a shortfall round. Off: the same far homes lose out.' },
   on: 'On', off: 'Off',
   litHours: { j: 'lit hours', s: 'home-hours supplied' },
   allLit: { j: 'Every home stayed lit.', s: 'Every home stayed supplied.' },
@@ -135,7 +137,7 @@ export const whenNote = (id, j) => pick(WHEN_NOTE[id] || WHEN_NOTE.always, j);
 export const whenIcon = (id) => WHEN_ICON[id] || '';
 export const thenWord = (id, j) => pick(THEN[id] || THEN.hold, j);
 export const ruleLine = (r, j) => `${whenWord(r.when, j)}, ${thenWord(r.then, j)}.`;
-export const rulesSpoken = (rules, j) => (rules.list.length ? rules.list.map((r, n) => `Rule ${n + 1}. ${ruleLine(r, j)}`).join(' ') + (rules.school ? ` ${pick(T.schoolRule, j)}.` : '') : (j ? 'No rules yet.' : 'No rules yet.'));
+export const rulesSpoken = (rules, j) => (rules.list.length ? rules.list.map((r, n) => `Rule ${n + 1}. ${ruleLine(r, j)}`).join(' ') + (rules.school ? ` ${pick(T.schoolRule, j)}.` : '') + (rules.turns ? ` ${pick(T.turnsRule, j)}.` : '') : (j ? 'No rules yet.' : 'No rules yet.'));
 
 export function rulesAsk(j, draft, first) {
   if (draft && draft.length) return j ? `I watched you. I wrote ${draft.length === 1 ? 'the first rule' : 'the first two rules'} from what you did. Add more, or change ${draft.length === 1 ? 'it' : 'them'}.` : `I drafted ${draft.length === 1 ? 'one rule' : 'two rules'} from what you did by hand. Edit ${draft.length === 1 ? 'it' : 'them'} and add more.`;
@@ -177,6 +179,8 @@ export function resultsSay(test, j, prev) {
   if (prev) { const d = test.litHours - prev.litHours; s += d > 0 ? ` ${j ? `That is ${d} more lit hours than last time.` : `That is ${d} more home-hours than last time.`}` : d < 0 ? ` ${j ? `That is ${-d} fewer lit hours than last time.` : `That is ${-d} fewer home-hours than last time.`}` : ` ${j ? 'The same as last time.' : 'No change from last time.'}`; }
   return s;
 }
+// ages 13-17: how the shortfall fell on single homes (the choice "take turns" changes this, not the total)
+export const longestLine = (day, turns) => (day.longest ? `Longest any one home was off: ${day.longest} h in a row${turns ? ' (homes took turns)' : ' (the same homes each hour)'}.` : '');
 export const unusedLine = (n, j) => (j ? `Rule ${n} was never used. A rule above it always fitted first, or its time never came.` : `Rule ${n} never fired: an earlier rule always matched first, or its condition never came true.`);
 export const dayScore = (day, j) => `${day.litHours} / ${day.total} ${pick(T.litHours, j)}`;
 
@@ -200,7 +204,7 @@ const pct = (d) => Math.round(d.share * 100);
 export function madeLines(rules, cmp, j, hadHand) {
   const out = []; const rl = rules.list.map((r, n) => `${n + 1}. ${ruleLine(r, j)}`);
   for (let i = 0; i < rl.length; i += 2) out.push(rl.slice(i, i + 2).join(' '));
-  if (rules.school) out.push(`${pick(T.schoolRule, j)}.`);
+  if (rules.school || rules.turns) out.push([rules.school ? `${pick(T.schoolRule, j)}.` : '', rules.turns ? `${pick(T.turnsRule, j)}.` : ''].filter(Boolean).join(' '));
   const res = `Homes lit: ${cmp.test.days.map((d) => `${pick(T.day[d.dayId], j).replace(/^A /, '')} ${pct(d)}%`).join(', ')}.`;
   const hand = hadHand ? `By hand ${pct(cmp.hand)}% lit; the rules on the same day ${pct(cmp.auto)}%.` : '';
   while (out.length > (hand ? 4 : 5)) out.pop();

@@ -31,7 +31,7 @@ const says = () => text(M + '.pw-top p');
 const fits = () => p.evaluate((m) => { const d = document.querySelector(m + '.pw-desk'), r = d.getBoundingClientRect(); const t = document.querySelector(m + '.pw-top').getBoundingClientRect(), pl = document.querySelector(m + '.pw-plate').getBoundingClientRect(), back = document.querySelector('#module .modback').getBoundingClientRect();
   const hit = (a, c) => !(a.right <= c.left || c.right <= a.left || a.bottom <= c.top || c.bottom <= a.top);
   const wide = [...d.querySelectorAll('button, h3, li, p, .pw-dial span')].filter((e) => e.scrollWidth > e.clientWidth + 2).map((e) => e.textContent.trim().slice(0, 30));
-  return { deskOnScreen: r.bottom <= innerHeight + 1 && r.right <= innerWidth + 1, window: Math.round(r.top), noSideScroll: d.scrollWidth <= d.clientWidth + 1, clipped: wide, topClear: !hit(t, pl) && !hit(t, back) && !hit(pl, back), topAboveDesk: t.bottom < r.top }; }, M);
+  return { deskOnScreen: r.bottom <= innerHeight + 1 && r.right <= innerWidth + 1, window: Math.round(r.top), noSideScroll: d.scrollWidth <= d.clientWidth + 1, clipped: wide, topClear: !hit(t, pl) && !hit(t, back) && !hit(pl, back), topAboveDesk: t.bottom < r.top, panelsApart: (() => { const ps = [...d.children].map((e) => e.getBoundingClientRect()); const inner = [...d.children].every((e) => [...e.children].every((k) => { const b = k.getBoundingClientRect(), o = e.getBoundingClientRect(); return e.scrollHeight > e.clientHeight + 2 || b.bottom <= o.bottom + 1; })); return inner && ps.every((a, i) => ps.every((c, k) => k <= i || !hit(a, c))); })() }; }, M);
 const allFit = []; const fit = async (name) => { const f = await fits(); allFit.push({ name, ...f }); return f; };
 
 // ---- into a town
@@ -62,7 +62,7 @@ await p.waitForSelector(M + '.pw-top', { timeout: LONG });
 checks.backButton = await p.isVisible('#module .modback');
 checks.hello = await says();
 await fit('desk'); await shot('desk', 2500);
-await click(M + '[data-act="next"]'); checks.firstAsk = await says();
+await click(M + '[data-act="next"]'); checks.firstAsk = await says(); checks.focusOnStart = await p.evaluate(() => document.activeElement?.dataset?.act === 'hand');
 checks.noSkipFirstTime = !(await p.$(M + '[data-act="rules"]'));
 await click(M + '[data-act="hand"]');
 
@@ -108,7 +108,10 @@ await fit('rules-draft'); await shot('rules-draft');
 const runTest = async (name) => {
   await click(M + '[data-op="test"]');
   if (motion) { await p.waitForSelector(M + '[data-skip]', { timeout: LONG }); await p.waitForTimeout(5200); await fit('test-run'); await shot(`${name}-running`, 200); if (name !== 'test1') await p.click(M + '[data-skip]').catch(() => {}); }
-  else for (let i = 0; i < 3; i++) { await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); if (i === 1) { await fit('test-day'); await shot(`${name}-still-day`, 1500); } await p.click(M + '[data-act="next"]'); await p.waitForTimeout(300); }
+  else for (let i = 0; i < 3; i++) { // with reduced motion each day is five still views (cut, not swept), then the whole day with Next
+    if (i === 0 && name === 'test1') { await p.waitForSelector(M + '[data-skip]', { timeout: LONG }); const a = await clockIs(); await p.waitForTimeout(3200); const c = await clockIs(); checks.stillViews = { a, c, cuts: a !== c || !!(await p.$(M + '[data-act="next"]')), focus: await p.evaluate(() => document.activeElement?.hasAttribute('data-skip') || document.activeElement?.dataset?.act === 'next') }; await shot(`${name}-still-view`, 100); }
+    else if (await p.$(M + '[data-skip]')) await p.click(M + '[data-skip]').catch(() => {});
+    await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); if (i === 1) { await fit('test-day'); await shot(`${name}-still-day`, 1500); } await p.click(M + '[data-act="next"]'); await p.waitForTimeout(300); }
   await p.waitForSelector(M + '.pw-tabs', { timeout: LONG });
   return p.evaluate((m) => ({ tabs: [...document.querySelectorAll(m + '.pw-tabs button')].map((e) => e.textContent.replace(/\s+/g, ' ').trim()), lines: [...document.querySelectorAll(m + '.pw-lines li')].map((e) => e.textContent), say: document.querySelector(m + '.pw-top p').textContent }), M);
 };
@@ -132,6 +135,7 @@ await add('windy', 'charge'); await add('morning', 'hold');
 for (let i = 3; i > 0; i--) { await p.focus(M + `[data-op="up"][data-n="${i}"]`); await p.keyboard.press('Enter'); await p.waitForTimeout(150); }
 // change one tile: rule 3 from "midday" to "sun is bright", then back out of a chooser without choosing
 await click(M + '[data-edit="when"][data-n="2"]'); await click(M + '.pw-pick [data-pick="sunny"]'); await click(M + '[data-edit="then"][data-n="2"]'); await click(M + '.pw-ctl [data-pick=""]');
+if (!junior) { await click(M + '[data-op="turns"]'); checks.turnsOn = (await p.getAttribute(M + '[data-op="turns"]', 'aria-pressed')) === 'true'; checks.focusStays = await p.evaluate(() => document.activeElement?.dataset?.op === 'turns'); } else checks.noTurnsForJunior = !(await p.$(M + '[data-op="turns"]'));
 await click(M + '[data-op="school"]'); checks.schoolOn = (await p.getAttribute(M + '[data-op="school"]', 'aria-pressed')) === 'true';
 checks.rules = await ruleList(); checks.addStopsAtMax = junior ? await p.isDisabled(M + '[data-op="add"]') : !(await p.isDisabled(M + '[data-op="add"]'));
 await fit('rules'); await shot('rules-mine');
@@ -163,12 +167,18 @@ Object.assign(checks, await p.evaluate((was) => {
   const kept = app.G.modules?.power;
   return { moduleGone: !document.querySelector('#module'), viewRemoved: view === 0, townScenery: town, putBack: { hour: s.hour === was.hour || Math.abs(s.hour - app.hour) < 0.6 /* the town's own clock runs on */, winter: s.winter === was.winter, view: !!s.camera.view?.enabled === was.view, fov: s.camera.fov === was.fov }, saved: { done: kept?.done, record: !!kept?.record, town: kept?.town?.kind, state: kept?.state?.stage, rules: kept?.state?.rules?.list?.length }, said: (window.__sayLog || []).length };
 }, before));
+// what is left in the town must be really drawn, and big enough to find from the usual island view
+checks.hut = await p.evaluate(() => { const { app } = window.__eco; const s = app.stage; let hut = null, lamps = 0; s.scene.traverse((o) => { if (o.name === 'power-hut') hut = o; if (o.name === 'power-lamp' && o.visible) lamps++; }); if (!hut) return { drawn: false, lamps };
+  hut.updateWorldMatrix(true, true); const V = hut.position.constructor; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, meshes = 0; const r = s.renderer.domElement.getBoundingClientRect();
+  hut.traverse((m) => { if (!m.isMesh) return; meshes++; for (const dx of [-0.5, 0.5]) for (const dy of [-0.5, 0.5]) for (const dz of [-0.5, 0.5]) { const v = new V(dx, dy, dz).applyMatrix4(m.matrixWorld).project(s.camera); const px = ((v.x + 1) / 2) * r.width, py = ((1 - v.y) / 2) * r.height; x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py); } });
+  return { drawn: hut.visible && hut.parent?.visible !== false && meshes >= 8, meshes, lamps, w: Math.round(x1 - x0), h: Math.round(y1 - y0), onScreen: x1 > 0 && x0 < r.width && y1 > 0 && y0 < r.height }; });
 await shot('town-day');
 // the same town at night: the lanterns follow the rules (the test sets the time; the game does this in its own night scenes)
-await p.evaluate(() => { const { app } = window.__eco; app.stage.setTime(21, 0); });
-await shot('town-night', 2200);
-checks.nightLamps = await p.evaluate(() => { const { app } = window.__eco; let lit = 0, dark = 0; app.stage.scene.traverse((o) => { if (o.parent?.name === 'power-town' && o.material?.isMeshBasicMaterial) { const c = o.material.color.getHexString(); if (c === 'ffd66b') lit++; else if (c === '353c5c') dark++; } }); return { lit, dark }; });
-await p.evaluate((was) => { window.__eco.app.stage.setTime(was.hour, was.winter); }, before);
+const hourWas = await p.evaluate(() => { const { app } = window.__eco; const h = app.hour; app.hour = 21.2; app.stage.setTime(21.2, 0); return h; });
+await p.waitForFunction(() => { let n = 0; window.__eco.app.stage.scene.traverse((o) => { if (o.name === 'power-lamp' && o.material?.isMeshBasicMaterial) n++; }); let any = 0; window.__eco.app.stage.scene.traverse((o) => { if (o.name === 'power-lamp') any++; }); return any === 0 || n > 0; }, null, { timeout: 60000 }).catch(() => {});
+checks.nightLamps = await p.evaluate(() => { const { app } = window.__eco; let lit = 0, dark = 0, pools = 0; app.stage.scene.traverse((o) => { if (o.name === 'power-lamp' && o.material?.isMeshBasicMaterial) { const c = o.material.color.getHexString(); if (c === 'ffd66b') lit++; else if (c === '353c5c') dark++; } if (o.name === 'power-pool' && o.visible) pools++; }); return { lit, dark, pools, night: +app.stage.night.toFixed(2) }; });
+await shot('town-night', 1500);
+await p.evaluate((h) => { const { app } = window.__eco; app.hour = h; app.stage.setTime(h, 0); }, hourWas);
 
 // ---- again: straight to the saved rules, then leave early by the one way back
 await p.evaluate(() => { window.__power2 = undefined; window.__eco.openModule('power').then((r) => { window.__power2 = r === undefined ? null : r; }); });
@@ -183,11 +193,12 @@ await p.waitForTimeout(1200);
 checks.leftEarly = await p.evaluate((was) => { const { app } = window.__eco; const s = app.stage; const r = window.__power2; let view = 0, town = 0; s.scene.traverse((o) => { if (o.name === 'power-view') view++; if (o.name === 'power-town') town++; });
   return { finished: !!r?.finished, stillDone: app.G.modules?.power?.done === true, keptRecord: !!app.G.modules?.power?.record, savedRules: app.G.modules?.power?.state?.rules?.list?.length, moduleGone: !document.querySelector('#module'), viewRemoved: view === 0, townScenery: town, hour: s.hour === was.hour || Math.abs(s.hour - app.hour) < 0.6, view: !!s.camera.view?.enabled === was.view }; }, before);
 checks.noOutsideRequests = outside.length === 0; if (!checks.noOutsideRequests) checks.outside = outside.slice(0, 5);
-checks.fits = allFit.filter((f) => !f.deskOnScreen || !f.noSideScroll || f.clipped.length || !f.topClear || !f.topAboveDesk); checks.windowHeights = allFit.map((f) => `${f.name}:${f.window}`).join(' ');
+checks.fits = allFit.filter((f) => !f.deskOnScreen || !f.noSideScroll || f.clipped.length || !f.topClear || !f.topAboveDesk || !f.panelsApart); checks.windowHeights = allFit.map((f) => `${f.name}:${f.window}`).join(' ');
 
 const ok = checks.finished && checks.picture && checks.practised?.length >= 2 && checks.lines?.length >= 3 && checks.moduleGone && checks.viewRemoved && checks.townScenery === 1 && Object.values(checks.putBack).every(Boolean)
   && checks.saved?.done && checks.saved?.town === 'power-rules' && checks.backButton && checks.draft.length >= 1 && checks.testNeedsRule && checks.usedTileHidden && checks.schoolOn && checks.rules.length === 4 && checks.resultsChanged && checks.moreLit && checks.hourSteps
-  && (motion ? checks.pauseStops?.still : checks.keyChoosesCharge && checks.enterChoosesUse && checks.holdDarkens?.differs) && checks.during.view === 1 && checks.during.night > 0.45 && checks.nightLamps.lit + checks.nightLamps.dark >= (townKind === 'built' ? 8 : 0)
+  && (motion ? checks.pauseStops?.still : checks.keyChoosesCharge && checks.enterChoosesUse && checks.holdDarkens?.differs) && checks.during.view === 1 && checks.during.night > 0.45 && checks.nightLamps.lit + checks.nightLamps.dark === (townKind === 'built' ? 8 : 0) && checks.nightLamps.pools === checks.nightLamps.lit
+  && checks.hut?.drawn && checks.hut.onScreen && checks.hut.h >= 24 && checks.hut.lamps === (townKind === 'built' ? 8 : 0) && checks.focusOnStart && (motion || (checks.stillViews?.cuts && checks.stillViews.focus)) && (junior ? checks.noTurnsForJunior : checks.turnsOn && checks.focusStays)
   && checks.rulesKept && !checks.leftEarly.finished && checks.leftEarly.stillDone && checks.leftEarly.keptRecord && checks.leftEarly.savedRules === 3 && checks.leftEarly.moduleGone && checks.leftEarly.viewRemoved && checks.leftEarly.hour && checks.leftEarly.view
   && checks.fits.length === 0 && checks.noOutsideRequests && errors.length === 0;
 console.log(JSON.stringify({ band, motion, large, town: townKind, size: `${W}x${H}`, ok, checks, errors }, null, 2));

@@ -21,7 +21,7 @@ export const maxRules = (junior) => (junior ? 4 : 6);
 export function cleanRules(raw, junior = true) {
   const whens = whensFor(junior); const list = [];
   for (const r of Array.isArray(raw?.list) ? raw.list : []) { if (r && whens.includes(r.when) && MODES.includes(r.then) && list.length < maxRules(junior)) list.push({ when: r.when, then: r.then }); }
-  return { list, school: !!raw?.school };
+  return { list, school: !!raw?.school, turns: !junior && !!raw?.turns }; // turns: ages 13-17 only (a shortfall is shared round the homes)
 }
 // What the system does this hour: the first rule that fits, or nothing.
 export function decide(rules, info) {
@@ -29,7 +29,7 @@ export function decide(rules, info) {
   for (let n = 0; n < list.length; n++) if (TESTS[list[n].when]?.(info)) return { mode: list[n].then, rule: n };
   return { mode: 'hold', rule: -1 };
 }
-export const runRules = (kit, dayId, rules, { seed = 1 } = {}) => runDay(kit, dayId, (info) => decide(rules, info), { seed, schoolFirst: !!rules?.school });
+export const runRules = (kit, dayId, rules, { seed = 1 } = {}) => runDay(kit, dayId, (info) => decide(rules, info), { seed, schoolFirst: !!rules?.school, turns: !!rules?.turns });
 // The three test days, and how often each rule was followed across them.
 export function testRules(kit, rules, opts) {
   const days = TEST_DAYS.map((d) => runRules(kit, d, rules, opts)); const used = (rules?.list || []).map(() => 0); let none = 0;
