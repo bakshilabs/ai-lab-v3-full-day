@@ -15,7 +15,7 @@ const [base = 'http://localhost:8863/', out = 'shots-roads', band = 'junior', W 
 const motion = !!process.env.MOTION, large = !!process.env.LARGE, built = !!process.env.BUILT; const junior = band !== 'senior';
 fs.mkdirSync(out, { recursive: true });
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-const p = await b.newPage({ viewport: { width: +W, height: +H } });
+const p = await b.newPage({ viewport: { width: +W, height: +H } }); p.setDefaultTimeout(120000);   // software 3D on a busy machine is slow
 await p.addInitScript((prefs) => { window.__sayLog = []; localStorage.setItem('ecotown.prefs', JSON.stringify(prefs)); }, { quality: 'low', reduce: !motion, text: large ? 'large' : 'normal' });
 const errors = []; p.on('pageerror', (e) => errors.push(e.message + ' ' + (e.stack || '').split('\n')[1])); p.on('console', (m) => m.type() === 'error' && !/404/.test(m.text()) && errors.push(m.text()));
 const outside = []; p.on('request', (r) => { if (!r.url().startsWith(base) && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) outside.push(r.url()); });
