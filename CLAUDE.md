@@ -6,7 +6,7 @@ A **full-day kids' camp (AI Lab)** of eight hours: Eco Town, then the "Eco Town 
 - **Modules:** drone delivery, robot training, roads for self-driving cars, town film studio, power control room, each grown to one hour (they were built as ten-minute first versions). Florence is a capable partner there, not something to catch out.
 
 Read first:
-- `docs/curriculum.md`: what each hour teaches: six real uses of the technology and the real skills and jobs (draft for the user, 15 Nov 2026).
+- `docs/curriculum.md`: what each hour teaches: six real uses of the technology, the real skills and the jobs (approved by the user, 15 Nov 2026; being built).
 - `docs/full-day-plan.md`: the eight-hour day, one hour per part, discussion and break after each (supersedes the ten-minute loops below).
 - `docs/afternoon-modules-plan.md`: the user's plan for the afternoon modules, word for word.
 - **Work queue (15 Nov 2026; `docs/full-day-plan.md` comes first):** (1) the live site at `bakshilabs.github.io/ai-lab-v3-full-day` is live (15 Nov 2026), published from `main` only; (2) reviews of the drone, robots and roads modules, fixed and re-reviewed until every aspect scores 8 out of 10; (3) `docs/more-modules-plan.md`: two more modules, film studio and power control room, then the same review loop to 8; (4) `docs/grid-hero-plan.md`: the user's Grid Hero game as a "Finished early?" break game (report on it first, change nothing until then).

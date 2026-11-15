@@ -7,7 +7,7 @@
 
 This replaces "first versions only: one playable loop of about ten minutes each" in `docs/afternoon-modules-plan.md` and `docs/more-modules-plan.md`, and the morning/afternoon split in `CLAUDE.md`.
 
-## Assumptions to confirm (made by Claude, not yet confirmed by the user)
+## Confirmed by the user (15 November 2026), with the curriculum in `docs/curriculum.md`
 1. **All five modules are in the day.** Eco Town plus five modules is six hours of parts, which with breaks and lunch fills eight hours. The film studio and power control room stop being "a menu a leader chooses from", and the start page shows six parts in a row (not "four plus More to try").
 2. **Each hour is about 45 minutes of play and 10 to 15 minutes of discussion.** The discussion is led by the teacher with screens down; the game shows the questions and waits.
 3. **The order** is Eco Town, drone, robots, roads, film studio, power control room.

@@ -1,6 +1,6 @@
 # What each hour teaches: real jobs, real skills
 
-*Draft for the user's review, 15 November 2026. Nothing here is built yet.*
+*Approved by the user on 15 November 2026 ("agree. this is terrific."): the uses and jobs, the new titles, six missions of about seven minutes then the talk and the break, and all five modules in the day in this order. Being built.*
 
 ## What the user asked for (word for word)
 > "extending each module from 10 minutes to 1 hour cannot be more of the same skill. each topic is extensive and complex, and there is a lot to teach in the form of a game. by playing the game, the students will learn real skills they can apply to future careers in robotics, or becoming a drone pilot, etc."
@@ -83,7 +83,7 @@ Jobs: director, video editor, content producer, accessibility producer.
 Ages 13–17 also: kilowatts against kilowatt-hours, a supply and demand chart, battery percentage thresholds.
 Jobs: grid control engineer, energy analyst, renewable energy technician, emergency planner.
 
-## Questions for the user
-1. Are these the right real uses and jobs for each topic? Anything to add or drop?
-2. Should the titles change to match (for example "Robots at work" rather than "Robot training", and "Self-driving cars" rather than "Roads for self-driving cars")?
-3. Is six missions of about seven minutes, then the talk and the break, the right shape for each hour?
+## Decided
+- Titles: **Drones at work**, **Robots at work**, **Self-driving cars**, **Town film studio**, **Power control room**. Module ids stay `drone`, `robots`, `roads`, `film`, `power`.
+- Six missions of about seven minutes, then "Jobs that use this", "Talk it over" and a break.
+- All five modules are in the day, in the order above, after Eco Town.
