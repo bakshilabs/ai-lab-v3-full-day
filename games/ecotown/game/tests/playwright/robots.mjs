@@ -203,6 +203,8 @@ checks.cameraIsClose = await p.evaluate(async () => { const THREE = await import
 { const r = await seen('robots-robot', 1.0); const c = await colours(); notes.street = { robot: r, ...c };
   checks.streetRobotOnScreen = !!r && r.onScreen; checks.streetRobotNotHidden = !!r && r.blocked === 0; checks.streetNotOneFlatColour = c.colours >= 12 && c.hues >= 2; }
 await layout('street'); await shot('street-start');
+// every caption the street shows is logged by the page itself, so none is missed between two presses
+await p.evaluate(() => { window.__caps = []; const foot = document.querySelector('#module .rb-foot'); const log = () => { const t = foot.querySelector('.rb-cap p')?.textContent || ''; if (/^[✓✗?]/.test(t) && !window.__caps.includes(t)) window.__caps.push(t); }; new MutationObserver(log).observe(foot, { childList: true, subtree: true, characterData: true }); log(); });
 const streetThings = [];
 let presses = 0; let streetShot = false; let skipped = null;
 while ((await p.locator('#module').count()) && presses++ < 30) {
@@ -210,13 +212,14 @@ while ((await p.locator('#module').count()) && presses++ < 30) {
   if (!(await p.locator('#module').count())) break;
   await p.waitForTimeout(340); await go.click().catch(() => {}); await p.waitForTimeout(200);
   const moving = await p.evaluate(() => document.querySelector('#module .rb')?.dataset.moving === '1');
-  const txt = await p.evaluate(() => document.querySelector('#module .rb-cap p')?.textContent || ''); if (/^[✓✗?]/.test(txt)) streetThings.push(txt);
+  for (const t of await p.evaluate(() => window.__caps || [])) if (!streetThings.includes(t)) streetThings.push(t);
   if (motion && moving && skipped === null) { // a second press finishes the robot's move at once
     await p.waitForTimeout(400); // pressed straight from the page, so a slow 3D frame cannot hold up the click itself
     const t0 = Date.now(); const still = await p.evaluate(() => { document.querySelector('#module .rb-cap [data-go]').click(); return document.querySelector('#module .rb')?.dataset.moving === '1'; }); skipped = still ? null : Date.now() - t0; if (still) await p.waitForFunction(() => document.querySelector('#module .rb')?.dataset.moving !== '1', null, { timeout: 30000 }).catch(() => {}); }
   else if (moving) await p.waitForFunction(() => document.querySelector('#module .rb')?.dataset.moving !== '1', null, { timeout: 30000 }).catch(() => {});
   if (presses === 3 && !streetShot) { streetShot = true; await shot('street', 500); }
 }
+for (const t of await p.evaluate(() => window.__caps || [])) if (!streetThings.includes(t)) streetThings.push(t);
 if (motion) { notes.skipMs = skipped; checks.secondPressFinishesMove = skipped !== null && skipped < 1500; }
 
 // ---------- the record card, and what was kept
