@@ -26,7 +26,15 @@ export function createPlayer(ctx, set, { reduce }) {
     if (set.who.otters.here) out.otters = otterAt(S.gameT, riverX);
     return out;
   }
+  // Florence turns to the camera when a shot is of her (she looks about by herself otherwise, and a close-up of the
+  // back of her head is no use)
+  let faced = 0;
+  function faceCamera(pose) {
+    const sub = (S.shot || S.view)?.sub; const now2 = now(); if (now2 - faced < 400) return; faced = now2;
+    try { if (sub === 'who:florence' && ctx.engine.THREE) florence?.look?.(new ctx.engine.THREE.Vector3(pose.pos[0], pose.pos[1], pose.pos[2])); else if (S.facing) florence?.look?.(null); S.facing = sub === 'who:florence'; } catch { /* she is not on the island */ }
+  }
   function apply(pose) {
+    faceCamera(pose);
     camera.position.set(pose.pos[0], pose.pos[1], pose.pos[2]); camera.lookAt(pose.look[0], pose.look[1], pose.look[2]);
     if (camera.fov !== pose.fov) { camera.fov = pose.fov; camera.updateProjectionMatrix(); }
     S.last = pose;

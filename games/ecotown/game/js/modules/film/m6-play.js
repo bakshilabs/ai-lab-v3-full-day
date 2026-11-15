@@ -28,7 +28,9 @@ export async function playTruth(env) {
       pic: `${madePic(p.id)}<p class="fm-hear"><span aria-hidden="true">📍</span> ${esc(p.from)}</p>` });
     r.pics++; if (p.answer === 'clue') r.clues++; if (res.tries === 0) r.first++;
   }
-  await mui.note({ kick, title: 'Clues are not enough', lines: HONEST, stage: 'honest' });
+  // ages 13–17: the numbers from this set of pictures
+  const made = pics.filter((x) => x.answer === 'clue').length; const seen = made - 1; // the poster's only clue is its label
+  await mui.note({ kick, title: 'Clues are not enough', lines: [...HONEST.slice(0, 1), ...(env.junior ? [] : [`Here, ${seen} of the ${made} machine-made pictures had a clue in the picture itself (${Math.round(seen / made * 100)}%). One had only a label.`]), ...HONEST.slice(1)], stage: 'honest' });
 
   await mui.note({ kick, title: PARTS[2].title, lines: [PARTS[2].line], btn: 'Start ➜', stage: 'part-ask' });
   const asks = permissionItems();
