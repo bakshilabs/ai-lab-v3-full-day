@@ -3,10 +3,11 @@
 // writes the save itself and never edits the game's shared files.
 import * as THREE from 'three';
 import { h, esc } from '../ui/ui.js';
-import { MODULE_IDS, CONTRACT, checkModule, cleanResult, cleanReport, cleanState, storedModule } from './contract.js';
+import { MODULE_IDS, ON_BOARD, CONTRACT, checkModule, cleanResult, cleanReport, cleanState, storedModule } from './contract.js';
 
 // One line per module. Each folder's index.js is that module (a placeholder until its builder replaces it).
-const REGISTRY = { drone: () => import('./drone/index.js'), robots: () => import('./robots/index.js'), roads: () => import('./roads/index.js') };
+const REGISTRY = { drone: () => import('./drone/index.js'), robots: () => import('./robots/index.js'), roads: () => import('./roads/index.js'),
+  film: () => import('./film/index.js'), power: () => import('./power/index.js') };
 const PIC = (id) => `ecotown.modpic.${id}`; // a module's picture for the take-home page: on this device only, never sent
 const loaded = new Map(); const styled = new Set(); let shown = [];
 
@@ -42,7 +43,7 @@ export async function openModule(app, id) {
       // the 3D engine. The island and the town stay in the scene; a module may add its own things to scene and must
       // remove them when it ends. onFrame(fn): fn(dt, t) runs every frame after the game's own camera, so a module can
       // place the camera itself (set camera.position / quaternion / fov there).
-      engine: { THREE, scene: app.stage.scene, camera: app.stage.camera, renderer: app.stage.renderer, stage: app.stage, world: app.world, rig: app.rig, life: app.life, florence: app.bot, audio: app.audio, canvas: app.stage.renderer.domElement,
+      engine: { THREE, scene: app.stage.scene, camera: app.stage.camera, renderer: app.stage.renderer, stage: app.stage, world: app.world, rig: app.rig, life: app.life, florence: app.bot, audio: app.audio, setMusic: (mood) => app.setMusic?.(mood) /* the game's own mood music: 'day' | 'night' | 'lab' | 'celebrate' */, canvas: app.stage.renderer.domElement,
         onFrame(fn) { frame = fn; app.moduleFrame = (dt, t) => { try { frame?.(dt, t); } catch (e) { console.error(e); } }; } },
       root,                                             // the module's own layer over the 3D view: put its panels here
       say(text, voice = 'helper') { app.ui.say(text, voice); }, // read aloud (only when read-aloud is on)
@@ -90,11 +91,11 @@ export async function showInTown(app) {
 
 // The board: the three modules, which are done, and a way in. Opened from the menu.
 export async function moduleBoard(app) {
-  const G = app.G; if (!G?.canMenu?.()) return; const j = G.j; const mods = (await Promise.all(MODULE_IDS.map(loadModule))).filter(Boolean);
+  const G = app.G; if (!G?.canMenu?.()) return; const j = G.j; const mods = (await Promise.all(ON_BOARD.map(loadModule))).filter(Boolean);
   const a = await app.ui.modal(`<div class="ribbon">🚀 ${j ? 'Eco Town of the future' : 'Eco Town of the future'}</div><h2>${j ? 'Work with the machines' : 'Working with machines'}</h2>
     <div class="modboard" style="display:grid;gap:10px;text-align:left">${mods.map((m) => `<button class="age chcard ${G.modules?.[m.id]?.done ? 'won' : ''}" data-act="${m.id}"><b class="chico" aria-hidden="true">${esc(m.icon)}</b><span><b>${esc(pick(m.title, j))}</b><small>${esc(pick(m.blurb, j))}</small><em>${G.modules?.[m.id]?.done ? '✓ Done: play again' : G.modules?.[m.id] ? '▶ Carry on' : 'Not tried yet'}</em></span></button>`).join('')}</div>
     <div class="row" style="justify-content:center;margin-top:10px"><button class="btn alt" data-act="close">${j ? 'Back to my town' : 'Back to the town'}</button></div>`);
-  if (MODULE_IDS.includes(a)) return openModule(app, a);
+  if (ON_BOARD.includes(a)) return openModule(app, a);
 }
 // The picture a module left for the take-home page (on this device only), or null.
 export const modulePicture = (id) => { try { return localStorage.getItem(PIC(id)); } catch { return null; } };

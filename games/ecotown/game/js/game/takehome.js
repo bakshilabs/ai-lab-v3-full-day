@@ -8,6 +8,7 @@ import { MODULE_IDS } from '../modules/contract.js';
 const mine = (x) => x.replace(/\byou found\b/g, 'I found').replace(/\byourself\b/g, 'myself').replace(/\byour own\b/g, 'my own').replace(/\byour\b/g, 'my').replace(/\byou\b/g, 'I');
 const ASK = {
   drone: 'How did you tell the drone where to go?', robots: 'What did your robot get wrong at first, and what did you show it?', roads: 'What did you do with the land the car park did not need, and why?',
+  film: 'What did you ask Florence to change in your film, and did it get better?', power: 'What rule did you write to keep the lights on, and when did it not work?',
   town: 'How did you find out when Florence the AI planner was wrong?', none: 'What would you build first in your own town?',
 };
 // labs, extra: as for sessionRecap. modules: G.modules. titles: { id: { icon, title } } for the modules.

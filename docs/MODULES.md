@@ -12,9 +12,11 @@
 
 The user's plan for the three modules is `docs/afternoon-modules-plan.md`. This page is how a module plugs into the game.
 
+**15 November 2026, later:** two more ids were added, `film` (Town film studio) and `power` (Power control room), with `ctx.engine.setMusic(mood)` for the game's own mood music (`'day'`, `'night'`, `'lab'`, `'celebrate'`). The interface is otherwise unchanged. Their plan is `docs/more-modules-plan.md`. A module appears on the board and the start page only once it is merged (`ON_BOARD` in `contract.js`).
+
 ## In short
 
-- A module is **one folder**: `games/ecotown/game/js/modules/<id>/`. The ids are `drone`, `robots` and `roads`.
+- A module is **one folder**: `games/ecotown/game/js/modules/<id>/`. The ids are `drone`, `robots`, `roads`, `film` and `power`.
 - Its `index.js` exports one object. The **loader** (`js/modules/loader.js`) opens it, gives it the town and the 3D engine, keeps what it hands back and shows its result in the town.
 - A module **adds files in its own folder and its own tests. It edits nothing else.**
 

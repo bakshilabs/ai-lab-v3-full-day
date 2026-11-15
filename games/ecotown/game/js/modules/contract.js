@@ -2,7 +2,10 @@
 // It names the modules, and checks and trims what a module hands back, so one module's mistake cannot spoil the save.
 // DO NOT CHANGE while module work is in progress: three modules are built against exactly this.
 
-export const MODULE_IDS = ['drone', 'robots', 'roads'];
+export const MODULE_IDS = ['drone', 'robots', 'roads', 'film', 'power'];
+// Modules shown on the board in the game. A module is added here only once it is built and merged, so a child never
+// meets a placeholder. (film and power were added to the contract on 15 Nov 2026; the interface did not change.)
+export const ON_BOARD = ['drone', 'robots', 'roads'];
 export const CONTRACT = 1;
 
 const text = (v, max) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '');

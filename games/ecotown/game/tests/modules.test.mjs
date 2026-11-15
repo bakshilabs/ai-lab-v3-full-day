@@ -1,11 +1,12 @@
 // The contract for the "Eco Town of the future" modules (js/modules/contract.js, docs/MODULES.md).
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { MODULE_IDS, checkModule, cleanResult, cleanMade, cleanPractised, cleanTown, cleanState, cleanReport, storedModule } from '../js/modules/contract.js';
+import { MODULE_IDS, ON_BOARD, checkModule, cleanResult, cleanMade, cleanPractised, cleanTown, cleanState, cleanReport, storedModule } from '../js/modules/contract.js';
 import { forServer } from '../js/net.js';
 
 test('there are three modules, and each folder holds one that fits the contract', async () => {
-  assert.deepEqual(MODULE_IDS, ['drone', 'robots', 'roads']);
+  assert.deepEqual(MODULE_IDS, ['drone', 'robots', 'roads', 'film', 'power']);
+  assert.ok(ON_BOARD.every((id) => MODULE_IDS.includes(id)), 'only real modules are on the board');
   for (const id of MODULE_IDS) {
     const mod = (await import(`../js/modules/${id}/index.js`)).default;
     assert.deepEqual(checkModule(mod, id), [], id);

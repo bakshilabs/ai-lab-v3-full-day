@@ -2,10 +2,10 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { PARTS, SCENES, EVERYWHERE, progress, LABEL } from '../js/series.js';
-import { MODULE_IDS } from '../js/modules/contract.js';
+import { ON_BOARD } from '../js/modules/contract.js';
 
 test('four parts in order: the town, then the three modules', () => {
-  assert.deepEqual(PARTS.map((p) => p.id), ['town', ...MODULE_IDS]); assert.deepEqual(PARTS.map((p) => p.n), [1, 2, 3, 4]);
+  assert.deepEqual(PARTS.map((p) => p.id), ['town', 'drone', 'robots', 'roads']); assert.ok(PARTS.slice(1).every((p) => ON_BOARD.includes(p.id)), 'every part on the start page is a built module'); assert.deepEqual(PARTS.map((p) => p.n), [1, 2, 3, 4]);
   for (const p of PARTS) { assert.equal(p.how.length, 3, p.id); for (const l of [...p.how, p.blurb]) assert.ok(l.length <= 160, `${p.id}: short lines`); assert.match(p.query, p.id === 'town' ? /^\?part=town$/ : new RegExp(`^\\?module=${p.id}$`)); }
   assert.equal(EVERYWHERE.length, 3);
 });
