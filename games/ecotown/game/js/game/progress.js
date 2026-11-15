@@ -46,7 +46,7 @@ export function townGoals(s, ctx) {
     { id: 'health', ok: s.petals.health >= 1 },
     { id: 'energy', ok: s.power.winterOK && s.homes.length > 0 },
     { id: 'community', ok: s.petals.community >= 1 },
-    { id: 'carbon', ok: s.carbonOK },
+    { id: 'carbon', ok: s.carbonOK }, // the town total. The 70 t limit on homes' materials is the homes mission's limit for 40 families; as a town goal it made the 60-family and tiny-town challenges impossible (tried, 15 Nov 2026)
     { id: 'walk', ok: ctx.hasSchool && s.homes.length > 0 && s.walkMax <= TARGETS.walkMinutes },
   ];
 }

@@ -124,10 +124,11 @@ export function createUI(root, labelsRoot, opts) {
       this.show('card');
     },
     // free building: one clear next step with a bar under it; the bar pulses when it moves forward
-    setStep(text, have, need) {
+    // label: what the numbers are ("12 of 40 families", "now 180 t · 160 or less"); without it, have/need
+    setStep(text, have, need, label) {
       const g = P.card.querySelector('[data-goal]'); const pct = Math.round(100 * Math.min(1, have / Math.max(1, need)));
       const prev = +(g.dataset.have ?? -1); g.dataset.have = have;
-      g.innerHTML = `<span class="gt">${esc(text)}</span><span class="gbar" role="progressbar" aria-label="Progress on the next step" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${have}"><i style="width:${pct}%"></i><b>${have}/${need}</b></span>`;
+      g.innerHTML = `<span class="gt">${esc(text)}</span><span class="gbar" role="progressbar" aria-label="Progress on the next step${label ? `: ${esc(label)}` : ''}" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${have}"><i style="width:${pct}%"></i><b>${esc(label || `${have}/${need}`)}</b></span>`;
       if (prev >= 0 && have > prev) { g.classList.remove('bump'); void g.offsetWidth; g.classList.add('bump'); }
       this.show('card');
     },
@@ -142,8 +143,9 @@ export function createUI(root, labelsRoot, opts) {
       P.lenspop.innerHTML = `<b class="poptitle">${esc(title)}</b>` + list.map((l) => `<button class="slot act ${l.on ? 'on' : ''}" data-lens="${l.id}" aria-pressed="${!!l.on}"><b class="ico">${l.icon}</b><span>${esc(l.label)}</span></button>`).join('');
       if (!list.length) P.lenspop.classList.add('hide'); fitStrip();
     },
-    // the stars chip shows the stars there are to spend (ui.wallet, set by the game) and opens the Star shop
-    setStars(n) { const b = P.card.querySelector('[data-stars]'); n = this.wallet ? this.wallet(n) : n; if (b.textContent !== String(n)) { b.textContent = n; b.parentElement.classList.remove('bump'); void b.offsetWidth; b.parentElement.classList.add('bump'); } this.show('card'); },
+    // the stars chip shows the stars earned (it used to show the stars left to spend, so the number fell after a visit
+    // to the Star shop and read as lost progress); the shop itself says how many are left to spend
+    setStars(n) { const b = P.card.querySelector('[data-stars]'); if (b.textContent !== String(n)) { b.textContent = n; b.parentElement.classList.remove('bump'); void b.offsetWidth; b.parentElement.classList.add('bump'); } this.show('card'); },
     // T: SANDBOX[band].shop. canNew: something new is affordable (a small NEW tag, a word as well as a colour)
     setShop(left, canNew, T) { const btn = P.card.querySelector('[data-shop]'); const lbl = T?.chip ? T.chip(left) : `Star shop: ${left} stars`; btn.setAttribute('aria-label', canNew && T?.newMark ? `${lbl}. ${T.newMark}` : lbl); btn.title = lbl; btn.querySelector('[data-shopnew]').hidden = !canNew; },
     // Florence speaks in the dock: { tag, tagCls, html, sure, sureLabel, why, thinking, mini, say }

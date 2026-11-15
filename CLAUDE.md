@@ -1,13 +1,23 @@
 # ai-lab-v3-full-day
 
-A **full-day kids' club (AI Lab)** built around the Eco Town game. Eco Town is **module 1** and fills one to two hours. Five new modules, each a new game environment in the Eco Town world, fill the rest of the day.
+A **full-day kids' camp (AI Lab)**: **Eco Town in the morning, "Eco Town of the future" in the afternoon** (decided by the user, 15 Nov 2026).
 
-- `docs/full-day-club-plan.html`: the one-page plan for the day (timetable, the six modules, what ties them together). **Read this first.**
+- **Morning:** the existing Eco Town lab, taken to be one hour. Its lesson is "AI can be confidently wrong; check it". That lesson stops at the morning.
+- **Afternoon:** three new modules in the Eco Town world, about working with AI and machines: **drone delivery, robot training, roads for self-driving cars**. First versions only (one playable loop of about ten minutes each). Florence is a capable partner there, not something to catch out. This replaces the earlier instruction not to build modules 2 to 6.
+
+Read first:
+- `docs/afternoon-modules-plan.md`: the user's plan for the afternoon modules, word for word.
+- **Work queue, in this order (15 Nov 2026):** (1) the live site at `bakshilabs.github.io/ai-lab-v3-full-day` (waits for the user to switch GitHub Pages on); (2) reviews of the drone, robots and roads modules, fixed and re-reviewed until every aspect scores 8 out of 10; (3) `docs/more-modules-plan.md`: two more modules, film studio and power control room, then the same review loop to 8; (4) `docs/grid-hero-plan.md`: the user's Grid Hero game as a "Finished early?" break game (report on it first, change nothing until then).
+- `docs/MODULES.md`: the shared contract every module is built against. **Do not change it while module work is in progress.**
+- `docs/pilot-plan.md`: the plan for the morning hour and the server (sections F and G say what is built). `docs/RELEASES.md`: what is in the current build and its known issues. `docs/LOAD.md`: load results (local runs only).
 - `games/ecotown/`: module 1, copied from `bakshilabs/ai-lab-v3` (`games/ecotown/`, commit `a5fd92c`, 14 Nov 2026). Its own notes are in `games/ecotown/CLAUDE.md`; they were written for the original repository.
 
 ## Rules for this repository
-- **Never deploy to the original sites.** `ecotown.deltaops.workers.dev` and `bakshilabs.github.io/ai-lab-v3` belong to the original repository. `games/ecotown/worker/deploy.mjs` is switched off here until the camp has its own worker, voice store and passcode store.
+- **Never deploy to the original sites.** `ecotown.deltaops.workers.dev` and `bakshilabs.github.io/ai-lab-v3` belong to the original repository. This repository is a **new live build**, deployed from here to a **new Cloudflare address that the user will provide** (decided 14 Nov 2026). `games/ecotown/worker/deploy.mjs` stays switched off until that address exists and the script names a new worker, voice store and passcode store.
+- The AI Lab as it stands (the town and six missions) is taken to be one hour. Do not cut it to fit.
 - The GitHub workflow only runs when started by hand. There is no public test site for this repository yet.
 - Research and the other lab concepts (`research/`, `games/PLAN.md`, `games/labs/`) stayed in the original repository. Some documents here still refer to them.
 - Plain British English for the user. No budget or coins for ages 8–12.
-- Module 1 unit tests: `cd games/ecotown/game && node --test tests/*.test.mjs` (250 pass).
+- Unit tests: `cd games/ecotown/game && node --test tests/*.test.mjs` (295 pass on 15 Nov 2026; `model.test.mjs` "predict is fast" is a timing test and can fail on a busy machine).
+- **Module rules:** a module adds files under `games/ecotown/game/js/modules/<id>/`. It does not edit `game.js`, `main.js`, `game.css`, `content.js` or anything under `worker/`. Nothing a child types leaves the device; no names; Florence only assembles from built-in choices.
+- **Access:** an organisation has groups; a group has a join code; each child becomes a learner with a made-up badge. Leaders have a leader code and a page at `/leader`. The words "passcode" and "batch" in older documents describe the system this replaced.

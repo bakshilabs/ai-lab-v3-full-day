@@ -1,7 +1,7 @@
 // Challenge towns: a new town with one special rule, for players who have finished the six AI Lab missions.
 // Each has its own saved town and its own medal, so a club day has more than one town to build.
 // Pure (tests/challenges.test.mjs). A challenge is passed when the eight town goals and its own goals are met;
-// the medal is the town score's medal at that moment (at least bronze).
+// the medal is the town score's medal at that moment (none below the bronze score).
 //   cap: town land allowed (default: the usual 30)   ban: builds that are not offered
 //   goals(s): extra goals, [{ id, ok, have, need }]   start: 'florence' = Florence has already built a town, badly
 //   island: the island it is played on ('delta' or 'hills'; none = the home island). See LAYOUTS in world/terrain.js.
@@ -86,8 +86,9 @@ export function challengeState(ch, s, x, townGoals) {
   return { extra, passed };
 }
 const RANK = { bronze: 1, silver: 2, gold: 3 };
-// the medal a passed challenge earns: the score's medal, and never less than bronze
-export const challengeMedal = (score) => score.medal || 'bronze';
+// the medal a passed challenge earns: the town score's medal. Below the bronze score there is no medal yet
+// (it used to hand out bronze regardless, which the medal table in score.js contradicts).
+export const challengeMedal = (score) => score.medal || null;
 // keep the better of two results { medal, score }
 export function better(a, b) { if (!a) return b; if (!b) return a; return (RANK[b.medal] || 0) > (RANK[a.medal] || 0) || ((RANK[b.medal] || 0) === (RANK[a.medal] || 0) && b.score > a.score) ? b : a; }
 

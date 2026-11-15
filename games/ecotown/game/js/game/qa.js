@@ -2,6 +2,7 @@
 // the player's question is matched by keywords to a topic, or to a build by its name, and each answer can
 // come with a build video for the big screen. Pure, so it is unit tested (tests/qa.test.mjs).
 import { ITEMS } from '../world/catalog.js';
+import { careFor, CARE } from './care.js'; // a sign of needing help, personal details, unsuitable requests: a fixed reply first
 
 // topics: keys (words that point to it), a: { j, s } answers, video: a build video id to show
 export const TOPICS = [
@@ -108,6 +109,7 @@ function hasKey(q, k) {
 // answer(question, junior) -> { text, video, topic } (video: a build id, or null)
 export function answer(question, junior = true) {
   const q = norm(question); const band = junior ? 'j' : 's';
+  const care = careFor(question); if (care) return { text: CARE[care][band], video: null, topic: 'care-' + care };
   const id = itemIn(q);
   const topic = TOPICS.map((t) => ({ t, n: t.keys.filter((k) => hasKey(q, k)).length })).filter((x) => x.n).sort((a, b) => b.n - a.n)[0]?.t; // whole words (word starts): "alive" is not "live", "nuclear" is not "clear"
   // a build by name, unless the question is clearly about a topic (e.g. "why do wind turbines matter in winter")

@@ -38,6 +38,10 @@ import { townScore } from './score.js';
 import { passport } from './passport.js';
 import { reactionFor, speciesNews, ANIMALS } from './reactions.js';
 import { challenge, challengeState, challengeMedal, better, florenceTown, GOAL_TEXT } from './challenges.js';
+import { missionVerdict, brokenBy, townVerdict } from './criteria.js';
+import { net, FMT } from '../net.js';
+import { missionRecap, sessionRecap } from './recap.js';
+import { careFor, CARE } from './care.js'; // typed text that needs a fixed, careful reply (never repeated back) // "You practised…", from what the player actually did // the learner's session and the server's copy of their progress // the one place that decides whether a target is met
 import { answer as askFlorence, SUGGEST } from './qa.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -97,7 +101,7 @@ export function createGame(app) {
   function star(i, why = '') { if (!run || run.marks[i]) return; run.marks[i] = true; audio.star(); G.stars = shownStars(); ui.setStars(G.stars); if (why) ui.caption(`★ ${why}`, 2600); }
   function bonusStar(why) { if (!run) return; run.bonus = true; G.stars = shownStars(); ui.setStars(G.stars); ui.caption(`★ ${why}`, 2800); }
   function flower(flash = true) { const s = sim(); ui.carbonInfo = { used: s.carbon, limit: TARGETS.carbonCeiling }; ui.flower(s.petals, G.townName, { flash }); renderGoals(s); }
-  const KEEP = ['badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'band', 'levelStars', 'starMarks', 'bonus', 'mistakes', 'diary', 'instructions', 'extra', 'credits', 'townName', 'inputMode', 'paths', 'outcomes', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'charter', 'reflection', 'reflectDone', 'shop', 'chSeen', 'eps' /* story episodes seen: js/ui/epviewer.js */];
+  const KEEP = ['badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'band', 'levelStars', 'starMarks', 'bonus', 'mistakes', 'diary', 'instructions', 'extra', 'credits', 'townName', 'inputMode', 'paths', 'outcomes', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'charter', 'reflection', 'reflectDone', 'shop', 'chSeen', 'eps' /* story episodes seen: js/ui/epviewer.js */, 'pauses' /* pause-and-talk cards shown */, 'sessionDone', 'modules' /* Eco Town of the future: js/modules/loader.js */];
   // the club passport's part of the device record (js/game/passport.js): mission stars, town complete, catches
   function recordMe() {
     if (G.full) return; const stars = Object.values(G.levelStars).reduce((x, y) => x + y, 0) + Object.values(G.bonus).reduce((x, y) => x + y, 0);
@@ -110,10 +114,14 @@ export function createGame(app) {
     const p = passport(dev, G.band); const was = sb.rankIdx; sb.rankIdx = p.rankIndex;
     if (was != null && p.rankIndex > was && sb.running) setTimeout(() => { audio.star?.(); app.bot?.cheer(); ui.alert(`${p.rank.icon} ${G.j ? `New rank: ${p.rank.name}!` : `Rank reached: ${p.rank.name}.`} ${G.j ? 'See your club passport in ☰.' : 'Club passport: ☰.'}`, true, 4200); }, 2600);
   }
-  function save() {
+  // now: the page is being hidden or closed, so the server's copy is sent at once
+  function save({ now = false } = {}) {
     recordMe(); rankCheck();
     if (app.inLab || G.full) return; // a mission's practice island is never saved as the player's town
-    try { const d = { cells: [...G.cells], li: 1 }; for (const k of KEEP) d[k] = G[k]; if (d.credits === Infinity) d.credits = null; localStorage.setItem(SLOT, JSON.stringify(d)); } catch { /* storage off: keep playing */ }
+    if (sb.newer) return; // this town was saved by a newer version of the game: never overwrite it
+    const d = { cells: [...G.cells], li: 1, at: Date.now(), fmt: FMT }; for (const k of KEEP) d[k] = G[k]; if (d.credits === Infinity) d.credits = null;
+    try { localStorage.setItem(SLOT, JSON.stringify(d)); } catch { /* storage off: keep playing */ }
+    if (!CH) net.push(d, { now }); // the server keeps the player's own town (challenge towns stay on the device)
   }
   G.load = (data) => { for (const k of KEEP) if (data[k] != null) G[k] = data[k]; if (G.credits == null) G.credits = G.j ? Infinity : 60; G.cells = new Map(data.cells || []); G.shop = shopState(G.shop); G.stars = totalStars(); };
   G.paths = {}; G.shop = shopState(null); G.save = save;
@@ -171,6 +179,8 @@ export function createGame(app) {
     for (;;) {
       const { text } = await instruct(id, heading);
       app.bot.show(true);
+      // an instruction that is really a sign of needing help, or holds personal details: a fixed reply, and the words are not kept
+      { const care = careFor(text); if (care === 'help' || care === 'personal') { const m = CARE[care][G.j ? 'j' : 's']; audio.tap?.(); help({ tag: care === 'help' ? '💛' : '🔒', html: `<p>${esc(m)}</p>`, say: m, voice: 'helper' }); await sleep(1200); await continueBtn(); continue; } }
       help({ tag: 'THINKING', html: `<p>${esc('“' + text + '”')}</p>`, thinking: true });
       await sleep(app.reduce ? 100 : 650);
       const res = ask(id, text, { terrain, cells: G.cells });
@@ -204,6 +214,8 @@ export function createGame(app) {
   async function checkAct(id, res, { auto = false } = {}) {
     const lv = LEVELS[id]; const sAfter = sim(res.after); const cx = ctxFor(res.after);
     const reveal = lv.reveal(sAfter, sim(), cx); const flawed = Object.keys(reveal).length > 0 || !lv.pass(sAfter, cx);
+    // targets the player wrote into the instruction that this plan does not meet (the town's own rules may still hold)
+    const own = missionVerdict(id, sAfter, cx, { junior: G.j, targets: res.plan.targets || [], minutes: app.briefMinutes }).brief.map((c) => c.label);
     if (auto) {
       const which = Object.keys(reveal)[0];
       if (!which) return { flawed: false };
@@ -219,6 +231,12 @@ export function createGame(app) {
         audio.bad(); help({ tag: G.C.ui.unfairTag, tagCls: 'bad', html: `<p>${esc(G.C.ui.unfair)}</p>`, say: G.C.ui.unfair, voice: 'helper' }); star(0, G.C.ui.checked);
         await sleep(1600); await continueBtn();
         return { flawed: false, missed: [G.j ? 'a school that is fair to every family' : 'a fair test: every household, not the richest'], tried };
+      }
+      if (!flawed && own.length) { // the rules hold but the player's own target does not: partly met, never "no problem" and never a first-time star
+        audio.bad(); ui.alert(G.C.ui.partly, false);
+        help({ tag: G.C.ui.partlyTag, tagCls: 'bad', html: `<p><b>${esc(G.C.ui.partly)}</b></p><ul>${own.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>`, say: `${G.C.ui.partly} ${own.join(' ')}`, voice: 'helper' });
+        await sleep(1600); await continueBtn(); ui.show('alert', false);
+        return { flawed: false, tried, partly: own };
       }
       if (!flawed) { // the plan really is fine
         // the plan passed; the brief earns "well specified first time" only if it really was one (not repeats, emoji, or a part she refused)
@@ -262,8 +280,9 @@ export function createGame(app) {
       if (!tried.includes(choice)) tried.push(choice);
       // this check showed no problem: say what it looked at and what it found, then let the player decide
       const summary = r.info?.summary || '';
-      ui.say(`${label(choice)}: ${summary}. ${G.C.ui.nothingHere}`, 'narrator');
-      const next = await new Promise((resolve) => ui.tray(`<h3>✓ ${esc(label(choice))}${summary ? `: ${esc(summary)}` : ''}</h3><p class="checknote">${G.j ? 'This checked' : 'Tested'}: ${esc(G.C.checkWhat[choice])}. ${esc(G.C.ui.nothingHere)}</p><div class="row" style="justify-content:flex-end"><button class="btn alt" data-again>🔎 ${esc(G.C.ui.checkAnother)}</button><button class="btn go" data-accept>✓ ${esc(G.C.ui.accept)}</button></div>`,
+      const nothing = own.length ? G.C.ui.nothingButOwn : G.C.ui.nothingHere; // a check that shows the player's own target missed is not an all-clear
+      ui.say(`${label(choice)}: ${summary}. ${nothing}`, 'narrator');
+      const next = await new Promise((resolve) => ui.tray(`<h3>✓ ${esc(label(choice))}${summary ? `: ${esc(summary)}` : ''}</h3><p class="checknote">${G.j ? 'This checked' : 'Tested'}: ${esc(G.C.checkWhat[choice])}. ${esc(nothing)}</p><div class="row" style="justify-content:flex-end"><button class="btn alt" data-again>🔎 ${esc(G.C.ui.checkAnother)}</button><button class="btn go" data-accept>✓ ${esc(G.C.ui.accept)}</button></div>`,
         (tr) => { tr.querySelector('[data-again]').onclick = () => resolve('again'); tr.querySelector('[data-accept]').onclick = () => resolve('accept'); }));
       await checks.leave();
       if (view) showCells(G.cells);
@@ -497,18 +516,25 @@ export function createGame(app) {
     if (nu) { const left = nu.need - nu.have; return { text: nu.id === 'homes' ? G.S.nextStep.land(left, nu.need) : nu.kind === 'food' ? G.S.nextStep.food(Math.max(1, left), G.S.cats[nu.id]) : G.S.nextStep.fam(left, G.S.cats[nu.id]), have: nu.have, need: nu.need }; }
     const goals = townGoals(s, ctxFor(G.cells)); const next = firstGoal(goals); const done = goals.filter((g) => g.ok).length;
     if (!next && CH) { const g = chState(s).extra.find((x) => !x.ok); if (!g) return { text: CH.free ? G.S.allGoals : G.j ? 'Challenge passed! Keep building for a higher medal.' : 'Challenge passed. Improve the score for a higher medal.', have: 1, need: 1 };
-      return { text: `${G.S.next}: ${GOAL_TEXT[g.id](g)[0]}`, have: g.low ? Math.min(g.need, Math.round(g.need * g.need / Math.max(1, g.have))) : Math.min(g.have, g.need), need: g.need }; }
-    if (!next) return labsDone() < 6 ? { text: `${G.S.next}: ${G.S.labGoal(labsDone())}`, have: labsDone(), need: 6 } : { text: G.S.allGoals, have: 1, need: 1 };
+      return g.low ? { text: `${G.S.next}: ${GOAL_TEXT[g.id](g)[0]}`, have: Math.min(g.need, g.have), need: Math.max(1, g.have), label: G.j ? `now ${g.have} · ${g.need} or less` : `${g.have} · limit ${g.need}`, low: true }
+        : { text: `${G.S.next}: ${GOAL_TEXT[g.id](g)[0]}`, have: Math.min(g.have, g.need), need: g.need }; }
+    if (!next) return labsDone() < 6 ? { text: `${G.S.next}: ${G.S.labGoal(labsDone())}`, have: labsDone(), need: 6, label: `${labsDone()} of 6 missions` } : { text: G.S.allGoals, have: 1, need: 1, label: '✓' };
+    // "lower is better" goals show the number against its limit (the bar used to switch to "goals met out of 8" here, unlabelled)
+    if (next.id === 'carbon') return { text: `${G.S.next}: ${G.S.goal.carbon(s)}`, have: TARGETS.carbonCeiling, need: Math.max(TARGETS.carbonCeiling, s.carbon), label: G.j ? `${s.carbon} t · 160 or less` : `${s.carbon} t · limit 160`, low: true };
+    if (next.id === 'walk') { const W = TARGETS.walkMinutes; return ctxFor(G.cells).hasSchool && s.homes.length ? { text: `${G.S.next}: ${G.S.goal.walk(s)}`, have: W, need: Math.max(W, s.walkMax), label: G.j ? `${s.walkMax} min · ${W} or less` : `${s.walkMax} min · limit ${W}`, low: true } : { text: `${G.S.next}: ${G.S.goal.walk(s)}`, have: 0, need: 1, label: G.j ? 'no school yet' : 'no school' }; }
     const pct = (v) => Math.min(100, Math.round(v * 100));
     const [have, need] = { homes: [s.familiesSafe, TARGETS.families], food: [s.food, s.foodNeed], nature: [pct(s.petals.nature), 100], health: [pct(s.petals.health), 100], community: [pct(s.petals.community), 100],
       energy: [Math.round(s.power.winterSupply), Math.max(1, Math.round(s.power.demand))] }[next.id] || [done, goals.length];
-    return { text: `${G.S.next}: ${G.S.goal[next.id](s)}`, have: Math.min(have, need), need };
+    const unit = { homes: G.S.families, food: G.j ? 'baskets' : 'units', nature: '%', health: '%', community: '%', energy: G.j ? 'power' : 'units' }[next.id];
+    return { text: `${G.S.next}: ${G.S.goal[next.id](s)}`, have: Math.min(have, need), need, label: unit === '%' ? `${Math.min(have, need)}%` : unit ? `${Math.min(have, need)} of ${need} ${unit}` : undefined };
   }
   // the town card: the next step, and the six missions on the track (lit = ready, ticked = done)
   function renderCard() {
     const s = sim();
     ui.setBadge('');
-    const st = nextStep(s); ui.setStep(st.text, st.have, st.need);
+    const st = nextStep(s); ui.setStep(st.text, st.have, st.need, st.label);
+    // a new next step is said aloud once (read-aloud on), so it does not depend on being read
+    { const key = st.text.replace(/[\d.]+/g, '#'); if (key !== sb.stepKey) { const first = sb.stepKey === undefined; sb.stepKey = key; if (!first && ui.readAloud && sb.running && !sb.intro && !G.busy && performance.now() - (sb.stepSaid || 0) > 20000) { sb.stepSaid = performance.now(); ui.say?.(st.text, 'narrator'); } } }
     ui.setTrack(LEVEL_ORDER.map((id) => (G.labs[id] ? 'done' : labReady(id, G.ever, G.labs, G.classMode) ? 'on' : '')));
     ui.setStars(G.stars = totalStars());
     ui.setShop?.(wallet(G.stars, G.shop), canAffordNew(G.stars, G.shop), G.S.shop); // the stars chip opens the Star shop
@@ -662,6 +688,9 @@ export function createGame(app) {
     if (!G.movedIn && s.homes.length) moveIn(s);
     renderBar(); renderCard(); milestones(s);
     if (!fresh.length) adviseSoon(400);
+    // a town that was celebrated as complete and has since slipped says so (the badge is kept; the status is live)
+    if (!CH && G.completeShown && sb.running) { const tv = townVerdict(s, ctxFor(G.cells), { was: true, labs: labsDone() });
+      if (tv.slipped && !sb.slipTold) { sb.slipTold = true; ui.alert(G.S.slipped(tv.failed.map((g) => G.S.goal[g.id](s)).join('; ')), false, 6000); } else if (!tv.slipped) sb.slipTold = false; }
     if (CH) challengeCheck(s);
     else if (!G.completeShown && !sb.celebrating && townComplete(s, ctxFor(G.cells)) && labsDone() >= 6) { sb.celebrating = true; setTimeout(celebrateTown, 1500); }
     if (!CH && labsDone() >= 6 && !sb.labsMarked) { sb.labsMarked = true; device((all) => { if (all.labs?.[G.band]) return false; (all.labs ||= {})[G.band] = true; }); }
@@ -1118,6 +1147,7 @@ export function createGame(app) {
     // and a big "Carbon lens" heading, with the mission's name in a small bar underneath: testers read it as a prize screen.)
     const go = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)} · ${G.classMode ? `${esc(G.S.mission)} ${lv.n} OF 6` : esc(G.S.missionsDone(labsDone()))}</div><h2 class="mtitle">${esc(L.title)}</h2><p class="brief">${esc(pick(L.brief))}</p><div class="newtool"><b class="big" aria-hidden="true">${lens.icon}</b><span><small>${esc(N.test ? G.C.ui.newTest : G.C.ui.newLens)}</small><b>${esc(newLabel)}</b><em>${esc(pick(N))}</em></span></div><div class="levelbar"><span class="dots">${[1, 2, 3, 4, 5, 6].map((i) => `<i class="${i === lv.n ? 'now' : G.labs[LEVEL_ORDER[i - 1]] ? 'on' : ''}"></i>`).join('')}</span></div><p class="practice">${esc(pick(G.S.practice))}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="later">${esc(G.S.notNow)}</button><button class="btn go" data-act="go">${esc(G.C.ui.start)} ➜</button></div>`, { say: `${pick(L.brief)} ${newLabel}. ${pick(N)}` });
     if (go === 'later') return leaveLab(real);
+    sb.realCells = real; try { localStorage.setItem(SLOT + '.mission', id); } catch { /* storage off */ } // a refresh during the mission offers to carry on with it
     G.paths[id] = null; G.instructions[id] = []; G.mistakes = G.mistakes.filter((m) => m.level !== id); // only once the mission really starts again ("Not now" kept an empty row in the report)
     stage.setTime(12.5);
     // plan
@@ -1128,11 +1158,18 @@ export function createGame(app) {
     briefMin(res);
     const chk = await checkAct(id, res);
     const checkName = (c) => G.C.checks[c]?.label || c;
-    if (chk.missed) {
+    if (chk.partly) { // the town's rules are met, the player's own target is not: rewrite the instruction, or keep the plan as "partly met"
+      if ((await partlyChoice(chk.partly)) === 'fix') {
+        G.paths[id] = 'missed';
+        G.outcomes[id] = { kind: 'missed', detail: G.j ? `Florence’s plan kept the town’s rules but missed your own target. ${chk.partly.join(' ')} You wrote a clearer instruction.` : `The plan met the town’s rules but not the brief’s own target. ${chk.partly.join(' ')} Revised in a new instruction.` };
+        res = await retry(id, res, G.S.tellMissing, briefMin);
+        star(1, G.C.stars.missed[1]); if (!run.partly) star(2, G.C.stars.missed[2]);
+      } else { G.paths[id] = 'clean'; run.partly = chk.partly; G.outcomes[id] = { kind: 'partly', detail: '' }; star(2, G.C.ui.checked); }
+    } else if (chk.missed) {
       G.paths[id] = 'missed';
       G.outcomes[id] = { kind: 'missed', detail: G.j ? `Florence’s plan left out: ${chk.missed.join('; ')}. You told her what was missing.` : `The plan did not cover: ${chk.missed.join('; ')}. Added in a revised instruction.` };
       res = await retry(id, res, G.S.tellMissing, briefMin);
-      star(1, G.C.stars.missed[1]); star(2, G.C.stars.missed[2]);
+      star(1, G.C.stars.missed[1]); if (!run.partly) star(2, G.C.stars.missed[2]);
     } else if (!chk.flawed) {
       G.paths[id] = 'clean'; const guessed = await hiddenAct(id);
       G.outcomes[id] = { kind: 'clean', detail: `${G.j ? 'Florence’s first plan passed the' : 'First plan passed the'} ${chk.tried.map(checkName).join(', ')} check${chk.tried.length > 1 ? 's' : ''}. ${G.j ? '' : 'Unstated assumption: '}${guessed}${app.__lucky ? ` ${G.C.ui.lucky[app.__lucky]}` : ''}` };
@@ -1147,7 +1184,7 @@ export function createGame(app) {
       res = await retry(id, res, G.C.ui.tryClearer, briefMin);
       // the third star is for a fix that works within two rewrites. Retrying is still free and unlimited, but a string of
       // silly or unwise rewrites followed by a good one no longer earns the same three stars as a careful fix.
-      if ((run?.tries || 1) <= 2) star(2, G.C.stars.flawed[2]); else ui.caption(G.C.ui.manyTries(run.tries), 4200);
+      if (run.partly) { /* the fix still misses the player's own target: no third star */ } else if ((run?.tries || 1) <= 2) star(2, G.C.stars.flawed[2]); else ui.caption(G.C.ui.manyTries(run.tries), 4200);
       ui.facil(null);
     }
     // the fixed plan is built on the practice island, system by system, layer by layer
@@ -1158,43 +1195,97 @@ export function createGame(app) {
     if (id === 'heart') await biasCheck();
     // senior: a town meeting with an honest trade-off (it changes the player's real town numbers)
     if (!G.j && DILEMMAS[id]) {
-      const d = DILEMMAS[id]; const a = await ui.modal(`<div class="ribbon">Town meeting</div><h2>${esc(d.text)}</h2><div class="row" style="justify-content:center">${d.options.map((o, i) => `<button class="btn ${i ? 'alt' : 'go'}" data-act="${i}">${esc(o.label)}</button>`).join('')}</div>`);
-      const e = d.options[+a].effect; for (const k of ['families', 'carbon', 'winter', 'health', 'community', 'nature']) if (e[k]) G.extra[k] = (G.extra[k] || 0) + e[k];
-      if (e.credits && Number.isFinite(G.credits)) G.credits = Math.max(0, G.credits + e.credits);
-      run.meeting = `${d.options[+a].label}: ${meetingEffect(e)}`; G.diary.push(`Town meeting: ${run.meeting}.`);
-      // a choice can break the mission's own limit (a tester's extra concrete floor took 66 t to 96 t against 70 t, unremarked)
-      const xs = { natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 };
-      const sM = simulate(terrain, G.cells, { ...xs, addHomesCarbon: id === 'homes' ? e.carbon || 0 : 0 }); const sB = simulate(terrain, G.cells, { ...xs, addFamilies: (G.extra.families || 0) - (e.families || 0), addCarbon: (G.extra.carbon || 0) - (e.carbon || 0), addWinter: (G.extra.winter || 0) - (e.winter || 0) });
-      const okB = new Map(lv.needs(sB, ctxFor(G.cells), G.j).map((n, i) => [i, n.ok]));
-      const broke = lv.needs(sM, ctxFor(G.cells), G.j).filter((n, i) => !n.ok && okB.get(i)).map((n) => n.label.replace(/^\P{L}+/u, ''));
-      if (broke.length) {
-        run.broke = broke; run.meeting += `. ⚠ ${G.S.meetingBroke(broke.join('; '))}`;
-        audio.bad(); await ui.modal(`<div class="ribbon">Town meeting</div><h2>⚠ ${esc(G.S.meetingBrokeHead)}</h2><p>${esc(G.S.meetingBroke(broke.join('; ')))}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${esc(G.C.ui.ok || 'OK')}</button></div>`, { say: G.S.meetingBroke(broke.join('; ')) });
+      const d = DILEMMAS[id]; const KEYS = ['families', 'carbon', 'winter', 'health', 'community', 'nature'];
+      // a choice that breaks one of the mission's own limits is shown as such, and can be changed before the mission ends
+      for (;;) {
+        const a = await ui.modal(`<div class="ribbon">Town meeting</div><h2>${esc(d.text)}</h2><div class="row" style="justify-content:center">${d.options.map((o, i) => `<button class="btn ${i ? 'alt' : 'go'}" data-act="${i}">${esc(o.label)}</button>`).join('')}</div>`);
+        const e = d.options[+a].effect; const had = Number.isFinite(G.credits) ? G.credits : null;
+        const xsOf = () => ({ natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 });
+        const sB = simulate(terrain, G.cells, xsOf()); // the plan before this choice
+        for (const k of KEYS) if (e[k]) G.extra[k] = (G.extra[k] || 0) + e[k];
+        if (e.credits && had !== null) G.credits = Math.max(0, G.credits + e.credits);
+        const sM = simulate(terrain, G.cells, { ...xsOf(), addHomesCarbon: id === 'homes' ? e.carbon || 0 : 0 });
+        const broke = brokenBy(id, sB, sM, ctxFor(G.cells), G.j);
+        const line = `${d.options[+a].label}: ${meetingEffect(e)}`;
+        if (!broke.length) { run.meeting = line; G.diary.push(`Town meeting: ${line}.`); break; }
+        audio.bad();
+        const k = await ui.modal(`<div class="ribbon">Town meeting</div><h2>⚠ ${esc(G.S.meetingBrokeHead)}</h2><p>${esc(G.S.meetingBroke(broke.join('; ')))}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="meet-keep">${esc(G.S.meetingKeep)}</button><button class="btn go" data-act="meet-again">↺ ${esc(G.S.meetingAgain)}</button></div>`, { say: G.S.meetingBroke(broke.join('; ')) });
+        if (k === 'meet-keep') { run.broke = broke; run.meeting = `${line}. ⚠ ${broke.join('; ')}`; /* the full sentence is in the outcome box; the tile only names the limit */ G.diary.push(`Town meeting: ${run.meeting}.`); break; }
+        for (const kk of KEYS) if (e[kk]) G.extra[kk] = (G.extra[kk] || 0) - e[kk]; if (had !== null) G.credits = had; // choose again: undo this choice
       }
     }
     // the reward card, then: use Florence's plan in your town, or keep your town as it is
-    const s2 = sim(); audio.fanfare(); setMusic('celebrate'); world.confetti(new THREE.Vector3(10, 20, 8), 200); rewardView(true); rig.startTurntable(app.reduce ? 0 : 0.1);
+    // a mission that ends with a limit broken, or with the player's own target missed, is not shown as a clean success
+    const short = run.broke ? 'broke' : run.partly ? 'partly' : null; if (run.broke) run.marks[2] = false;
+    const s2 = sim(); if (short) audio.pass(); else { audio.fanfare(); world.confetti(new THREE.Vector3(10, 20, 8), 200); } setMusic('celebrate'); rewardView(true); rig.startTurntable(app.reduce ? 0 : 0.1);
     const stars = run.marks.filter(Boolean).length; const rules = G.C.stars[G.paths[id] || 'flawed'];
     const [statLabel, statVal] = lv.stat(s2, G.j); const oc = outcomeFor(id, s2);
-    const heading = pick(L.complete); const newLens = G.C.checks[LAB_LENS[id]];
-    const choice = await ui.modal(`<div class="ribbon green">🧪 ${esc(G.S.missionDone)} · ${esc(L.title)}</div><div class="stars3">${[0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</div><h2>${esc(heading)}</h2>
+    const heading = short ? G.C.ui.shortHead[short] : pick(L.complete); const newLens = G.C.checks[LAB_LENS[id]];
+    const rec = { path: G.paths[id] || 'flawed', lens: chk.flawed ? chk.which : null, late: !!chk.late, tries: run.tries || 0, ...(short ? { short } : {}), ...(run.bonus ? { bias: true } : {}) };
+    const practised = missionRecap(rec, G.j);
+    const choice = await ui.modal(`<div class="ribbon ${short ? '' : 'green'}">🧪 ${esc(short ? G.C.ui.shortRibbon[short] : G.S.missionDone)} · ${esc(L.title)}</div><div class="stars3">${[0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</div><h2>${esc(heading)}</h2>
       <ul class="starlist">${rules.map((r, i) => `<li class="${run.marks[i] ? 'got' : ''}">${run.marks[i] ? '★' : '☆'} ${esc(r)}</li>`).join('')}${run.bonus ? `<li class="got">★ Bonus: found Florence’s biased survey</li>` : ''}</ul>
       <div class="outcome ${oc.kind}"><small>${esc(G.C.ui.outcomeHead)}</small><b>${esc(G.C.ui.outcome[oc.kind])}</b><p>${esc(oc.detail)}</p></div>
       <div class="stats"><div><small>${esc(statLabel)}</small>${esc(statVal)}</div><div><small>${esc(G.S.newTool)}</small>${newLens.icon} ${esc(newLens.label)}</div><div><small>${G.j ? 'Fact' : 'Evidence'}</small>${esc(pick(L.fact))}</div>${run.meeting ? `<div><small>Town meeting</small>${esc(run.meeting)}</div>` : ''}</div>
+      <div class="practised"><small>${esc(G.j ? 'You practised' : 'You practised')}</small><ul>${practised.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <p class="townline">${esc(townLine(real, id))}</p>
       <p class="usenote">${esc(G.paths[id] === 'clean' ? pick(G.S.useQuestion).replace('fixed ', '') : pick(G.S.useQuestion))}</p>
       <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepMine)}</button><button class="btn go" data-act="use">✓ ${esc(G.S.usePlan)}</button></div>`, { say: `${heading} ${stars} stars.` });
     rig.startTurntable(0); rewardView(false);
     await app.episodes?.auto(`${id}-close`, G); // story episode: the closing film, the first time this mission is finished
     // keep the best run's stars
     G.levelStars[id] = Math.max(G.levelStars[id] || 0, stars); if (run.bonus) G.bonus[id] = 1;
-    G.labs[id] = { stars: G.levelStars[id] };
+    G.labs[id] = { stars: G.levelStars[id], ...rec }; // rec: what happened (js/game/recap.js). short: finished with a limit broken ('broke') or the player's own target missed ('partly')
     const placements = res.plan.placements; run = null;
     await leaveLab(real, choice === 'use' ? placements : null, id);
     // the diary tells what happened in the player's own town (it used to describe the practice island even after "Keep my town")
     G.diary.push(choice === 'use' ? diaryLines(id, sim(), G.j)[0] : G.j ? `AI Lab: “${L.title}” done. I kept my own town as it was.` : `AI Lab: “${L.title}” complete. Own town kept unchanged.`);
     if (id === 'heart') await charterAct(s2);
     if (labsDone() >= LEVEL_ORDER.length && !G.reflectDone) await reflectAct();
+    await pauseCard();
   }
+  // Natural pause points for a led session: after the second and the fourth mission, one question to talk about away
+  // from the screen. No timer and no waiting: Carry on closes it. Only with a leader (class order or facilitator notes).
+  async function pauseCard() {
+    if (!(G.classMode || app.settings.facilitator) || CH) return; const n = labsDone(); const at = n === 2 ? 1 : n === 4 ? 2 : 0; G.pauses ||= {};
+    if (!at || G.pauses[at]) return; G.pauses[at] = true; save();
+    const q = G.S.pause[at - 1];
+    await ui.modal(`<div class="ribbon">⏸ ${esc(G.S.pauseRibbon)}</div><h2>${esc(q)}</h2><p>${esc(G.S.pauseHow)}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="go">${esc(G.S.pauseGo)} ➜</button></div>`, { say: `${G.S.pauseRibbon}. ${q}` });
+  }
+  // The end of a session, whenever the leader or the player calls it: what was practised, the choices made and where
+  // the town stands. It does not need a complete town. Two questions to talk about; nothing is typed.
+  async function finishSession() {
+    if (!G.canMenu()) return; G.busy = true; stopBuilding();
+    try {
+      const s = sim(); const goals = townGoals(s, ctxFor(G.cells)); const sc = s.homes.length ? scoreNow(s) : null;
+      const r = sessionRecap(G.labs, { catches: G.catches || 0, trusted: G.trusted || 0, goalsMet: goals.filter((g) => g.ok).length, families: s.familiesSafe, score: sc?.total, medal: sc?.medal, complete: goals.every((g) => g.ok) && labsDone() >= 6 }, G.j);
+      const failed = goals.filter((g) => !g.ok).slice(0, 3).map((g) => G.S.goal[g.id](s));
+      G.sessionDone = true; sb.finished = true; save({ now: true });
+      const a = await ui.modal(`<div class="ribbon green">🏁 ${esc(G.S.finishRibbon)}</div><h2>${esc(G.townName)}</h2>
+        <div class="practised"><small>${esc(G.S.finishPractised)}</small><ul>${r.practised.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        ${r.choices.length ? `<div class="practised plain"><small>${esc(G.S.finishChoices)}</small><ul>${r.choices.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+        <div class="practised plain"><small>${esc(G.S.finishResult)}</small><ul>${r.result.map((x) => `<li>${esc(x)}</li>`).join('')}${failed.length ? `<li>${esc(G.S.finishStill)}: ${esc(failed.join('; '))}</li>` : ''}</ul></div>
+        <div class="practised talk"><small>${esc(G.S.finishTalk)}</small><ul>${r.talk.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn alt" data-act="page">🖨 ${G.j ? 'Take-home page' : 'Take-home page'}</button><button class="btn go" data-act="report">📜 ${esc(G.S.finale.report)}</button></div>`, { say: `${G.S.finishPractised}: ${r.practised.join('. ')}. ${r.talk[0]}` });
+      sb.finished = false;
+      if (a === 'report') { G.busy = false; return showReport(); }
+      if (a === 'page') setTimeout(() => G.takeHome?.(), 300);
+    } finally { G.busy = false; if (!sb.running) startBuilding(); }
+  }
+  G.finishSession = finishSession;
+  // what the take-home page needs from the town (js/game/takehome.js). The page itself is opened by main.js.
+  G.takeHomeData = () => { const s = sim(); const goals = townGoals(s, ctxFor(G.cells)); const sc = s.homes.length ? scoreNow(s) : null;
+    return { townName: G.townName, labs: G.labs, modules: G.modules || {}, extra: { catches: G.catches || 0, trusted: G.trusted || 0, goalsMet: goals.filter((g) => g.ok).length, families: s.familiesSafe, score: sc?.total, medal: sc?.medal, complete: goals.every((g) => g.ok) && labsDone() >= 6 } }; };
+  // An "Eco Town of the future" module runs on top of the town (js/modules/loader.js): building stops, the module gets a
+  // copy of the town to read, and building starts again when it ends. fn(host) -> the module's result.
+  G.hostModule = async (fn) => {
+    if (!G.canMenu() || CH) return null; G.busy = true; stopBuilding(); ui.show('card', false); ui.show('strip', false); ui.closePops();
+    try { return await fn({ cells: [...G.cells].map(([k, c]) => [k, { ...c }]), sim: sim(), extra: { ...G.extra }, status: (st) => { sb.module = st; } }); }
+    finally { G.busy = false; setTimeout(() => { sb.module = null; }, 65000); startBuilding(); }
+  };
+  // a finished mission is not a finished town: the reward card says where both stand
+  function townLine(real, id) { const done = LEVEL_ORDER.filter((l) => G.labs[l] || l === id).length; const g = townGoals(sim(real), ctxFor(real)); const met = g.filter((x) => x.ok).length;
+    return G.j ? `Missions done: ${done} of 6. Your own town: ${met} of 8 goals met${met < 8 ? ', so there is more to build' : ''}.` : `Missions: ${done} of 6. Your town: ${met} of 8 goals met.`; }
   // retry until the plan has no problem left on any check and meets the mission's needs
   async function retry(id, res, heading, briefMin) {
     const lv = LEVELS[id];
@@ -1205,6 +1296,13 @@ export function createGame(app) {
         const sA = sim(res.after); const cx = ctxFor(res.after);
         if (lv.pass(sA, cx) && res.plan.contra) { const m = G.C.ui.contra(res.plan.contra[0]); help({ tag: G.j ? 'MIXED UP' : 'CONTRADICTORY', tagCls: 'bad', html: `<p>${esc(m)}</p>`, say: m, voice: 'helper' }); audio.bad(); heading = G.S.tellMissing; continue; } // a rewrite that says the opposite of its own key word never passes
         if (lv.pass(sA, cx) && res.plan.unfair) { help({ tag: G.C.ui.unfairTag, tagCls: 'bad', html: `<p>${esc(G.C.ui.unfair)}</p>`, say: G.C.ui.unfair, voice: 'helper' }); audio.bad(); heading = G.S.tellMissing; continue; } // the same biased words never pass on a retry
+        const own = lv.pass(sA, cx) ? missionVerdict(id, sA, cx, { junior: G.j, targets: res.plan.targets || [], minutes: app.briefMinutes }).brief.map((c) => c.label) : [];
+        if (own.length) { // the rules hold now, but a target the player wrote is still missed: say which, and let them choose
+          help({ tag: G.C.ui.partlyTag, tagCls: 'bad', html: `<p><b>${esc(G.C.ui.partly)}</b></p><ul>${own.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>`, say: `${G.C.ui.partly} ${own.join(' ')}`, voice: 'helper' }); audio.bad();
+          if ((await partlyChoice(own)) === 'fix') { heading = G.S.tellMissing; continue; }
+          if (run) run.partly = own; return res;
+        }
+        if (run) run.partly = null;
         if (lv.pass(sA, cx)) {
           audio.pass(); app.bot.proud(); world.confetti(app.bot.group.position.clone(), 90); ui.alert(G.C.ui.checked, true, 1800);
           help({ tag: G.C.ui.checked, tagCls: 'ok', html: `<ul>${res.plan.reading.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>`, sure: res.sure, sureLabel: G.C.ui.sure });
@@ -1216,11 +1314,14 @@ export function createGame(app) {
       }
       // say exactly what failed, how she read the brief, and one thing to add (a tester typed the same fix four times)
       const failed = again.which && T(id).flaw[again.which] ? fmt(T(id).flaw[again.which], again.rv) : ''; const tip = FIX_HINT[again.which]?.[G.j ? 'j' : 's'] || (G.j ? 'Add what must be protected or tested.' : 'Add a limit or a test condition.');
+      if (run) run.problem = failed ? `Still failing: ${failed}`.slice(0, 80) : 'A check still fails'; // for the leader's list
       const readAs = res.plan.reading.join(' ');
       const line = G.j ? `Still a problem${failed ? `: ${failed}` : ''}. I read your instruction as: ${readAs} Try adding: ${tip}` : `Still failing${failed ? `: ${failed}` : ''}. Your brief was read as: ${readAs} Add: ${tip}`;
       help({ tag: 'STILL WRONG', tagCls: 'bad', html: `<p><b>${esc(G.j ? 'Still a problem' : 'Still failing')}${failed ? `: ${esc(failed)}` : ''}.</b></p><p>${esc(G.j ? 'I read your instruction as:' : 'Read as:')} <i>${esc(readAs)}</i></p><p>💡 ${esc(G.j ? 'Try adding:' : 'Add:')} <b>${esc(tip)}</b></p>`, say: line, voice: 'helper' });
     }
   }
+  // the plan keeps the town's rules but misses a target the player wrote: rewrite the instruction ('fix') or keep the plan ('keep')
+  const partlyChoice = (own) => ui.modal(`<div class="ribbon">${esc(G.C.ui.partlyTag)}</div><h2>${esc(G.C.ui.partlyHead)}</h2><ul class="starlist">${own.map((o) => `<li>✗ ${esc(o)}</li>`).join('')}</ul><p>${esc(G.C.ui.partlyAsk)}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.C.ui.partlyKeep)}</button><button class="btn go" data-act="fix">✎ ${esc(G.C.ui.partlyFix)}</button></div>`, { say: `${G.C.ui.partlyHead} ${own.join(' ')} ${G.C.ui.partlyAsk}` });
   // what to add to a brief after a check still finds a problem (the lens names the problem; this names the fix)
   const FIX_HINT = {
     flood: { j: 'the town land must stay dry in winter.', s: 'a constraint: no town land on the floodplain.' },
@@ -1237,6 +1338,7 @@ export function createGame(app) {
   async function leaveLab(real, placements = null, id = null) {
     world.clearGhost(); ui.legend(null); ui.helper(null); ui.tray(''); ui.facil(null); await checks.leave();
     sb.lastSuggest = performance.now(); // her next idea for the town waits a while after a lesson
+    sb.realCells = null; try { localStorage.removeItem(SLOT + '.mission'); } catch { /* storage off */ }
     G.cells = real; app.inLab = false; app.levelId = null; app.briefMinutes = null; app.briefTargets = []; delete document.documentElement.dataset.lab; run = null;
     stage.setTime(app.hour = sb.hourWas ?? 12.5, 0); sb.hourWas = null; // (every mission used to reset the day to 12:30, so a whole game fitted inside Day 1)
     if (placements) {
@@ -1374,9 +1476,8 @@ export function createGame(app) {
   // one plain sentence per mission for the reward card and the report: what happened to the brief, and who caught it
   function outcomeFor(id, s2) {
     const oc = { ...(G.outcomes[id] || { kind: 'clean', detail: '' }) };
-    const b = app.briefMinutes, W = TARGETS.walkMinutes;
-    if (id === 'heart' && b && s2.walkMax > b) oc.detail += ` ${G.j ? 'You' : 'The brief'} asked for a ${b}-minute walk; the longest route is ${s2.walkMax} minutes. That meets the town’s ${W}-minute rule, but not ${G.j ? 'your' : 'the'} brief.`;
-    if (run?.broke) oc.detail += ` ${G.S.meetingBroke(run.broke.join('; '))}`;
+    if (run?.partly) { oc.kind = 'partly'; oc.detail = `${oc.detail} ${G.C.ui.partly} ${run.partly.join(' ')}`.trim(); }
+    if (run?.broke) { oc.kind = 'broke'; oc.detail = `${oc.detail} ${G.S.meetingBroke(run.broke.join('; '))}`.trim(); }
     G.outcomes[id] = oc; return oc;
   }
 
@@ -1439,10 +1540,10 @@ export function createGame(app) {
     const s = sim(); if (G.completeShown || !chState(s).passed) return;
     G.completeShown = true; G.busy = true; stopBuilding(); save(); let a = null;
     try {
-      const r = scoreNow(s); const med = MEDAL[challengeMedal(r)]; const nx = r.next && r.total >= 60 ? MEDAL[r.next.id] : null;
+      const r = scoreNow(s); const med = MEDAL[challengeMedal(r)] || ['✓', G.j ? 'Passed: no medal yet (bronze starts at 60)' : 'Passed; no medal yet (bronze from 60)']; const nx = r.next && r.total >= 60 ? MEDAL[r.next.id] : null;
       audio.complete(app.reduce); app.bot?.cheer(); if (!app.reduce) world.confetti(new THREE.Vector3(10, 20, 8), 200);
       const lead = G.j ? `You did it: ${CH.name} is a whole town that works.` : CH.free ? `${CH.name}: every town goal is met.` : `${CH.name}: every town goal and the challenge rule are met.`;
-      a = await ui.modal(`<div class="ribbon green">${CH.icon} ${CH.free ? 'Town goals met' : 'Challenge passed'}</div><h2>${med[0]} ${med[1]} medal</h2><p>${esc(lead)}</p><p class="fscore"><b>Town score ${r.total} / 100</b>${nx ? `<small>${r.next.need} more for ${nx[0]} ${nx[1]}. Keep building to raise it.</small>` : ''}</p>
+      a = await ui.modal(`<div class="ribbon green">${CH.icon} ${CH.free ? 'Town goals met' : 'Challenge passed'}</div><h2>${med[0]} ${med[1]}${challengeMedal(r) ? ' medal' : ''}</h2><p>${esc(lead)}</p><p class="fscore"><b>Town score ${r.total} / 100</b>${nx ? `<small>${r.next.need} more for ${nx[0]} ${nx[1]}. Keep building to raise it.</small>` : ''}</p>
         <div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn go" data-act="more">🏆 More challenges</button></div>`, { say: lead });
     } finally { G.busy = false; if (a !== 'more') startBuilding(); }
     if (a === 'more') location.search = '?challenges=1';
@@ -1489,6 +1590,13 @@ export function createGame(app) {
     if (CH && sim().homes.length) milestones(sim(), { quiet: true });
     // a new town starts with Florence's guided first build
     if (!G.introDone && !G.full) await intro();
+    net.setStatus(G.status);
+    // the page was refreshed or closed in the middle of a mission: offer to go straight back into it
+    { let was = null; try { was = localStorage.getItem(SLOT + '.mission'); localStorage.removeItem(SLOT + '.mission'); } catch { /* storage off */ }
+      if (was && LEVELS[was] && !CH && labReady(was, G.ever, G.labs, G.classMode)) {
+        const a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>${esc(G.j ? `You were in the mission “${T(was).title}”` : `You were in “${T(was).title}”`)}</h2><p>${esc(G.j ? 'Your town is safe. The mission starts again from its first step.' : 'Your town is saved. The mission restarts from its first step.')}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="town">${esc(G.j ? 'Back to my town' : 'Back to the town')}</button><button class="btn go" data-act="go">${esc(G.j ? 'Carry on with the mission' : 'Resume the mission')} ➜</button></div>`);
+        if (a === 'go') { openLab(was); return; }
+      } }
     // the first tip comes straight away, so a new player knows where to begin
     sb.adv.last = -Infinity; adviseSoon(1200);
     // class mode: Florence invites the class to the first mission that is ready
@@ -1517,6 +1625,16 @@ export function createGame(app) {
     return { score: s.homes.length ? scoreNow(s) : null, step: nextStep(s).text, unlock: nu?.id || null, goal: g?.id || null, tool, spots: tool ? [...(sb.spots?.keys || [])] : [], why: tool ? spotLine() : '' }; };
   G.suggest = () => { const sg = suggestFor(sim()); if (sg) offerSuggestion(sg); return sg?.id || null; };
   G.act = act; G.event = (day) => { G.day = day; return townEvent(sim()); }; G.openLab = openLab; G.labBoard = labBoard; G.enterClassroom = enterClassroom; G.classAsk = classAsk; G.leaveClassroom = leaveClassroom; G.playVideo = playVideo; G.videoCard = videoCard; G.florenceTo = florenceTo; G.placeAt = (k, tool, o) => { const ok = placeAt(k, tool, o); if (ok) changed(); return ok; }; G.sim = sim; G.advisor = sb.adv;
-  G.saved = () => { try { const d = JSON.parse(localStorage.getItem(SLOT) || 'null'); return d && d.band === G.band ? d : null; } catch { return null; } };
+  G.saved = () => { try { const d = JSON.parse(localStorage.getItem(SLOT) || 'null'); if (d && (d.fmt || 0) > FMT) { sb.newer = true; return null; } return d && d.band === G.band ? d : null; } catch { return null; } };
+  // where this learner is, for the group leader's list (js/net.js statusOf): never anything typed
+  G.status = () => { let s = null, goals = []; try { s = sim(real0()); goals = townGoals(s, ctxFor(real0())); } catch { /* not built yet */ }
+    const id = app.inLab ? app.levelId : null; const short = LEVEL_ORDER.filter((l) => G.labs[l]?.short);
+    if (sb.module) return { band: G.band, module: sb.module.module, stage: sb.module.stage, state: sb.module.state, finished: sb.module.finished, missionsDone: labsDone(), goalsMet: goals.filter((g) => g.ok).length, stuck: false, problem: null };
+    return { band: G.band, stage: id ? `Mission ${LEVELS[id].n} of 6: ${T(id).title}` : sb.finished ? 'Finished' : s ? nextStep(s).text : 'Starting', missionsDone: labsDone(), goalsMet: goals.filter((g) => g.ok).length,
+      state: sb.finished ? 'finished' : id ? 'mission' : 'building', stuck: !!(run && (run.tries || 0) >= 3),
+      problem: run?.problem || (short.length ? `Mission ended with a limit missed: ${T(short[0]).title}` : sb.slipTold ? 'Town was complete; a goal now fails' : null), finished: !!sb.finished || !!G.sessionDone };
+  };
+  const real0 = () => sb.realCells || G.cells; // the player's own town, also while a mission shows the practice island
+  G.flush = () => save({ now: true });
   return G;
 }

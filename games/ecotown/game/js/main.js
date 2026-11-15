@@ -26,6 +26,10 @@ import { loadVoices, setSpeakingHook } from './ui/voice.js';
 // showing towns to other people (stage 4): the postcard, "Visit a town" and the club wall live in these two files
 import { shareParams, startButtons, visitCard, wallCard, openPostcard, go as shareGo } from './ui/share.js';
 import { runVisit } from './game/visit.js';
+import { openTakeHome } from './ui/takehomecard.js'; // the printable page of what was made today
+import { openModule, moduleBoard, showInTown } from './modules/loader.js'; // Eco Town of the future (docs/MODULES.md)
+import { net } from './net.js'; // the learner's session and the server's copy of their progress
+import { BUILD, buildLabel, HUB } from './version.js'; // the build's version, shown at the foot of the ☰ menu
 import { createEpisodeViewer } from './ui/epviewer.js'; // story episodes: plays the recorded films (nothing is fetched until one plays)
 // while a 🔊 read-aloud plays, its button shows it (a tester couldn't tell whether anything was happening)
 let spkBtn = null;
@@ -100,6 +104,7 @@ function loop(now) {
     slowAvg += (raw - slowAvg) * 0.05; if (slowAvg > 45) { slowFor += raw; if (slowFor > 4000 && stage.tier !== 'low') { stage.setTier(stage.tier === 'high' ? 'mid' : 'low'); slowFor = 0; slowAvg = 16; } } else slowFor = 0;
   }
   rig.update(dt);
+  app.moduleFrame?.(dt, t); // a module of the town of the future may place the camera itself (js/modules/loader.js)
   { const ins = rig.mode === 'inside' && inside.root.visible && !app.inLab; /* not the classroom, which also uses the inside camera */ if (ins !== app._ins) { app._ins = ins; document.documentElement.dataset.inside = ins ? 'on' : 'off'; if (app.insideBack) app.insideBack.hidden = !ins; } } // the free inside view: its own Back button, panels step aside (CSS)
   { const st = rig.mode === 'street' && !!rig.street; if (st !== world.overlayHidden) { world.hideOverlay(st); document.documentElement.dataset.street = st ? 'on' : 'off'; } } world.update(dt, t, { windStill: app.winterTest }); life.update(dt, t, app.hour, { windStill: app.winterTest, moveIn: app.moveIn }); inside.update(dt, t); classroom.update(dt, t); bot.update(dt, t); cosmetics.update(dt, t, app.hour ?? 12);
   stage.render(dt, t); ui.labels.update(stage.camera, canvas);
@@ -114,20 +119,20 @@ function settingsSheet() {
   const row = (k, label) => `<label>${esc(label)}<input type="checkbox" data-k="${k}" ${s[k] ? 'checked' : ''}></label>`;
   const snd = !s.sound ? 'off' : s.music === false ? 'fx' : 'on';
   P.innerHTML = `<h3 style="margin:0 0 8px">Menu</h3>
-    <div class="menuacts"><button class="slot act" data-m-act="report" ${free ? '' : 'disabled'}><b class="ico">📜</b><span>Town report</span></button><button class="slot act" data-m-act="day" ${free ? '' : 'disabled'}><b class="ico">🌇</b><span>Watch a whole day</span></button><button class="slot act" data-intro ${free ? '' : 'disabled'}><b class="ico">🎬</b><span>Watch Florence’s intro again</span></button><button class="slot act" data-m-act="passport" ${free ? '' : 'disabled'}><b class="ico">🎒</b><span>Club passport</span></button><button class="slot act" data-m-act="episodes" ${free ? '' : 'disabled'}><b class="ico">🎬</b><span>Episodes</span></button><button class="slot act" data-m-act="shop" ${free ? '' : 'disabled'}><b class="ico">★</b><span>${esc(G?.S?.shop?.menu || 'Star shop')}</span></button>${/* sharing (stage 4) */ G?.visiting ? '<button class="slot act" data-m-act="vhome"><b class="ico">🏡</b><span>Back to my town</span></button>' : `<button class="slot act" data-m-act="postcard" ${free ? '' : 'disabled'}><b class="ico">✉</b><span>Town postcard</span></button>`}<button class="slot act" data-m-act="visit"><b class="ico">👀</b><span>Visit a town</span></button>${G?.challenge || (() => { try { return JSON.parse(localStorage.getItem('ecotown.best.v1') || '{}').labs?.[G?.band]; } catch { return false; } })() ? `<button class="slot act" data-m-act="challenges"><b class="ico">🏆</b><span>Challenge towns</span></button>` : ''}${G?.challenge ? `<button class="slot act" data-m-act="home"><b class="ico">🏡</b><span>Back to my own town</span></button>` : ''}${G?.completeShown && !G?.challenge ? `<button class="slot act" data-m-act="finale" ${free ? '' : 'disabled'}><b class="ico">🎉</b><span>${esc(G.S.finale.again)}</span></button>` : ''}</div>
+    <div class="menuacts"><button class="slot act" data-m-act="hub"><b class="ico">🏠</b><span>AI Lab start page</span></button><button class="slot act" data-m-act="future" ${free ? '' : 'disabled'}><b class="ico">🚀</b><span>Town of the future</span></button><button class="slot act" data-m-act="finish" ${free ? '' : 'disabled'}><b class="ico">🏁</b><span>Finish session</span></button><button class="slot act" data-m-act="takehome" ${free ? '' : 'disabled'}><b class="ico">🖨</b><span>Take-home page</span></button><button class="slot act" data-m-act="report" ${free ? '' : 'disabled'}><b class="ico">📜</b><span>Town report</span></button><button class="slot act" data-m-act="day" ${free ? '' : 'disabled'}><b class="ico">🌇</b><span>Watch a whole day</span></button><button class="slot act" data-intro ${free ? '' : 'disabled'}><b class="ico">🎬</b><span>Watch Florence’s intro again</span></button><button class="slot act" data-m-act="passport" ${free ? '' : 'disabled'}><b class="ico">🎒</b><span>Club passport</span></button><button class="slot act" data-m-act="episodes" ${free ? '' : 'disabled'}><b class="ico">🎬</b><span>Episodes</span></button><button class="slot act" data-m-act="shop" ${free ? '' : 'disabled'}><b class="ico">★</b><span>${esc(G?.S?.shop?.menu || 'Star shop')}</span></button>${/* sharing (stage 4) */ G?.visiting ? '<button class="slot act" data-m-act="vhome"><b class="ico">🏡</b><span>Back to my town</span></button>' : `<button class="slot act" data-m-act="postcard" ${free ? '' : 'disabled'}><b class="ico">✉</b><span>Town postcard</span></button>`}<button class="slot act" data-m-act="visit"><b class="ico">👀</b><span>Visit a town</span></button>${G?.challenge || (() => { try { return JSON.parse(localStorage.getItem('ecotown.best.v1') || '{}').labs?.[G?.band]; } catch { return false; } })() ? `<button class="slot act" data-m-act="challenges"><b class="ico">🏆</b><span>Challenge towns</span></button>` : ''}${G?.challenge ? `<button class="slot act" data-m-act="home"><b class="ico">🏡</b><span>Back to my own town</span></button>` : ''}${G?.completeShown && !G?.challenge ? `<button class="slot act" data-m-act="finale" ${free ? '' : 'disabled'}><b class="ico">🎉</b><span>${esc(G.S.finale.again)}</span></button>` : ''}</div>
     <h4 class="menuhead">Settings</h4>
     <label>Sound<select data-snd><option value="on" ${snd === 'on' ? 'selected' : ''}>On (music and effects)</option><option value="fx" ${snd === 'fx' ? 'selected' : ''}>Effects only</option><option value="off" ${snd === 'off' ? 'selected' : ''}>Off</option></select></label>
     ${row('readAloud', 'Read aloud')}${row('episodes', 'Story episodes')}${row('reduce', 'Reduce motion')}${row('facilitator', 'Facilitator notes')}
     <div class="setrow"><span id="tsz">Text size</span><span class="seg" role="radiogroup" aria-labelledby="tsz">${['normal', 'large'].map((v) => `<button type="button" role="radio" data-tsize="${v}" aria-checked="${(s.text || 'normal') === v}">${v === 'large' ? 'Large' : 'Normal'}</button>`).join('')}</span></div>
     <label>Graphics<select data-k="quality">${['auto', 'low', 'mid', 'high'].map((q) => `<option ${s.quality === q ? 'selected' : ''}>${q}</option>`).join('')}</select></label>
-    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><button class="btn go" data-close>Done</button>`;
+    <p style="font-size:.8em;color:#46596a">Florence runs on this device (${modelReady() ? 'a small language model' : 'a keyword reader: the model did not load'}). Her voice is recorded in advance. What you type stays on this device: nothing is sent anywhere.</p><p class="buildline" style="font-size:.75em;color:#46596a;margin:4px 0 8px">${net.badge() ? `You are ${esc(net.badge())} · ` : ''}Eco Town ${esc(buildLabel())}</p><button class="btn go" data-close>Done</button>`;
   P.querySelectorAll('[data-k]').forEach((i) => (i.onchange = () => { s[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.value; applySettings(); ui.refreshFacil(); }));
   // text size: two buttons, not a drop-down (a drop-down list opened over "Facilitator notes", and a tap meant for "Large" ticked it)
   P.querySelectorAll('[data-tsize]').forEach((b) => (b.onclick = () => { s.text = b.dataset.tsize; P.querySelectorAll('[data-tsize]').forEach((x) => x.setAttribute('aria-checked', String(x === b))); applySettings(); }));
   P.querySelector('[data-snd]').onchange = (e) => { const v = e.target.value; s.sound = v !== 'off'; s.effects = v !== 'off'; s.music = v === 'on'; applySettings(); };
   P.querySelector('[data-close]').onclick = () => ui.show('settings', false);
   P.querySelector('[data-intro]').onclick = () => { ui.show('settings', false); app.G?.replayIntro?.(); };
-  P.querySelectorAll('[data-m-act]').forEach((b) => (b.onclick = () => { ui.show('settings', false); const m = b.dataset.mAct; if (m === 'postcard') return openPostcard(app); if (m === 'visit') { app.G?.save?.(); return shareGo('?visit=1'); } if (m === 'vhome') return shareGo('?carry=1'); /* sharing (stage 4) */ if (m === 'passport') { app.G?.save?.(); ui.modal(`${passportHtml(app.band)}<div class="row" style="justify-content:center;margin-top:10px"><button class="btn alt" data-act="close">Close</button><button class="btn go" data-act="print">🖨 Print certificate</button></div>`).then((a) => { if (a === 'print') printCertificate(app.band); }); } else if (m === 'episodes') app.episodes.menu(app.G); else if (m === 'challenges') { app.G?.save?.(); location.search = '?challenges=1'; } else if (m === 'home') { app.G?.save?.(); location.search = ''; } else if (m === 'report') app.G?.showReport?.(); else if (m === 'shop') app.G?.openShop?.(); else if (m === 'finale') app.G?.finale?.(); else app.G?.wholeDay?.(); }));
+  P.querySelectorAll('[data-m-act]').forEach((b) => (b.onclick = () => { ui.show('settings', false); const m = b.dataset.mAct; if (m === 'hub') { app.G?.flush?.(); location.href = HUB; return; } if (m === 'future') return moduleBoard(app); if (m === 'takehome') return app.G?.takeHome?.(); if (m === 'finish') return app.G?.finishSession?.(); if (m === 'postcard') return openPostcard(app); if (m === 'visit') { app.G?.save?.(); return shareGo('?visit=1'); } if (m === 'vhome') return shareGo('?carry=1'); /* sharing (stage 4) */ if (m === 'passport') { app.G?.save?.(); ui.modal(`${passportHtml(app.band)}<div class="row" style="justify-content:center;margin-top:10px"><button class="btn alt" data-act="close">Close</button><button class="btn go" data-act="print">🖨 Print certificate</button></div>`).then((a) => { if (a === 'print') printCertificate(app.band); }); } else if (m === 'episodes') app.episodes.menu(app.G); else if (m === 'challenges') { app.G?.save?.(); location.search = '?challenges=1'; } else if (m === 'home') { app.G?.save?.(); location.search = ''; } else if (m === 'report') app.G?.showReport?.(); else if (m === 'shop') app.G?.openShop?.(); else if (m === 'finale') app.G?.finale?.(); else app.G?.wholeDay?.(); }));
   ui.closePops(P.settings); ui.show('settings', true);
 }
 ui.P.tr.querySelector('[data-menu]').onclick = () => (ui.P.settings.classList.contains('hide') ? settingsSheet() : ui.show('settings', false));
@@ -205,18 +210,27 @@ async function start() {
     await runVisit(app, share.town.town, { from: share.from, onBack: (where) => shareGo(where === 'wall' ? '?wall=1' : '?carry=1') });
     return;
   }
+  // which learner this is (when the site has groups), their own things on this browser, and the newer copy of their town.
+  // Three seconds at most: a slow connection never holds up the start screen.
+  { let waited = false; const pulled = net.pull();
+    await Promise.race([pulled, new Promise((r) => setTimeout(() => { waited = true; r(); }, 4000))]);
+    // the server's copy arrived after the start screen was drawn: draw it again once, so "Carry on building" is offered
+    pulled.then((from) => { if (waited && from === 'server' && document.getElementById('start') && !sessionStorage.getItem('eco.repull')) { try { sessionStorage.setItem('eco.repull', '1'); } catch { return; } location.reload(); } }).catch(() => {}); }
   const scr = h(`<div id="start"><div class="card">
     <span class="chip">A DELTAOPS LEARNING AI LAB</span><h1>Eco <span>Town</span></h1>
     <p style="font-weight:600;color:#46596a;margin:4px 0">Build your own town on a floating island. Florence, your AI helper, gives tips as you build. Step into the AI Lab to test her plans: she is clever, and sometimes confidently wrong. Can you catch her mistakes?</p>
     <div class="ages"><button class="age" data-band="junior"><b>Ages 8–12</b><span>Word tiles, picture chips and a friendly voice that reads everything aloud. Gentle consequences.</span></button><button class="age" data-band="senior"><b>Ages 13–17</b><span>Free-text instructions, real units, budgets and town-meeting dilemmas. 🔊 to hear any card.</span></button></div>
     <p class="both">Both versions have six AI Lab missions, ending with a bias check: who did Florence forget to ask? Next: name your town and choose how the missions are played.</p>
-    <p class="leaderlink">Running a club day? <a href="leader.html">The club leader’s one-page plan</a></p>
+    <p class="leaderlink">Leading a group? <a href="leader.html">The leader’s one-hour run sheet</a></p>
     <p data-resume style="display:none"></p>
+    ${net.badge() ? `<p class="badgeline" style="font-weight:800;color:#2b3a55;margin:8px 0 0">You are <span style="background:#fff3c9;border-radius:999px;padding:2px 12px">${esc(net.badge())}</span> <small style="font-weight:600;color:#46596a">Tell your leader this name if you need help.</small></p>` : ''}
   </div></div>`);
   $('#layer').appendChild(scr); setTimeout(() => scr.querySelector('[data-band]')?.focus(), 100);
   const ORDER = { free: 'Free: players build and open any AI Lab mission once it unlocks. Florence invites them when the town hits a problem a mission teaches.', class: 'In order: the class does the missions one by one. Only the next mission opens, and Florence invites players to it as soon as it is ready.' };
   // a saved town: one button on the first screen carries straight on (a returning player used to choose an age and
   // name a town again before the game offered the town they already had)
+  // a part chosen on the AI Lab start page: ?part=town, or ?module=<id> for a part of the town of the future
+  const wantModule = new URLSearchParams(location.search).get('module'); const fromHub = !!wantModule || !!new URLSearchParams(location.search).get('part');
   let resume = null;
   try { const d = JSON.parse(localStorage.getItem('ecotown.save.v3') || 'null'); if (d && d.cells && d.townName && ['junior', 'senior'].includes(d.band) && !app.sandboxFull && ISLAND === 'home') resume = d; } catch { /* no save */ } // (the player's own town lives on the home island)
   if (resume) {
@@ -242,12 +256,13 @@ async function start() {
   if (autoCh && autoBand && islandOf(autoCh) !== ISLAND) { location.replace(islandUrl(autoCh.id, autoBand)); return; }
   const homeHtml = scr.querySelector('.card').innerHTML;
   const band = await new Promise((res) => {
+    if (fromHub && resume) return res(resume.band); // a part chosen on the start page, with a town already saved: straight in
     const card = scr.querySelector('.card');
     const board = (b) => {
       card.innerHTML = `<span class="chip">🏆 CHALLENGE TOWNS</span><h1>Pick a <span>challenge</span></h1><p class="sub">A new town with one special rule. Everything is unlocked. Meet the town goals and the rule to win a medal: ${medalsOf(b)} of ${CHALLENGES.length} so far.</p>
         ${chBands.length > 1 ? `<div class="opts"><span class="seg" role="radiogroup" aria-label="Age">${chBands.map((x) => `<button type="button" role="radio" data-chband="${x}" aria-checked="${x === b}">${x === 'junior' ? 'Ages 8–12' : 'Ages 13–17'}</button>`).join('')}</span></div>` : ''}
         ${[['home', CHALLENGES.filter((c) => !c.island)], ['delta', CHALLENGES.filter((c) => c.island === 'delta')], ['hills', CHALLENGES.filter((c) => c.island === 'hills')], ['free', ISLAND_TOWNS]].map(([isl, list]) => `${isl === 'home' ? '' : `<h2 class="chisle">${isl === 'free' ? '🏝 Free building on another island <small>no special rule, its own saved town</small>' : `${LAYOUTS[isl].icon} ${esc(LAYOUTS[isl].name)} <small>${isl === 'delta' ? 'flood meadow and marsh, little dry ground' : 'woods, slopes and a long beach, little flat field'}</small>`}</h2>`}<div class="chgrid">${list.map((c) => { const r = dev.ch?.[b]?.[c.id]; const sv = slotOf(c.id); const mine = sv && sv.band === b;
-          return `<button class="age chcard ${r ? 'won' : ''}" data-ch="${c.id}"><b class="chico" aria-hidden="true">${c.icon}</b><span><b>${esc(c.name)}</b><small>${esc(b === 'junior' ? c.rule.j : c.rule.s)}</small><em>${r ? `${MED[r.medal]} ${r.medal[0].toUpperCase() + r.medal.slice(1)} · score ${Math.round(r.score)}${r.medal !== 'gold' ? ' · go for a higher medal' : ''}` : mine ? '▶ Carry on' : 'Not tried yet'}</em></span></button>`; }).join('')}</div>`).join('')}
+          return `<button class="age chcard ${r ? 'won' : ''}" data-ch="${c.id}"><b class="chico" aria-hidden="true">${c.icon}</b><span><b>${esc(c.name)}</b><small>${esc(b === 'junior' ? c.rule.j : c.rule.s)}</small><em>${r ? `${r.medal ? `${MED[r.medal]} ${r.medal[0].toUpperCase() + r.medal.slice(1)}` : '✓ Passed'} · score ${Math.round(r.score)}${r.medal !== 'gold' ? ' · go for a higher medal' : ''}` : mine ? '▶ Carry on' : 'Not tried yet'}</em></span></button>`; }).join('')}</div>`).join('')}
         <p class="islenote">The AI Lab missions are on the home island. A town on another island opens after a short reload.</p>
         <div class="row" style="justify-content:center;margin-top:10px"><button class="btn alt" data-chback>← Back</button></div>`;
       card.scrollTop = 0;
@@ -285,6 +300,7 @@ async function start() {
   initAudio(); sfx.good(); loadVoices(band);
   app.band = band; ui.readAloud = app.settings.readAloud && band === 'junior' ? true : app.settings.readAloud && band === 'senior' ? false : app.settings.readAloud;
   if (app.challenge) { app.classMode = false; app.townName = challenge(app.challenge).name; }
+  else if (!resume && wantModule) { app.townName = NAME_IDEAS[Math.floor(Math.random() * NAME_IDEAS.length)]; app.skipIntro = true; } // straight to a module from the start page: no naming step, no building intro
   else if (resume) { app.classMode = !!resume.classMode; app.settings.music = app.settings.music && !app.classMode; applySettings(); app.townName = resume.townName; }
   else {
   // name the town: one name, used everywhere (the header, the cards and the printed report)
@@ -310,34 +326,34 @@ async function start() {
   scr.remove();
   const tier = await quality; if (app.settings.quality === 'auto') stage.setTier(tier);
   const G = createGame(app);
+  if (app.skipIntro) G.introDone = true;
   const saved = G.saved();
   if (saved && (resume || app.challenge)) { G.load(saved); ui.setTownName(G.townName); }
   else if (saved && !app.sandboxFull) { const a = await ui.modal(`<div class="ribbon">Welcome back</div><h2>Carry on building ${esc(saved.townName || 'your town')}?</h2><div class="row" style="justify-content:center"><button class="btn go" data-act="resume">Carry on</button><button class="btn alt" data-act="new">Start a new town</button></div>`); if (a === 'resume') { G.load(saved); ui.setTownName(G.townName); } }
   // living-island opening: about 10 seconds, skippable
   rig.startTurntable(0); setMusic('calm');
   await G.run();
+  // Eco Town of the future: what finished modules left in the town, and ?module=<id> to open one straight away
+  await showInTown(app);
+  G.takeHome = () => openTakeHome(app, G.takeHomeData());
+  { const want = new URLSearchParams(location.search).get('module'); if (want) { const t0 = Date.now(); const go = () => (G.canMenu() ? openModule(app, want) : Date.now() - t0 < 120000 ? setTimeout(go, 400) : null); go(); } }
 }
-window.__eco = { app, terrain, ready: () => !!app.G, modelReady, thumbExtras: () => ({ ailab: { mark: null, item: 'ailab', mods: [] } }) };
-// Passcode sessions (only when served by the Eco Town Worker; local and GitHub Pages builds have no /api).
-// Every minute the game checks its session is still the active one for this passcode (newest login wins).
-(async function heartbeat() {
-  let first = true;
-  if (/^(localhost|127\.0\.0\.1)$|github\.io$/.test(location.hostname)) return; // no passcode server on local or GitHub Pages builds (a POST there only logs an error)
-  const beat = async () => {
-    let r; try { r = await fetch('/api/heartbeat', { method: 'POST', credentials: 'same-origin' }); } catch { return; }   // offline: keep playing
-    if (first && (r.status === 404 || r.status === 405 || r.status === 501)) return 'off';                               // no passcode server here
-    first = false;
-    if (r.status === 409) { let d = {}; try { d = await r.json(); } catch { /* */ } locked(d); return 'locked'; }
-  };
-  const lockedNow = await beat(); if (lockedNow) return;
-  const t = setInterval(async () => { if (await beat()) clearInterval(t); }, 60000);
-})();
+window.__eco = { build: BUILD, openModule: (id) => openModule(app, id), app, terrain, ready: () => !!app.G, modelReady, thumbExtras: () => ({ ailab: { mark: null, item: 'ailab', mods: [] } }) };
+// The learner's session (only when served by the Eco Town Worker; local and static builds have no /api, and
+// js/net.js then does nothing). Every minute the game checks the session is still good and says where the learner
+// is, for the leader's list. The town is also saved when the page is hidden or closed, so a refresh loses nothing.
+net.onLock(locked);
+setInterval(() => { net.beat(); }, 60000);
+const flush = () => { try { app.G?.flush?.(); } catch { /* not started */ } };
+window.addEventListener('pagehide', flush);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
 function locked(d) {
   try { setSound(false); } catch { /* */ }
   const card = h(`<div style="position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:rgba(30,40,60,.55)"><div class="panel modal" style="position:relative;left:auto;top:auto;transform:none">
-    <div class="ribbon">Eco Town</div><div class="big">🔒</div><h2>${d.reason === 'expired' ? 'Your free access has ended' : d.reason === 'revoked' ? 'This passcode is switched off' : 'Playing on another device'}</h2>
-    <p>${esc(d.message || 'This passcode is now being used on another device.')}</p><button class="btn go" data-act="again">Log in again</button></div></div>`);
-  document.body.appendChild(card); card.querySelector('[data-act]').onclick = async () => { try { await fetch('/api/logout', { method: 'POST' }); } catch { /* */ } location.replace('/'); };
+    <div class="ribbon">Eco Town</div><div class="big">🔒</div><h2>${d.reason === 'expired' ? 'Your group’s time has ended' : d.reason === 'revoked' ? 'This group is switched off' : 'Playing on another device'}</h2>
+    <p>${esc(d.message || 'Your badge is now being used on another device. Your town is saved.')}</p><button class="btn go" data-act="again">Join again</button></div></div>`);
+  if (document.getElementById('lockcard')) return; card.id = 'lockcard';
+  document.body.appendChild(card); card.querySelector('[data-act]').onclick = async () => { await net.logout(); location.replace('/'); };
 }
 // light deterrents against casual copying (not real protection: the browser must have the code to run it)
 const typing = (e) => /INPUT|TEXTAREA/.test(e.target?.tagName);
@@ -349,7 +365,8 @@ const filmParam = new URLSearchParams(location.search).get('film');
 app.townName = 'Eco Town';
 const shootParam = new URLSearchParams(location.search).get('shoot');
 const episodeParam = new URLSearchParams(location.search).get('episode');
-if (episodeParam) episodeShoot(episodeParam); else if (shootParam) shoot(shootParam); else if (filmParam) filmPreview(filmParam); else start();
+if (new URLSearchParams(location.search).get('welcome')) import('./welcome.js').then((m) => m.runWelcome({ stage, world, life, terrain, bot, app })); // the welcome film and guide (start page → Welcome)
+else if (episodeParam) episodeShoot(episodeParam); else if (shootParam) shoot(shootParam); else if (filmParam) filmPreview(filmParam); else start();
 
 // ---- story episodes (START OF BLOCK) -------------------------------------------------------------------------
 // Recording: index.html?episode=<id> stages one story episode (js/game/episodes.js, episodeplay.js) and exposes

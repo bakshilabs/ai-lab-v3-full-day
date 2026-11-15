@@ -31,8 +31,8 @@ test('junior L1 beach: the diagnosis names the beach the child chose, and the fl
 
 test('L3 homes: 40 families is a hard target (37 does not pass)', () => {
   const pass = LEVELS.homes.pass; const ok = { homesCarbon: 60, avgTemp: 20 };
-  assert.equal(pass({ ...ok, families: 37 }, {}), false);
-  assert.equal(pass({ ...ok, families: 40 }, {}), true);
+  assert.equal(pass({ ...ok, familiesSafe: 37, families: 40 }, {}), false, 'flooded homes do not count');
+  assert.equal(pass({ ...ok, familiesSafe: 40, families: 40 }, {}), true);
 });
 
 test('L6 10-minute brief: Florence says the brief and the real longest walk', () => {
