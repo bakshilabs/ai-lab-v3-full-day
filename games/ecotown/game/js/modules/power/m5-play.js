@@ -1,6 +1,6 @@
 // Mission 5 on the page: move flexible jobs into the hours with spare clean power. The rounds, layout and words:
 // m5-demand.js.
-import { DEMAND_ROUNDS, SLOTS, JOBS, BLOCK_KW, slotClock, startPlan, layout, solve, inWindow, DEM, jobName, jobNeed, jobSize, slotWord, refuseSay, runSay, demDay, demNote } from './m5-demand.js';
+import { DEMAND_ROUNDS, SLOTS, JOBS, BLOCK_KW, slotClock, startPlan, layout, solve, inWindow, DEM, jobName, jobNeed, jobSize, slotWord, slotShort, refuseSay, runSay, demDay, demNote } from './m5-demand.js';
 import { esc } from './shell.js';
 
 export async function playDemand(d) {
@@ -22,7 +22,7 @@ export async function playDemand(d) {
         const n = Math.max(slot.spare, slot.jobs.length, 1); let cells = '';
         for (let k = 0; k < n; k++) { const job = slot.jobs[k]; if (job) cells += `<i class="${job.clean ? 'clean' : 'gas'} ${job.id === sel ? 'sel' : ''}" title="${esc(jobName(job.id, j))}">${JOBS[job.id].icon}</i>`; else if (k < slot.spare) cells += '<i class="spare"></i>'; }
         const okHere = inWindow(sel, Math.min(slot.s, SLOTS - J.len));
-        return `<button type="button" data-slot="${slot.s}" class="${okHere ? '' : 'out'} ${plan[sel] <= slot.s && slot.s < plan[sel] + J.len ? 'here' : ''}" aria-label="${esc(`${slotWord(slot.s, j)}: ${slot.spare} spare${slot.jobs.length ? `, ${slot.jobs.length} in use` : ''}${okHere ? '' : j ? ', not a time this job can run' : ', outside the window'}`)}"><span class="pw-col">${cells}</span>${star === slot.s ? '<em class="pw-star" aria-hidden="true">★</em>' : ''}<b>${esc(slotWord(slot.s, j))}</b></button>`;
+        return `<button type="button" data-slot="${slot.s}" class="${okHere ? '' : 'out'} ${plan[sel] <= slot.s && slot.s < plan[sel] + J.len ? 'here' : ''}" aria-label="${esc(`${slotWord(slot.s, j)}: ${slot.spare} spare${slot.jobs.length ? `, ${slot.jobs.length} in use` : ''}${okHere ? '' : j ? ', not a time this job can run' : ', outside the window'}`)}"><span class="pw-col">${cells}</span>${star === slot.s ? '<em class="pw-star" aria-hidden="true">★</em>' : ''}<b>${esc(slotShort(slot.s, j))}</b></button>`;
       }).join('');
       d.screen.innerHTML = `<h3>${j ? 'Spare clean power, and the jobs' : 'Surplus renewables by slot, and flexible demand'}<small>${j ? 'two hours a column' : `2 h per column · 1 square = ${BLOCK_KW} kW`}</small></h3><div class="pw-slots" role="group" aria-label="${j ? 'Times of day' : 'Time slots'}">${cols}</div>
         <div class="pw-blocks"><span><i class="spare"></i>${j ? 'spare wind and sun' : 'unused surplus'}</span><span><i class="clean"></i>${j ? 'job on clean power' : 'met by renewables'}</span><span><i class="gas"></i>${j ? 'job on gas' : 'met by gas'}</span></div>`;

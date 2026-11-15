@@ -75,9 +75,9 @@ export function recordLines(p, j) {
   const r = p.res; const out = [];
   out.push(r.balance ? (j ? `Balanced the grid: ${r.balance.level} of ${r.balance.of} ten-minute steps level.` : `Balancing: ${r.balance.level} of ${r.balance.of} steps held at 50 Hz.`) : 'Balanced the grid as the town woke up.');
   out.push(r.forecast?.spells ? (j ? `Read three forecasts and found every hour of short power.` : `Forecasting: found every shortfall hour on three days${r.forecast.kwh ? ', and sized it in kWh' : ''}.`) : 'Read three forecasts and found the short hours.');
-  out.push(r.storage ? (j ? `Ran the town battery for three days: homes lit ${r.storage.dark.map((d) => `${pct(r.storage.total - d, r.storage.total)}%`).join(', ')}.` : `Storage: three days by hand, ${r.storage.dark.map((d) => `${pct(r.storage.total - d, r.storage.total)}%`).join(' / ')} of home-hours supplied.`) : 'Ran the town battery by hand for three days.');
+  out.push(r.storage ? (j ? 'Ran the town battery by hand for three days, and met the goal each day.' : `Storage: three days by hand, ${r.storage.dark.map((d) => `${pct(r.storage.total - d, r.storage.total)}%`).join(' / ')} of home-hours supplied.`) : 'Ran the town battery by hand for three days.');
   const n = p.rules?.list?.length || 0;
-  out.push(r.rules ? (j ? `Wrote ${n} rule${n === 1 ? '' : 's'}. On the test days they kept ${r.rules.share}% of homes lit.` : `Automation: ${n} rule${n === 1 ? '' : 's'}, ${r.rules.share}% of home-hours supplied on the three test days.`) : `Wrote ${n || 'some'} rules for the system to follow.`);
+  out.push(r.rules ? (j ? `Wrote ${n} rule${n === 1 ? '' : 's'} and tested them on a windy day, a still day and a winter night.` : `Automation: ${n} rule${n === 1 ? '' : 's'}, ${r.rules.share}% of home-hours supplied on the three test days.`) : `Wrote ${n || 'some'} rules for the system to follow.`);
   out.push(r.demand ? (j ? `Moved ${r.demand.moved} jobs to spare wind and sun. None used gas.` : `Demand response: ${r.demand.moved} jobs (${r.demand.kwh} kWh) moved onto surplus renewables.`) : 'Moved jobs to times with spare clean power.');
   out.push(j ? 'Storm night: cut off the broken line, lit the health centre and shelter first, brought everyone back.' : 'Storm night: isolated the fault, restored priority sites first, re-energised safely.');
   return out.slice(0, 6);

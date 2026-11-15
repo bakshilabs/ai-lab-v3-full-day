@@ -130,7 +130,7 @@ test('the record: a title, one line per mission, a small picture and two to four
   const p = cleanProgress({ v: 2, done: Array(6).fill(true), rules: { list: [{ when: 'evening', then: 'use' }] }, res: { balance: { level: 22, of: 24 }, forecast: { tries: 1, kwh: false, spells: 4 }, storage: { dark: [1, 3, 2], total: 144 }, rules: { share: 91, diff: 4 }, demand: { moved: 9, kwh: 560 }, storm: { trips: 1 } } }, true);
   for (const j of [true, false]) {
     const lines = recordLines(p, j); assert.equal(lines.length, 6); assert.ok(lines.every((l) => l.length <= 120), lines.join('\n'));
-    if (j) assert.ok(!lines.some((l) => /kWh|kW\b/.test(l)), 'no kilowatts for ages 8-12');
+    if (j) assert.ok(!lines.some((l) => /kWh|kW\b|%/.test(l)), 'no kilowatts or percentages for ages 8-12');
     const pr = practisedLines(p, j); assert.ok(pr.length >= 2 && pr.length <= 4);
     const pic = hourPicture(p, j); assert.ok(pic.startsWith('<svg') && pic.length < 20000);
     const res = cleanResult({ finished: true, record: { made: { title: madeTitle(j), lines, picture: pic }, practised: pr }, town: { kind: 'power-rules', data: { v: 1, rules: p.rules } } });

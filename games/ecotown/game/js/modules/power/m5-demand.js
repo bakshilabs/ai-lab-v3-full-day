@@ -60,7 +60,7 @@ export const JOB_WORD = {
   carA: { name: { j: 'Electric cars, Mill Lane', s: 'EV charging, Mill Lane' }, need: { j: 'Home from 6 pm. Needed again at 6 am. Takes 4 hours.', s: 'Plugged in 18:00–06:00; 4 hours of charging.' } },
   carB: { name: { j: 'Electric cars, River Row', s: 'EV charging, River Row' }, need: { j: 'Home from 6 pm. Needed again at 6 am. Takes 4 hours.', s: 'Plugged in 18:00–06:00; 4 hours of charging.' } },
   nightWater: { name: { j: 'Hot water tanks', s: 'Hot water tanks' }, need: { j: 'Hot for the 6 am showers: heat it after 10 pm.', s: 'Window 22:00–06:00 (hot for morning showers).' } },
-  heat: { name: { j: 'Heat pumps (warm the homes early)', s: 'Heat pumps: pre-heating' }, need: { j: 'Warm the homes before the cold evening: between 10 am and 4 pm.', s: 'Window 10:00–16:00; 20 kW for 2 hours.' } },
+  heat: { name: { j: 'Heat pumps (warm the homes early)', s: 'Heat pumps: pre-heating' }, need: { j: 'Warm the homes before the cold evening: between 10 am and 4 pm.', s: 'Window 10:00–16:00 (warm before the cold evening).' } },
 };
 export const DEM = {
   round: {
@@ -80,6 +80,8 @@ export const jobName = (id, j) => pick(JOB_WORD[id].name, j);
 export const jobNeed = (id, j) => pick(JOB_WORD[id].need, j);
 export function jobSize(id, j) { const x = JOBS[id]; if (j) return ''; const kw = x.p * BLOCK_KW, h = x.len * 2; return `${kw} kW × ${h} h = ${kw * h} kWh`; }
 export function slotWord(s, j) { const c = slotClock(s); return j ? (c === 0 ? 'midnight' : c === 12 ? '12 noon' : c < 12 ? `${c} am` : `${c - 12} pm`) : `${String(c).padStart(2, '0')}:00`; }
+// the short form for a column label: 6am, 12pm, 12am (ages 8-12) or 06 (ages 13-17)
+export function slotShort(s, j) { const c = slotClock(s); return j ? `${c % 12 === 0 ? 12 : c % 12}${c < 12 ? 'am' : 'pm'}` : `${String(c).padStart(2, '0')}:00`; }
 export function refuseSay(id, j) {
   if (id === 'carA' || id === 'carB') return j ? 'The cars are out until 6 pm, and needed again at 6 am. Pick a time between.' : 'The cars are only plugged in from 18:00 to 06:00.';
   if (id === 'wash') return j ? 'The washing must be done by 6 pm, so it can dry before dark.' : 'Washing must finish by 18:00.';

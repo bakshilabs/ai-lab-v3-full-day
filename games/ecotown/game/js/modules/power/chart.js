@@ -108,7 +108,7 @@ export function hourPicture(p, junior = true) {
   ];
   const stat = [
     r.balance ? `${r.balance.level} of ${r.balance.of} level` : 'done', junior ? 'short hours found' : 'shortfalls found',
-    `${Math.round(share[2] * 100)}% lit`, `${Math.round(share[3] * 100)}% lit`, junior ? 'all on clean power' : 'all on renewables', junior ? 'everyone back' : 'all restored',
+    junior ? 'goal met each day' : `${Math.round(share[2] * 100)}% supplied`, junior ? 'tested on 3 days' : `${Math.round(share[3] * 100)}% supplied`, junior ? 'all on clean power' : 'all on renewables', junior ? 'everyone back' : 'all restored',
   ];
   const names = [junior ? 'Balance the grid' : 'Grid balance', 'Forecasting', 'Storage', 'Automation rules', 'Smart demand', 'Storm night'];
   const icons = ['⚖️', '🌦️', '🔋', '📋', '🔌', '⛈️'];
