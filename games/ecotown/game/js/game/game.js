@@ -101,7 +101,7 @@ export function createGame(app) {
   function star(i, why = '') { if (!run || run.marks[i]) return; run.marks[i] = true; audio.star(); G.stars = shownStars(); ui.setStars(G.stars); if (why) ui.caption(`★ ${why}`, 2600); }
   function bonusStar(why) { if (!run) return; run.bonus = true; G.stars = shownStars(); ui.setStars(G.stars); ui.caption(`★ ${why}`, 2800); }
   function flower(flash = true) { const s = sim(); ui.carbonInfo = { used: s.carbon, limit: TARGETS.carbonCeiling }; ui.flower(s.petals, G.townName, { flash }); renderGoals(s); }
-  const KEEP = ['badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'band', 'levelStars', 'starMarks', 'bonus', 'mistakes', 'diary', 'instructions', 'extra', 'credits', 'townName', 'inputMode', 'paths', 'outcomes', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'charter', 'reflection', 'reflectDone', 'shop', 'chSeen', 'eps' /* story episodes seen: js/ui/epviewer.js */, 'pauses' /* pause-and-talk cards shown */, 'sessionDone'];
+  const KEEP = ['badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'band', 'levelStars', 'starMarks', 'bonus', 'mistakes', 'diary', 'instructions', 'extra', 'credits', 'townName', 'inputMode', 'paths', 'outcomes', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'charter', 'reflection', 'reflectDone', 'shop', 'chSeen', 'eps' /* story episodes seen: js/ui/epviewer.js */, 'pauses' /* pause-and-talk cards shown */, 'sessionDone', 'modules' /* Eco Town of the future: js/modules/loader.js */];
   // the club passport's part of the device record (js/game/passport.js): mission stars, town complete, catches
   function recordMe() {
     if (G.full) return; const stars = Object.values(G.levelStars).reduce((x, y) => x + y, 0) + Object.values(G.bonus).reduce((x, y) => x + y, 0);
@@ -1272,6 +1272,13 @@ export function createGame(app) {
     } finally { G.busy = false; if (!sb.running) startBuilding(); }
   }
   G.finishSession = finishSession;
+  // An "Eco Town of the future" module runs on top of the town (js/modules/loader.js): building stops, the module gets a
+  // copy of the town to read, and building starts again when it ends. fn(host) -> the module's result.
+  G.hostModule = async (fn) => {
+    if (!G.canMenu() || CH) return null; G.busy = true; stopBuilding(); ui.show('card', false); ui.show('strip', false); ui.closePops();
+    try { return await fn({ cells: [...G.cells].map(([k, c]) => [k, { ...c }]), sim: sim(), extra: { ...G.extra }, status: (st) => { sb.module = st; } }); }
+    finally { G.busy = false; setTimeout(() => { sb.module = null; }, 65000); startBuilding(); }
+  };
   // a finished mission is not a finished town: the reward card says where both stand
   function townLine(real, id) { const done = LEVEL_ORDER.filter((l) => G.labs[l] || l === id).length; const g = townGoals(sim(real), ctxFor(real)); const met = g.filter((x) => x.ok).length;
     return G.j ? `Missions done: ${done} of 6. Your own town: ${met} of 8 goals met${met < 8 ? ', so there is more to build' : ''}.` : `Missions: ${done} of 6. Your town: ${met} of 8 goals met.`; }
@@ -1618,6 +1625,7 @@ export function createGame(app) {
   // where this learner is, for the group leader's list (js/net.js statusOf): never anything typed
   G.status = () => { let s = null, goals = []; try { s = sim(real0()); goals = townGoals(s, ctxFor(real0())); } catch { /* not built yet */ }
     const id = app.inLab ? app.levelId : null; const short = LEVEL_ORDER.filter((l) => G.labs[l]?.short);
+    if (sb.module) return { band: G.band, module: sb.module.module, stage: sb.module.stage, state: sb.module.state, finished: sb.module.finished, missionsDone: labsDone(), goalsMet: goals.filter((g) => g.ok).length, stuck: false, problem: null };
     return { band: G.band, stage: id ? `Mission ${LEVELS[id].n} of 6: ${T(id).title}` : sb.finished ? 'Finished' : s ? nextStep(s).text : 'Starting', missionsDone: labsDone(), goalsMet: goals.filter((g) => g.ok).length,
       state: sb.finished ? 'finished' : id ? 'mission' : 'building', stuck: !!(run && (run.tries || 0) >= 3),
       problem: run?.problem || (short.length ? `Mission ended with a limit missed: ${T(short[0]).title}` : sb.slipTold ? 'Town was complete; a goal now fails' : null), finished: !!sb.finished || !!G.sessionDone };

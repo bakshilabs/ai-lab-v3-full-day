@@ -14,7 +14,7 @@ const OWN = (k) => k.startsWith('ecotown.') && !k.startsWith(BOX) && k !== WHO &
 
 // Fields of a save that may go to the server: the town and its progress. Nothing typed, nothing that quotes typed words.
 const SAFE = ['band', 'li', 'at', 'fmt', 'badges', 'bestScore', 'medal', 'milestones', 'placements', 'catches', 'trusted', 'introDone', 'levelStars', 'starMarks', 'bonus',
-  'extra', 'credits', 'inputMode', 'paths', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'reflectDone', 'shop', 'chSeen', 'eps', 'pauses', 'sessionDone'];
+  'extra', 'credits', 'inputMode', 'paths', 'labs', 'ever', 'classMode', 'day', 'movedIn', 'completeShown', 'reflectDone', 'shop', 'chSeen', 'eps', 'pauses', 'sessionDone', 'modules'];
 export function forServer(save) {
   if (!save || typeof save !== 'object') return null;
   const out = { cells: save.cells || [] };
@@ -51,7 +51,7 @@ export function swapLearner(storage, learner) {
 // What the group's leader sees for this learner: where they are and whether something is wrong. No typed text.
 const cut = (s, n) => String(s || '').slice(0, n);
 export function statusOf(x) {
-  return { module: 'ecotown', band: cut(x.band, 20), stage: cut(x.stage, 80), missionsDone: Math.max(0, Math.min(6, x.missionsDone | 0)), goalsMet: Math.max(0, Math.min(8, x.goalsMet | 0)),
+  return { module: cut(x.module || 'ecotown', 20), band: cut(x.band, 20), stage: cut(x.stage, 80), missionsDone: Math.max(0, Math.min(6, x.missionsDone | 0)), goalsMet: Math.max(0, Math.min(8, x.goalsMet | 0)),
     state: cut(x.state || 'building', 20), problem: x.problem ? cut(x.problem, 80) : null, stuck: !!x.stuck, finished: !!x.finished, at: x.at || Date.now() };
 }
 
