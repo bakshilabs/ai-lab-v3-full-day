@@ -24,7 +24,7 @@ function map(plan, round, res, j) {
 }
 // the trade-off chart for ages 13–17: longest wait (minutes) against the number of cars
 function chart(plan, round) {
-  const pts = curve(plan, !!round.charge); const w = 360, h = 190, x0 = 46, y0 = 16, maxY = Math.max(20, ...pts.map((p) => Math.min(60, p.longest)));
+  const pts = curve(plan, !!round.charge); const w = 360, h = 190, x0 = 46, y0 = 16, maxY = Math.ceil(Math.max(20, ...pts.map((p) => p.longest)) / 10) * 10;
   const X = (c) => x0 + ((c - CARS.min) / (CARS.max - CARS.min)) * (w - x0 - 10), Y = (m) => y0 + (1 - Math.min(m, maxY) / maxY) * (h - y0 - 30);
   const line = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.cars).toFixed(1)} ${Y(p.longest).toFixed(1)}`).join(' '); const me = pts.find((p) => p.cars === plan.cars);
   return `<svg class="rd-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Chart: the longest wait for each number of cars" font-family="Inter, Arial, sans-serif"><rect width="${w}" height="${h}" fill="#fffaf0"/>
@@ -32,7 +32,7 @@ function chart(plan, round) {
     <path d="${line}" fill="none" stroke="#2f6fd8" stroke-width="3"/>${me ? `<circle cx="${X(me.cars)}" cy="${Y(me.longest)}" r="7" fill="#c8553d" stroke="#fff" stroke-width="2"/>` : ''}
     <line x1="${x0}" y1="${h - 30}" x2="${w - 10}" y2="${h - 30}" stroke="#5e4936"/><line x1="${x0}" y1="${y0}" x2="${x0}" y2="${h - 30}" stroke="#5e4936"/>
     ${[CARS.min, 6, 10, CARS.max].map((c) => `<text x="${X(c)}" y="${h - 14}" font-size="12" text-anchor="middle" fill="#3b2a1e">${c}</text>`).join('')}<text x="${(x0 + w) / 2}" y="${h - 1}" font-size="12" font-weight="700" text-anchor="middle" fill="#3b2a1e">cars</text>
-    ${[0, Math.round(maxY / 2), maxY].map((m) => `<text x="${x0 - 6}" y="${Y(m) + 4}" font-size="12" text-anchor="end" fill="#3b2a1e">${m}</text>`).join('')}<text x="12" y="${y0 + 60}" font-size="12" font-weight="700" fill="#3b2a1e" transform="rotate(-90 12 ${y0 + 60})">longest wait (min)</text></svg>`;
+    ${[0, Math.round(maxY / 2), maxY].map((m) => `<text x="${x0 - 6}" y="${Y(m) + 4}" font-size="12" text-anchor="end" fill="#3b2a1e">${m}</text>`).join('')}<text x="12" y="${(y0 + h - 30) / 2}" font-size="12" font-weight="700" text-anchor="middle" fill="#3b2a1e" transform="rotate(-90 12 ${(y0 + h - 30) / 2})">longest wait (min)</text></svg>`;
 }
 
 export async function fleetMission(K) {

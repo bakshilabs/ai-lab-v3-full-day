@@ -40,7 +40,7 @@ export function scenePic(id, v, p, safe, j = false) {
     o.push(car(cx, 238, '#2f6fd8', 0, true), person(612, childY, '#e0a020', true));
     if (p > 0.35 && v !== null) {
       o.push(`<line x1="${react}" y1="212" x2="604" y2="212" stroke="#ffd166" stroke-width="3" stroke-dasharray="6 5"/><text x="${(react + 604) / 2}" y="204" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">${j ? 'room to stop' : 'room: 12 m'}</text>`);
-      if (p > 0.6) o.push(`<line x1="${react}" y1="196" x2="${front(lerp(react - 34, stopFront - 34, ease((p - 0.35) / 0.45)))}" y2="196" stroke="${safe ? '#6dff9e' : '#ff8a70'}" stroke-width="5"/><text x="${react}" y="186" font-size="15" font-weight="800" fill="#fff">${j ? (safe ? 'stops in time' : 'needs more room') : `needs ${need} m to stop`}</text>`);
+      if (p > 0.6) o.push(`<line x1="${react}" y1="184" x2="${front(lerp(react - 34, stopFront - 34, ease((p - 0.35) / 0.45)))}" y2="184" stroke="${safe ? '#6dff9e' : '#ff8a70'}" stroke-width="5"/><text x="${react}" y="174" font-size="15" font-weight="800" fill="#fff">${j ? (safe ? 'stops in time' : 'needs more room') : `needs ${need} m to stop`}</text>`);
     }
     if (done && v !== null) o.push(safe ? tick(612, 330) : warn(612, 330));
   }
