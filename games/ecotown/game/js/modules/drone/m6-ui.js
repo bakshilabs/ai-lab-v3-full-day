@@ -64,7 +64,7 @@ export async function runRescue(ctx, kit, scope) {
     // ---- 2. the search pattern, then the search
     ctx.report({ stage: `Search and rescue: search ${si + 1} of ${scenes.length}` });
     P.say(si === 0 ? `The heat camera sees a square of ground ${junior ? 'three squares wide' : `${3 * SQUARE_M} m wide`} below the drone. How should the drone search?`
-      : 'Later that night, a second call: another walker is missing near the forest edge. Their phone had no signal all day, so nobody knows which way they went. Only their car at the car park is known. How should the drone search this time?');
+      : 'Later that night, a second call: another walker is missing near the forest edge. They set off early and walked all day, and their phone had no signal. Only their car at the car park is known. How should the drone search this time?');
     P.main.innerHTML = `${steps(1, si)}${areaSvg(sc, {})}`;
     P.side.innerHTML = `<h2>Choose the search pattern</h2><div class="dk-choices">${PATTERNS.map((p) => `<button type="button" class="dr-btn" data-pattern="${p.id}">${esc(p.id === 'square' && !sc.known ? 'Squares growing out from the car park' : p.label)}</button>`).join('')}</div><p>Both are real patterns that rescue teams use. Think about what you know.</p>`;
     kit.focusFirst(P.side, '[data-pattern]');
@@ -99,19 +99,24 @@ export async function runRescue(ctx, kit, scope) {
     // ---- 3. guide the team to the walker
     ctx.report({ stage: `Search and rescue: guiding the team (${si + 1} of ${scenes.length})` });
     const walker = walkerOf(sc); let team = [{ ...sc.team }]; let note = null; let done = false;
-    P.say(`The drone hovers over the walker with its light on. Now guide the rescue team from the car park. Tap the squares they should walk through, one at a time. They can cross the river only at the bridge, and cannot climb the crags.`);
+    P.say(`The drone hovers over the walker with its light on. Now guide the rescue team from the car park. Tap the squares they should walk to: a tap in a straight line from the orange dot takes them all the way along it. They can cross the river only at the bridge, and cannot climb the crags.`);
     const draw3 = () => {
       P.main.innerHTML = `${steps(2, si)}<div class="dk-team">${areaSvg(sc, { found: [walker.id], team, mark: walker, heat: { path: [{ x: walker.x, z: walker.z }], upto: 1 } })}</div>`;
       const best = shortest(sc);
-      P.side.innerHTML = `<h2>Guide the team</h2><p>${junior ? 'Tap a square next to the orange dot, or use the arrows.' : `Tap a square next to the orange dot, or use the arrows. ${team.length - 1} squares so far (${(team.length - 1) * SQUARE_M} m).`}</p>
+      P.side.innerHTML = `<h2>Guide the team</h2><p>${junior ? 'Tap a square in a straight line from the orange dot, or use the arrows.' : `Tap a square in a straight line from the orange dot, or use the arrows. ${team.length - 1} squares so far (${(team.length - 1) * SQUARE_M} m).`}</p>
         ${done ? '' : `<div class="dk-arrows" role="group" aria-label="Move the team's way">${Object.entries({ n: '↑ North', w: '← West', e: '→ East', s: '↓ South' }).map(([d, l]) => `<button type="button" class="dr-btn" data-step="${d}">${l}</button>`).join('')}<button type="button" class="dr-btn" data-undo ${team.length < 2 ? 'disabled' : ''}>↶ Back one</button></div>`}
         ${note ? `<div class="dk-note ${note.ok ? 'good' : 'warn'}" role="status" data-dk-reply>${esc(note.text)}</div>` : ''}
         ${done ? `<div class="dk-note good" role="status">${esc(junior ? 'The team has reached the walker. They strap the ankle and help the walker back, with the drone lighting the way.' : `The team reached the walker: ${team.length - 1} squares, about ${(team.length - 1) * SQUARE_M} m and ${walkMinutes(team.length - 1)} minutes on foot. The shortest safe way is ${best} squares.`)}</div><div class="dr-row"><button type="button" class="dr-btn go" data-k="done">${si < scenes.length - 1 ? 'Next call ➜' : 'Finish the rescue ➜'}</button></div>` : ''}`;
     };
     draw3(); kit.focusFirst(P.side, '[data-step]');
     const go = (x, z) => {
-      if (done) return; const r = extend(team, x, z, sc);
-      if (!r.ok) { note = { ok: false, text: r.text }; P.say(r.text); } else { team = r.path; note = null; if (r.reached) { done = true; P.say('The team has reached the walker.'); } }
+      if (done) return;
+      // a tap on a square straight along from the orange dot adds the whole straight run, square by square, as far as it is safe
+      const end = team[team.length - 1]; const dx = Math.sign(x - end.x), dz = Math.sign(z - end.z); const n = Math.abs(x - end.x) + Math.abs(z - end.z);
+      const straight = (dx === 0 || dz === 0) && n > 1; let r = null;
+      if (straight) { for (let i = 0; i < n; i++) { const e = team[team.length - 1]; r = extend(team, e.x + dx, e.z + dz, sc); if (!r.ok || r.reached) break; team = r.path; } }
+      else r = extend(team, x, z, sc);
+      if (!r.ok) { note = { ok: false, text: straight ? `The team went as far as it safely could. ${r.text}` : r.text }; P.say(note.text); } else { team = r.path; note = null; if (r.reached) { done = true; P.say('The team has reached the walker.'); } }
       draw3(); kit.focusFirst(P.side, done ? '[data-k]' : '[data-step]');
     };
     await new Promise((res) => {

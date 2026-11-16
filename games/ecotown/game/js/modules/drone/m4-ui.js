@@ -26,7 +26,7 @@ function fieldSvg(field, p, { shown = null, junior }) {
     if (i >= upto) return; const part = shown === null ? 1 : Math.min(1, upto - i);
     const [x0, z0, x1, z1] = l; const ns = x0 === x1; const xe = x0 + (x1 - x0) * part, ze = z0 + (z1 - z0) * part;
     const rx = ns ? X(x0 - FOOT / 2) : X(Math.min(x0, xe)), ry = ns ? Z(Math.min(z0, ze)) : Z(z0 - FOOT / 2), rw = ns ? FOOT * C : Math.abs(xe - x0) * C, rh = ns ? Math.abs(ze - z0) * C : FOOT * C;
-    o.push(`<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="#1f6fd0" fill-opacity="${shown === null ? 0.28 : 0.34}" stroke="#1f4f96" stroke-opacity=".9" stroke-width="2.5"/>`);
+    o.push(`<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="#1f6fd0" fill-opacity="${shown === null ? 0.38 : 0.42}" stroke="#1f4f96" stroke-opacity=".9" stroke-width="2.5"/>`);
   });
   // gaps: strips of ground no photo reaches (hatched red), shown in the plan as a warning
   if (p.gaps) {

@@ -76,7 +76,7 @@ export const minutesToFind = (path, sc = S0) => { const f = finds(path, sc).find
 export function compareSearch(sc, chose) {
   const mins = Object.fromEntries(PATTERNS.map((p) => [p.id, minutesToFind(p.path(sc), sc)]));
   const best = mins.square <= mins.lines ? 'square' : 'lines'; const other = chose === 'square' ? 'lines' : 'square';
-  const why = sc.known ? 'The last sighting was a good place to start, so the growing squares searched the likeliest ground first.' : 'Nobody knew where the walker went, so covering the whole area in lines was the steadier plan.';
+  const why = sc.known ? 'The last sighting was a good place to start, so the growing squares searched the likeliest ground first.' : 'The walker had walked all day, so they were probably far from the car. Squares spent the first minutes near the car; lines covered the whole area steadily.';
   const text = `Your pattern found the walker in about ${mins[chose]} minutes. The other pattern would have taken about ${mins[other]}. ${why}`;
   return { mins, best, text };
 }

@@ -22,7 +22,8 @@ export function pickOpen(cells, tiles, avoid = []) {
     const clear = solid.length ? Math.min(...solid.map((s) => Math.max(Math.abs(s.gx - t.gx), Math.abs(s.gz - t.gz)))) : 6;
     // the course round it should fit on the island without being squeezed, and trees and slopes make a poor field
     const squeezed = [...HOOPS, LAND].filter((o) => Math.hypot((x + o.dx) / (SAFE_RX - 5), (z + o.dz) / (SAFE_RZ - 5)) > 1).length;
-    const v = Math.min(clear, 3) * 10 - inner * 30 - squeezed * 12 + (t.zone === 'meadow' || t.zone === 'field' || t.zone === 'coast' ? 6 : t.zone === 'wood' || t.zone === 'slope' ? -12 : 0);
+    const bare = cellOf.get(t.k)?.item ? 0 : 25; // nothing on the tile, so nothing pokes through the pad
+    const v = bare + Math.min(clear, 3) * 10 - inner * 30 - squeezed * 12 + (t.zone === 'meadow' || t.zone === 'field' || t.zone === 'coast' ? 6 : t.zone === 'wood' || t.zone === 'slope' ? -12 : 0);
     if (v > best) { best = v; top = { gx: t.gx, gz: t.gz, x, z, k: t.k }; }
   }
   return top;
@@ -58,8 +59,8 @@ export const PAD_R = 2.6;                                   // the landing pad's
 // A touchdown: speed in metres a second (downwards), off = how far from the pad's middle.
 export function landing(speed, off) {
   if (off > PAD_R) return { ok: false, kind: 'off', text: 'The drone landed off the pad. Go up a little, move over the pad, and come down again.' };
-  if (speed > 3) return { ok: false, kind: 'hard', text: 'Bump! That was too fast. Go up a little and try again. Let go of Down just before the ground.' };
-  if (speed > 1.8) return { ok: true, kind: 'firm', text: 'Landed on the pad. It was a little firm: next time, let go of Down a moment sooner.' };
+  if (speed > 3) return { ok: false, kind: 'hard', text: 'Bump! That was too fast. Go up a little and try again. Let go of Down a little way above the pad, then come down the last bit in short taps.' };
+  if (speed > 1.8) return { ok: true, kind: 'firm', text: 'Landed on the pad. It was a little firm: next time, come down the last bit in short taps.' };
   return { ok: true, kind: 'soft', text: 'A gentle landing, right on the pad.' };
 }
 export const windWords = (round, junior) => {

@@ -15,7 +15,7 @@ export async function runHand(ctx, ui, scope, { touch }) {
   const junior = !!ctx.junior; const tiles = tileList(ctx.town.terrain); const cells = ctx.town.cells || [];
   const spot = pickOpen(cells, tiles) || { x: 0, z: 0 };
   const cellOf0 = new Map(cells); const tileOf = ctx.town.terrain?.tiles instanceof Map ? ctx.town.terrain.tiles : new Map();
-  const open = (x, z) => { const [fx, fz] = toGrid(x, z); const k = key(Math.round(fx), Math.round(fz)); const t = tileOf.get(k); const it = cellOf0.get(k)?.item; return !!t && t.zone !== 'river' && !t.fixed && !(it && ITEMS[it]?.kind === 'build'); };
+  const open = (x, z) => { const [fx, fz] = toGrid(x, z); const k = key(Math.round(fx), Math.round(fz)); const t = tileOf.get(k); const it = cellOf0.get(k)?.item; return !!t && t.zone !== 'river' && !t.fixed && !it; }; // plain ground: no building, crop or flower plot under the pad
   const C = course(spot, open); const fly = createFly3d(ctx, { origin: { x: C.pad.x, z: C.pad.z }, radius: 34 });
   const pad = createFlyPad(ctx, { touch }); fly.setInput(pad.input);
   scope.onEnd(() => { fly.dispose(); pad.off(); ui.hush(); });
@@ -80,6 +80,7 @@ export async function runHand(ctx, ui, scope, { touch }) {
   await fly.until(() => {
     const h = hoops[hi]; const dy = h.y - (fly.S.y + 0.6); const d = Math.hypot(h.x - fly.S.x, dy, h.z - fly.S.z);
     if (d < HOOP_R) { h.mesh.done(); sound('good'); hi++; sum.hoops = hi; if (hi >= hoops.length) return true; next(hi); return false; }
+    const cam = ctx.engine.camera.position; hoops.forEach((o, j) => { o.mesh.group.visible = j >= hi && Math.hypot(o.x - cam.x, o.y - cam.y, o.z - cam.z) > 7; });
     const way = arrowFor(bearing(fly.S.x, fly.S.z, h.x, h.z)); const flat = Math.hypot(h.x - fly.S.x, h.z - fly.S.z);
     const up = dy > 1.5 ? 'Climb ⤒' : dy < -1.5 ? 'Come down ⤓' : 'Height is right';
     pad.task(`Hoop ${hi + 1} of ${hoops.length}`);
@@ -91,7 +92,7 @@ export async function runHand(ctx, ui, scope, { touch }) {
 
   // ---- land gently on the orange pad
   ctx.report({ stage: 'Hand flying: landing' }); ui.setStage('m2-land'); fly.freeze(true); landPad.group.visible = true; for (const h of hoops) h.mesh.group.visible = false; fly.setWind(0, 0);
-  await ui.talk(`Last, the landing. Fly over the orange pad and come down slowly. Let go of Down just before the pad, so the drone touches down gently.`, { button: 'Go and land ➜' });
+  await ui.talk(`Last, the landing. Fly over the orange pad and come down. A little way above the pad, let go of Down, then come down the last bit in short taps, so the drone touches down gently.`, { button: 'Go and land ➜' });
   ui.hush(); fly.freeze(false); let msg = ''; let landed = null; let resting = 0;
   await fly.until((dt, info) => {
     const off = Math.hypot(fly.S.x - C.land.x, fly.S.z - C.land.z); const h = fly.height(); const vy = -fly.S.vy;
