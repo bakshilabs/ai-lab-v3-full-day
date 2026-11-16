@@ -108,7 +108,7 @@ for (let guard = 0; guard < 900; guard++) {
     }
     if (/again/.test(kickNow)) cameBack++;
     // a question set aside never comes straight back on the very next screen
-    if (lastAside) { if (/again/.test(kickNow) && /at the end|after the next question/.test(setAside[setAside.length - 1].said)) asideNext++; lastAside = null; } // many questions share a heading: the "again" mark tells
+    if (lastAside) { if (/again/.test(kickNow) && (await p.textContent("#module [data-fm-ask] h2")) === lastAside && /at the end|after the next question/.test(setAside[setAside.length - 1].said)) asideNext++; lastAside = null; } // many questions share a heading: the "again" mark tells
     // every other question: one wrong answer first. Florence says why, and the right one is still to find.
     // (only where one miss does not set it aside: four choices or more, or a question already on its second go)
     if (asks % 2 === 0 && (nOpts >= 4 || /again/.test(kickNow))) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right') && !/The answer is/.test(line)) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
