@@ -74,7 +74,7 @@ export function tapReply(what, x, z, view, tries) {
   }
   if (inSick(x, z)) return { right: true, text: 'Found it. These plants look green to our eyes, but the health view shows they are struggling.' };
   if (view !== 'health') return { right: false, text: 'In the normal photo the crops all look green. Switch to the plant health view first.' };
-  return { right: false, text: tries ? 'Look for the red patch in the barley field, top right.' : 'That part is healthy. Look for a patch that is red or orange in the health view.' };
+  return { right: false, text: tries ? 'Look for the red patch in the barley field, top right.' : (health(x, z) < 0.75 ? 'That part is a little stressed, but not the worst. Look for where it is reddest.' : 'That part is healthy. Look for a patch that is red or orange in the health view.') };
 }
 export const ADVICE = [
   { id: 'target', label: 'Water the potato field, and check the sick patch in the barley up close', right: true },
