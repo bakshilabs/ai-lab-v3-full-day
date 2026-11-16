@@ -7,7 +7,7 @@
 import { kitFrom } from './model.js';
 import { css } from './css.js';
 import { createDesk } from './shell.js';
-import { MISSIONS, cleanProgress, packProgress, allDone, madeTitle, recordLines, practisedLines } from './missions.js';
+import { MISSIONS, cleanProgress, packProgress, allDone, madeTitle, recordLines, practisedLines, doneLines } from './missions.js';
 import { missionMap, briefing, debrief } from './map.js';
 import { playBalance } from './m1-play.js';
 import { playForecast } from './m2-play.js';
@@ -19,14 +19,15 @@ import { hourPicture } from './chart.js';
 import { show } from './town.js';
 import { T } from './words.js';
 
-// What each mission hands back becomes a small result (kept in the save) and a few lines for its "done" card.
+// What each mission hands back: a small result (kept in the save). The "done" card's lines: doneLines in missions.js.
+// rs: where to start (a mission left part-way resumes at its next round) and what to keep after each round.
 const PLAY = {
-  balance: async (d) => { const r = await playBalance(d); return { res: r, lines: [d.j ? `${r.level} of ${r.of} ten-minute steps level.` : `${r.level} of ${r.of} steps balanced at 50 Hz.`] }; },
-  forecast: async (d) => { const r = await playForecast(d); return { res: r, lines: [d.j ? `Three forecasts read. ${r.spells} short spells found.` : `Three forecasts read; ${r.spells} shortfall spells found${r.kwh ? ' and sized in kWh' : ''}.`] }; },
-  storage: async (d, st, save) => { const r = await playStorage(d, st, save); return { res: r, lines: r.dark.map((x, n) => (d.j ? `Day ${n + 1}: ${x} dark hours.` : `Day ${n + 1}: ${x} home-hours unsupplied.`)) }; },
-  rules: async (d, st, save) => { const r = await playRules(d, st, save); return { res: { share: r.share, diff: r.diff }, lines: [d.j ? `${st.rules.list.length} rules. Homes lit on the test days: ${r.share}%.` : `${st.rules.list.length} rules; ${r.share}% of home-hours supplied across the test days.`] }; },
-  demand: async (d) => { const r = await playDemand(d); return { res: r, lines: [d.j ? `${r.moved} jobs moved to spare wind and sun.` : `${r.moved} jobs moved; ${r.kwh} kWh of flexible demand shifted to surplus renewables.`] }; },
-  storm: async (d) => { const r = await playStorm(d); return { res: r, lines: [d.j ? 'The broken line was cut off, the safe places came first, and everyone is back.' : `Fault isolated, priority load first, all supply restored${r.trips ? ` (${r.trips} trip${r.trips === 1 ? '' : 's'} on the way)` : ' with no trips'}.`] }; },
+  balance: (d, st, save, rs) => playBalance(d, rs),
+  forecast: (d, st, save, rs) => playForecast(d, rs),
+  storage: (d, st, save, rs) => playStorage(d, st, save, rs),
+  rules: async (d, st, save) => { const r = await playRules(d, st, save); return { share: r.share, diff: r.diff, lit: r.cmp.test.litHours, total: r.cmp.test.total }; }, // its rules are saved as they change
+  demand: (d, st, save, rs) => playDemand(d, rs),
+  storm: (d, st, save, rs) => playStorm(d, rs),
 };
 
 async function run(ctx) {
@@ -40,10 +41,13 @@ async function run(ctx) {
   let go = await missionMap(d, p);
   while (go !== 'finish') {
     const i = go; const m = MISSIONS[i];
-    if ((await briefing(d, i)) !== 'start') { go = await missionMap(d, p); continue; }
-    const out = await PLAY[m.id](d, st, save);
-    p.res[m.id] = out.res; p.done[i] = true; save();
-    const a = await debrief(d, i, out.lines, p);
+    const cur = p.cur && p.cur.id === m.id ? p.cur : null;
+    if ((await briefing(d, i, cur?.round || 0)) !== 'start') { go = await missionMap(d, p); continue; }
+    // progress is saved after every round, so a child who leaves part-way comes back to the next round
+    const rs = { from: cur?.round || 0, part: cur?.part || null, done: (round, part) => { p.cur = { id: m.id, round, part }; save(); } };
+    const res = await PLAY[m.id](d, st, save, rs);
+    p.res[m.id] = res; p.done[i] = true; p.cur = null; save();
+    const a = await debrief(d, i, doneLines(m.id, res, j, st.rules.list.length), p);
     if (a === 'finish') break;
     if (a === 'next') { const n = p.done.findIndex((x) => !x); go = n >= 0 ? n : await missionMap(d, p); continue; }
     go = await missionMap(d, p);

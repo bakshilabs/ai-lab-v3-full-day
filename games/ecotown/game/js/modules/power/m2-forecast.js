@@ -63,8 +63,20 @@ export const FC = {
 };
 export const fcDay = (id, j) => pick(FC.day[id], j);
 export const fcNote = (id, j) => pick(FC.note[id], j);
+// A spell said from its first clearly short hour to the end of its last one (close hours at the edges are left out,
+// so the words match the marks a child was asked to make).
+export function sureSpells(hours) {
+  return spells(hours).map((s) => { let a = s.from, b = s.to; while (hours[a].truth !== 'short') a++; while (hours[b].truth !== 'short') b--; return { from: a, to: b }; });
+}
 export function spellWords(hours, j) {
-  return spells(hours).map((s) => `${clockWord(hours[s.from].clock, j)} to ${clockWord((hours[s.to].clock + 1) % 24, j)}`);
+  return sureSpells(hours).map((s) => `${clockWord(hours[s.from].clock, j)} to ${clockWord((hours[s.to].clock + 1) % 24, j)}`);
+}
+// The reveal after a right answer: when homes would start going dark with no battery, and the worst hour.
+export function revealLine(hours, j) {
+  const worst = hours.reduce((a, h) => (h.need - h.made > a.need - a.made ? h : a), hours[0]);
+  const sp = sureSpells(hours).find((s) => s.from <= worst.i && worst.i <= s.to) || sureSpells(hours)[0];
+  const from = clockWord(hours[sp ? sp.from : worst.i].clock, j), at = clockWord(worst.clock, j);
+  return { worst, line: j ? `Without a battery, homes would start going dark at ${from}, and it is worst at ${at}. Now the control room knows to plan for it.` : `With no storage: shortfall from ${from}, worst at ${at}, with a gap of ${Math.round((worst.need - worst.made) * KW)} kW. That is the case to plan for.` };
 }
 export function checkSay(res, tries, hours, j) {
   if (res.right) {

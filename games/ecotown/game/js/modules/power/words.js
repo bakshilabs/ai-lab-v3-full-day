@@ -128,7 +128,7 @@ export const handDoneSay = (j) => (j ? 'That was one day by hand. Now write rule
 // ---- rules in plain words
 const WHEN = {
   windy: { j: 'If the wind is strong', s: 'If the wind is strong' }, calm: { j: 'If the wind drops', s: 'If the wind is low' }, sunny: { j: 'If the sun is bright', s: 'If the sun is bright' },
-  low: { j: `If the battery is below ${LOW_BATTERY * 100}%`, s: `If the battery is below ${LOW_BATTERY * 100}%` }, high: { j: `If the battery is ${HIGH_BATTERY * 100}% or more`, s: `If the battery is ${HIGH_BATTERY * 100}% or more` },
+  low: { j: 'If the battery is nearly empty', s: `If the battery is below ${LOW_BATTERY * 100}%` }, high: { j: 'If the battery is nearly full', s: `If the battery is ${HIGH_BATTERY * 100}% or more` },
   morning: { j: 'In the morning', s: 'In the morning' }, midday: { j: 'At midday', s: 'At midday' }, afternoon: { j: 'In the afternoon', s: 'In the afternoon' }, evening: { j: 'In the evening', s: 'In the evening' }, night: { j: 'At night', s: 'At night' },
   always: { j: 'At any other time', s: 'Otherwise' },
 };

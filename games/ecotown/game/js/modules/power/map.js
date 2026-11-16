@@ -24,11 +24,11 @@ export async function missionMap(d, p) {
   });
 }
 // Before a mission: the real job in one line, then how to play. Resolves 'start' or 'map'.
-export async function briefing(d, i) {
+export async function briefing(d, i, round = 0) {
   const { j, full } = d; const m = MISSIONS[i]; d.mode('full'); d.idle(11); d.label(pk(m.use, j)); d.plate('Control room', `Mission ${i + 1}`); d.report(`Mission ${i + 1}: ${pk(m.use, j)}`);
   full.innerHTML = `<div class="pw-brief"><i aria-hidden="true">${m.icon}</i><div><p class="pw-kicker">${j ? 'Mission' : 'Mission'} ${i + 1} of 6</p><h2>${esc(pk(m.use, j))}</h2>
-    <p class="pw-job"><b>${j ? 'The real job:' : 'In real life:'}</b> ${esc(pk(m.job, j))}</p><p class="pw-howto"><b>${j ? 'What to do:' : 'Your task:'}</b> ${esc(pk(m.how, j))}</p>
-    <div class="pw-row"><button class="go" type="button" data-act="start">${j ? 'Start ➜' : 'Start ➜'}</button><button type="button" data-act="map">${j ? '← Missions' : '← Missions'}</button></div></div></div>`;
+    <p class="pw-job"><b>${j ? 'The real job:' : 'In real life:'}</b> ${esc(pk(m.job, j))}</p><p class="pw-howto"><b>${j ? 'What to do:' : 'Your task:'}</b> ${esc(pk(m.how, j))}</p>${round ? `<p class="pw-howto"><b>${j ? 'Welcome back:' : 'Resuming:'}</b> ${j ? `you carry on from round ${round + 1}.` : `round ${round + 1}.`}</p>` : ''}
+    <div class="pw-row"><button class="go" type="button" data-act="start">${round ? (j ? 'Carry on ➜' : 'Resume ➜') : 'Start ➜'}</button><button type="button" data-act="map">${j ? '← Missions' : '← Missions'}</button></div></div></div>`;
   d.say(pk(m.job, j), pk(m.how, j)); d.focusFirst('[data-act="start"]');
   return d.press();
 }

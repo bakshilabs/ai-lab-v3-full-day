@@ -37,15 +37,15 @@ export function networkSvg(sw, { flags = null, j = true, cap = 0, battery = fals
 
 const allOn = () => Object.fromEntries(IDS.map((id) => [id, true]));
 
-export async function playStorm(d) {
-  const { j, pick, ctl, kit } = d; let trips = 0;
+export async function playStorm(d, rs = {}) {
+  const { j, pick, ctl, kit } = d; let trips = rs.part?.trips || 0; const from = rs.from || 0; const next = (k) => rs.done?.(k, { trips });
   const groups = homeGroups(kit.homes.length); const whoToId = { north: '1B', medical: '2B', mill: '3A', river: '3B' };
   const town = (sw) => { const L = live(sw); d.view.setHour(21, true); d.view.setLit(kit.homes.map((_, i) => !!L[whoToId[groups[i]]]), !!L['2A']); d.plate(j ? 'Storm night' : 'Storm night', j ? '9 pm' : '21:00'); };
   const meter = (sw, cap) => { const used = loadOf(sw); return `<div class="pw-meter" aria-label="${esc(j ? `Using ${used} of ${cap} blocks` : `Load ${used * KWB} of ${cap * KWB} kW`)}"><i><u style="width:${Math.min(100, (used / cap) * 100).toFixed(0)}%"></u></i><b>${j ? `${used} of ${cap} blocks` : `${used * KWB} / ${cap * KWB} kW`}</b></div>`; };
   const switches = (sw, lockFault) => `<div class="pw-switches" role="group" aria-label="${j ? 'Switches' : 'Switchgear'}">${IDS.map((id) => `<button type="button" data-sw="${id}" aria-pressed="${!!sw[id]}" ${lockFault && id === FAULT ? 'disabled' : ''}><i aria-hidden="true">${WHO_ICON[SECTIONS[id].who]}</i><span><b>${id}</b> ${esc(whoWord(id, j))}${SECTIONS[id].prio ? ` <small>${j ? 'keeps people safe' : 'priority'}</small>` : ''}</span><em>${sw[id] ? (j ? 'On' : 'Closed') : (j ? 'Off' : 'Open')}</em></button>`).join('')}</div>`;
 
   // ---- round 1: a storm is coming. Choose what helps.
-  {
+  if (from <= 0) {
     d.mode('desk', 'switches'); d.report('Storm night: getting ready'); const picked = new Set(); let tries = 0;
     town(allOn());
     const draw = (msg, f) => {
@@ -64,10 +64,10 @@ export async function playStorm(d) {
       draw(m, '[data-prep]');
     }
     d.setTap(null);
-    ctl.innerHTML = `<button class="go" type="button" data-act="next">${j ? 'Here comes the storm ➜' : 'The storm arrives ➜'}</button>`; d.focusFirst('[data-act]'); await d.press();
+    ctl.innerHTML = `<button class="go" type="button" data-act="next">${j ? 'Here comes the storm ➜' : 'The storm arrives ➜'}</button>`; d.focusFirst('[data-act]'); await d.press(); next(1);
   }
   // ---- round 2: find and isolate the fault
-  {
+  if (from <= 1) {
     d.mode('desk', 'switches'); d.report('Storm night: finding the fault'); let sw = r1Start(); let mistakes = 0; const flags = indicators();
     const draw = (msg, f) => { d.side.innerHTML = `<h3>${esc(pick(STORM.r1))}</h3>${switches(sw, false)}`; d.screen.innerHTML = `${networkSvg(sw, { flags, j })}<p class="pw-note">${esc(j ? 'Red flags: the fault went past here.' : 'Red flags: fault passage indicators.')}</p>${msg ? `<p class="pw-msg">${esc(msg)}</p>` : ''}`; ctl.innerHTML = r1Done(sw) ? `<button class="go" type="button" data-act="next">${j ? 'Next round ➜' : 'Next round ➜'}</button>` : `<p>${esc(j ? 'Switch the right one off, then switch the rest back on.' : 'Open the right switch, then restore the healthy section.')}</p>`; town(sw); if (f) d.focusFirst(f); };
     d.say(pick(STORM.r1how)); draw('', '[data-sw="1A"]');
@@ -81,10 +81,11 @@ export async function playStorm(d) {
       });
       d.press().then(res);
     });
+    next(2);
   }
   // ---- round 3: priorities on battery power
-  {
-    d.report('Storm night: who gets power first'); let sw = r2Start(); let tries = 0;
+  if (from <= 2) {
+    d.mode('desk', 'switches'); d.report('Storm night: who gets power first'); let sw = r2Start(); let tries = 0;
     const draw = (msg, f) => { d.side.innerHTML = `<h3>${esc(pick(STORM.r2))}</h3>${switches(sw, true)}`; d.screen.innerHTML = `${networkSvg(sw, { j, cap: BATTERY_ONLY, battery: true })}${meter(sw, BATTERY_ONLY)}${msg ? `<p class="pw-msg">${esc(msg)}</p>` : ''}${r2Done(sw) ? `<p class="pw-note">ℹ️ ${esc(pick(STORM.psr))}</p>` : ''}`; ctl.innerHTML = r2Done(sw) ? `<button class="go" type="button" data-act="next">${j ? 'Next round ➜' : 'Next round ➜'}</button>` : `<p>${esc(j ? 'Who needs power most tonight?' : 'Restore in priority order.')}</p>`; town(sw); if (f) d.focusFirst(f); };
     d.say(pick(STORM.r2how)); draw('', '[data-sw="1A"]');
     await new Promise((res) => {
@@ -98,6 +99,7 @@ export async function playStorm(d) {
       });
       d.press().then(res);
     });
+    next(3);
   }
   // ---- round 4: the crew's safe order, then bring the last homes back one area at a time
   {

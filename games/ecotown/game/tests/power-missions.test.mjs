@@ -2,12 +2,12 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { kitFrom, forecast, runModes, DAY_IDS, isWinter, HOURS } from '../js/modules/power/model.js';
 import { stepSay, BAL, BALANCE_ROUNDS, STEPS, FLEX_MIN, FLEX_MAX, ROUND_GOAL, needFlex, gap, hz, judge, reachable, darkFor, balanceHint, stateWord, clockText } from '../js/modules/power/m1-balance.js';
-import { FORECAST_ROUNDS, hoursOf, checkMarks, spells, shortKwh, peakGapKw, energyChoices, checkSay, energySay } from '../js/modules/power/m2-forecast.js';
+import { FORECAST_ROUNDS, hoursOf, checkMarks, spells, shortKwh, peakGapKw, energyChoices, checkSay, energySay, sureSpells, revealLine } from '../js/modules/power/m2-forecast.js';
 import { STORE_ROUNDS, bestPlan, storeGoal, storeMet, storeHint, planLine, planSpans, storeGoalLine } from '../js/modules/power/m3-storage.js';
 import { batteryWord } from '../js/modules/power/shell.js';
 import { DEMAND_ROUNDS, JOBS, SLOTS, startPlan, layout, solve, minGas, inWindow, runSay, refuseSay, jobSize, DEM } from '../js/modules/power/m5-demand.js';
-import { PREP, PREP_GOOD, prepCheck, prepSay, STORM, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SECTIONS, live, loadOf, indicators, r1Start, r1Flip, r1Done, r2Start, r2Flip, r2Done, r2Best, prioOn, crewSteps, crewShuffled, crewCheck, r3Start, r3Switch, r3Done } from '../js/modules/power/m6-storm.js';
-import { MISSIONS, cleanProgress, packProgress, nextMission, isOpen, allDone, recordLines, practisedLines, madeTitle } from '../js/modules/power/missions.js';
+import { PREP, PREP_GOOD, prepCheck, prepSay, STORM, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SECTIONS, live, loadOf, indicators, r1Start, r1Flip, r1Done, r2Start, r2Flip, r2Done, r2Best, prioOn, crewSteps, crewShuffled, crewCheck, crewWord, crewSay, r3Start, r3Switch, r3Done } from '../js/modules/power/m6-storm.js';
+import { MISSIONS, cleanProgress, packProgress, nextMission, isOpen, allDone, recordLines, practisedLines, madeTitle, doneLines } from '../js/modules/power/missions.js';
 import { hourPicture } from '../js/modules/power/chart.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
 
@@ -157,4 +157,40 @@ test('words: plain, built in, no catching anyone out, no money for ages 8-12', a
   const text = all.join(' ');
   assert.ok(!/catch (her|florence|the ai)|wrong on purpose|trick/i.test(text));
   assert.ok(!/£|\bpence\b|\bcost\b|\bbudget\b|\bcoins?\b/i.test(text), 'no money');
+});
+
+test('round 2 review: nothing for ages 8-12 shows %, kW or £; done cards say "rule" for one rule; progress is kept after every round', async () => {
+  const res = { balance: { level: 22, of: 24 }, forecast: { tries: 1, kwh: false, spells: 4 }, storage: { dark: [1, 3, 2], total: 144 }, rules: { share: 98, diff: 4, lit: 423, total: 432 }, demand: { moved: 9, kwh: 120 }, storm: { trips: 1 } };
+  const bad = /%|kW|£/;
+  for (const m of MISSIONS) {
+    for (const l of doneLines(m.id, res[m.id], true, 1)) assert.doesNotMatch(l, bad, `${m.id} done card (8-12): ${l}`);
+    assert.ok(!doneLines(m.id, res[m.id], false, 1).some((l) => /\b1 rules\b/.test(l)));
+  }
+  assert.match(doneLines('rules', res.rules, true, 4)[0], /^4 rules\. On the test days: 423 of 432 lit hours\.$/);
+  assert.match(doneLines('rules', res.rules, false, 1)[0], /^1 rule;/);
+  const p = cleanProgress({ v: 2, done: Array(6).fill(true), res, rules: { list: [{ when: 'evening', then: 'use' }] } }, true);
+  for (const l of recordLines(p, true).concat(practisedLines(p, true))) assert.doesNotMatch(l, bad, l);
+  // every junior word in the mission files
+  const all = [];
+  const pickJ = (o) => (o && typeof o === 'object' ? ('j' in o && typeof o.j === 'string' ? [o.j] : Object.values(o).flatMap(pickJ)) : []);
+  for (const f of ['m1-balance', 'm2-forecast', 'm3-storage', 'm5-demand', 'm6-storm', 'missions']) { const m = await import(`../js/modules/power/${f}.js`); for (const v of Object.values(m)) all.push(...pickJ(v)); }
+  for (const t of all) assert.doesNotMatch(t, bad, t);
+  // a mission left part-way comes back at its next round
+  const left = cleanProgress(packProgress({ ...cleanProgress(null), cur: { id: 'demand', round: 2, part: { moved: 4, kwh: 40 } } }));
+  assert.deepEqual(left.cur, { id: 'demand', round: 2, part: { moved: 4, kwh: 40 } }); assert.equal(cleanProgress({ cur: { id: 'nope', round: 2 } }).cur, null);
+});
+
+test('round 2 review: the forecast reveal matches the marks, and the permit to work comes after the earths', () => {
+  for (const kit of KITS) for (const d of FORECAST_ROUNDS) {
+    const h = hoursOf(kit, d, 3);
+    for (const sp of sureSpells(h)) { assert.equal(h[sp.from].truth, 'short'); assert.equal(h[sp.to].truth, 'short'); }
+    const rv = revealLine(h, true); const first = sureSpells(h).find((s) => s.from <= rv.worst.i && rv.worst.i <= s.to);
+    assert.ok(first && rv.line.includes('start going dark'), rv.line);
+  }
+  const order = crewSteps(false); const words = order.map((id) => crewWord(id, false));
+  const permit = words.findIndex((w) => /issued a permit/.test(w)); const earths = words.findIndex((w) => /Fit safety earths/.test(w)); const back = words.findIndex((w) => /hands back the permit/.test(w));
+  assert.ok(earths >= 0 && permit >= earths && back > permit, 'permit issued with or after the earths, handed back before they come off');
+  assert.ok(!/permit/.test(crewWord('dead', false)));
+  assert.match(crewSay({ done: true }, 1, false), /earth, permit, repair/);
+  assert.match(MISSIONS[0].how.j, /each one harder/);
 });

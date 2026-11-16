@@ -42,7 +42,7 @@ ${P} .pw-screen h3 { margin: 0; font: 800 1.05em Bricolage, Inter, system-ui, sa
 ${P} .pw-screen h3 small { font: 700 .8em Inter, system-ui, sans-serif; color: #5e4936; margin-left: 8px; }
 ${P} .pw-chart { border-radius: 10px; background: #fffaf0; box-shadow: inset 0 0 0 2px #d2c4ac; padding: 6px 6px 2px; }
 ${P} .pw-chart svg { display: block; width: 100%; height: auto; max-height: 30vh; }
-${P} .pw-key svg { display: block; width: min(100%, 420px); height: auto; }
+${P} .pw-key svg { display: block; width: min(100%, 500px); height: auto; }
 ${P} .pw-lines { margin: 0; padding: 0; list-style: none; font-size: .95em; font-weight: 600; line-height: 1.35; } ${P} .pw-lines li + li { margin-top: 2px; }
 ${P} .pw-lines li.fix { color: #1f5f8a; font-weight: 800; } ${P} .pw-lines li.note { color: #5e4936; font-size: .92em; }
 ${P} .pw-ctl { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
@@ -99,7 +99,7 @@ ${P} .pw-cmp em { font-style: normal; text-align: right; font-variant-numeric: t
 
 ${P} .pw-desk[data-mode="full"] { display: block; overflow: auto; } ${P} .pw-desk[data-mode="full"] > :not(.pw-full) { display: none; } ${P} .pw-desk[data-mode="desk"] > .pw-full { display: none; }
 ${P} .pw-desk:has(> .pw-side.scale) { --side: minmax(250px, 290px); } ${P} .pw-desk:has(> .pw-side.jobs) { --side: minmax(250px, 320px); } ${P} .pw-desk:has(> .pw-side.switches) { --side: minmax(240px, 300px); } ${P} .pw-desk:has(> .pw-side.notes) { --side: minmax(200px, 250px); }
-${P} .pw-side { overflow: auto; display: flex; flex-direction: column; gap: 6px; } ${P} .pw-side h3 { margin: 0; font: 800 1.02em Bricolage, Inter, system-ui, sans-serif; }
+${P} .pw-side { overflow: auto; display: flex; flex-direction: column; gap: 6px; } ${P} .pw-side h3 { margin: 0; font: 800 1.02em Bricolage, Inter, system-ui, sans-serif; position: sticky; top: -8px; z-index: 1; background: #f3e4c6; padding: 2px 0; }
 ${P} .pw-desk > .pw-full { padding: 10px 14px; }
 ${P} .pw-maphead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; } ${P} .pw-maphead h2 { margin: 0; font: 800 1.25em Bricolage, Inter, system-ui, sans-serif; } ${P} .pw-maphead p { margin: 0; font-weight: 700; color: #5e4936; }
 ${P} ol.pw-map { margin: 0 0 8px; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -168,5 +168,5 @@ ${P} .pw-meter { display: grid; grid-template-columns: 1fr auto; gap: 8px; align
   ${P} .pw-switches { grid-template-columns: 1fr 1fr; } ${P} .pw-jobs { grid-template-columns: 1fr 1fr; } ${P} .pw-slots button { min-height: 120px; }
   ${P} .pw-side.scale { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; } ${P} .pw-side.scale .pw-scale { grid-row: span 3; }
 }
-@media (max-width: 560px) { ${P} .pw-slots { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} .pw-slots button { min-height: 96px; } ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { ${P} .pw-desk:has(> .pw-side.scale) > .pw-ctl { order: -1; } ${P} .pw-desk:has(> .pw-side.scale) > .pw-side { order: -2; } ${P} .pw-desk:has(> .pw-side.jobs) > .pw-screen { order: -2; } ${P} .pw-desk:has(> .pw-side.jobs) > .pw-ctl { order: -1; } ${P} .pw-side.scale .pw-blocks { display: none; } ${P} .pw-slots { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} .pw-slots button { min-height: 96px; } ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
 `;

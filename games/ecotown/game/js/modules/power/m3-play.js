@@ -52,9 +52,9 @@ function handDay(d, round, guide) {
 }
 
 // The whole mission. st: the module's state (st.hand is kept for mission 4). Resolves with { dark: [3], total }.
-export async function playStorage(d, st, save) {
-  const { kit, j, pick } = d; const out = { dark: [], total: kit.homes.length * HOURS };
-  for (let r = 0; r < STORE_ROUNDS.length; r++) {
+export async function playStorage(d, st, save, rs = {}) {
+  const { kit, j, pick } = d; const out = { dark: Array.isArray(rs.part?.dark) ? rs.part.dark.slice(0, 3) : [], total: kit.homes.length * HOURS };
+  for (let r = rs.from || 0; r < STORE_ROUNDS.length; r++) {
     const round = { ...STORE_ROUNDS[r], goal: storeGoal(kit, STORE_ROUNDS[r], SEED) };
     let tries = 0;
     for (;;) {
@@ -75,6 +75,7 @@ export async function playStorage(d, st, save) {
       const a = await d.press();
       if (a === 'next') { out.dark[r] = day.darkHours; break; }
     }
+    rs.done?.(r + 1, { dark: out.dark });
   }
   return out;
 }

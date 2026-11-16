@@ -3,12 +3,12 @@
 import { DEMAND_ROUNDS, SLOTS, JOBS, BLOCK_KW, slotClock, startPlan, layout, solve, inWindow, DEM, jobName, jobNeed, jobSize, slotWord, slotShort, refuseSay, runSay, demDay, demNote } from './m5-demand.js';
 import { esc } from './shell.js';
 
-export async function playDemand(d) {
-  const { j, pick, ctl } = d; let moved = 0, kwh = 0;
-  for (let r = 0; r < DEMAND_ROUNDS.length; r++) {
+export async function playDemand(d, rs = {}) {
+  const { j, pick, ctl } = d; let moved = rs.part?.moved || 0, kwh = rs.part?.kwh || 0;
+  for (let r = rs.from || 0; r < DEMAND_ROUNDS.length; r++) {
     const round = DEMAND_ROUNDS[r]; const plan = startPlan(round); const habit = { ...plan }; const ids = round.jobs.map(([id]) => id);
     let sel = ids[0]; let tries = 0; let star = null; const best = solve(round);
-    d.mode('desk', 'jobs'); d.report(`Smart demand: day ${r + 1} of 3`);
+    d.mode('desk', 'jobs'); d.report(`Smart demand: day ${r + 1} of ${DEMAND_ROUNDS.length}`);
     const showSlot = (s) => { const c = slotClock(s); d.view.setHour(c + 1, round.id === 'scarce' || round.id === 'shift'); d.view.setLit(d.allLit(), true); const t = pick(DEM.round[round.id]).replace(/^Day \d of \d: /, ''); d.plate(t.charAt(0).toUpperCase() + t.slice(1), slotWord(s, j)); };
     const drawJobs = (f) => {
       const l = layout(round, plan);
@@ -65,6 +65,7 @@ export async function playDemand(d) {
     const last = r === DEMAND_ROUNDS.length - 1;
     ctl.innerHTML = `<p class="pw-sum ok">✓ ${layout(round, plan).gas ? (j ? 'The least gas possible' : 'Minimum gas') : (j ? 'Every job on clean power' : 'All flexible demand on renewables')}</p><button class="go" type="button" data-act="next">${last ? 'Finish the mission ➜' : 'Next day ➜'}</button>`; d.focusFirst('[data-act]');
     await d.press();
+    rs.done?.(r + 1, { moved, kwh });
   }
   return { moved, kwh };
 }

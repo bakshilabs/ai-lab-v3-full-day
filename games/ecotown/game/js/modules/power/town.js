@@ -17,7 +17,7 @@ export function show(townCtx, data) {
   const cells = townCtx.town?.cells; const tiles = townCtx.town?.terrain?.tiles;
   let kit; try { kit = kitFrom(cells, tiles); } catch { return nothing; }
   const top = (k) => { try { return k ? world.tileTop(k) : null; } catch { return null; } };
-  const homes = kit.homes.map((h, i) => ({ i, pos: h.practice ? null : top(h.k) })).filter((h) => h.pos);
+  const homes = kit.homes.map((h, i) => ({ i, pos: top(h.k) })).filter((h) => h.pos); // practice homes (lent to a small town) get a lantern on their plot too
   const days = { still: runRules(kit, 'still', rules), winter: runRules(kit, 'winter', rules) };
   const group = new THREE.Group(); group.name = 'power-town'; scene.add(group); const bin = []; const keep = (x) => { bin.push(x); return x; };
   const box = keep(new THREE.BoxGeometry(1, 1, 1)); const lam = (c) => keep(new THREE.MeshLambertMaterial({ color: c })); const flat = (c) => keep(new THREE.MeshBasicMaterial({ color: c }));

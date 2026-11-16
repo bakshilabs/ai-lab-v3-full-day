@@ -162,6 +162,7 @@ export function signSpot(cells, tiles, kit) {
   const list = Array.isArray(cells) ? cells : []; const all = tiles instanceof Map ? [...tiles.values()] : Array.isArray(tiles) ? tiles : [];
   const used = new Set(list.filter(([, c]) => c && (c.item || c.mark)).map(([k]) => k)); const from = kit?.gens?.[0] || kit?.school?.k; if (!from) return null;
   const [fx, fz] = xy(from); const far = (t) => Math.hypot(t.gx - fx, t.gz - fz);
-  const open = all.filter((t) => t && !t.fixed && !t.hedge && OPEN_ZONES.includes(t.zone) && !used.has(t.k) && far(t) > 0).sort((a, b) => far(a) - far(b) || (a.k < b.k ? -1 : 1));
+  const lent = new Set((kit?.homes || []).map((h) => h.k)); // not on a practice home's plot: it has a lantern
+  const open = all.filter((t) => t && !t.fixed && !t.hedge && OPEN_ZONES.includes(t.zone) && !used.has(t.k) && !lent.has(t.k) && far(t) > 0).sort((a, b) => far(a) - far(b) || (a.k < b.k ? -1 : 1));
   return open.length ? open[0].k : null;
 }
