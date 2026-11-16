@@ -20,8 +20,8 @@ export async function playAccess(env) {
     const pic = (cap) => `${captionPic(c.art, cap)}<p class="fm-hear"><span aria-hidden="true">🔊</span> ${esc(c.hear)}</p>`;
     const res = await mui.ask({ head: { kick: again ? 'Captions · again' : 'Captions', step: [i + 1, caps.length] }, item: c, pic: pic(''), cols: 1, limit: mui.LIMIT, reveal: again,
       onRight: () => { const f = ctx.root.querySelector('.fm-qpic'); if (f) f.innerHTML = pic(c.caption); } });
-    if (!res.missed) { r.caps++; if (res.tries === 0 && !again) r.first++; } return res;
-  });
+    if (!res.missed && !res.revealed) { r.caps++; if (res.tries === 0 && !again) r.first++; } return res;
+  }, { more: true });
 
   // ---- build a caption from tiles: who speaks, what they say, how, and the sound
   await mui.note({ kick, title: part('build').title, lines: [part('build').line], btn: 'Start ➜', stage: 'part-build' });
@@ -38,7 +38,7 @@ export async function playAccess(env) {
     ctx.report({ stage: `For everyone: descriptions, ${i + 1} of ${descs.length}` });
     const res = await mui.ask({ head: { kick: again ? 'Described version · again' : 'Described version', step: [i + 1, descs.length] }, item: d, cols: 1, limit: mui.LIMIT, reveal: again,
       pic: `${shotPic(d.art)}<p class="fm-hear"><span aria-hidden="true">🔇</span> No talking here: a gap for the description.</p>` });
-    if (!res.missed) { r.descs++; if (res.tries === 0 && !again) r.first++; } return res;
+    if (!res.missed && !res.revealed) { r.descs++; if (res.tries === 0 && !again) r.first++; } return res;
   });
 
   // ---- the version for everyone: each picture with its caption, or its description written and read aloud

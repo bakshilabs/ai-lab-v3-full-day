@@ -46,6 +46,7 @@ export function restoreHour(saved) {
   for (let i = 1; i < st.done.length; i++) if (!st.done[i - 1]) st.done[i] = false;
   for (const id of MISSION_IDS) if (saved.res?.[id] && st.done[MISSION_IDS.indexOf(id)]) st.res[id] = clean(saved.res[id]);
   st.m3 = saved.m3 && typeof saved.m3 === 'object' ? saved.m3 : null;
+  st.m4 = Array.isArray(saved.m4) ? saved.m4.filter((p) => ['takes', 'trim', 'pace', 'music'].includes(p)) : null; // mission 4's finished parts
   return st;
 }
 export const isOpen = (st, i) => i === 0 || !!st.done[i - 1];
@@ -64,7 +65,7 @@ export const mapLine = (st, j) => {
 export const lockedLine = (i) => `Finish mission ${i} first. The missions open in order.`;
 
 // ---- the record. One line a mission, from what the child did. res keys are set by each mission's play file.
-export const num = (n) => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'][n] ?? String(n);
+export const num = (n) => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four'][n] ?? String(n);
 export function hourLines(st, m3Line) {
   const r = st.res; const out = [];
   if (r.crew) out.push(`Crew words: named ${num(r.crew.of)} shots and moves${r.crew.seq ? `, and planned ${num(r.crew.seq)} two-shot sequences` : ''}.`);

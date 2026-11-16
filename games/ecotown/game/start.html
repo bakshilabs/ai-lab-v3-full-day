@@ -27,7 +27,7 @@
   .welcome img { width: 150px; height: 150px; object-fit: contain; }
   .welcome h2 { margin: 0 0 4px; font: 800 1.7rem Bricolage, Inter, sans-serif; } .welcome p { margin: 0; font-weight: 600; color: var(--ink2); }
   .go { display: inline-block; background: var(--green); color: #fff; font-weight: 800; border-radius: 16px; padding: 12px 20px; box-shadow: inset 0 -4px 0 var(--greend); white-space: nowrap; }
-  .parts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   a.card.part { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px; min-height: 330px; }
   .part .num { position: absolute; left: -8px; top: -10px; width: 44px; height: 44px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font: 800 1.3rem Bricolage, Inter, sans-serif; box-shadow: 0 3px 0 #17233a; }
   .part .pic { height: 96px; border-radius: 16px; display: grid; place-items: center; font-size: 3.6rem; background: #e9f3e4; box-shadow: inset 0 0 0 2px #cfe2c4; } .part .pic img { height: 88px; }
@@ -48,12 +48,12 @@
   <header>
     <span class="chip">A DELTAOPS LEARNING AI LAB</span>
     <h1>Eco Town, <span>today and tomorrow</span></h1>
-    <p>Plan a town with an AI helper. Then work with the machines of its future: a delivery drone, a robot you train, and streets for self-driving cars.</p>
+    <p>Plan a town with an AI helper. Then work with the machines of its future: drones and robots at work, self-driving cars, a film studio and the power control room.</p>
     <p class="badge" data-badge></p>
   </header>
   <a class="card welcome" data-part="welcome" href="index.html?welcome=1">
     <img src="img/florence.png" alt="Florence, a wooden robot">
-    <div><h2>Start here: welcome</h2><p>A short film about the four parts of today, and how to get around in each one. About two minutes.</p><span class="state" data-state="welcome">Not watched yet</span></div>
+    <div><h2>Start here: welcome</h2><p>A short film about the six parts of today, and how to get around in each one. About two minutes.</p><span class="state" data-state="welcome">Not watched yet</span></div>
     <span class="go">▶ Watch the welcome</span><span class="nexttag">Start here</span>
   </a>
   <div class="parts" data-parts></div>

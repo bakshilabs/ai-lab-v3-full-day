@@ -19,7 +19,7 @@ export async function openTakeHome(app, data) {
       <p class="thtop">Eco Town · ${esc(page.date)}</p><h1>${esc(page.title)}</h1>
       <p class="thname">Made by <span></span></p>
       <section class="thtown"><div>${map ? `<img class="thmap" alt="A map of the town" src="${map}">` : ''}</div><div><h2>${esc(page.town.heading)}${page.town.name ? `: ${esc(page.town.name)}` : ''}</h2>${list(page.town.made)}<h3>I practised</h3>${list(page.town.practised)}</div></section>
-      ${page.modules.map((m) => `<section class="thmod"><div class="thpic">${safePic(modulePicture(m.id))}</div><div><h2>${esc(m.icon)} ${esc(m.heading)}</h2><p class="thmade"><b>${esc(m.title)}</b></p>${list(m.lines)}<h3>I practised</h3>${list(m.practised)}</div></section>`).join('')}
+      <div class="thmods" data-n="${page.modules.length}">${page.modules.map((m) => `<section class="thmod"><div class="thpic">${safePic(modulePicture(m.id))}</div><div><h2>${esc(m.icon)} ${esc(m.heading)}</h2><p class="thmade"><b>${esc(m.title)}</b></p>${list(m.lines)}<h3>I practised</h3>${list(m.practised).replace('<ul>', '<ul class="thprac">')}</div></section>`).join('')}</div>
       <section class="thask"><h2>Ask me at home</h2><p>${esc(page.ask)}</p></section>
       <p class="thfoot">${esc(page.foot)}</p>
     </div></div>`);

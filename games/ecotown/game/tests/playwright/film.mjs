@@ -71,7 +71,7 @@ checks.lightBack = await lightOk(); checks.sceneAfterLeaving = (await filmNames(
 // ---------- play the hour
 await open();
 let mission = '', missions = 0, asks = 0, wrongTried = 0, wrongGaveAway = 0; const seen = new Set(); const wrongLines = []; const story = {}; const m3 = { plays: 0, fed: false };
-let paceFastTried = false; const setAside = []; let cameBack = 0; const builds = []; let resumedChecked = false; const missionTimes = {}; let t0 = Date.now();
+let paceFastTried = false; let lastAside = null; let asideNext = 0; const setAside = []; let cameBack = 0; const builds = []; let resumedChecked = false; const missionTimes = {}; let t0 = Date.now();
 const firstLook = async (key, wait) => { if (seen.has(key)) return; seen.add(key); await shot(key, wait); await checkLayout(key); };
 for (let guard = 0; guard < 900; guard++) {
   if (await p.evaluate(() => window.__filmDone)) break;
@@ -96,16 +96,23 @@ for (let guard = 0; guard < 900; guard++) {
     asks++; await p.waitForSelector('#module [data-fm-ask]'); await firstLook(`${mission}-ask`, mission === 'crew' ? 1500 : 500);
     // every ninth question with three or more choices: two wrong answers. The question is set aside (no answer shown)
     // and comes back at the end of its part.
-    const nOpts = (await p.$$('#module [data-fm-opt]')).length; const kickNow = await p.textContent('#module .fm-qhead .fm-kick').catch(() => '');
-    if (asks % 9 === 4 && nOpts >= 3 && !/again/.test(kickNow)) {
-      const wrong = await p.$$eval('#module [data-fm-opt]:not([data-fm-right])', (els) => els.map((e) => e.dataset.fmOpt));
-      for (const w of wrong.slice(0, 2)) await click(`#module [data-fm-opt="${w}"]`);
-      setAside.push({ said: await said(), shown: !!(await p.$('#module .fm-opt.right')), next: !!(await p.$('#module [data-fm-next]:not([hidden])')) }); await firstLook(`${mission}-set-aside`, 300);
-      await click('#module [data-fm-next]'); continue;
+    const nOpts = (await p.$$('#module [data-fm-opt]')).length; const lastOfList = await p.evaluate(() => { const d = [...document.querySelectorAll('#module [data-fm-ask] .fm-dots i')]; return d.length > 1 && d.every((i) => i.classList.contains('on')); }); const kickNow = await p.textContent('#module .fm-qhead .fm-kick').catch(() => '');
+    if ((asks % 9 === 4 || (process.env.ASIDE_LAST === '1' && lastOfList)) && nOpts >= 3 && !/again/.test(kickNow)) {
+      // wrong tiles until it is set aside: one miss on three choices, two on four or more
+      const qText = await p.textContent('#module [data-fm-ask] h2'); let misses = 0; const rightN = (await p.$$('#module [data-fm-right]')).length;
+      for (const w of await p.$$eval('#module [data-fm-opt]:not([data-fm-right])', (els) => els.map((e) => e.dataset.fmOpt))) {
+        if (await p.$('#module [data-fm-next]:not([hidden])')) break; await click(`#module [data-fm-opt="${w}"]`); misses++;
+      }
+      setAside.push({ q: qText, misses, opts: nOpts, rightN, said: await said(), shown: !!(await p.$('#module .fm-opt.right')), left: (await p.$$('#module [data-fm-opt]:not(.off)')).length, next: !!(await p.$('#module [data-fm-next]:not([hidden])')) });
+      await firstLook(`${mission}-set-aside`, 300); await click('#module [data-fm-next]'); lastAside = qText; continue;
     }
     if (/again/.test(kickNow)) cameBack++;
+    // a question set aside never comes straight back on the very next screen
+    if (lastAside) { if (/again/.test(kickNow) && (await p.textContent("#module [data-fm-ask] h2")) === lastAside && /at the end|after the next question/.test(setAside[setAside.length - 1].said)) asideNext++; lastAside = null; } // many questions share a heading: the "again" mark tells
     // every other question: one wrong answer first. Florence says why, and the right one is still to find.
-    if (asks % 2 === 0) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right')) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
+    // (only where one miss does not set it aside: four choices or more, or a question already on its second go)
+    if (asks % 2 === 0 && (nOpts >= 4 || /again/.test(kickNow))) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right') && !/The answer is/.test(line)) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
+    if (await p.$('#module [data-fm-next]:not([hidden])')) { await click('#module [data-fm-next]'); continue; } // shown with its reason after a second go
     await click('#module [data-fm-right]'); if (mission === 'crew' && asks > 10 && !seen.has('crew-scene-filmed')) await firstLook('crew-scene-filmed', reduce ? 800 : 3500);
     if (!seen.has(`${mission}-right`)) await firstLook(`${mission}-right`, 300);
     await click('#module [data-fm-next]'); continue;
@@ -166,7 +173,7 @@ for (let guard = 0; guard < 900; guard++) {
   }
   await p.waitForTimeout(300);
 }
-checks.setAside = setAside; checks.cameBack = cameBack; checks.builds = builds; checks.missionTimesSecs = missionTimes; checks.asks = asks; checks.wrongTried = wrongTried; checks.wrongGaveAway = wrongGaveAway; checks.wrongLines = wrongLines.slice(0, 6); checks.storyHints = Object.fromEntries(Object.entries(story).filter(([k]) => /Hint/.test(k)));
+checks.setAside = setAside; checks.asideCameStraightBack = asideNext; checks.cameBack = cameBack; checks.builds = builds; checks.missionTimesSecs = missionTimes; checks.asks = asks; checks.wrongTried = wrongTried; checks.wrongGaveAway = wrongGaveAway; checks.wrongLines = wrongLines.slice(0, 6); checks.storyHints = Object.fromEntries(Object.entries(story).filter(([k]) => /Hint/.test(k)));
 
 if (only >= 6) {
   // ---------- the record, "Talk it over" and the break
@@ -197,7 +204,7 @@ const endOk = only < 6 || (checks.finished === true && checks.lines?.length === 
   && checks.sceneAfter === 'film-screen' && checks.lightBackAtEnd && checks.moduleLayerGone && checks.againAllTicked === 6 && checks.saved.bytes < 8000);
 const ok = endOk && checks.mapFirst.done === 0 && checks.mapFirst.locked === 5 && /open in order/.test(checks.lockedLine) && checks.leftEarly === false && checks.lightBack && checks.sceneAfterLeaving === ''
   && (only < 3 || (checks.beforeLeaving === 2 && checks.afterComingBack === 2 && checks.replayOffered)) && wrongTried > 0 && wrongGaveAway === 0
-  && setAside.length > 0 && setAside.every((x) => !x.shown && x.next && /comes back/.test(x.said)) && cameBack >= setAside.length && (only < 5 || builds.length === (band === 'junior' ? 1 : 2))
+  && setAside.length > 0 && setAside.every((x) => !x.shown && x.next && x.misses === Math.max(1, x.opts - x.rightN - 1) && x.left - x.rightN >= 1 && /comes back|come back/.test(x.said)) && asideNext === 0 && cameBack >= setAside.length && (only < 5 || builds.length === (band === 'junior' ? 1 : 2))
   && !layoutBad.length && !errors.length && !outside.length;
 console.log(JSON.stringify({ ok, band, reduce, size: `${W}x${H}`, empty, full, large, checks, layoutBad, errors, outside, shots: shots.length }, null, 2));
 await b.close();

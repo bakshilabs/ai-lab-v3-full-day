@@ -8,6 +8,9 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const pick = (v, j) => (v && typeof v === 'object' ? (j ? v.j : v.s) : v);
 // the browser test reads the answer from the page (never shown): only when it asks for it
 const testing = () => !!globalThis.__filmTest;
+// How many misses before a question is set aside: two tiles must still be open, and at least one of them wrong, so
+// the answer is never the only thing left (one miss on three choices; two on four with one answer, one on four with two).
+export const missLimit = (item) => Math.max(1, item.opts.length - (item.answers?.length || 1) - 1);
 
 export function createMissionUi(ctx, ui, { junior, onPanel }) {
   const root = ctx.root; let panel = null;
@@ -71,6 +74,10 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   // limit: after this many misses the question stops (so tapping every tile cannot win). It resolves { missed: true }
   // and the caller brings it back later; with reveal, Florence shows the answer and explains it instead.
   async function ask({ head = {}, item, pic = '', picLabel = '', tools = [], wide = false, cols = 0, onRight = null, limit = Infinity, reveal = false }) {
+    // a set-aside question comes back with its tiles in a new order (moved round by one)
+    if (reveal && item.opts.length > 1) item = { ...item, opts: [...item.opts.slice(1), item.opts[0]] };
+    // how many misses before it stops: two tiles must still be left (one miss on three choices, two on four)
+    const lim = limit === Infinity ? Infinity : missLimit(item); const soon = lastInQueue && !holdNext;
     let misses = 0; let chosen = null; let outcome = {}; const off = new Set(); const imgs = item.opts.some((o) => o.pic);
     const isRight = (id) => (item.answers ? item.answers.includes(id) : id === item.answer); // some questions have more than one good answer
     const p = put(`<section class="fm-m fm-ask ${pic ? 'has-pic' : ''} ${wide ? 'wide' : ''}" data-fm-ask aria-label="${esc(item.q)}">
@@ -97,12 +104,12 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
         const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
       } else {
         misses++; off.add(id); mark(id, 'off', 'Not this one');
-        if (misses >= limit) { // even if only the answer is left: tapping every tile must not win
+        if (misses >= lim) { // two tiles are still left: tapping every tile must not win
           for (const x of p.querySelectorAll('[data-fm-opt]')) x.disabled = true;
           if (reveal) { // the second time round: show the answer, and why
             const r = item.opts.find((x) => isRight(x.id)); mark(r.id, 'right', 'This one'); chosen = r.id; outcome = { revealed: true };
             talk(`${o?.why || 'Not this one.'} The answer is “${r.label}”. ${item.ok}`);
-          } else { outcome = { missed: true }; talk(`${o?.why || 'Not this one.'} Let’s leave this one for now. It comes back at the end, so look out for it.`); }
+          } else { outcome = { missed: true }; talk(`${o?.why || 'Not this one.'} ${soon ? 'Let’s come back to this one in a moment, with fresh eyes.' : holdNext ? 'Let’s leave this one for now. It comes back after the next question.' : 'Let’s leave this one for now. It comes back at the end, so look out for it.'}`); }
           const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
           return;
         }
@@ -113,11 +120,25 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   }
 
   // ---- a list of questions. run(item, i, again) asks one (passing limit and reveal on to ask); a question missed
-  // twice is set aside and asked again at the end, once, with the answer shown if it is missed twice again.
-  async function askList(items, run) {
-    const queue = items.map((it, i) => ({ it, i, again: false })); const out = [];
-    while (queue.length) { const q = queue.shift(); const r = await run(q.it, q.i, q.again); if (r.missed && !q.again) { queue.push({ ...q, again: true }); continue; } out.push({ i: q.i, again: q.again, ...r }); }
+  // (once on three choices, twice on four or more) is set aside and asked again at the end, once, with the answer shown if it is missed twice again.
+  // more: another list of questions follows in this mission. Then the last question of this list, if it is set
+  // aside, is held and asked after the first question of the next list, not straight away.
+  let lastInQueue = false; let holdNext = false; let held = []; let lists = 0;
+  async function askList(items, run, { more = false } = {}) {
+    const me = ++lists; const queue = items.map((it, i) => ({ it, i, again: false })); const out = [];
+    while (queue.length) {
+      const q = queue.shift(); lastInQueue = queue.length === 0; holdNext = lastInQueue && more;
+      const r = await run(q.it, q.i, q.again); lastInQueue = false; holdNext = false;
+      if (r.missed && !q.again) { if (more && queue.length === 0) held.push({ ...q, again: true, run, me }); else queue.push({ ...q, again: true }); }
+      else out.push({ i: q.i, again: q.again, ...r });
+      await flushHeld(me); // a question held from an earlier list comes back after this list's first question
+    }
     return out;
+  }
+  // ask the questions held from earlier lists (all of them, when the mission ends)
+  async function flushHeld(notFrom = 0) {
+    const now = held.filter((h) => h.me !== notFrom); held = held.filter((h) => h.me === notFrom);
+    for (const h of now) await h.run(h.it, h.i, true);
   }
   const LIMIT = 2;
 
@@ -137,7 +158,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   function custom(html, stage) { return put(html, stage); }
 
   addEventListener('resize', measure);
-  return { map, intro, outro, ask, askList, LIMIT, note, custom, clear, measure, say: talk, off() { clear(); removeEventListener('resize', measure); } };
+  return { map, intro, outro, ask, askList, flushHeld, LIMIT, note, custom, clear, measure, say: talk, off() { clear(); removeEventListener('resize', measure); } };
 }
 
 const M = '#module[data-module="film"]';
@@ -198,6 +219,7 @@ ${M} .fm-opt:active:not(:disabled), ${M} .fm-mcard:active:not([aria-disabled]) {
 
 ${M} .fm-hear { margin: 8px 0 0; padding: 7px 11px; border-radius: 10px; background: #f3e6cc; font-weight: 700; line-height: 1.35; }
 ${M} .fm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+${M} .fm-pair figure { margin: 0; } ${M} .fm-pair figcaption { margin-top: 4px; text-align: center; font-weight: 800; }
 ${M} .fm-qpic .fm-pair svg { box-shadow: 0 0 0 2px #3b2a1e; }
 ${M} .fm-story h2, ${M} .fm-trim h2, ${M} .fm-pace h2 { margin-bottom: 8px; }
 ${M} .fm-slots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--fm-n), minmax(0, 1fr)); gap: 8px; }

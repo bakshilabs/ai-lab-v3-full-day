@@ -84,7 +84,7 @@ export function titleChoices(brief, set, mood = brief.mood) {
 export const filmTitle = (st, set) => { const all = titleChoices(st.brief, set, st.cut?.mood || st.brief.mood); return all[st.title] || all[0]; };
 
 // ---- the film itself
-export const CREDIT = 'Directed by a town planner · Camera by Florence';
+export const CREDIT = 'Directed by you · Camera by Florence';
 export const THE_END = 'The end';
 export const shotCount = (i, n) => `Shot ${i + 1} of ${n}`;
 

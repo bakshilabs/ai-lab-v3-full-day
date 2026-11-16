@@ -5,7 +5,7 @@
 export const MODULE_IDS = ['drone', 'robots', 'roads', 'film', 'power'];
 // Modules shown on the board in the game. A module is added here only once it is built and merged, so a child never
 // meets a placeholder. (film and power were added to the contract on 15 Nov 2026; the interface did not change.)
-export const ON_BOARD = ['drone', 'robots', 'roads'];
+export const ON_BOARD = ['drone', 'robots', 'roads', 'film', 'power'];
 export const CONTRACT = 1;
 
 const text = (v, max) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '');

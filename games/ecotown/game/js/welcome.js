@@ -1,5 +1,5 @@
 // The welcome: a short animated film made live with the game's own island and Florence, then a guide to getting
-// around each of the four parts. Opened from the start page (index.html?welcome=1 in a copy run from source).
+// around each of the six parts. Opened from the start page (index.html?welcome=1 in a copy run from source).
 // It needs no town and saves only that it has been seen. Nothing typed, nothing sent.
 import * as THREE from 'three';
 import { h, esc } from './ui/ui.js';
@@ -62,7 +62,7 @@ export async function runWelcome({ stage, world, life, terrain, bot, app }) {
 
   // 1. the opening card (a tap here also lets the browser play sound)
   await new Promise((res) => {
-    root.innerHTML = `<div class="wcard"><h1>Welcome to the <span>AI Lab</span></h1><p>A short film shows you the four parts of today. Then you will see how to get around in each one.</p>
+    root.innerHTML = `<div class="wcard"><h1>Welcome to the <span>AI Lab</span></h1><p>A short film shows you the six parts of today. Then you will see how to get around in each one.</p>
       <div class="wend"><button data-skip>Skip the film</button><button class="go" data-play>▶ Play the welcome film</button></div></div>`;
     root.querySelector('[data-play]').onclick = () => res('play'); root.querySelector('[data-skip]').onclick = () => res('skip'); root.querySelector('[data-play]').focus();
   }).then(async (a) => {
@@ -82,10 +82,10 @@ export async function runWelcome({ stage, world, life, terrain, bot, app }) {
   });
   // 3. how to get around
   seen(); view = orbit(R * 2.3, R * 1.25, 1.5, 2.4); t0 = performance.now(); dur = 40000;
-  root.innerHTML = `<div class="wcard"><h1>How to get <span>around</span></h1><p>Four parts, in this order. Each one tells you what to do as you go.</p>
+  root.innerHTML = `<div class="wcard"><h1>How to get <span>around</span></h1><p>Six parts, in this order. Each one tells you what to do as you go.</p>
     <div class="wguide">${PARTS.map((p) => `<section><h3><b>${p.n}</b>${esc(p.icon)} ${esc(p.title)}${p.time ? ` <small style="font-weight:600;color:#6f5f53">· ${esc(p.time)}</small>` : ''}</h3><ul>${p.how.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>`).join('')}</div>
     <div class="weach"><b>In every part</b><ul>${EVERYWHERE.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-    <div class="wend"><button data-hub>All four parts</button><button class="go" data-start>Start part 1: Eco Town ➜</button></div></div>`;
-  speak('Four parts, in this order. Each one tells you what to do as you go.', { voice: 'narrator' });
+    <div class="wend"><button data-hub>All six parts</button><button class="go" data-start>Start part 1: Eco Town ➜</button></div></div>`;
+  speak('Six parts, in this order. Each one tells you what to do as you go.', { voice: 'narrator' });
   root.querySelector('[data-hub]').onclick = () => leave(HUB); root.querySelector('[data-start]').onclick = () => leave(GAME + PARTS[0].query); root.querySelector('[data-start]').focus();
 }

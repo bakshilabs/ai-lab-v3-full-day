@@ -1,4 +1,4 @@
-// The AI Lab series: one welcome and four parts. The start page (start.html, js/hub.js), the welcome film
+// The AI Lab series: one welcome and six parts. The start page (start.html, js/hub.js), the welcome film
 // (js/welcome.js) and the tests all read this one list. Pure: no page, no 3D. tests/series.test.mjs.
 export const WELCOME_KEY = 'ecotown.welcome'; export const SAVE_KEY = 'ecotown.save.v3';
 
@@ -16,6 +16,12 @@ export const PARTS = [
   { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', time: 'about an hour', query: '?module=roads',
     blurb: 'Six jobs behind a self-driving car: its sensors, labelling pictures, rules of the road, testing, a shared fleet and redesigning the street.',
     how: ['Pick a mission on the map. They open one after another.', 'Choose, label or set things, then press Run or Test to see what the car does.', 'Every mission says the real job first, and what you can now do at the end.'] },
+  { id: 'film', n: 5, icon: '🎬', title: 'Town film studio', time: 'about an hour', query: '?module=film',
+    blurb: 'Six jobs in film and TV: naming shots, storyboarding, directing, editing, captions for everyone, and checking if a picture is real.',
+    how: ['Pick a mission on the map. They open one after another.', 'Tap a card or a tile to choose, then press Film or Watch to see it.', 'Every mission says the real job first, and what you can now do at the end.'] },
+  { id: 'power', n: 6, icon: '⚡', title: 'Power control room', time: 'about an hour', query: '?module=power',
+    blurb: 'Six jobs in a control room: balancing the grid, forecasting, batteries, writing rules, moving demand, and a storm night.',
+    how: ['Pick a mission on the map. They open one after another.', 'Use the buttons and tiles on the desk, then press Run to try your plan.', 'Every mission says the real job first, and what you can now do at the end.'] },
 ];
 export const EVERYWHERE = ['“Back to my town” at the top left always takes you back.', 'The speaker button reads the words aloud.', 'Stuck? Tell your leader your badge name.'];
 
@@ -27,6 +33,8 @@ export const SCENES = [
   { id: 'drone', view: 'low', part: 'drone', icon: '🚁', title: 'Part 2: Drones at work', say: 'Next, put drones to work. Check them, fly them, deliver, map a farm, inspect a turbine, and search for someone lost.' },
   { id: 'robots', view: 'street', part: 'robots', icon: '🤖', title: 'Part 3: Robots at work', say: 'Then put robots to work. Choose their sensors, program an arm, write safety rules, teach them, and design a rescue robot.' },
   { id: 'roads', view: 'road', part: 'roads', icon: '🚗', title: 'Part 4: Self-driving cars', say: 'Then work on self-driving cars. Give them sensors, teach them, set their rules, test them, plan a fleet and redesign the street.' },
+  { id: 'film', view: 'town', part: 'film', icon: '🎬', title: 'Part 5: Town film studio', say: 'Then make a film of the town. Plan the shots, direct Florence, edit, add captions, and check what is real.' },
+  { id: 'power', view: 'high', part: 'power', icon: '⚡', title: 'Part 6: Power control room', say: 'Last, run the power control room. Keep the lights on, plan for the weather, and get through a storm night.' },
   { id: 'page', view: 'high', icon: '📄', title: 'Take it home', say: 'At the end you take home a page that shows what you made. Ready? Let us see how to get around.' },
 ];
 
@@ -38,7 +46,7 @@ export function progress(save, welcomeSeen = false) {
     welcome: welcomeSeen ? 'done' : 'new', hasTown: !!(save && save.cells && save.band),
     town: state(labs >= 6 || !!save?.sessionDone || !!save?.completeShown, !!(save && save.cells && (save.cells.length || labs))),
     townNote: labs ? `${labs} of 6 missions done` : '',
-    drone: state(!!mods.drone?.done, !!mods.drone), robots: state(!!mods.robots?.done, !!mods.robots), roads: state(!!mods.roads?.done, !!mods.roads),
+    ...Object.fromEntries(PARTS.filter((p) => p.id !== 'town').map((p) => [p.id, state(!!mods[p.id]?.done, !!mods[p.id])])),
     // what to do next: the welcome, then the parts in order
     next: !welcomeSeen ? 'welcome' : (PARTS.find((p) => state(p.id === 'town' ? (labs >= 6 || !!save?.sessionDone || !!save?.completeShown) : !!mods[p.id]?.done, false) !== 'done')?.id || null),
   };
@@ -57,7 +65,7 @@ export const TALK = {
   roads: { j: ['Which sensor would you trust in fog, and why does a car need more than one?', 'Which pictures were hardest to label, and why did they matter?', 'Which rule of the road did you set, and who does it keep safe?', 'Who did your street work well for, and who did it not?'],
     s: ['What did the car get wrong before you labelled the hard cases?', 'In testing, why change only one setting at a time?', 'How many cars did your fleet need, and what did you trade off?', 'Should a town plan for self-driving cars before it knows how people will use them?'] },
   film: { j: ['Which shot would you use to show how someone feels: wide or close-up? Why?', 'Why does a story need a beginning, a middle and an end?', 'How do captions help someone watch your film?', 'How can you tell if a picture is true or made up, and why must you ask before filming someone?'],
-    s: ['How did the length of your shots change the mood of the edit?', 'What made your feedback to Florence useful?', 'Who are captions and audio description for, and what makes them good?', 'When does changing a picture become misleading?', 'Who made the film: you, Florence, or both? What should you say in the credits?'] },
+    s: ['How did the length of your shots change the mood of the edit?', 'Who are captions and audio description for, and what makes them good?', 'When does changing a picture become misleading?', 'Who made the film: you, Florence, or both? What should you say in the credits?'] },
   power: { j: ['Why must the power made always match the power used?', 'How did the forecast help you plan for a short spell?', 'Which jobs did you move to a windy or sunny time, and did people still get what they needed?', 'On storm night, who got power first, and why?'],
     s: ['What is the difference between kW and kWh, and where did it matter today?', 'Where did your automation rules have a gap, and how did testing show it?', 'How did moving demand compare with storing power in the battery?', 'Who should decide the order power comes back after a storm: people or the machine?'] },
 };
@@ -88,8 +96,5 @@ export const JOBS = {
     ['☀️', 'Renewable energy technician', 'Looks after wind turbines, solar panels and batteries.', 'Installs and maintains turbines, solar panels and batteries.'],
     ['🌩️', 'Emergency planner', 'Plans what to do when storms or floods hit.', 'Plans who gets help first in an emergency and how to restore services safely.']],
 };
-// The whole day in order (docs/full-day-plan.md). Parts not on the start page yet are still named on the break screen,
-// so the break after Self-driving cars never says the day is over.
-const LATER = [{ id: 'film', icon: '🎬', title: 'Town film studio' }, { id: 'power', icon: '⚡', title: 'Power control room' }];
-export const dayParts = () => [...PARTS, ...LATER.filter((l) => !PARTS.some((p) => p.id === l.id))].map((p, i) => ({ ...p, n: i + 1 }));
-export const nextPart = (id) => { const d = dayParts(); const i = d.findIndex((p) => p.id === id); return i >= 0 ? d[i + 1] || null : null; };
+// The part after this one, for the break screen (null after the last part of the day).
+export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };

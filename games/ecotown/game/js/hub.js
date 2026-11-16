@@ -1,4 +1,4 @@
-// The AI Lab start page (start.html): the welcome and the four parts, with what has been done so far.
+// The AI Lab start page (start.html): the welcome and the six parts, with what has been done so far.
 // It reads the saved town on this device for the ticks. It sends nothing.
 import { PARTS, LABEL, WELCOME_KEY, SAVE_KEY, progress } from './series.js';
 import { GAME, buildLabel } from './version.js';
@@ -7,7 +7,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let save = null, seen = false;
 try { save = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); seen = !!localStorage.getItem(WELCOME_KEY); } catch { /* storage off: everything shows as not started */ }
 const P = progress(save, seen);
-const PIC = { town: '<img src="img/thumbs/timber.png" alt="">', drone: '🚁', robots: '🤖', roads: '<img src="img/thumbs/road.png" alt="">' };
+const PIC = { town: '<img src="img/thumbs/timber.png" alt="">', drone: '🚁', robots: '🤖', roads: '<img src="img/thumbs/road.png" alt="">', film: '🎬', power: '<img src="img/thumbs/wind.png" alt="">' };
 
 document.querySelector('[data-part="welcome"]').href = `${GAME}?welcome=1`;
 document.querySelector('[data-parts]').innerHTML = PARTS.map((p) => `<a class="card part${P.next === p.id ? ' next' : ''}" data-part="${p.id}" href="${GAME}${p.query}">
