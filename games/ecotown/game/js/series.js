@@ -62,4 +62,30 @@ export const TALK = {
     s: ['What is the difference between kW and kWh, and where did it matter today?', 'Where did your automation rules have a gap, and how did testing show it?', 'How did moving demand compare with storing power in the battery?', 'Who should decide the order power comes back after a storm: people or the machine?'] },
 };
 // The part after this one in the day, or null at the end (for the break screen).
+// "Jobs that use this" (docs/curriculum.md): the last screen before the talk. [icon, job, what the person does (8–12), (13–17)].
+export const JOBS = {
+  town: [['🏘️', 'Town planner', 'Decides where homes, schools and parks go.', 'Plans where homes, schools, parks and roads go, using data and what people need.'],
+    ['🌿', 'Environmental scientist', 'Checks how a place affects nature, water and air.', 'Measures how building affects nature, flooding and pollution, and advises on it.'],
+    ['📊', 'Data analyst', 'Reads numbers to find out what is really going on.', 'Checks data and models, and finds where a confident answer is wrong.']],
+  drone: [['🚁', 'Drone pilot', 'Flies drones safely for deliveries, films and farms.', 'Plans and flies missions within the rules, checking weather, battery and airspace.'],
+    ['🗺️', 'Survey and mapping technician', 'Makes maps from photos taken by drones.', 'Plans survey flights and turns overlapping photos into maps and measurements.'],
+    ['🌉', 'Infrastructure inspector', 'Checks bridges and wind turbines for damage.', 'Inspects bridges, turbines and power lines close up, and reports cracks and wear.'],
+    ['🆘', 'Search and rescue drone operator', 'Helps find people who are lost.', 'Flies heat cameras on search patterns and guides the rescue team on the ground.']],
+  robots: [['🤖', 'Robotics engineer', 'Designs robots and what they can sense and do.', 'Designs robots: the body, the sensors, the power and the program.'],
+    ['🔧', 'Robot technician', 'Sets up robots, programs them and fixes them.', 'Installs, programs, maintains and repairs robots in factories, hospitals and farms.'],
+    ['🌱', 'Agricultural engineer', 'Builds machines that help farms grow food.', 'Builds farm machines and robots that plant, weed and harvest with less waste.'],
+    ['🧪', 'Test engineer', 'Tests robots to find mistakes before people use them.', 'Designs tests that find where a machine fails, before it is used for real.']],
+  roads: [['🚗', 'Autonomous vehicle engineer', 'Builds the parts of a car that let it drive itself.', 'Works on the sensors and software that let a car see, decide and drive.'],
+    ['🚌', 'Transport planner', 'Plans how people get around a town.', 'Plans streets, buses and shared cars so everyone can get where they need to go.'],
+    ['🛑', 'Safety test driver', 'Rides in test cars and takes over if needed.', 'Supervises self-driving cars on test drives and reports where they went wrong.'],
+    ['📈', 'Traffic data analyst', 'Studies traffic numbers to make streets work better.', 'Analyses journeys, waits and crashes to show what would make streets safer.']],
+  film: [['🎬', 'Director', 'Decides how the story is told and filmed.', 'Leads the crew and decides the shots, the pace and the feeling of the film.'],
+    ['✂️', 'Video editor', 'Puts the shots together and chooses the music.', 'Cuts and orders the shots and sets the rhythm, sound and music.'],
+    ['📱', 'Content producer', 'Plans and makes videos for websites and channels.', 'Plans, makes and checks videos, including what AI tools helped to make.'],
+    ['♿', 'Accessibility producer', 'Adds captions and descriptions so everyone can enjoy it.', 'Makes media work for everyone, with captions, audio description and clear design.']],
+  power: [['⚡', 'Grid control engineer', 'Keeps the power on by matching what is made to what is used.', 'Balances supply and demand minute by minute and handles faults on the network.'],
+    ['📉', 'Energy analyst', 'Reads forecasts and numbers about power.', 'Forecasts demand and wind and sun, and finds ways to use clean power better.'],
+    ['☀️', 'Renewable energy technician', 'Looks after wind turbines, solar panels and batteries.', 'Installs and maintains turbines, solar panels and batteries.'],
+    ['🌩️', 'Emergency planner', 'Plans what to do when storms or floods hit.', 'Plans who gets help first in an emergency and how to restore services safely.']],
+};
 export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };
