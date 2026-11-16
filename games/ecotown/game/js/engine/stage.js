@@ -23,7 +23,7 @@ export const ease = {
 // Anti-aliasing: low draws straight to the canvas (the canvas's own antialias); mid and high draw through the
 // composer, whose targets have no samples, so they smooth edges themselves: mid with an SMAA pass at the end
 // (FXAA was cheaper but smeared the small voxel detail by about a third),
-// high with a 4x multisampled scene target (msaa).
+// high with a multisampled scene target (msaa: 4x, or 2x on high-DPI screens).
 export const TIERS = {
   low:  { ratio: 1,    shadows: false, shadowSize: 1024, post: false, bloom: false, aa: 'canvas', particles: 0.4, residents: 10, grass: 0.35 },
   mid:  { ratio: 1.25, shadows: true,  shadowSize: 2048, post: true,  bloom: false, aa: 'smaa',   particles: 0.7, residents: 18, grass: 0.7 },
@@ -110,9 +110,10 @@ export function createStage(canvas, skyEl) {
   function buildComposer(q) {
     if (composer) { for (const p of composer.passes) p.dispose?.(); composer.dispose(); }
     composer = null; if (!q.post) return;
-    // high: the composer's own targets are multisampled, so the scene pass is anti-aliased (WebGL 2 resolves it)
-    const size = renderer.getDrawingBufferSize(new THREE.Vector2());
-    composer = new EffectComposer(renderer, q.aa === 'msaa' ? new THREE.WebGLRenderTarget(size.x, size.y, { samples: 4, type: THREE.HalfFloatType }) : undefined);
+    // high: the composer's own targets are multisampled, so the scene pass is anti-aliased (WebGL 2 resolves it);
+    // on a sharp (high-DPI) screen the pixels are already small, so 2 samples do and cost half as much
+    const size = renderer.getDrawingBufferSize(new THREE.Vector2()), samples = renderer.getPixelRatio() >= 1.75 ? 2 : 4;
+    composer = new EffectComposer(renderer, q.aa === 'msaa' ? new THREE.WebGLRenderTarget(size.x, size.y, { samples, type: THREE.HalfFloatType }) : undefined);
     composer.addPass(new RenderPass(scene, camera));
     if (q.bloom) { fx.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.22, 0.6, 0.94); composer.addPass(fx.bloom); }
     fx.tiltH = new ShaderPass(HorizontalTiltShiftShader); fx.tiltV = new ShaderPass(VerticalTiltShiftShader);
