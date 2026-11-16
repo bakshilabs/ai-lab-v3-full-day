@@ -1,49 +1,22 @@
 // Robot training: the workshop bench, drawn in the module's own layer (ctx.root). Page only: the learning is in
 // learn.js, the words in words.js, the pictures in pictures.js. Every control is a button: tap, drag or keys.
 import { kind, binById, canShow, readyToTest, shelf, examplesOf, explain, runTest, confusion, featsOn, featuresFor, ROOM, FEATURES } from './learn.js';
-import { itemSvg, binSvg, robotSvg, florenceSvg, chartSvg, workshopSvg } from './pictures.js';
+import { itemSvg, binSvg, robotSvg, florenceSvg, chartSvg } from './pictures.js';
 import { SAY, STEPS, verdict, did, why, wrongBin, streetLine, sameText, tuneLine } from './words.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MARK = { ok: '✓', miss: '✗', ask: '?' };
 const SHORT = { paper: 'Paper', glass: 'Glass', food: 'Food', repair: 'Repair', ask: 'Asked' };
-const GUARD = 300; // ms: a second press sooner than this is taken as the same press
 
-export function createBench(ctx, env) {
-  const { junior, feats, bins } = env; const root = ctx.root; const still = !!ctx.settings.reduceMotion;
-  root.innerHTML = `<div class="rb ${junior ? 'junior' : 'senior'}${still ? ' still' : ''}${ctx.settings.largeText ? ' large' : ''}">
-    <div class="rb-bg">${workshopSvg()}</div>
-    <header class="rb-head"><ol class="rb-steps" aria-label="Steps">${STEPS.map((s, i) => `<li data-step="${i}"><i>${i + 1}</i><b>${s}</b></li>`).join('')}</ol></header>
-    <div class="rb-say"><span class="rb-flo">${florenceSvg(46)}</span><p aria-live="polite"></p></div>
-    <section class="rb-main"></section><footer class="rb-foot"></footer></div>`;
-  const el = root.firstElementChild; const main = el.querySelector('.rb-main'); const foot = el.querySelector('.rb-foot'); const line = el.querySelector('.rb-say p'); const head = el.querySelector('.rb-head');
-  let keys = false; // the last input was the keyboard: move focus for the child after the page changes
-  el.addEventListener('keydown', () => { keys = true; }, true); el.addEventListener('pointerdown', () => { keys = false; }, true);
-  const timers = new Set(); const later = (fn, ms) => { const t = setTimeout(() => { timers.delete(t); if (!ctx.signal.aborted) fn(); }, ms); timers.add(t); return t; };
-  ctx.onLeave(() => { for (const t of timers) clearTimeout(t); timers.clear(); });
-  const say = (text) => { line.textContent = text; ctx.say(text); };
-  // The step bar sits beside the loader's Back button when there is room, and under it when there is not
-  // (large text, a narrow screen). Measured, because the button's width follows the text size.
-  function fitHead() {
-    const back = root.parentElement?.querySelector('.modback'); if (!back) return;
-    const b = back.getBoundingClientRect(); const e = el.getBoundingClientRect(); const cs = getComputedStyle(el); const padL = parseFloat(cs.paddingLeft) || 0; const padT = parseFloat(cs.paddingTop) || 0;
-    const steps = head.firstElementChild; const left = b.right - e.left + 12; const room = e.width - left - padL; const under = steps.scrollWidth > room;
-    head.style.paddingLeft = under ? '0px' : `${Math.max(0, left - padL)}px`; head.style.paddingTop = under ? `${Math.max(0, b.bottom - e.top + 8 - padT)}px` : '0px';
-    head.style.minHeight = under ? '0px' : `${Math.max(0, b.bottom - e.top - padT)}px`; el.classList.toggle('under', under);
-  }
-  // when a page is taller than the room for it, its bottom edge fades out until the child scrolls to the end
-  const mainCue = () => { main.classList.toggle('more', main.scrollHeight - main.scrollTop - main.clientHeight > 8); };
-  main.addEventListener('scroll', mainCue, { passive: true }); const watch = new MutationObserver(() => requestAnimationFrame(mainCue)); watch.observe(main, { childList: true }); ctx.onLeave(() => watch.disconnect());
-  const onResize = () => { fitHead(); mainCue(); }; window.addEventListener('resize', onResize); ctx.onLeave(() => window.removeEventListener('resize', onResize));
-  try { document.fonts?.ready?.then(() => { if (!ctx.signal.aborted) fitHead(); }); } catch { /* no font loading here */ }
-  const step = (n) => { el.querySelectorAll('.rb-steps li').forEach((li, i) => { li.className = i < n ? 'done' : i === n ? 'on' : ''; if (i === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); }); fitHead(); };
-  const focusSoon = (sel) => { if (keys) (main.querySelector(sel) || foot.querySelector(sel))?.focus(); };
+export function createBench(ctx, env, sh) {
+  const { junior, feats, bins } = env; const still = sh.still;
+  sh.setup({ mission: { n: 4, icon: '♻️' }, steps: STEPS, stage: 'teach' });
+  const { el, main, foot, line, later, say, wait, guard, focusSoon } = sh;
+  const step = (n) => sh.step(n); const fitHead = () => sh.fitHead();
   // what the robot can tell about a thing. Condition is shown only when it is not "good" (most things are).
   const chips = (id, same = null, fs = feats) => `<span class="rb-chips">${fs.filter((f) => f !== 'state' || kind(id).f.state !== 'good').map((f) => `<i${same?.includes(f) ? ' class="same"' : ''}>${esc(kind(id).f[f])}</i>`).join('')}</span>`;
   const featWords = (id) => feats.filter((f) => f !== 'state' || kind(id).f.state !== 'good').map((f) => kind(id).f[f]).join(', ');
   const sees = `The robot looks at ${feats.map((f) => FEATURES[f].label.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1')}`;
-  const wait = (fn) => new Promise((res) => fn(res));
-  const guard = () => { let last = 0; return () => { const t = Date.now(); if (t - last < GUARD) return false; last = t; return true; }; };
 
   // ---------- showing examples. st.rounds[last] is filled in place; onChange() after each change.
   // stars(): the shelf things that would each, right now, fill a gap in the test (learn.js starsFor), best first.
@@ -78,7 +51,7 @@ export function createBench(ctx, env) {
         }
         const was = ready(); cur.push(id); picked = null; onChange?.(); draw();
         if (round === 0 && !was && ready()) say(SAY.teachReady(junior)); else if (round > 0 && cur.length >= room) say(SAY.full(junior));
-        if (keys) (main.querySelector('.rb-item') || foot.querySelector('[data-go]'))?.focus();
+        if (sh.keys()) (main.querySelector('.rb-item') || foot.querySelector('[data-go]'))?.focus();
       }
       // a tap chooses a thing; a tap on the thing already chosen keeps it chosen (so the next tap on a bin still works)
       const pick = (id) => { picked = id; main.querySelectorAll('.rb-item').forEach((b) => { const on = b.dataset.kind === picked; b.classList.toggle('picked', on); b.setAttribute('aria-pressed', on); }); main.querySelector('.rb-bins')?.classList.toggle('aim', !!picked); };
@@ -145,8 +118,8 @@ export function createBench(ctx, env) {
         const label = running ? 'Running…' : i < 0 ? (every ? 'Sort the first thing' : 'Run the test') : atEnd ? 'See the results' : every ? 'Next thing' : 'Carry on';
         foot.innerHTML = `<p class="rb-hint" aria-live="polite">${i >= 0 ? `In the right bin so far: <b>${right} of ${i + 1}</b>` : `${t.of} things on the tray`}</p>
           ${prev && !junior && !atEnd ? `<button type="button" class="rb-btn alt" data-every aria-pressed="${every}">${every ? '✓ ' : ''}Show every step</button>` : ''}<button type="button" class="rb-btn go" data-go ${running ? 'aria-disabled="true"' : ''}>${label} ➜</button>`;
-        const go = foot.querySelector('[data-go]'); go.onclick = press; const ev = foot.querySelector('[data-every]'); if (ev) ev.onclick = () => { every = !every; if (!running) draw(); if (keys) foot.querySelector('[data-every]')?.focus(); };
-        if (keys) go.focus();
+        const go = foot.querySelector('[data-go]'); go.onclick = press; const ev = foot.querySelector('[data-every]'); if (ev) ev.onclick = () => { every = !every; if (!running) draw(); if (sh.keys()) foot.querySelector('[data-every]')?.focus(); };
+        if (sh.keys()) go.focus();
       }
       // the run by itself: unchanged things go by quickly; it stops at the first thing that changed, or at the end
       function auto() {
@@ -212,7 +185,7 @@ export function createBench(ctx, env) {
         if (i >= 0) tune.off.splice(i, 1); else if (tune.off.length < all.length - 1) tune.off.push(f); else { say('The robot must look at something. Leave at least one switched on.'); return; }
         tune.onChange?.(); const on2 = featsOn(junior, tune.off); const t2 = tune.off.length ? runTest(tune.tray, ex, on2) : b; say(tuneLine(on2, tune.off, t2.right, t2.of, b.right)); draw(f);
       }; });
-      if (focus && keys) main.querySelector(`.rb-feat[data-feat="${focus}"]`)?.focus();
+      if (focus && sh.keys()) main.querySelector(`.rb-feat[data-feat="${focus}"]`)?.focus();
     }
     draw();
     foot.innerHTML = `<p class="rb-hint">${canMore ? 'Add more examples, or send the robot out.' : 'Time to send the robot out.'}</p>${canMore ? '<button type="button" class="rb-btn alt" data-act="more">Add more and test again</button>' : ''}<button type="button" class="rb-btn go" data-act="street">Send it to the street ➜</button>`;
@@ -230,7 +203,7 @@ export function createBench(ctx, env) {
         const v = r ? verdict(r) : null;
         foot.innerHTML = `<div class="rb-cap">${r ? `<span class="rb-cappic">${itemSvg(r.kind, 72)}</span>` : `<span class="rb-flo">${florenceSvg(52)}</span>`}<div><p aria-live="polite">${r ? `<span class="rb-tag ${v.cls}">${MARK[v.cls]} ${v.tag}</span> ` : ''}${esc(text)}</p>${r ? `<small>Thing ${i + 1} of ${results.length}</small>` : ''}</div>
           <button type="button" class="rb-btn go" data-go>${i < 0 ? 'Start' : i < results.length - 1 ? 'Next' : i === results.length - 1 ? 'How did it do?' : 'Finish'} ➜</button></div>`;
-        const go = foot.querySelector('[data-go]'); go.onclick = next; if (keys) go.focus();
+        const go = foot.querySelector('[data-go]'); go.onclick = next; if (sh.keys()) go.focus();
       };
       function next() {
         if (!fresh()) return;
@@ -244,7 +217,6 @@ export function createBench(ctx, env) {
       const hello = SAY.street(junior, results.length); draw(hello, null); ctx.say(hello);
     });
   }
-  fitHead();
   return { teach, test, review, result, street, el };
 }
 
