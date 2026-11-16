@@ -9,3 +9,10 @@ test('every part has jobs and talk questions', () => {
   }
   assert.ok(PARTS.length >= 4);
 });
+
+test('the break screen names the next part for every part but the last of the day', async () => {
+  const { nextPart } = await import('../js/series.js');
+  assert.equal(nextPart('roads')?.title, 'Town film studio');
+  assert.equal(nextPart('film')?.title, 'Power control room');
+  assert.equal(nextPart('power'), null);
+});

@@ -88,4 +88,8 @@ export const JOBS = {
     ['☀️', 'Renewable energy technician', 'Looks after wind turbines, solar panels and batteries.', 'Installs and maintains turbines, solar panels and batteries.'],
     ['🌩️', 'Emergency planner', 'Plans what to do when storms or floods hit.', 'Plans who gets help first in an emergency and how to restore services safely.']],
 };
-export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };
+// The whole day in order (docs/full-day-plan.md). Parts not on the start page yet are still named on the break screen,
+// so the break after Self-driving cars never says the day is over.
+const LATER = [{ id: 'film', icon: '🎬', title: 'Town film studio' }, { id: 'power', icon: '⚡', title: 'Power control room' }];
+export const dayParts = () => [...PARTS, ...LATER.filter((l) => !PARTS.some((p) => p.id === l.id))].map((p, i) => ({ ...p, n: i + 1 }));
+export const nextPart = (id) => { const d = dayParts(); const i = d.findIndex((p) => p.id === id); return i >= 0 ? d[i + 1] || null : null; };
