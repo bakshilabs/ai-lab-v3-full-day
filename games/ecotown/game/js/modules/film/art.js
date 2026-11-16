@@ -119,7 +119,10 @@ export const captionPic = (id, text, label = '') => { const fs = Math.min(8.5, M
   return svg((SHOT_ART[id] || SHOT_ART['wide-town'])() + (text ? `<rect x="8" y="70" width="144" height="14" rx="2" fill="#000"/><text x="80" y="${79 + fs * 0.18}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" font-family="Inter, Arial, sans-serif">${esc(text)}</text>` : ''), label); };
 
 // ---- mission 6: a picture as it was filmed, and as it was shown. And pictures with or without a machine's clues.
-const RIVER_LITTER = (litter) => frame('day', at(80, 70, 2.2, water(100, 18)) + at(24, 60, 0.9, ART.trees()) + (litter ? can(60, 64) + can(84, 70, '#3f8fd0') + can(104, 62) + '<path d="M70 74 h9 l-2 4 h-6 Z" fill="#fffaf0" opacity="0.9"/>' : ''), { horizon: 52 });
+// litter big enough to spot on a phone: cans, a bottle and a bag on the water
+const bigCan = (x, y, r, c) => `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 6}" y="${y - 3.5}" width="12" height="7" rx="2" fill="${c}" stroke="#3b2a1e" stroke-width="0.8"/><rect x="${x - 6}" y="${y - 1}" width="12" height="2" fill="#fff" opacity="0.8"/></g>`;
+const LITTER = bigCan(56, 66, 20, '#c0563a') + bigCan(92, 72, -15, '#3f8fd0') + bigCan(118, 62, 35, '#c0563a') + '<path d="M70 76 h14 l-2 6 h-10 Z" fill="#fffaf0" stroke="#3b2a1e" stroke-width="0.8"/><rect x="98" y="54" width="14" height="5" rx="2.5" fill="#7fd4a0" stroke="#3b2a1e" stroke-width="0.8" transform="rotate(-25 105 56)"/>';
+const RIVER_LITTER = (litter) => frame('day', at(80, 70, 2.2, water(100, 18)) + at(24, 60, 0.9, ART.trees()) + (litter ? LITTER : ''), { horizon: 52 });
 const OTTERS_N = (k) => frame('day', at(80, 70, 2, water(110, 18)) + Array.from({ length: k }, (_, i) => at(k === 1 ? 80 : 30 + i * 33, 70, 1.6, otter(0))).join(''), { horizon: 52 });
 export const CHANGE_ART = {
   // the same scene twice: the colours were dull and dark as filmed, and brightened for the film (nothing else changed)

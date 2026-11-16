@@ -29,7 +29,7 @@ export async function playEdit(env) {
   }
   // then naming each fault, as one list: a question set aside comes back after the others
   await mui.askList(takes, (t, i, again) => { ctx.report({ stage: `Editing: what went wrong, ${i + 1} of ${takes.length}` });
-    return mui.ask({ head: { kick: again ? 'What went wrong · again' : 'What went wrong', step: [i + 1, takes.length] }, item: t.whatWrong, pic: t.pic, wide: true, cols: 1, limit: mui.LIMIT, reveal: again }); });
+    return mui.ask({ head: { kick: again ? 'What went wrong · again' : 'What went wrong', step: [i + 1, takes.length] }, item: t.whatWrong, pic: t.pic, wide: true, cols: 1, limit: mui.LIMIT, reveal: again }); }, { more: true });
 
   mark('takes'); }
   // ---- part 2: trim the rough cut. Tap a clip to cut it (or bring it back), then check.
@@ -92,7 +92,7 @@ export async function playEdit(env) {
   if (!skip('music')) {
   await mui.note({ kick, title: PARTS[3].title, lines: [PARTS[3].line], btn: 'Start ➜', stage: 'part-music' });
   const turns = turnItems((art) => shotPic(art));
-  await mui.askList(turns, (item, i, again) => { ctx.report({ stage: 'Editing: where the music changes' }); return mui.ask({ head: { kick: again ? 'Music · again' : 'Music', step: [i + 1, 5] }, item, limit: mui.LIMIT, reveal: again }); });
+  await mui.askList(turns, (item, i, again) => { ctx.report({ stage: 'Editing: where the music changes' }); return mui.ask({ head: { kick: again ? 'Music · again' : 'Music', step: [i + 1, 5] }, item, limit: mui.LIMIT, reveal: again }); }, { more: true });
   const music = {}; const items = musicItems();
   await mui.askList(items, async (item, i, again) => {
     ctx.report({ stage: `Editing: music for the ${item.part}` });
