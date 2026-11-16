@@ -3,7 +3,7 @@
 // It needs no town and saves only that it has been seen. Nothing typed, nothing sent.
 import * as THREE from 'three';
 import { h, esc } from './ui/ui.js';
-import { speak, stopSpeech } from './ui/voice.js';
+import { speak, stopSpeech, loadVoices } from './ui/voice.js';
 import { simulate } from './sim/sim.js';
 import { seedTo } from './game/seed.js';
 import { PARTS, SCENES, EVERYWHERE, WELCOME_KEY } from './series.js';
@@ -36,6 +36,7 @@ const CSS = `#welcome { position: absolute; inset: 0; pointer-events: none; font
 
 export async function runWelcome({ stage, world, life, terrain, bot, app }) {
   document.getElementById('boot')?.remove();
+  loadVoices('junior'); // the welcome lines are in the recorded pack; without it the device voice reads them
   const style = document.createElement('style'); style.textContent = CSS; document.head.appendChild(style);
   const reduce = !!app.reduce || matchMedia('(prefers-reduced-motion: reduce)').matches;
   // a finished town to look at: Florence's practice island with every mission's plan built
