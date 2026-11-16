@@ -166,7 +166,7 @@ export async function runGround(ctx, kit, scope) {
   }
   P.remove();
   const flew = sum.checked - sum.grounded;
-  return { sum, lines: [`You checked ${sum.checked} drones. ${flew} flew and ${sum.grounded} stayed on the ground${sum.fixed ? `, after you fixed ${sum.fixed} ${sum.fixed === 1 ? 'problem' : 'problems'}` : ''}.`, `You judged ${PLANS.length} flight plans: ${sum.first} right first time.`] };
+  return { sum, lines: [`You checked the drone on ${sum.checked} days. It flew on ${flew} and stayed on the ground on ${sum.grounded}${sum.fixed ? `, after you fixed ${sum.fixed} ${sum.fixed === 1 ? 'problem' : 'problems'}` : ''}.`, `You judged ${PLANS.length} flight plans: ${sum.first} right first time.`] };
 }
 
 const M = '#module[data-module="drone"]';
