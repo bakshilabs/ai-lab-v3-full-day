@@ -14529,1339 +14529,2864 @@
  {
   "s": "No family lives in your town yet.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c58cb619"
+  "key": "c58cb619",
+  "mod": 1
  },
  {
   "s": "Families move in when there are homes.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3fc69705"
+  "key": "3fc69705",
+  "mod": 1
  },
  {
   "s": "There are no otters in your town.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d80022af"
+  "key": "d80022af",
+  "mod": 1
  },
  {
   "s": "Otters come when the wetland is left wild.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9e0d7769"
+  "key": "9e0d7769",
+  "mod": 1
  },
  {
   "s": "Demand climbs as homes wake up; the sun starts to help.",
   "voice": "helper",
-  "mod": 1,
-  "key": "798b1e38"
+  "key": "798b1e38",
+  "mod": 1
  },
  {
   "s": "The school load arrives, then solar rises past demand: the battery must switch from giving to storing.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5398b761"
+  "key": "5398b761",
+  "mod": 1
  },
  {
   "s": "Gusty, with passing cloud.",
   "voice": "helper",
-  "mod": 1,
-  "key": "02863081"
+  "key": "02863081",
+  "mod": 1
  },
  {
   "s": "One turbine group will shut itself down.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f9a18190"
+  "key": "f9a18190",
+  "mod": 1
  },
  {
   "s": "Breakfast: kettles and toasters add demand.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5969699c"
+  "key": "5969699c",
+  "mod": 1
  },
  {
   "s": "Showers and heat pumps: demand rises again.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0a46cedb"
+  "key": "0a46cedb",
+  "mod": 1
  },
  {
   "s": "The school opens: lighting, computers and the kitchen add demand.",
   "voice": "helper",
-  "mod": 1,
-  "key": "adad844f"
+  "key": "adad844f",
+  "mod": 1
  },
  {
   "s": "Solar output now exceeds what the town needs: store the surplus.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d6971abe"
+  "key": "d6971abe",
+  "mod": 1
  },
  {
   "s": "A gust: wind output jumps.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b1e9e5f3"
+  "key": "b1e9e5f3",
+  "mod": 1
  },
  {
   "s": "Wind above the safe limit: the turbines have cut out to protect themselves.",
   "voice": "helper",
-  "mod": 1,
-  "key": "76cdc066"
+  "key": "76cdc066",
+  "mod": 1
  },
  {
   "s": "Wind back in range: the turbines restart.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1db3f514"
+  "key": "1db3f514",
+  "mod": 1
  },
  {
   "s": "Keep supply equal to demand. ▲ raises battery output; ▼ lowers it, below zero it charges.",
   "voice": "helper",
-  "mod": 1,
-  "key": "82318a6b"
+  "key": "82318a6b",
+  "mod": 1
  },
  {
   "s": "Windy morning, sunny midday, the wind easing by evening.",
   "voice": "helper",
-  "mod": 1,
-  "key": "dd762022"
+  "key": "dd762022",
+  "mod": 1
  },
  {
   "s": "Calm, overcast dawn; a breeze late morning to teatime; windy overnight.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2524c1ac"
+  "key": "2524c1ac",
+  "mod": 1
  },
  {
   "s": "Mark each hour where forecast supply (bars) is below demand (red line).",
   "voice": "helper",
-  "mod": 1,
-  "key": "265144b5"
+  "key": "265144b5",
+  "mod": 1
  },
  {
   "s": "Day 1 of 3: today, battery at 25%.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4b0397ed"
+  "key": "4b0397ed",
+  "mod": 1
  },
  {
   "s": "Day 2 of 3: a still day, battery empty at dawn.",
   "voice": "helper",
-  "mod": 1,
-  "key": "43bba19d"
+  "key": "43bba19d",
+  "mod": 1
  },
  {
   "s": "Fault indicators light where fault current flowed: the fault is beyond the last lit one.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3e70f428"
+  "key": "3e70f428",
+  "mod": 1
  },
  {
   "s": "Open the nearest switch upstream, then restore the healthy section.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cb37d877"
+  "key": "cb37d877",
+  "mod": 1
  },
  {
   "s": "The grid supply is lost; the battery can deliver 70 kW.",
   "voice": "helper",
-  "mod": 1,
-  "key": "e0d9d890"
+  "key": "e0d9d890",
+  "mod": 1
  },
  {
   "s": "Restore load in priority order without exceeding it, or the battery protection trips everything.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c4ee91dc"
+  "key": "c4ee91dc",
+  "mod": 1
  },
  {
   "s": "Order the crew’s safety procedure, then restore the remaining load.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2cf2283c"
+  "key": "2cf2283c",
+  "mod": 1
  },
  {
   "s": "Calm, overcast dawn; breezy late morning; windy overnight.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1c153559"
+  "key": "1c153559",
+  "mod": 1
  },
  {
   "s": "Cold; the wind dies after lunch and returns before dawn.",
   "voice": "helper",
-  "mod": 1,
-  "key": "7cd2dfaf"
+  "key": "7cd2dfaf",
+  "mod": 1
  },
  {
   "s": "Goal: longest wait ≤ 15 min.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ddd5247d"
+  "key": "ddd5247d",
+  "mod": 1
  },
  {
   "s": "Goal: longest wait ≤ 8 min and empty driving ≤ 50%.",
   "voice": "helper",
-  "mod": 1,
-  "key": "e67ffda4"
+  "key": "e67ffda4",
+  "mod": 1
  },
  {
   "s": "All cars start and wait at the depot on the edge of town.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d00bee6f"
+  "key": "d00bee6f",
+  "mod": 1
  },
  {
   "s": "Choose the fleet size and run the morning.",
   "voice": "helper",
-  "mod": 1,
-  "key": "8b015e89"
+  "key": "8b015e89",
+  "mod": 1
  },
  {
   "s": "Returning to the depot means a lot of empty driving.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2719e58c"
+  "key": "2719e58c",
+  "mod": 1
  },
  {
   "s": "Choose up to two waiting places in town.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5cf44d48"
+  "key": "5cf44d48",
+  "mod": 1
  },
  {
   "s": "Each car must charge for 15 minutes in the hour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "38cba429"
+  "key": "38cba429",
+  "mod": 1
  },
  {
   "s": "Choose the charging hub.",
   "voice": "helper",
-  "mod": 1,
-  "key": "77a4571f"
+  "key": "77a4571f",
+  "mod": 1
  },
  {
   "s": "Tap each object the car must know about to box it, then choose its label.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4709b51b"
+  "key": "4709b51b",
+  "mod": 1
  },
  {
   "s": "Two labelled pictures.",
   "voice": "helper",
-  "mod": 1,
-  "key": "a06edd15"
+  "key": "a06edd15",
+  "mod": 1
  },
  {
   "s": "Train on them, then test on unseen pictures.",
   "voice": "helper",
-  "mod": 1,
-  "key": "629e4333"
+  "key": "629e4333",
+  "mod": 1
  },
  {
   "s": "Now label pictures that contain the hard cases: the edge cases.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d2359bb7"
+  "key": "d2359bb7",
+  "mod": 1
  },
  {
   "s": "Autonomous cars sense the street with cameras, radar and lidar.",
   "voice": "helper",
-  "mod": 1,
-  "key": "baafb669"
+  "key": "baafb669",
+  "mod": 1
  },
  {
   "s": "Engineers must know each sensor’s blind spots, because the car is only as safe as what it senses.",
   "voice": "helper",
-  "mod": 1,
-  "key": "73ad6280"
+  "key": "73ad6280",
+  "mod": 1
  },
  {
   "s": "Compare the three sensor views in four conditions, tick every sensor that can answer, then choose the car’s sensor set.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c794513a"
+  "key": "c794513a",
+  "mod": 1
  },
  {
   "s": "Explain each sensor’s strengths and limits, and why cars fuse several.",
   "voice": "helper",
-  "mod": 1,
-  "key": "caed9081"
+  "key": "caed9081",
+  "mod": 1
  },
  {
   "s": "Data labellers mark up street images so the car’s recognition model can learn; the hard cases matter most.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4e297685"
+  "key": "4e297685",
+  "mod": 1
  },
  {
   "s": "Box and label each object, train, test on unseen pictures, then find and label the edge cases.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f7f1209d"
+  "key": "f7f1209d",
+  "mod": 1
  },
  {
   "s": "Label training data and hunt for the edge cases a model fails on.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c5c48f51"
+  "key": "c5c48f51",
+  "mod": 1
  },
  {
   "s": "Engineers translate the Highway Code into behaviour: speeds, gaps and priorities the car follows every time.",
   "voice": "helper",
-  "mod": 1,
-  "key": "a8f66072"
+  "key": "a8f66072",
+  "mod": 1
  },
  {
   "s": "Set the behaviour for six situations and test each one.",
   "voice": "helper",
-  "mod": 1,
-  "key": "bad8d707"
+  "key": "bad8d707",
+  "mod": 1
  },
  {
   "s": "Turn road rules into clear, testable behaviour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "350db6c7"
+  "key": "350db6c7",
+  "mod": 1
  },
  {
   "s": "Test engineers run the car through millions of simulated miles to find failures safely.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b5467261"
+  "key": "b5467261",
+  "mod": 1
  },
  {
   "s": "Run the scenarios, review failures, change one setting per run.",
   "voice": "helper",
-  "mod": 1,
-  "key": "15beab91"
+  "key": "15beab91",
+  "mod": 1
  },
  {
   "s": "Test a system in simulation and isolate causes by changing one variable at a time.",
   "voice": "helper",
-  "mod": 1,
-  "key": "bbd05fe6"
+  "key": "bbd05fe6",
+  "mod": 1
  },
  {
   "s": "Fleet planners size a shared fleet and choose where it waits and charges, trading waiting time against idle cars.",
   "voice": "helper",
-  "mod": 1,
-  "key": "98b7a1aa"
+  "key": "98b7a1aa",
+  "mod": 1
  },
  {
   "s": "Set fleet size, waiting places and charging hub; run the morning; read waits and empty driving.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fccf9f3b"
+  "key": "fccf9f3b",
+  "mod": 1
  },
  {
   "s": "Size a fleet and read the trade-off between waiting time and the number of cars.",
   "voice": "helper",
-  "mod": 1,
-  "key": "89585324"
+  "key": "89585324",
+  "mod": 1
  },
  {
   "s": "Maple Street today: parked cars and a 40-space car park.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5e34ee5d"
+  "key": "5e34ee5d",
+  "mod": 1
  },
  {
   "s": "Shared self-driving cars will stop only where the street is marked.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c499c746"
+  "key": "c499c746",
+  "mod": 1
  },
  {
   "s": "Street designers lay out stops, bays and crossings for passengers, walkers and cyclists.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3efc9446"
+  "key": "3efc9446",
+  "mod": 1
  },
  {
   "s": "Place stops, bays and crossings on the 3D street, run the morning, read the numbers, and decide what the car park becomes.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f315caa9"
+  "key": "f315caa9",
+  "mod": 1
  },
  {
   "s": "Design a street for every user and test it against measured outcomes.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cd31a41c"
+  "key": "cd31a41c",
+  "mod": 1
  },
  {
   "s": "Your settings, as the rules the car now follows.",
   "voice": "helper",
-  "mod": 1,
-  "key": "799e8154"
+  "key": "799e8154",
+  "mod": 1
  },
  {
   "s": "A pedestrian is waiting at a zebra crossing.",
   "voice": "helper",
-  "mod": 1,
-  "key": "769e019a"
+  "key": "769e019a",
+  "mod": 1
  },
  {
   "s": "Set the car’s behaviour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3923c355"
+  "key": "3923c355",
+  "mod": 1
  },
  {
   "s": "The car continued; the pedestrian had to step back.",
   "voice": "helper",
-  "mod": 1,
-  "key": "69176dc3"
+  "key": "69176dc3",
+  "mod": 1
  },
  {
   "s": "The car stopped short of the crossing; the pedestrian crossed.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d5323edf"
+  "key": "d5323edf",
+  "mod": 1
  },
  {
   "s": "Who has priority at a zebra crossing?",
   "voice": "helper",
-  "mod": 1,
-  "key": "26db1e46"
+  "key": "26db1e46",
+  "mod": 1
  },
  {
   "s": "IF a pedestrian waits at a zebra crossing THEN slow down and stop.",
   "voice": "helper",
-  "mod": 1,
-  "key": "161ba5bf"
+  "key": "161ba5bf",
+  "mod": 1
  },
  {
   "s": "School home time.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f88b0f0f"
+  "key": "f88b0f0f",
+  "mod": 1
  },
  {
   "s": "Choose the car’s speed.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9f5d7654"
+  "key": "9f5d7654",
+  "mod": 1
  },
  {
   "s": "A child may step out 12 m ahead.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9a35b9f0"
+  "key": "9a35b9f0",
+  "mod": 1
  },
  {
   "s": "Child steps out 12 m ahead.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1143309d"
+  "key": "1143309d",
+  "mod": 1
  },
  {
   "s": "Stopping distance at 20 mph: 8 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c9690e05"
+  "key": "c9690e05",
+  "mod": 1
  },
  {
   "s": "Stopped in time.",
   "voice": "helper",
-  "mod": 1,
-  "key": "41a545de"
+  "key": "41a545de",
+  "mod": 1
  },
  {
   "s": "Stopping distance at 30 mph: 16 m, more than 12 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0deea3b7"
+  "key": "0deea3b7",
+  "mod": 1
  },
  {
   "s": "Could not stop in time.",
   "voice": "helper",
-  "mod": 1,
-  "key": "35ecb77b"
+  "key": "35ecb77b",
+  "mod": 1
  },
  {
   "s": "IF in a school street THEN at most 20 mph.",
   "voice": "helper",
-  "mod": 1,
-  "key": "bbf20eb7"
+  "key": "bbf20eb7",
+  "mod": 1
  },
  {
   "s": "Set the side gap when overtaking a cyclist at 30 mph.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c6388428"
+  "key": "c6388428",
+  "mod": 1
  },
  {
   "s": "1.0 m: the cyclist swerved.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9058f9f5"
+  "key": "9058f9f5",
+  "mod": 1
  },
  {
   "s": "Still too close.",
   "voice": "helper",
-  "mod": 1,
-  "key": "490a900d"
+  "key": "490a900d",
+  "mod": 1
  },
  {
   "s": "2.0 m: a safe pass with room to spare.",
   "voice": "helper",
-  "mod": 1,
-  "key": "91a142f2"
+  "key": "91a142f2",
+  "mod": 1
  },
  {
   "s": "0.5 m: the cyclist was pushed towards the kerb.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ff93e1c8"
+  "key": "ff93e1c8",
+  "mod": 1
  },
  {
   "s": "Too close.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d482528b"
+  "key": "d482528b",
+  "mod": 1
  },
  {
   "s": "1.5 m: a safe pass.",
   "voice": "helper",
-  "mod": 1,
-  "key": "54e83147"
+  "key": "54e83147",
+  "mod": 1
  },
  {
   "s": "Allow for a wobble or a pothole.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1a2317fa"
+  "key": "1a2317fa",
+  "mod": 1
  },
  {
   "s": "Highway Code rule 163 gives a minimum in metres, above 1 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "79ec3396"
+  "key": "79ec3396",
+  "mod": 1
  },
  {
   "s": "IF overtaking a cyclist THEN side gap ≥ 1.5 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d66c44d2"
+  "key": "d66c44d2",
+  "mod": 1
  },
  {
   "s": "An oncoming car leaves less than 1.5 m to pass the cyclist.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b3b3dca1"
+  "key": "b3b3dca1",
+  "mod": 1
  },
  {
   "s": "Set the behaviour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "93466625"
+  "key": "93466625",
+  "mod": 1
  },
  {
   "s": "Squeezed past at under 1 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1eb21f2e"
+  "key": "1eb21f2e",
+  "mod": 1
  },
  {
   "s": "Unsafe.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9f4ece8d"
+  "key": "9f4ece8d",
+  "mod": 1
  },
  {
   "s": "Held back about 6 s, then passed at 1.5 m.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ac49e01c"
+  "key": "ac49e01c",
+  "mod": 1
  },
  {
   "s": "What does the 1.5 m rule mean when there is no room?",
   "voice": "helper",
-  "mod": 1,
-  "key": "621652a4"
+  "key": "621652a4",
+  "mod": 1
  },
  {
   "s": "Rule 163: wait behind if it is not safe to pass.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4d29044c"
+  "key": "4d29044c",
+  "mod": 1
  },
  {
   "s": "IF gap < 1.5 m THEN wait behind.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9f07a3d7"
+  "key": "9f07a3d7",
+  "mod": 1
  },
  {
   "s": "Wet road.",
   "voice": "helper",
-  "mod": 1,
-  "key": "44e91e01"
+  "key": "44e91e01",
+  "mod": 1
  },
  {
   "s": "Set the gap behind the car in front, in seconds.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5ab6407b"
+  "key": "5ab6407b",
+  "mod": 1
  },
  {
   "s": "1 s: braking on a wet road, the gap closed completely.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4e4e4f5c"
+  "key": "4e4e4f5c",
+  "mod": 1
  },
  {
   "s": "2 s: enough when dry, but wet stopping takes about twice as far.",
   "voice": "helper",
-  "mod": 1,
-  "key": "66e3f108"
+  "key": "66e3f108",
+  "mod": 1
  },
  {
   "s": "Only just stopped.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5ba69632"
+  "key": "5ba69632",
+  "mod": 1
  },
  {
   "s": "4 s: stopped with room to spare.",
   "voice": "helper",
-  "mod": 1,
-  "key": "54a603dc"
+  "key": "54a603dc",
+  "mod": 1
  },
  {
   "s": "How does rain change stopping distance?",
   "voice": "helper",
-  "mod": 1,
-  "key": "fb400a1e"
+  "key": "fb400a1e",
+  "mod": 1
  },
  {
   "s": "Rule 126: two seconds dry; at least double on wet roads.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f19f523a"
+  "key": "f19f523a",
+  "mod": 1
  },
  {
   "s": "IF the road is wet THEN gap ≥ 4 s.",
   "voice": "helper",
-  "mod": 1,
-  "key": "a8277714"
+  "key": "a8277714",
+  "mod": 1
  },
  {
   "s": "Turning left into a side road while a pedestrian is crossing it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "6ed5146d"
+  "key": "6ed5146d",
+  "mod": 1
  },
  {
   "s": "Who has priority?",
   "voice": "helper",
-  "mod": 1,
-  "key": "2b43484c"
+  "key": "2b43484c",
+  "mod": 1
  },
  {
   "s": "The car cut across the pedestrian’s path.",
   "voice": "helper",
-  "mod": 1,
-  "key": "e317af7a"
+  "key": "e317af7a",
+  "mod": 1
  },
  {
   "s": "The car gave way, then turned.",
   "voice": "helper",
-  "mod": 1,
-  "key": "77516001"
+  "key": "77516001",
+  "mod": 1
  },
  {
   "s": "Think about who can do the most harm.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f2060c27"
+  "key": "f2060c27",
+  "mod": 1
  },
  {
   "s": "Highway Code rule H2 (2022).",
   "voice": "helper",
-  "mod": 1,
-  "key": "cec26392"
+  "key": "cec26392",
+  "mod": 1
  },
  {
   "s": "IF turning and a pedestrian is crossing THEN give way.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fb78c0e3"
+  "key": "fb78c0e3",
+  "mod": 1
  },
  {
   "s": "Switch between the three sensor views of the same street.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4f44139f"
+  "key": "4f44139f",
+  "mod": 1
  },
  {
   "s": "Then tick every sensor that can answer the question.",
   "voice": "helper",
-  "mod": 1,
-  "key": "29c3fa32"
+  "key": "29c3fa32",
+  "mod": 1
  },
  {
   "s": "Final step: choose the car’s sensor set and read the coverage table.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b47cb1bb"
+  "key": "b47cb1bb",
+  "mod": 1
  },
  {
   "s": "Is the traffic light ahead red or green?",
   "voice": "helper",
-  "mod": 1,
-  "key": "5348f7c8"
+  "key": "5348f7c8",
+  "mod": 1
  },
  {
   "s": "Tick every sensor that can tell.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cb24a6cb"
+  "key": "cb24a6cb",
+  "mod": 1
  },
  {
   "s": "Only the camera sees colour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3be85c5d"
+  "key": "3be85c5d",
+  "mod": 1
  },
  {
   "s": "Radar and lidar find the pole and the box, not which lamp is lit.",
   "voice": "helper",
-  "mod": 1,
-  "key": "a6803488"
+  "key": "a6803488",
+  "mod": 1
  },
  {
   "s": "Compare the three views.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b4dfd0ff"
+  "key": "b4dfd0ff",
+  "mod": 1
  },
  {
   "s": "Which one shows colour?",
   "voice": "helper",
-  "mod": 1,
-  "key": "8c8b2bb3"
+  "key": "8c8b2bb3",
+  "mod": 1
  },
  {
   "s": "Radar and lidar return shapes and distances, never colour.",
   "voice": "helper",
-  "mod": 1,
-  "key": "23465c69"
+  "key": "23465c69",
+  "mod": 1
  },
  {
   "s": "Night.",
   "voice": "helper",
-  "mod": 1,
-  "key": "96b52e9f"
+  "key": "96b52e9f",
+  "mod": 1
  },
  {
   "s": "A person in dark clothes is crossing beyond the headlights.",
   "voice": "helper",
-  "mod": 1,
-  "key": "bdc4fa85"
+  "key": "bdc4fa85",
+  "mod": 1
  },
  {
   "s": "Tick every sensor that detects them.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ce583236"
+  "key": "ce583236",
+  "mod": 1
  },
  {
   "s": "Radar and lidar send out their own signal, so darkness does not matter.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2d7db682"
+  "key": "2d7db682",
+  "mod": 1
  },
  {
   "s": "A camera needs light on the scene.",
   "voice": "helper",
-  "mod": 1,
-  "key": "15acee14"
+  "key": "15acee14",
+  "mod": 1
  },
  {
   "s": "Check the camera view: is the person in it?",
   "voice": "helper",
-  "mod": 1,
-  "key": "fea66c69"
+  "key": "fea66c69",
+  "mod": 1
  },
  {
   "s": "Two of the sensors are active: they light the scene themselves.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fc5265d1"
+  "key": "fc5265d1",
+  "mod": 1
  },
  {
   "s": "Thick fog.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4fc65f2a"
+  "key": "4fc65f2a",
+  "mod": 1
  },
  {
   "s": "A car has stopped 34 m ahead.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d03b2c88"
+  "key": "d03b2c88",
+  "mod": 1
  },
  {
   "s": "Tick every sensor that detects it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b05bf52b"
+  "key": "b05bf52b",
+  "mod": 1
  },
  {
   "s": "Radio waves pass through fog.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4df28232"
+  "key": "4df28232",
+  "mod": 1
  },
  {
   "s": "Fog blocks the camera and scatters lidar pulses, so both only see close up.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d3f008f6"
+  "key": "d3f008f6",
+  "mod": 1
  },
  {
   "s": "Look past the first 12 metres in each view.",
   "voice": "helper",
-  "mod": 1,
-  "key": "49349b39"
+  "key": "49349b39",
+  "mod": 1
  },
  {
   "s": "One sensor still returns a long-range echo.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ae40a67a"
+  "key": "ae40a67a",
+  "mod": 1
  },
  {
   "s": "Rain.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c3b0a325"
+  "key": "c3b0a325",
+  "mod": 1
  },
  {
   "s": "Which sensor measures the cyclist’s speed directly?",
   "voice": "helper",
-  "mod": 1,
-  "key": "2c510147"
+  "key": "2c510147",
+  "mod": 1
  },
  {
   "s": "Radar measures speed directly, from the shift in the returning wave (the Doppler effect).",
   "voice": "helper",
-  "mod": 1,
-  "key": "051a013e"
+  "key": "051a013e",
+  "mod": 1
  },
  {
   "s": "Camera and lidar only give position at one moment.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0c3371ca"
+  "key": "0c3371ca",
+  "mod": 1
  },
  {
   "s": "Which view reports a speed?",
   "voice": "helper",
-  "mod": 1,
-  "key": "d36bc72b"
+  "key": "d36bc72b",
+  "mod": 1
  },
  {
   "s": "The same sensor that sees through fog.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fb386532"
+  "key": "fb386532",
+  "mod": 1
  },
  {
   "s": "A small object by the kerb: child or bollard?",
   "voice": "helper",
-  "mod": 1,
-  "key": "c57aad8c"
+  "key": "c57aad8c",
+  "mod": 1
  },
  {
   "s": "Tick every sensor that can tell the shape.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d2b21b65"
+  "key": "d2b21b65",
+  "mod": 1
  },
  {
   "s": "Camera and lidar both resolve shape.",
   "voice": "helper",
-  "mod": 1,
-  "key": "8318b883"
+  "key": "8318b883",
+  "mod": 1
  },
  {
   "s": "Radar returns a blob of about the same size for both.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f806a360"
+  "key": "f806a360",
+  "mod": 1
  },
  {
   "s": "In which views can you tell the two objects apart?",
   "voice": "helper",
-  "mod": 1,
-  "key": "1c658543"
+  "key": "1c658543",
+  "mod": 1
  },
  {
   "s": "More than one is right.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1d476f39"
+  "key": "1d476f39",
+  "mod": 1
  },
  {
   "s": "Radar gives two similar blobs.",
   "voice": "helper",
-  "mod": 1,
-  "key": "65ea81b2"
+  "key": "65ea81b2",
+  "mod": 1
  },
  {
   "s": "Colour and detail: reads signs and lights.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5d41d144"
+  "key": "5d41d144",
+  "mod": 1
  },
  {
   "s": "Needs light and clear air.",
   "voice": "helper",
-  "mod": 1,
-  "key": "dc59edba"
+  "key": "dc59edba",
+  "mod": 1
  },
  {
   "s": "Radio waves: distance and speed, in any weather.",
   "voice": "helper",
-  "mod": 1,
-  "key": "47c6b358"
+  "key": "47c6b358",
+  "mod": 1
  },
  {
   "s": "A blurry picture.",
   "voice": "helper",
-  "mod": 1,
-  "key": "9d3f126a"
+  "key": "9d3f126a",
+  "mod": 1
  },
  {
   "s": "Laser pulses: a 3D point picture of shapes and distances.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3a50d34e"
+  "key": "3a50d34e",
+  "mod": 1
  },
  {
   "s": "Fog scatters it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2b51e2b9"
+  "key": "2b51e2b9",
+  "mod": 1
  },
  {
   "s": "The car’s factory settings.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1b13a5fd"
+  "key": "1b13a5fd",
+  "mod": 1
  },
  {
   "s": "Run it through two test days, 100 simulated drives each.",
   "voice": "helper",
-  "mod": 1,
-  "key": "11fa8322"
+  "key": "11fa8322",
+  "mod": 1
  },
  {
   "s": "Change one setting per run, so each difference has one cause.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3060b5c6"
+  "key": "3060b5c6",
+  "mod": 1
  },
  {
   "s": "One change per run.",
   "voice": "helper",
-  "mod": 1,
-  "key": "29e349f5"
+  "key": "29e349f5",
+  "mod": 1
  },
  {
   "s": "Revert this one to change another.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4f442a1b"
+  "key": "4f442a1b",
+  "mod": 1
  },
  {
   "s": "All four test days pass.",
   "voice": "helper",
-  "mod": 1,
-  "key": "e41ed958"
+  "key": "e41ed958",
+  "mod": 1
  },
  {
   "s": "Real programmes run millions of simulated miles before road testing.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4baa8bf0"
+  "key": "4baa8bf0",
+  "mod": 1
  },
  {
   "s": "Replay: lead car braked; on the wet road our stopping distance exceeded the gap.",
   "voice": "helper",
-  "mod": 1,
-  "key": "7241d531"
+  "key": "7241d531",
+  "mod": 1
  },
  {
   "s": "Replay: road spray blinded the camera; the lead car was lost for 2 s.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f7bbee10"
+  "key": "f7bbee10",
+  "mod": 1
  },
  {
   "s": "Replay: an unclear shape stayed below the brake threshold.",
   "voice": "helper",
-  "mod": 1,
-  "key": "708fb874"
+  "key": "708fb874",
+  "mod": 1
  },
  {
   "s": "It was a child.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fca549a0"
+  "key": "fca549a0",
+  "mod": 1
  },
  {
   "s": "Replay: low light; neither camera nor radar resolved a pedestrian in dark clothing.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5ed06a4d"
+  "key": "5ed06a4d",
+  "mod": 1
  },
  {
   "s": "Replay: frequent emergency stops for bags and shadows; a following car nearly rear-ended it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cce38c30"
+  "key": "cce38c30",
+  "mod": 1
  },
  {
   "s": "Open the greenhouse vent when the air goes above 30 °C.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4aee2120"
+  "key": "4aee2120",
+  "mod": 1
  },
  {
   "s": "Pick only the ripe red tomatoes, and leave the green ones.",
   "voice": "helper",
-  "mod": 1,
-  "key": "640fc379"
+  "key": "640fc379",
+  "mod": 1
  },
  {
   "s": "Slow down when a wall is less than 1 metre ahead.",
   "voice": "helper",
-  "mod": 1,
-  "key": "05c8ee36"
+  "key": "05c8ee36",
+  "mod": 1
  },
  {
   "s": "A robot vacuum must know for certain that it has touched a chair leg.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c8c09a28"
+  "key": "c8c09a28",
+  "mod": 1
  },
  {
   "s": "Notice a box in its path in a storeroom with the lights off.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b0f852f2"
+  "key": "b0f852f2",
+  "mod": 1
  },
  {
   "s": "Hand over a cup of tea only once it has cooled below 60 °C.",
   "voice": "helper",
-  "mod": 1,
-  "key": "5ec5596a"
+  "key": "5ec5596a",
+  "mod": 1
  },
  {
   "s": "Read the number on a hotel room door to deliver towels.",
   "voice": "helper",
-  "mod": 1,
-  "key": "509e5acc"
+  "key": "509e5acc",
+  "mod": 1
  },
  {
   "s": "A robot lawnmower must stop as soon as it touches a fence post.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0a91ffb2"
+  "key": "0a91ffb2",
+  "mod": 1
  },
  {
   "s": "If the distance is under 50 cm, turn right.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f75c7dcc"
+  "key": "f75c7dcc",
+  "mod": 1
  },
  {
   "s": "Otherwise go forward.",
   "voice": "helper",
-  "mod": 1,
-  "key": "ceac7d28"
+  "key": "ceac7d28",
+  "mod": 1
  },
  {
   "s": "If the distance is under 100 cm, turn right.",
   "voice": "helper",
-  "mod": 1,
-  "key": "6854dd02"
+  "key": "6854dd02",
+  "mod": 1
  },
  {
   "s": "Ignore the distance: always go forward.",
   "voice": "helper",
-  "mod": 1,
-  "key": "94d0997d"
+  "key": "94d0997d",
+  "mod": 1
  },
  {
   "s": "It cannot see in the dark, and it cannot tell how hot something is.",
   "voice": "helper",
-  "mod": 1,
-  "key": "c6c38e61"
+  "key": "c6c38e61",
+  "mod": 1
  },
  {
   "s": "It sends out a sound and times the echo.",
   "voice": "helper",
-  "mod": 1,
-  "key": "a2911a24"
+  "key": "a2911a24",
+  "mod": 1
  },
  {
   "s": "It cannot tell colours or read writing.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0f6f8984"
+  "key": "0f6f8984",
+  "mod": 1
  },
  {
   "s": "It only knows after it has touched.",
   "voice": "helper",
-  "mod": 1,
-  "key": "59f88931"
+  "key": "59f88931",
+  "mod": 1
  },
  {
   "s": "It cannot warn before.",
   "voice": "helper",
-  "mod": 1,
-  "key": "19a92b64"
+  "key": "19a92b64",
+  "mod": 1
  },
  {
   "s": "It cannot tell where things are or what they look like.",
   "voice": "helper",
-  "mod": 1,
-  "key": "27617a91"
+  "key": "27617a91",
+  "mod": 1
  },
  {
   "s": "Its leaves are chewed by slugs, so it looks ragged, like a weed.",
   "voice": "helper",
-  "mod": 1,
-  "key": "b326507e"
+  "key": "b326507e",
+  "mod": 1
  },
  {
   "s": "It is half hidden under leaves, so the camera sees only part of it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "bdcec7d6"
+  "key": "bdcec7d6",
+  "mod": 1
  },
  {
   "s": "It is tiny, so the camera sees few leaves.",
   "voice": "helper",
-  "mod": 1,
-  "key": "8458b400"
+  "key": "8458b400",
+  "mod": 1
  },
  {
   "s": "Its feathery leaves look a lot like cow parsley, a weed.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fcd7d908"
+  "key": "fcd7d908",
+  "mod": 1
  },
  {
   "s": "Every robot runs the same loop: sense, think, act.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fd3b8c3d"
+  "key": "fd3b8c3d",
+  "mod": 1
  },
  {
   "s": "Choosing the right sensors is one of the first jobs of a robotics engineer.",
   "voice": "helper",
-  "mod": 1,
-  "key": "34990483"
+  "key": "34990483",
+  "mod": 1
  },
  {
   "s": "Match each job to the sensor that can do it.",
   "voice": "helper",
-  "mod": 1,
-  "key": "8908704f"
+  "key": "8908704f",
+  "mod": 1
  },
  {
   "s": "Then predict the robot’s next move from its sensor reading and its rule, and set the rule yourself.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cee0aa10"
+  "key": "cee0aa10",
+  "mod": 1
  },
  {
   "s": "You can now choose a sensor by what it can and cannot measure, and trace a robot’s control loop.",
   "voice": "helper",
-  "mod": 1,
-  "key": "082db170"
+  "key": "082db170",
+  "mod": 1
  },
  {
   "s": "Robot arms in factories and greenhouses follow programs of positions and grips.",
   "voice": "helper",
-  "mod": 1,
-  "key": "68588a4d"
+  "key": "68588a4d",
+  "mod": 1
  },
  {
   "s": "Technicians write them, test them and fix them.",
   "voice": "helper",
-  "mod": 1,
-  "key": "01531477"
+  "key": "01531477",
+  "mod": 1
  },
  {
   "s": "Tap the step tiles to write the arm’s program.",
   "voice": "helper",
-  "mod": 1,
-  "key": "2c917b5f"
+  "key": "2c917b5f",
+  "mod": 1
  },
  {
   "s": "Positions are in centimetres.",
   "voice": "helper",
-  "mod": 1,
-  "key": "4d007213"
+  "key": "4d007213",
+  "mod": 1
  },
  {
   "s": "Run it, or step through it to find a bug.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1c6a7139"
+  "key": "1c6a7139",
+  "mod": 1
  },
  {
   "s": "You can now write a sequence with positions, debug it step by step, and use a loop.",
   "voice": "helper",
-  "mod": 1,
-  "key": "79bb7303"
+  "key": "79bb7303",
+  "mod": 1
  },
  {
   "s": "Hospital delivery robots carry medicine and samples along corridors and ride the lifts.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0a5d05d7"
+  "key": "0a5d05d7",
+  "mod": 1
  },
  {
   "s": "Their rules keep people safe.",
   "voice": "helper",
-  "mod": 1,
-  "key": "eb485583"
+  "key": "eb485583",
+  "mod": 1
  },
  {
   "s": "Set each “if … then” rule.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0abf6512"
+  "key": "0abf6512",
+  "mod": 1
  },
  {
   "s": "Then put the rules in order: the robot uses the first one that fits.",
   "voice": "helper",
-  "mod": 1,
-  "key": "7428f265"
+  "key": "7428f265",
+  "mod": 1
  },
  {
   "s": "Test run the trip and read what happened at each event.",
   "voice": "helper",
-  "mod": 1,
-  "key": "0e822848"
+  "key": "0e822848",
+  "mod": 1
  },
  {
   "s": "You can now write condition and action rules, and order them so the safest one wins.",
   "voice": "helper",
-  "mod": 1,
-  "key": "011718c3"
+  "key": "011718c3",
+  "mod": 1
  },
  {
   "s": "Recycling plants use camera-guided robots to pick and sort waste.",
   "voice": "helper",
-  "mod": 1,
-  "key": "38841ba0"
+  "key": "38841ba0",
+  "mod": 1
  },
  {
   "s": "They are trained on examples that people have labelled.",
   "voice": "helper",
-  "mod": 1,
-  "key": "cfa0cd99"
+  "key": "cfa0cd99",
+  "mod": 1
  },
  {
   "s": "Tap a thing, then its bin: each one is a labelled example.",
   "voice": "helper",
-  "mod": 1,
-  "key": "eef5872e"
+  "key": "eef5872e",
+  "mod": 1
  },
  {
   "s": "Test on a set it has not seen, read the misses, add examples and test again.",
   "voice": "helper",
-  "mod": 1,
-  "key": "f4e2b68c"
+  "key": "f4e2b68c",
+  "mod": 1
  },
  {
   "s": "You can now train a classifier by example and test it fairly on unseen things.",
   "voice": "helper",
-  "mod": 1,
-  "key": "8a27f4c0"
+  "key": "8a27f4c0",
+  "mod": 1
  },
  {
   "s": "Weeding robots tell crops from weeds with a camera and act only when they are sure enough.",
   "voice": "helper",
-  "mod": 1,
-  "key": "6a2fd373"
+  "key": "6a2fd373",
+  "mod": 1
  },
  {
   "s": "Less weedkiller, fewer lost crops.",
   "voice": "helper",
-  "mod": 1,
-  "key": "fbf8ee90"
+  "key": "fbf8ee90",
+  "mod": 1
  },
  {
   "s": "Read the robot’s confidence for each plant.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1e4ac63b"
+  "key": "1e4ac63b",
+  "mod": 1
  },
  {
   "s": "Set the threshold it needs before it pulls.",
   "voice": "helper",
-  "mod": 1,
-  "key": "99e699fb"
+  "key": "99e699fb",
+  "mod": 1
  },
  {
   "s": "Weed the row and read the table.",
   "voice": "helper",
-  "mod": 1,
-  "key": "d5853f6b"
+  "key": "d5853f6b",
+  "mod": 1
  },
  {
   "s": "You can now choose a confidence threshold when mistakes have different costs.",
   "voice": "helper",
-  "mod": 1,
-  "key": "aa8dc911"
+  "key": "aa8dc911",
+  "mod": 1
  },
  {
   "s": "Rescue robots go where it is too dangerous for people, such as a flooded street.",
   "voice": "helper",
-  "mod": 1,
-  "key": "08548e2b"
+  "key": "08548e2b",
+  "mod": 1
  },
  {
   "s": "Engineers design them, test them in simulation and improve them.",
   "voice": "helper",
-  "mod": 1,
-  "key": "1fa4c07c"
+  "key": "1fa4c07c",
+  "mod": 1
  },
  {
   "s": "Choose body, sensors, floats and battery.",
   "voice": "helper",
-  "mod": 1,
-  "key": "6bb05d94"
+  "key": "6bb05d94",
+  "mod": 1
  },
  {
   "s": "Each adds weight.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3d3e14b0"
+  "key": "3d3e14b0",
+  "mod": 1
  },
  {
   "s": "Test in the simulation, read where it failed, change it and test again.",
   "voice": "helper",
-  "mod": 1,
-  "key": "3446c941"
+  "key": "3446c941",
+  "mod": 1
  },
  {
   "s": "You can now make design trade-offs, test a design in simulation and improve it.",
   "voice": "helper",
+  "key": "b390eb74",
+  "mod": 1
+ },
+ {
+  "s": "Next, put drones to work.",
+  "voice": "narrator",
+  "key": "011a4933"
+ },
+ {
+  "s": "Check them, fly them, deliver, map a farm, inspect a turbine, and search for someone lost.",
+  "voice": "narrator",
+  "key": "ac3a0695"
+ },
+ {
+  "s": "Jobs that use this.",
+  "voice": "narrator",
+  "key": "c82f778c"
+ },
+ {
+  "s": "Town planner.",
+  "voice": "narrator",
+  "key": "ce708d06"
+ },
+ {
+  "s": "Plans where homes, schools, parks and roads go, using data and what people need.",
+  "voice": "narrator",
+  "key": "4ac3b79d"
+ },
+ {
+  "s": "Environmental scientist.",
+  "voice": "narrator",
+  "key": "ac195af0"
+ },
+ {
+  "s": "Measures how building affects nature, flooding and pollution, and advises on it.",
+  "voice": "narrator",
+  "key": "b3bf2fe9"
+ },
+ {
+  "s": "Data analyst.",
+  "voice": "narrator",
+  "key": "216173b4"
+ },
+ {
+  "s": "Checks data and models, and finds where a confident answer is wrong.",
+  "voice": "narrator",
+  "key": "83b929d4"
+ },
+ {
+  "s": "Drone pilot.",
+  "voice": "narrator",
+  "key": "64dc1a12"
+ },
+ {
+  "s": "Plans and flies missions within the rules, checking weather, battery and airspace.",
+  "voice": "narrator",
+  "key": "cbc6de4a"
+ },
+ {
+  "s": "Survey and mapping technician.",
+  "voice": "narrator",
+  "key": "ea32ab11"
+ },
+ {
+  "s": "Plans survey flights and turns overlapping photos into maps and measurements.",
+  "voice": "narrator",
+  "key": "9c68aa49"
+ },
+ {
+  "s": "Infrastructure inspector.",
+  "voice": "narrator",
+  "key": "d361090c"
+ },
+ {
+  "s": "Inspects bridges, turbines and power lines close up, and reports cracks and wear.",
+  "voice": "narrator",
+  "key": "2d835e76"
+ },
+ {
+  "s": "Search and rescue drone operator.",
+  "voice": "narrator",
+  "key": "35b44e3e"
+ },
+ {
+  "s": "Flies heat cameras on search patterns and guides the rescue team on the ground.",
+  "voice": "narrator",
+  "key": "4f8d1909"
+ },
+ {
+  "s": "Robotics engineer.",
+  "voice": "narrator",
+  "key": "e8803cbc"
+ },
+ {
+  "s": "Designs robots: the body, the sensors, the power and the program.",
+  "voice": "narrator",
+  "key": "8f511adb"
+ },
+ {
+  "s": "Robot technician.",
+  "voice": "narrator",
+  "key": "d6c67ffc"
+ },
+ {
+  "s": "Installs, programs, maintains and repairs robots in factories, hospitals and farms.",
+  "voice": "narrator",
+  "key": "53977587"
+ },
+ {
+  "s": "Agricultural engineer.",
+  "voice": "narrator",
+  "key": "091917a6"
+ },
+ {
+  "s": "Builds farm machines and robots that plant, weed and harvest with less waste.",
+  "voice": "narrator",
+  "key": "48485f6f"
+ },
+ {
+  "s": "Test engineer.",
+  "voice": "narrator",
+  "key": "94a7cbe1"
+ },
+ {
+  "s": "Designs tests that find where a machine fails, before it is used for real.",
+  "voice": "narrator",
+  "key": "c56c9836"
+ },
+ {
+  "s": "Autonomous vehicle engineer.",
+  "voice": "narrator",
+  "key": "29113ccd"
+ },
+ {
+  "s": "Works on the sensors and software that let a car see, decide and drive.",
+  "voice": "narrator",
+  "key": "d21e7488"
+ },
+ {
+  "s": "Transport planner.",
+  "voice": "narrator",
+  "key": "9169c2ad"
+ },
+ {
+  "s": "Plans streets, buses and shared cars so everyone can get where they need to go.",
+  "voice": "narrator",
+  "key": "1a578480"
+ },
+ {
+  "s": "Safety test driver.",
+  "voice": "narrator",
+  "key": "e626c38e"
+ },
+ {
+  "s": "Supervises self-driving cars on test drives and reports where they went wrong.",
+  "voice": "narrator",
+  "key": "898a9ad6"
+ },
+ {
+  "s": "Traffic data analyst.",
+  "voice": "narrator",
+  "key": "05457415"
+ },
+ {
+  "s": "Analyses journeys, waits and crashes to show what would make streets safer.",
+  "voice": "narrator",
+  "key": "297cbb0d"
+ },
+ {
+  "s": "Director.",
+  "voice": "narrator",
+  "key": "d053afb6"
+ },
+ {
+  "s": "Leads the crew and decides the shots, the pace and the feeling of the film.",
+  "voice": "narrator",
+  "key": "c3036e5b"
+ },
+ {
+  "s": "Video editor.",
+  "voice": "narrator",
+  "key": "011d39da"
+ },
+ {
+  "s": "Cuts and orders the shots and sets the rhythm, sound and music.",
+  "voice": "narrator",
+  "key": "228456b5"
+ },
+ {
+  "s": "Content producer.",
+  "voice": "narrator",
+  "key": "19451e59"
+ },
+ {
+  "s": "Plans, makes and checks videos, including what AI tools helped to make.",
+  "voice": "narrator",
+  "key": "fb8414c8"
+ },
+ {
+  "s": "Accessibility producer.",
+  "voice": "narrator",
+  "key": "f5fa9c08"
+ },
+ {
+  "s": "Makes media work for everyone, with captions, audio description and clear design.",
+  "voice": "narrator",
+  "key": "f59c6699"
+ },
+ {
+  "s": "Grid control engineer.",
+  "voice": "narrator",
+  "key": "410b8690"
+ },
+ {
+  "s": "Balances supply and demand minute by minute and handles faults on the network.",
+  "voice": "narrator",
+  "key": "5e240d30"
+ },
+ {
+  "s": "Energy analyst.",
+  "voice": "narrator",
+  "key": "a09374b8"
+ },
+ {
+  "s": "Forecasts demand and wind and sun, and finds ways to use clean power better.",
+  "voice": "narrator",
+  "key": "ead97188"
+ },
+ {
+  "s": "Renewable energy technician.",
+  "voice": "narrator",
+  "key": "eb0da1f7"
+ },
+ {
+  "s": "Installs and maintains turbines, solar panels and batteries.",
+  "voice": "narrator",
+  "key": "e3edc8bd"
+ },
+ {
+  "s": "Emergency planner.",
+  "voice": "narrator",
+  "key": "1dc97965"
+ },
+ {
+  "s": "Plans who gets help first in an emergency and how to restore services safely.",
+  "voice": "narrator",
+  "key": "aae57dbf"
+ },
+ {
+  "s": "Next: part 2, Drones at work.",
+  "voice": "narrator",
+  "key": "92d6ed15"
+ },
+ {
+  "s": "Which Drone Code rule surprised you, and who is it there to protect?",
+  "voice": "narrator",
+  "key": "cbe956e1"
+ },
+ {
+  "s": "Why do survey photos need to overlap, and what happens if they do not?",
+  "voice": "narrator",
+  "key": "e00464e8"
+ },
+ {
+  "s": "How did you keep a safe distance while still getting a clear inspection photo?",
+  "voice": "narrator",
+  "key": "b79fc724"
+ },
+ {
+  "s": "Where should drones be used, and where should they not, even if they could help?",
+  "voice": "narrator",
+  "key": "b98f2497"
+ },
+ {
+  "s": "How did the length of your shots change the mood of the edit?",
+  "voice": "narrator",
+  "key": "6b791dba"
+ },
+ {
+  "s": "What made your feedback to Florence useful?",
+  "voice": "narrator",
+  "key": "4117f945"
+ },
+ {
+  "s": "Who are captions and audio description for, and what makes them good?",
+  "voice": "narrator",
+  "key": "7fe6afdf"
+ },
+ {
+  "s": "When does changing a picture become misleading?",
+  "voice": "narrator",
+  "key": "e44e9cea"
+ },
+ {
+  "s": "What should you say in the credits?",
+  "voice": "narrator",
+  "key": "6088af9e"
+ },
+ {
+  "s": "Take photos of the old wood for the nature club, from the field beside it.",
+  "voice": "helper",
   "mod": 1,
-  "key": "b390eb74"
+  "key": "fc4a2426"
+ },
+ {
+  "s": "This one is fine: you can see the drone the whole time, it stays low and it keeps away from people.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d4bf5ba1"
+ },
+ {
+  "s": "Film sports day by flying right above the crowd at the school.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ac1f6f6d"
+ },
+ {
+  "s": "The Drone Code says never fly over crowds.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "40031b5a"
+ },
+ {
+  "s": "If the drone fell, it could hurt someone.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4ccac83b"
+ },
+ {
+  "s": "Film the seabirds on their nests on the cliffs in May.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "48a6b366"
+ },
+ {
+  "s": "Disturbing wild birds on their nests is against the law.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "97c7a59a"
+ },
+ {
+  "s": "Wildlife needs space, so this flight should not happen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4dc3a076"
+ },
+ {
+  "s": "Fly up to 200 m to get the whole town in one photo.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c4e82e5f"
+ },
+ {
+  "s": "The Drone Code says stay below 120 metres.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e2d89682"
+ },
+ {
+  "s": "Higher up is where planes and helicopters fly.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5870de5d"
+ },
+ {
+  "s": "Check a roof on the far side of the hill, where you would not be able to see the drone.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4e1c0e91"
+ },
+ {
+  "s": "The Drone Code says always keep the drone where you can see it with your own eyes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8d5ca779"
+ },
+ {
+  "s": "The camera screen does not count.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "727afc2c"
+ },
+ {
+  "s": "Fly straight over the hospital helipad to reach the beach.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fe458bc2"
+ },
+ {
+  "s": "Air ambulances land at the helipad with little warning.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "abe05c2e"
+ },
+ {
+  "s": "Drones must stay well clear of other aircraft, so go round.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2dd1b722"
+ },
+ {
+  "s": "At dusk the normal camera sees almost nothing: the moor is just dark grey.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3760df88"
+ },
+ {
+  "s": "The zoom camera sees further, but at dusk everything is still too dark to pick out a person.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "75575b44"
+ },
+ {
+  "s": "The heat camera shows warm things as bright shapes, even in the dark.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "832dc697"
+ },
+ {
+  "s": "People and animals stand out against the cold ground.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dbc6d9dd"
+ },
+ {
+  "s": "Real drone pilots check the drone, the weather and the map before every flight.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7b82c03c"
+ },
+ {
+  "s": "Many problems are easier to find on the ground than in the air.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b6b2095b"
+ },
+ {
+  "s": "Check each drone, then decide whether to fly.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f455141e"
+ },
+ {
+  "s": "Then read the airspace map and judge five flight plans against the Drone Code.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0c5c26e6"
+ },
+ {
+  "s": "You can now check a drone before it flies and say whether a flight is allowed and safe.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7434a8ea"
+ },
+ {
+  "s": "Pilots practise flying by hand, so they stay in control if the wind gets up or the drone loses its GPS signal.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3c97ffe3"
+ },
+ {
+  "s": "Take off, hold a hover against a crosswind, fly a hoop course at different heights, and land gently on the pad.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7105234c"
+ },
+ {
+  "s": "You can now take off, hold a drone steady in the wind and land it gently.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "73e82708"
+ },
+ {
+  "s": "In some places drones already carry parcels and medicines, on routes that are planned before they fly.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c488c73c"
+ },
+ {
+  "s": "Fly one delivery by hand.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c285573c"
+ },
+ {
+  "s": "Then write the route as steps the drone follows by itself, within its battery.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8e385ea7"
+ },
+ {
+  "s": "You can now turn a route into steps a drone can follow by itself.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2ca01b08"
+ },
+ {
+  "s": "Farmers and surveyors fly drones up and down in lines, taking hundreds of photos that a computer joins into one map.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "86f3fbb3"
+ },
+ {
+  "s": "Plan a survey pattern with enough overlap and within the battery.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ab6fd266"
+ },
+ {
+  "s": "Then read the map, including the plant health view.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2d734d3d"
+ },
+ {
+  "s": "You can now plan a survey so the photos overlap, and read a map made from the air.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fc71946d"
+ },
+ {
+  "s": "Inspectors fly drones close to wind turbines and bridges, so fewer people have to climb up high to look for damage.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cc87b44e"
+ },
+ {
+  "s": "Photograph each inspection point while keeping the safe distance, then find the damage and decide what to report.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e43d0501"
+ },
+ {
+  "s": "You can now fly a careful inspection, keep a safe distance and spot damage in photos.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b6ac9060"
+ },
+ {
+  "s": "Search and rescue teams fly drones with heat cameras to find people who are lost, even at night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aa43100b"
+ },
+ {
+  "s": "Choose the sensor, choose a search pattern, identify what the heat camera finds, then guide the ground team.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5e63bd95"
+ },
+ {
+  "s": "You can now choose the right camera for a search, search in a pattern and help a team on the ground.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ba418856"
+ },
+ {
+  "s": "Film crews use the same words for every shot, so everyone knows what the camera will do.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b5edd916"
+ },
+ {
+  "s": "Watch the camera in your town and name each shot size and camera move.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "317ef123"
+ },
+ {
+  "s": "You can name wide, medium and close-up shots, and pan, tilt and track moves.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ef6b9bc6"
+ },
+ {
+  "s": "Before anyone films, the director draws a storyboard: every shot in order, like a comic.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "05b2e6a8"
+ },
+ {
+  "s": "Then the crew knows the plan.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "98020a4c"
+ },
+ {
+  "s": "Put the shot cards in order: a beginning, a middle and an end.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fadbf128"
+ },
+ {
+  "s": "Leave out any card the story does not need.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fc4ee202"
+ },
+ {
+  "s": "You can plan a story in shots, with a beginning, a middle and an end.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "83a7734c"
+ },
+ {
+  "s": "Directors and producers brief their helpers, and now AI helpers too.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "31753925"
+ },
+ {
+  "s": "Then they improve the first draft with clear feedback.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b62fa0ae"
+ },
+ {
+  "s": "Brief Florence: a place, who is in it and a mood.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f742731a"
+ },
+ {
+  "s": "Watch her first cut and give her feedback.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0d5dbf7b"
+ },
+ {
+  "s": "You can brief a helper clearly and make a draft better with feedback.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e7eb29d9"
+ },
+ {
+  "s": "Video editors choose the best takes, set the pace and pick the music.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "74b22ac2"
+ },
+ {
+  "s": "The same shots can feel calm or exciting.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9936634c"
+ },
+ {
+  "s": "Choose the best takes, set the shot lengths for the pace you want, then choose the music and where it changes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "15519d45"
+ },
+ {
+  "s": "You can pick good takes, set the pace of a film and use music to set the mood.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6ff7735a"
+ },
+ {
+  "s": "Access producers add captions for people who cannot hear the sound, and a described version for people who cannot see the screen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c670cb7b"
+ },
+ {
+  "s": "Choose captions that are clear and quick to read, then descriptions that fit the gaps.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f9a2f23a"
+ },
+ {
+  "s": "You can write captions with speakers and sounds, and describe a shot for someone who cannot see it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8172b2ce"
+ },
+ {
+  "s": "True or made up?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "42b68dcb"
+ },
+ {
+  "s": "News teams check whether a picture is real or changed before they use it, and they ask people before filming them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2843e8b4"
+ },
+ {
+  "s": "Check each picture for changes and machine-made clues, judge whether a change misleads, and decide when to ask permission.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "56206129"
+ },
+ {
+  "s": "You can check pictures for changes and clues, and ask before you film people.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f764ecf7"
+ },
+ {
+  "s": "In a pan the camera stays in one spot and turns from side to side.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "88ccf91b"
+ },
+ {
+  "s": "In a tilt the camera stays in one spot and turns up or down.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "25763e42"
+ },
+ {
+  "s": "In a track the camera itself moves along beside what it films.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7f54b396"
+ },
+ {
+  "s": "Film crews name a shot by how much it shows.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0fad840c"
+ },
+ {
+  "s": "I will film myself three ways.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "630e3c1a"
+ },
+ {
+  "s": "You name each one.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a7943c8c"
+ },
+ {
+  "s": "Now the camera moves.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "28d89bd3"
+ },
+ {
+  "s": "Watch where it stands and which way it turns.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4d6d4b91"
+ },
+ {
+  "s": "Part 3: what does the scene need?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "27bece5a"
+ },
+ {
+  "s": "Directors write notes like these.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4e335660"
+ },
+ {
+  "s": "Pick the shot or move each note needs, and I will film it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "30caa404"
+ },
+ {
+  "s": "A wide shot shows the whole place and where it is.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "345ee323"
+ },
+ {
+  "s": "A medium shot shows someone from the waist up, or one thing with a little around it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c07e51c7"
+ },
+ {
+  "s": "A close-up shows a face or one small detail, so you can see feelings.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7f6e63c0"
+ },
+ {
+  "s": "First, make it an exciting trailer: the kind that makes you want to see the film.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "962efda2"
+ },
+ {
+  "s": "Now make the same shots into a calm, gentle film.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2b84e5d8"
+ },
+ {
+  "s": "The camera filmed some shots twice.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "92d1c33d"
+ },
+ {
+  "s": "An editor picks the best take of each.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "548bfd7f"
+ },
+ {
+  "s": "This is everything the camera filmed, in order.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "32f23726"
+ },
+ {
+  "s": "Cut the clips the film does not need.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "54f69a3e"
+ },
+ {
+  "s": "How long each shot lasts changes how a film feels.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a6088dca"
+ },
+ {
+  "s": "Set the length of each shot.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "59a5e106"
+ },
+ {
+  "s": "Music tells people how to feel.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dea47f96"
+ },
+ {
+  "s": "Choose where it changes, then what plays.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e003bc6d"
+ },
+ {
+  "s": "Captions put the sound into words, for people who cannot hear it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "76f8ef1a"
+ },
+ {
+  "s": "Pick the best caption for each sound.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b5dba1e4"
+ },
+ {
+  "s": "For people who cannot see the screen, a voice says what is happening in the gaps.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0339ab56"
+ },
+ {
+  "s": "Pick the best words for each gap.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c82e04be"
+ },
+ {
+  "s": "Here is the film with your captions on screen and your descriptions in the gaps.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "24742569"
+ },
+ {
+  "s": "A film about the town hall.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "437041fd"
+ },
+ {
+  "s": "The colours were made brighter.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6d4b8d9e"
+ },
+ {
+  "s": "A tree was taken out.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3c793f02"
+ },
+ {
+  "s": "The hall was made bigger.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d1503acb"
+ },
+ {
+  "s": "Brighter colours do not change what happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e590de68"
+ },
+ {
+  "s": "Editors fix colours all the time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "55f36910"
+ },
+ {
+  "s": "A film about market day.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "48dd5c01"
+ },
+ {
+  "s": "The picture was turned so it is level.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "494a37ea"
+ },
+ {
+  "s": "A stall was added.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a5dfcfc3"
+ },
+ {
+  "s": "The sky was changed.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e06ec3d8"
+ },
+ {
+  "s": "Making the picture level does not change what happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e5e26d8c"
+ },
+ {
+  "s": "A news report called “Our river is clean!”",
+  "voice": "helper",
+  "mod": 1,
+  "key": "55fb5296"
+ },
+ {
+  "s": "The litter in the river was taken out.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ef045b8c"
+ },
+ {
+  "s": "The river was made wider.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9e8d5109"
+ },
+ {
+  "s": "The trees were made greener.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ff14bf61"
+ },
+ {
+  "s": "The report says the river is clean, but it was not.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6b599efc"
+ },
+ {
+  "s": "Taking the litter out changes what happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "87096164"
+ },
+ {
+  "s": "A news report called “Lots of otters are back!”",
+  "voice": "helper",
+  "mod": 1,
+  "key": "005ee092"
+ },
+ {
+  "s": "One otter was copied to make four.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "795ec159"
+ },
+ {
+  "s": "The water was made bluer.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "672895af"
+ },
+ {
+  "s": "The otter was made bigger.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "05f71fec"
+ },
+ {
+  "s": "There was only one otter.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bb4cfd68"
+ },
+ {
+  "s": "Clues like these help.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cc4b8606"
+ },
+ {
+  "s": "But machine-made pictures keep getting better, and some have no clue at all.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "43f8987a"
+ },
+ {
+  "s": "So also ask: where did it come from?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a32347dd"
+ },
+ {
+  "s": "Who made it?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "56454100"
+ },
+ {
+  "s": "Does it say it was made by a machine?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a7fd3259"
+ },
+ {
+  "s": "When I make a picture, I say so.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "81e8bd21"
+ },
+ {
+  "s": "That is the honest thing to do.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8a09d624"
+ },
+ {
+  "s": "Part 1: what changed?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2b34ba2a"
+ },
+ {
+  "s": "Editors change pictures.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "79047696"
+ },
+ {
+  "s": "Some changes are fine.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dba6bf82"
+ },
+ {
+  "s": "Some change what happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ff7d73f0"
+ },
+ {
+  "s": "Spot the change, then decide.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7d041b39"
+ },
+ {
+  "s": "Part 2: filmed, or made by a machine?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "83d7b151"
+ },
+ {
+  "s": "Look for clues, and look at where each picture came from.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dba01c94"
+ },
+ {
+  "s": "A film crew asks people before filming them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8cb0e705"
+ },
+ {
+  "s": "What would you do?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dea1f191"
+ },
+ {
+  "s": "You want a close-up of a family having a picnic in the park.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5947ce01"
+ },
+ {
+  "s": "What do you do?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "af70b0f7"
+ },
+ {
+  "s": "Ask them first, and say what the film is for.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e88a8c20"
+ },
+ {
+  "s": "Film them quickly before they notice.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "587b0e18"
+ },
+ {
+  "s": "Filming people close up without asking is not fair to them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "15de89ec"
+ },
+ {
+  "s": "Hide behind a tree and zoom in.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7eb898dd"
+ },
+ {
+  "s": "Hiding to film people is not fair.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4823e505"
+ },
+ {
+  "s": "Ask them instead.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fbd39bf2"
+ },
+ {
+  "s": "Ask first, and tell them what the film is for and who will see it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "36a07bb9"
+ },
+ {
+  "s": "They say no.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a1f9bf99"
+ },
+ {
+  "s": "What now?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "848fd1ce"
+ },
+ {
+  "s": "Film them anyway: it is a park.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "98a0d416"
+ },
+ {
+  "s": "When someone says no to being filmed, respect it, wherever you are.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "af23a2b7"
+ },
+ {
+  "s": "Film the park without them in it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4883ba72"
+ },
+ {
+  "s": "Keep asking until they say yes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4d408695"
+ },
+ {
+  "s": "No means no.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "241ab865"
+ },
+ {
+  "s": "Asking again and again is not fair.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c07d96be"
+ },
+ {
+  "s": "You can still film the park.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ecd4f99d"
+ },
+ {
+  "s": "A friend from school wants to be in your film.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "58dbe80d"
+ },
+ {
+  "s": "It will go on the town website.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0f246beb"
+ },
+ {
+  "s": "Their yes is enough.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e1f56d80"
+ },
+ {
+  "s": "For children, a parent or carer should say yes too, especially before it goes online.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f0b35de1"
+ },
+ {
+  "s": "Check that a parent or carer says yes too.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "32219184"
+ },
+ {
+  "s": "Put it online, then tell them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fb0562ae"
+ },
+ {
+  "s": "Once it is online, it is hard to take back.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "63c2c86b"
+ },
+ {
+  "s": "Ask first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b60b5a3c"
+ },
+ {
+  "s": "For children, ask a parent or carer too, before anything goes online.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "994e723f"
+ },
+ {
+  "s": "Florence offers to make a picture of a big crowd at the hall’s opening, for your news film.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7ce5ce99"
+ },
+ {
+  "s": "Only a few people came.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "359ffb2b"
+ },
+ {
+  "s": "What do you say?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7c49ac8f"
+ },
+ {
+  "s": "Yes: a big crowd looks better.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cdaefd4c"
+ },
+ {
+  "s": "A made-up crowd makes people believe something untrue.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6aafc5b7"
+ },
+ {
+  "s": "No thanks: news should show what really happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5a1b1118"
+ },
+ {
+  "s": "Yes, and don’t tell anyone.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e79dc3f4"
+ },
+ {
+  "s": "A made-up picture in the news, kept secret, misleads everyone who sees it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d25467d2"
+ },
+ {
+  "s": "A news film shows what really happened.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "92237b07"
+ },
+ {
+  "s": "I would not make that picture for the news.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1d109524"
+ },
+ {
+  "s": "The last card of your film.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "57dec128"
+ },
+ {
+  "s": "What should it say about Florence’s part?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "649c9621"
+ },
+ {
+  "s": "Made by me.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d9d7936f"
+ },
+ {
+  "s": "Florence worked the camera.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b7d09f35"
+ },
+ {
+  "s": "Leaving her out is not the whole truth.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f3a373ec"
+ },
+ {
+  "s": "Made by Florence.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "16273e35"
+ },
+ {
+  "s": "You directed it: you chose the place, the people, the mood and the changes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "269efafb"
+ },
+ {
+  "s": "Directed by me.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3262aff0"
+ },
+ {
+  "s": "Camera by Florence, an AI helper.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ee4e7c28"
+ },
+ {
+  "s": "That says who did what, and that an AI helped.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3b2601da"
+ },
+ {
+  "s": "Honest credits matter.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "05bd5687"
+ },
+ {
+  "s": "From the town hall’s camera, with the date it was filmed.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9df86860"
+ },
+ {
+  "s": "The roofs are red.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a0f5f952"
+ },
+ {
+  "s": "There is a cloud.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5dc5e00b"
+ },
+ {
+  "s": "Shared online.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "44dd8ec1"
+ },
+ {
+  "s": "Nobody says who made it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d9309838"
+ },
+ {
+  "s": "The letters on the sign are jumbled.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "21506b19"
+ },
+ {
+  "s": "The stalls have roofs.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f9c056d4"
+ },
+ {
+  "s": "The sky is blue.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "31eeb7c3"
+ },
+ {
+  "s": "Sent in to the town news.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d438cbe9"
+ },
+ {
+  "s": "It does not say by whom.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a8bfe5ad"
+ },
+ {
+  "s": "One tree has two shadows pointing opposite ways, with one sun.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e1aa40c7"
+ },
+ {
+  "s": "The tree is green.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7312af89"
+ },
+ {
+  "s": "The grass is short.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4df900fc"
+ },
+ {
+  "s": "From the river warden, who filmed it on her walk.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "614ba328"
+ },
+ {
+  "s": "The water has ripples.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "84b6e654"
+ },
+ {
+  "s": "There are two otters.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c1103fa4"
+ },
+ {
+  "s": "The sheep has six legs.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "820da78c"
+ },
+ {
+  "s": "The sheep is white.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "52f00298"
+ },
+ {
+  "s": "There are trees behind it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "756ef1e1"
+ },
+ {
+  "s": "The festival poster.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c9db7bff"
+ },
+ {
+  "s": "It is labelled “Made with AI”.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c6322d1c"
+ },
+ {
+  "s": "The tent is pink.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dbaa79e3"
+ },
+ {
+  "s": "It is evening.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7e7bfc7c"
  }
 ]

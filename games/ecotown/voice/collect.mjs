@@ -109,7 +109,9 @@ const out = await p.evaluate(async (WORD_FILES) => {
     // the welcome film and its guide (js/welcome.js, js/series.js)
     { const { SCENES } = await import('./js/series.js'); for (const sc of SCENES) add(band, sc.say, 'narrator'); add(band, 'Four parts, in this order. Each one tells you what to do as you go.', 'narrator');
       // the end of every part (js/ui/talk.js): "Talk it over" and the break screen
-      const { TALK, PARTS, nextPart } = await import('./js/series.js');
+      const { TALK, JOBS, PARTS, nextPart } = await import('./js/series.js');
+      // "Jobs that use this" before every Talk it over (js/ui/talk.js)
+      for (const jobs of Object.values(JOBS || {})) add(band, `Jobs that use this. ${jobs.map(([, t, jj, s]) => `${t}. ${j ? jj : s}`).join(' ')}`, 'narrator');
       if (TALK) { for (const id of new Set([...Object.keys(TALK), ...(PARTS || []).map((x) => x.id)])) { const qs = TALK[id]?.[j ? 'j' : 's']; if (qs) add(band, `Talk it over with your teacher. ${qs.join(' ')}`, 'narrator');
         const nx = nextPart?.(id); add(band, nx ? `Break time. Next: part ${nx.n}, ${nx.title}.` : 'That is the end of today’s parts.', 'narrator'); } } }
     // the afternoon modules: every built-in sentence in their word files (strings, { j, s } pairs, and what functions
