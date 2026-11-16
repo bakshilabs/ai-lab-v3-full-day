@@ -23,7 +23,7 @@ export const MISSIONS = [
     after: 'You can now plan a survey so the photos overlap, and read a map made from the air.' },
   { id: 'inspect', icon: '🔧', title: 'Inspection', use: 'Turbines and bridges',
     open: 'Inspectors fly drones close to wind turbines and bridges, so fewer people have to climb up high to look for damage.',
-    how: { j: 'Fly to each blue frame and hold the drone still to take a photo. Do not go too close. Then find the crack in the photos.', s: 'Photograph each inspection point while keeping the safe distance, then find the damage and decide what to report.' },
+    how: { j: 'Fly to each blue frame and hold the drone still to take a photo. Do not go too close. Then find the crack in the photos.', s: 'Photograph each inspection point while keeping the company\'s safe distance, then find the damage and decide what to report. (Real inspection pilots hold extra permission from the Civil Aviation Authority.)' },
     after: 'You can now fly a careful inspection, keep a safe distance and spot damage in photos.' },
   { id: 'rescue', icon: '🔦', title: 'Search and rescue', use: 'Finding people',
     open: 'Search and rescue teams fly drones with heat cameras to find people who are lost, even at night.',
@@ -64,21 +64,31 @@ export function finishMission(st, id, sum, extra = {}) {
 const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 // One line per mission: what the child made or achieved. Built from the summary of the last go.
 export function lineFor(id, s = {}, junior = true) {
+  const n = (v) => Number.isFinite(v) && v > 0;
   switch (id) {
     case 'ground': {
-      const fixed = s.fixed ? `, fixed ${plural(s.fixed, 'problem')}` : ''; const kept = s.grounded ? ` and kept ${plural(s.grounded, 'drone')} on the ground` : '';
-      return `Ground school: checked ${plural(s.checked || 3, 'drone')}${fixed}${kept}; judged ${plural(s.jobs || 6, 'flight plan')} against the Drone Code.`;
+      if (!n(s.checked)) return 'Ground school: checked a drone before flying and judged flight plans against the Drone Code.';
+      const fixed = s.fixed ? `, fixed ${plural(s.fixed, 'problem')}` : ''; const kept = s.grounded ? (s.grounded === 1 ? ', kept it grounded once' : `, kept it grounded ${s.grounded} times`) : '';
+      return `Ground school: checked the drone on ${plural(s.checked, 'day')}${fixed}${kept}; judged ${plural(s.jobs || 6, 'flight plan')}.`;
     }
     case 'hand': {
-      const hover = Number.isFinite(s.hover) ? (junior ? ` held a hover in the wind` : ` held a hover in a ${s.wind || 20} km/h crosswind`) : ' held a hover in the wind';
-      const land = Number.isFinite(s.landing) && !junior ? ` landed at ${s.landing} m/s` : ' landed gently on the pad';
-      return `Hand flying: took off,${hover}, flew ${s.hoops ?? 4} of ${s.of ?? 4} hoops and${land}.`;
+      if (!n(s.of)) return 'Hand flying: took off, held a hover in the wind, flew the hoop course and landed on the pad.';
+      const land = s.kind === 'soft' ? 'landed gently' : 'landed';
+      return junior ? `Hand flying: took off, held a hover in the wind, flew ${s.hoops} of ${s.of} hoops and ${land} on the pad.`
+        : `Hand flying: hovered in ${s.wind || 24} km/h gusts, flew ${s.hoops} of ${s.of} hoops, ${land} at ${s.landing} m/s.`;
     }
-    case 'delivery': return `Delivery: ${s.line || 'planned a route as steps and watched the drone fly it'}`;
-    case 'survey': return junior ? `Farm survey: planned ${plural(s.lanes || 6, 'line')} of photos that overlap, then found the dry field and the sick crop.`
-      : `Farm survey: ${plural(s.lanes || 6, 'line')} with ${s.overlap ?? 60}% overlap, within the battery; found the dry field and the sick crop.`;
-    case 'inspect': return `Inspection: took ${plural(s.photos || 6, 'photo')} of a wind turbine and a bridge${s.close ? '' : ' from a safe distance'} and found ${plural(s.found || 2, 'crack')}.`;
-    case 'rescue': return `Search and rescue: chose the ${s.sensor === 'heat' || !s.sensor ? 'heat camera' : 'camera'}, searched ${s.pattern === 'lines' ? 'in lines' : 'in growing squares'}, found the walker and guided the team${junior ? '' : ` (${s.path || 10} squares)`}.`;
+    case 'delivery': return `Delivery: ${s.line || 'planned a route as steps and watched the drone fly it.'}`;
+    case 'survey': if (!n(s.lanes)) return 'Farm survey: planned overlapping survey lines and read the map of the farm.';
+      return junior ? `Farm survey: planned ${plural(s.lanes, 'line')} of photos that overlap, then found the dry field and the sick crop.`
+        : `Farm survey: ${plural(s.lanes, 'line')}, ${s.overlap}% side overlap${s.front ? ` and ${s.front}% along` : ''}, within the battery; found the sick crop.`;
+    case 'inspect': if (!n(s.photos)) return 'Inspection: photographed a wind turbine and a bridge and looked for damage.';
+      return `Inspection: ${plural(s.photos, 'photo')} of a turbine and a bridge${s.close ? '' : ' from a safe distance'}; found ${s.found ? plural(s.found, 'crack') : 'the damage'}.`;
+    case 'rescue': {
+      if (!s.pattern) return 'Search and rescue: searched with a heat camera and guided the team to the walker.';
+      const how = s.pattern === 'lines' ? 'lines' : 'growing squares';
+      return junior ? `Search and rescue: chose the heat camera, searched in ${how}, found the walker and guided the team.`
+        : `Search and rescue: heat camera, ${how} first; ${plural(s.searches || 1, 'search', 'searches')}, guided the team ${s.path * 50} m.`;
+    }
     default: return '';
   }
 }

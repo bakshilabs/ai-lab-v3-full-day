@@ -64,13 +64,15 @@ const MARK = {
   close: () => corners(42, 12, 118, 80, 10),
 };
 // where the subject stands and how big it is drawn for each move: [x, y, size]
+const CLOSE_WHO = { florence: [80, 150, 3.9], family: [80, 132, 4.6], otters: [74, 92, 3.4] };
 const PLACE = { wide: [80, 58, 1.35], push: [80, 66, 1.45], pull: [80, 56, 1.1], orbit: [80, 62, 1.5], street: [80, 70, 1.9], glide: [80, 62, 1.2], rise: [74, 70, 1.5], close: [80, 72, 1.9] };
 
 // The inside of one frame (no <svg> wrapper), 160 × 90.
 export function frameInner(shot, set, mood = 'cheerful') {
   const L = LIGHT[mood] || LIGHT.cheerful; const move = PLACE[shot.move] ? shot.move : 'close';
   const whole = move === 'pull' || move === 'wide' || move === 'glide' || shot.sub === 'town'; const art = whole ? 'town' : ART_OF(shot.sub, set);
-  const [x, y, s] = PLACE[move]; const horizon = art === 'town' ? FH : move === 'street' || move === 'close' ? 52 : 46;
+  // a close-up of someone is drawn as mission 1 teaches it: their face fills the frame (the frame cuts the rest)
+  const [x, y, s] = move === 'close' && CLOSE_WHO[art] ? CLOSE_WHO[art] : PLACE[move]; const horizon = art === 'town' ? FH : move === 'street' || move === 'close' ? 52 : 46;
   const sky = `<rect width="${FW}" height="${FH}" fill="${L[0]}"/><rect y="${horizon - 22}" width="${FW}" height="22" fill="${L[1]}" opacity="0.75"/>`;
   const sun = mood === 'calm' ? '<circle cx="106" cy="27" r="9" fill="#ffb066"/>' : mood === 'party' ? [[22, 16, '#ff7eb6'], [40, 26, '#ffd23f'], [136, 18, '#16c79a'], [120, 30, '#ff8a5c']].map(([a, b, c]) => `<rect x="${a}" y="${b}" width="4" height="4" fill="${c}" transform="rotate(30 ${a} ${b})"/>`).join('') : `<circle cx="108" cy="19" r="8" fill="#fff3b0"/>`;
   const cloud = art === 'town' ? '<ellipse cx="28" cy="72" rx="16" ry="4" fill="#fff" opacity="0.8"/><ellipse cx="134" cy="78" rx="18" ry="4" fill="#fff" opacity="0.8"/>' : '<ellipse cx="34" cy="20" rx="13" ry="4" fill="#fff" opacity="0.85"/>';

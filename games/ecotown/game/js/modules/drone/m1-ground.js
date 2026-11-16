@@ -12,6 +12,7 @@ export const DAYS = [
   { id: 'mon', name: 'Monday', job: 'Photos of the school roof for the builders', state: { battery: 'ok', props: 'ok', weather: 'ok', area: 'ok' } },
   { id: 'tue', name: 'Tuesday', job: 'A video of the new orchard', state: { battery: 'low', props: 'chipped', weather: 'ok', area: 'ok' } },
   { id: 'wed', name: 'Wednesday', job: 'Photos of the beach after a storm', state: { battery: 'ok', props: 'ok', weather: 'gale', area: 'ok' } },
+  { id: 'thu', name: 'Thursday', job: 'Photos of the new pond in the park', state: { battery: 'ok', props: 'ok', weather: 'ok', area: 'people' } },
 ];
 // What the child sees when they look closely: the facts, never the verdict. Ages 13-17 get the numbers.
 export function look(check, state, junior = true) {
@@ -23,12 +24,13 @@ export function look(check, state, junior = true) {
     case 'weather:ok': return junior ? 'Sunny, with a gentle breeze. The windsock hangs down.' : `Sunny. Wind 10 km/h, gusts 14 km/h. This drone is built for wind up to ${DRONE_LIMIT_KMH} km/h.`;
     case 'weather:gale': return junior ? 'Rain showers, and the windsock is sticking straight out. The trees are bending. This drone is not built for strong wind or rain.' : `Showers. Wind 35 km/h, gusts 52 km/h. This drone is built for wind up to ${DRONE_LIMIT_KMH} km/h and is not waterproof.`;
     case 'area:ok': return 'An empty field, away from roads and people, with nothing above it. You can see the whole flight from where you stand.';
+    case 'area:people': return junior ? 'A family is walking their dogs across the middle of the field, right where the drone will fly.' : 'A family with two dogs is crossing the field, right under the flight. They are not part of your flight.';
     default: return '';
   }
 }
 export const isProblem = (state) => state !== 'ok';
 // What puts a problem right before flying. null: it cannot be put right today (the weather), so the drone stays down.
-export const FIX = { 'battery:low': 'Swap in a fully charged battery', 'props:chipped': 'Fit a new propeller', 'weather:gale': null };
+export const FIX = { 'battery:low': 'Swap in a fully charged battery', 'props:chipped': 'Fit a new propeller', 'area:people': 'Wait until the field is clear', 'weather:gale': null };
 export const fixFor = (check, state) => FIX[`${check}:${state}`] ?? null;
 // The right call for a day once fixable problems are fixed: 'fly' or 'stay'.
 export const dayAnswer = (day) => (CHECKS.some((c) => isProblem(day.state[c]) && !fixFor(c, day.state[c])) ? 'stay' : 'fly');
@@ -46,7 +48,7 @@ export function checkReply(check, state, said, tries, junior = true) {
     const where = { battery: 'Look at how many lights are lit.', props: 'Look closely at the tips of the blades.', weather: junior ? 'Look at the windsock and the sky.' : 'Compare the gusts with what the drone is built for.', area: 'Look for people, roads and anything above the field.' }[check];
     return { right, text: problem ? `Look again. ${where}` : `Look again. Is anything really wrong here? ${where}` };
   }
-  const tell = { 'battery:low': 'The battery is low. A drone needs a full battery, with plenty kept back for landing.', 'props:chipped': 'The chipped propeller is a problem. Even a small chip can make a propeller break.', 'weather:gale': 'The wind is stronger than this drone is built for, and it is raining.' }[`${check}:${state}`];
+  const tell = { 'battery:low': 'The battery is low. A drone needs a full battery, with plenty kept back for landing.', 'props:chipped': 'The chipped propeller is a problem. Even a small chip can make a propeller break.', 'weather:gale': 'The wind is stronger than this drone is built for, and it is raining.', 'area:people': 'People are walking under where the drone will fly. Keep a safe distance from people: wait until they have gone.' }[`${check}:${state}`];
   return { right, told: true, text: problem ? `This one is a problem. ${tell}` : `This one is fine. ${look(check, state, junior)}` };
 }
 export function dayReply(day, said, tries) {
@@ -70,7 +72,9 @@ export const PLANS = [
   { id: 'sports', ask: 'Film sports day by flying right above the crowd at the school.', height: 40, answer: 'no',
     rule: 'The Drone Code says never fly over crowds. If the drone fell, it could hurt someone.' },
   { id: 'cliffs', ask: 'Film the seabirds on their nests on the cliffs in May.', height: 30, answer: 'no',
-    rule: 'Disturbing wild birds on their nests is against the law. Wildlife needs space, so this flight should not happen.' },
+    rule: 'Many nesting birds are protected by law, and a drone can scare them off their eggs. Keep well away from nests.' },
+  { id: 'airfield', ask: 'Film the little planes landing, from the field right next to the airfield.', height: 40, answer: 'no',
+    rule: 'Never fly in the zone round an airport or airfield without permission. Planes take off and land there, low down.', ruleS: ' Pilots check these zones on a drone safety map before every flight.' },
   { id: 'high', ask: { j: 'Fly the drone up as high as it will go, to get the whole town in one photo.', s: 'Fly up to 200 m to get the whole town in one photo.' }, height: 200, answer: 'change',
     fixes: [{ id: 'lower', label: 'Fly no higher than the limit and take a few photos instead' }, { id: 'quick', label: 'Go up high, but only for a minute' }],
     rule: 'The Drone Code says stay below 120 metres. Higher up is where planes and helicopters fly.' },
@@ -80,20 +84,27 @@ export const PLANS = [
   { id: 'hospital', ask: 'Fly straight over the hospital helipad to reach the beach.', height: 50, answer: 'change',
     fixes: [{ id: 'round', label: 'Fly round the hospital, well clear of the helipad' }, { id: 'fast', label: 'Fly over it quickly while no helicopter is there' }],
     rule: 'Air ambulances land at the helipad with little warning. Drones must stay well clear of other aircraft, so go round.' },
+  { id: 'fire', ask: 'Film the fire engines putting out a fire at one of the houses.', height: 50, answer: 'no',
+    rule: 'Never fly near an emergency. Fire crews, police and air ambulances may need the sky, and a drone can get in their way.' },
+  { id: 'ids', senior: true, ask: 'Your cousin has a new camera drone and wants to fly it today. Nobody has registered or done any test.', height: 40, answer: 'change',
+    fixes: [{ id: 'register', label: 'First get a Flyer ID (a free online test) and an Operator ID (registration)' }, { id: 'garden', label: 'Fly it anyway, but only over the garden' }],
+    rule: 'In the UK most drones need the pilot to have a Flyer ID and the owner an Operator ID before they fly. The rules depend on the drone\'s weight and camera, so check the Civil Aviation Authority\'s website.' },
 ];
+export const plansFor = (junior) => PLANS.filter((p) => !p.senior || !junior);
+export const ruleOf = (plan, junior = true) => plan.rule + (!junior && plan.ruleS ? plan.ruleS : '');
 export const HEIGHT_LIMIT = 120;
-export function planReply(plan, said, tries) {
+export function planReply(plan, said, tries, junior = true) {
   const right = said === plan.answer;
-  if (right) return { right, text: plan.answer === 'change' ? 'Yes, it can fly once the plan is changed. Which change?' : plan.rule };
+  if (right) return { right, text: plan.answer === 'change' ? 'Yes, it can fly once the plan is changed. Which change?' : ruleOf(plan, junior) };
   if (!tries) {
-    const where = { wood: 'Look at where the drone goes on the map. Is anyone or anything in the way?', sports: 'Look at who is under the drone on the map.', cliffs: 'Look at what lives on the cliffs, and the time of year.', high: 'Look at the side view: how high is the plan?', sight: 'Think about where you stand and where the drone goes.', hospital: 'Look at what is under the flight path on the map.' }[plan.id];
+    const where = { wood: 'Look at where the drone goes on the map. Is anyone or anything in the way?', sports: 'Look at who is under the drone on the map.', cliffs: 'Look at what lives on the cliffs, and the time of year.', high: 'Look at the side view: how high is the plan?', sight: 'Think about where you stand and where the drone goes.', hospital: 'Look at what is under the flight path on the map.', airfield: 'Look at the shaded zone on the map, and what flies there.', fire: 'Think about who else needs the sky at a fire.', ids: 'Is the drone ready to fly? What about the pilot?' }[plan.id];
     return { right, text: `Look again. ${where}` };
   }
   const answer = plan.answer === 'fly' ? 'it can fly as planned' : plan.answer === 'no' ? 'this flight should not happen' : 'it can fly if the plan is changed';
-  return { right, told: true, text: `Here, ${answer}. ${plan.rule}` };
+  return { right, told: true, text: `Here, ${answer}. ${ruleOf(plan, junior)}` };
 }
-export function fixReply(plan, fixId, tries) {
+export function fixReply(plan, fixId, tries, junior = true) {
   const right = plan.fixes?.[0]?.id === fixId;
-  if (right) return { right, text: plan.rule };
-  return { right, told: tries > 0, text: tries ? `The safe change is: ${plan.fixes[0].label.charAt(0).toLowerCase() + plan.fixes[0].label.slice(1)}. ${plan.rule}` : 'That still breaks the rule. Try the other change.' };
+  if (right) return { right, text: ruleOf(plan, junior) };
+  return { right, told: tries > 0, text: tries ? `The safe change is: ${plan.fixes[0].label.charAt(0).toLowerCase() + plan.fixes[0].label.slice(1)}. ${ruleOf(plan, junior)}` : 'That still breaks the rule. Try the other change.' };
 }

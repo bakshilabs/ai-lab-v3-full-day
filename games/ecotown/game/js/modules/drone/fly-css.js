@@ -6,7 +6,8 @@ ${M} .df-hud { position: absolute; left: 12px; bottom: 14px; width: min(400px, c
 ${M} .df-hud[hidden], ${M} .df-pad[hidden] { display: none; }
 ${M} .df-task { font-size: 1.05em; line-height: 1.3; font-weight: 800; }
 ${M} .df-read { display: grid; gap: 6px; font-size: .95em; }
-${M} .df-meter { display: grid; grid-template-columns: 6.6em minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+${M} .df-meter { display: grid; grid-template-columns: 6.6em minmax(70px, 1fr) minmax(0, auto); align-items: center; gap: 8px; }
+${M} .df-meter b { max-width: 11em; line-height: 1.2; }
 ${M} .df-bar { position: relative; height: 16px; border-radius: 8px; background: #f3e6cc; box-shadow: inset 0 0 0 2px #b08a55; overflow: hidden; }
 ${M} .df-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #1f6fd0; }
 ${M} .df-bar .band { position: absolute; top: 0; bottom: 0; background: #7cc06a; opacity: 1; }

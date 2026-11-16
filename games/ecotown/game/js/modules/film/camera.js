@@ -37,7 +37,7 @@ export const PAN_DEG = 70, TILT_DEG = 36;
 // where a close shot or a medium shot of someone aims: a face for a close-up, the middle of the body for a medium shot
 function whoLook(id, P, size) {
   if (id === 'florence') return [P[0], P[1] + (size === 'close' ? 2.1 : 0.7), P[2]];
-  if (id === 'family') return [P[0], P[1] + (size === 'close' ? 0.9 : 0.4), P[2]];
+  if (id === 'family') return [P[0], P[1] + (size === 'close' ? 0.45 : 0.15), P[2]];
   return [P[0], P[1] + 0.2, P[2]];
 }
 // A real camera's lens for this view: the focal length (mm) that gives the same picture height on a full-frame camera
@@ -69,11 +69,11 @@ export function poseFor(shot, set, u = 0.5, live = null) {
     }
     // ---- the film crew's words (mission 1): the same subject at three sizes, and the three camera moves
     case 'cw-wide': if (kind === 'who') { const L = [P[0], P[1] - 0.6, P[2]]; look = L; pos = around(L, 46 * far, 20, lerp(HOME - 4, HOME + 4, t)); fov = 38; } else { pos = around(set.town, D, 31, HOME); look = set.town; fov = 40; } break;
-    case 'cw-medium': if (kind === 'who') { const L = whoLook(id, P, 'medium'); look = L; pos = around(L, (id === 'florence' ? 10.5 : id === 'family' ? 6.5 : 5.5) * far, 7, lerp(HOME - 6, HOME + 2, t)); fov = 30; } else { pos = around(P, 30 * far, 20, lerp(HOME - 4, HOME + 4, t)); fov = 34; } break;
+    case 'cw-medium': if (kind === 'who') { const L = whoLook(id, P, 'medium'); look = L; const a = id === 'family' ? (live?.familyFace ?? 0) : id === 'otters' ? 83 : HOME; pos = around(L, (id === 'florence' ? 10.5 : id === 'family' ? 3.6 : 7) * far, id === 'otters' ? 22 : 7, lerp(a - 6, a + 2, t)); fov = 30; } else { pos = around(P, 30 * far, 20, lerp(HOME - 4, HOME + 4, t)); fov = 34; } break;
     case 'cw-close': if (kind === 'who') {
         const L = whoLook(id, P, 'close'); look = L; fov = 24;
-        if (id === 'family') { const face = live?.familyFace ?? 0; pos = around(L, 7 * far, 14, lerp(face - 8, face + 8, t)); }  // from their door side: they face the camera
-        else if (id === 'otters') pos = around(L, 9 * far, 22, lerp(70, 96, t));                                                 // from the east bank
+        if (id === 'family') { const face = live?.familyFace ?? 0; pos = around(L, 2.8 * far, 10, lerp(face - 8, face + 8, t)); }  // from their door side: they face the camera
+        else if (id === 'otters') pos = around(L, 4.5 * far, 22, lerp(70, 96, t));                                                 // from the east bank
         else pos = around(L, 10.5 * far, 5, lerp(HOME - 5, HOME + 3, t));
       } else { pos = around(P, 11 * far, 16, lerp(HOME - 4, HOME + 4, t)); fov = 28; } break;
     case 'pan': { // the camera stands still and turns from one side to the other
@@ -89,12 +89,8 @@ export function poseFor(shot, set, u = 0.5, live = null) {
     case 'track': { // the camera itself moves along beside what it films: here, down the river at the water's edge
       const z = lerp(-14, 14, t); const rx = riverX(z); pos = [rx + 10, 7.5, z - 4]; look = [rx, 0.6, z + 6]; fov = 44; break;
     }
-    case 'close': default: {
-      if (id === 'otters') { pos = around(P, 18, 23, lerp(66, 104, t)); fov = 30; }           // from the east bank, following them down the river
-      else if (id === 'family') { const face = live?.familyFace ?? set.who.family?.face ?? 0; pos = around(P, 11.5, 22, lerp(face - 20, face + 20, t)); fov = 27; } // from the side their door is on: they face the camera
-      else if (id === 'florence') { pos = around(P, 14, 10, lerp(-28, 16, t)); fov = 30; }
-      else { pos = around(P, 17 * far, 20, lerp(-20, 14, t)); fov = 32; }                         // a close shot of a place
-    }
+    // a close-up anywhere in the hour is filmed as mission 1 teaches it: a face, or one detail
+    case 'close': default: return poseFor({ ...shot, move: 'cw-close' }, set, u, live);
   }
   return { pos: lift(pos), look, fov };
 }

@@ -7,7 +7,7 @@
 import { kitFrom } from './model.js';
 import { css } from './css.js';
 import { createDesk } from './shell.js';
-import { MISSIONS, cleanProgress, packProgress, allDone, madeTitle, recordLines, practisedLines, doneLines } from './missions.js';
+import { MISSIONS, cleanProgress, packProgress, allDone, madeTitle, recordLines, practisedLines, doneLines, keepRound, finishMission } from './missions.js';
 import { missionMap, briefing, debrief } from './map.js';
 import { playBalance } from './m1-play.js';
 import { playForecast } from './m2-play.js';
@@ -41,12 +41,12 @@ async function run(ctx) {
   let go = await missionMap(d, p);
   while (go !== 'finish') {
     const i = go; const m = MISSIONS[i];
-    const cur = p.cur && p.cur.id === m.id ? p.cur : null;
+    const cur = p.rounds[m.id] || null;
     if ((await briefing(d, i, cur?.round || 0)) !== 'start') { go = await missionMap(d, p); continue; }
     // progress is saved after every round, so a child who leaves part-way comes back to the next round
-    const rs = { from: cur?.round || 0, part: cur?.part || null, done: (round, part) => { p.cur = { id: m.id, round, part }; save(); } };
+    const rs = { from: cur?.round || 0, part: cur?.part || null, done: (round, part) => { keepRound(p, m.id, round, part); save(); } };
     const res = await PLAY[m.id](d, st, save, rs);
-    p.res[m.id] = res; p.done[i] = true; p.cur = null; save();
+    finishMission(p, i, res); save();
     const a = await debrief(d, i, doneLines(m.id, res, j, st.rules.list.length), p);
     if (a === 'finish') break;
     if (a === 'next') { const n = p.done.findIndex((x) => !x); go = n >= 0 ? n : await missionMap(d, p); continue; }

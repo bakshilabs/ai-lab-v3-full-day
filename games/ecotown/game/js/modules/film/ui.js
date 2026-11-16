@@ -3,7 +3,7 @@
 // the words in words.js, the drawings in picture.js and the camera in player.js. Nothing is typed anywhere.
 import { moodOf } from './kit.js';
 import { FEEDBACK, cutSecs } from './cut.js';
-import { caption, moveName, subjectLine, shotSentence, TAG, tagMeans, cutName, cutFacts, musicLine, shotCount, CREDIT, THE_END } from './words.js';
+import { caption, moveName, subjectLine, shotSentence, TAG, tagMeans, cutName, cutFacts, musicLine, shotCount, CREDIT, THE_END, CREW_LINE } from './words.js';
 import { frameSvg } from './picture.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -22,7 +22,10 @@ export function createUi(ctx, { junior, reduce, onPanel }) {
   let panel = null; const clear = () => { panel?.remove(); panel = null; };
   // tell the camera how far the panel reaches up the screen, so it can keep its subject in the clear part above it
   const measure = () => { if (!panel || !onPanel) return; const H = root.clientHeight || innerHeight; const top = talkBox.getBoundingClientRect().bottom || 70; const mid = (top + Math.max(top, panel.getBoundingClientRect().top)) / 2; onPanel(Math.max(0, Math.min(0.72, (H / 2 - mid) / (H / 2)))); };
-  addEventListener('resize', measure);
+  // Florence's line starts just after the Back button, whatever its width (large text makes it wider)
+  const placeTalk = () => { const back = root.parentElement?.querySelector('.modback'); if (!back) return; const r = back.getBoundingClientRect(); talkBox.style.left = innerWidth > 620 && r.width ? `${Math.ceil(r.right + 12)}px` : ''; };
+  placeTalk(); requestAnimationFrame(placeTalk);
+  addEventListener('resize', measure); addEventListener('resize', placeTalk);
 
   // Florence's line: written at the top and spoken. quiet: written only (it was just said).
   function talk(text, { quiet } = {}) { talkBox.hidden = false; talkBox.querySelector('p').textContent = text; if (!quiet) ctx.say(text); }
@@ -73,7 +76,7 @@ export function createUi(ctx, { junior, reduce, onPanel }) {
           ${retitle ? '<button type="button" class="fm-btn small" data-fm-title>Change the title</button>' : ''}</div>
         <ol class="fm-frames" style="--fm-cols:${Math.max(5, cut.shots.length)}" data-shots="${cut.shots.length}" data-cut="${cut.n}" data-mood="${m.id}" data-secs="${cutSecs(cut)}">${cut.shots.map(frame).join('')}</ol>${goneRow}
         <div class="fm-lower">
-          ${plays > 0 ? `<div class="fm-fb" role="group" aria-labelledby="fm-fbh"><h3 id="fm-fbh">${junior ? 'Tell Florence one thing to change' : 'Give Florence feedback'}</h3><div class="fm-fbtiles">${FEEDBACK.map((f) => `<button type="button" class="fm-fbt" data-fm-fb="${f.id}"><span aria-hidden="true">${f.icon}</span> ${esc(f.label)}</button>`).join('')}</div></div>` : `<p class="fm-hint">${junior ? 'These are the shots, in order. The arrows show how the camera moves.' : 'The shots in order. The arrows on each frame show the camera move.'}</p>`}
+          ${plays > 0 ? `<div class="fm-fb" role="group" aria-labelledby="fm-fbh"><h3 id="fm-fbh">${junior ? 'Tell Florence one thing to change' : 'Give Florence feedback'}</h3><div class="fm-fbtiles">${FEEDBACK.map((f) => `<button type="button" class="fm-fbt" data-fm-fb="${f.id}"><span aria-hidden="true">${f.icon}</span> ${esc(f.label)}</button>`).join('')}</div></div>` : `<p class="fm-hint">${junior ? 'These are the shots, in order. The arrows show how the camera moves.' : 'The shots in order. The arrows on each frame show the camera move.'} ${esc(CREW_LINE)}</p>`}
           <div class="fm-acts"><button type="button" class="fm-btn go big" data-fm-watch>▶ ${plays === 0 ? 'Watch the film' : cut.dirty ? 'Watch the new cut' : 'Watch it again'}</button>
             ${plays > 0 ? '<button type="button" class="fm-btn" data-fm-finish>Finish with this film ➜</button>' : ''}</div>
         </div>`;
@@ -120,7 +123,7 @@ export function createUi(ctx, { junior, reduce, onPanel }) {
     };
   }
 
-  function off() { clear(); removeEventListener('resize', measure); removeEventListener('keydown', onKey, true); removeEventListener('keyup', onKey, true); root.removeEventListener('wheel', stopWheel); }
+  function off() { clear(); removeEventListener('resize', measure); removeEventListener('resize', placeTalk); removeEventListener('keydown', onKey, true); removeEventListener('keyup', onKey, true); root.removeEventListener('wheel', stopWheel); }
   return { talk, choose, board, film, setStage, off };
 }
 

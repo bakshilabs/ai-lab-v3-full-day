@@ -4,6 +4,7 @@
 // Close-up: a face or one small detail. Pan: the camera stays put and turns side to side. Tilt: it stays put and turns
 // up or down. Track: the camera itself moves along beside what it films.
 import { placeOf } from './kit.js';
+import { num } from './hour.js';
 import { poseFor, lensMm, PAN_DEG, TILT_DEG } from './camera.js';
 
 export const SIZES = {
@@ -20,7 +21,8 @@ const ALL = { ...SIZES, ...MOVES2 };
 const opts = (ids, why = (o) => `That would be a ${o.label.toLowerCase()}. ${o.means}`) => ids.map((id) => ({ id, icon: ALL[id].icon, label: ALL[id].label, why: why(ALL[id]) }));
 
 // the tallest thing to tilt up: a wind turbine, the hall, the school, else the AI Lab
-const TALL = ['wind', 'hall', 'school', 'oldschool', 'ailab'];
+const TALL = ['wind', 'hall', 'school', 'wood', 'oldschool', 'ailab']; // Florence stands by the Lab and the old school: tilt elsewhere if we can
+export const tallWords = (p) => (p.id === 'wood' ? 'the pine trees in the old wood are' : `${p.label} is`);
 export const tallPlace = (set) => TALL.map((id) => placeOf(set, id)).find(Boolean) || set.places[0];
 // a place with a street beside it for a sideways shot, the child's own builds first
 export const streetPlace = (set) => set.places.find((p) => p.built && p.clear) || set.places.find((p) => p.clear) || set.places[0];
@@ -73,7 +75,7 @@ export function sceneItems(set) {
   const S = [
     { id: 'wide', note: 'The first shot. Show everyone where the film happens.', shot: { move: 'wide', sub: 'town' }, hint: 'The audience does not know where we are yet. How much should they see?' },
     { id: 'close', note: `Show how I feel ${see}.`, shot: { move: 'cw-close', sub: 'who:florence' }, hint: 'Feelings show on a face. How close should we be?' },
-    { id: 'tilt', note: `Show how tall ${tall.label} is, from the ground to the top.`, shot: { move: 'tilt', sub: `place:${tall.id}` }, hint: 'From the ground to the top: which way does the camera need to turn?' },
+    { id: 'tilt', note: `Show how tall ${tallWords(tall)}, from the ground to the top.`, shot: { move: 'tilt', sub: `place:${tall.id}` }, hint: 'From the ground to the top: which way does the camera need to turn?' },
     { id: 'track', note: 'Travel down the river beside the water, as if the camera were on a boat.', shot: { move: 'track', sub: 'town' }, hint: 'The camera has to travel. Can a camera that stays in one spot do that?' },
     { id: 'medium', note: 'Show me waving, and my arms as I talk.', shot: { move: 'cw-medium', sub: 'who:florence' }, hint: 'We need my face and my arms, but not the whole island.' },
     { id: 'pan', note: `Show all of ${wide.label} from one spot, from one end to the other.`, shot: { move: 'pan', sub: `place:${wide.id}` }, hint: 'From one spot, from one end to the other: does the camera move along, or turn?' },
@@ -87,6 +89,26 @@ export const PARTS = [
   { id: 'size', kick: 'Shot sizes', title: 'Part 1: shot sizes', line: 'Film crews name a shot by how much it shows. I will film myself three ways. You name each one.' },
   { id: 'move', kick: 'Camera moves', title: 'Part 2: camera moves', line: 'Now the camera moves. Watch where it stands and which way it turns.' },
   { id: 'scene', kick: 'Director’s notes', title: 'Part 3: what does the scene need?', line: 'Directors write notes like these. Pick the shot or move each note needs, and I will film it.' },
+  { id: 'seq', kick: 'Sequences', senior: true, title: 'Part 4: two shots in a row', line: 'A director plans shots in sequences. Each note below needs two shots, one after the other: choose both, then I will film the pair.' },
 ];
+export const partsFor = (junior) => PARTS.filter((p) => !p.senior || !junior);
+
+// ---- part 4 (ages 13–17): a two-shot sequence. Each note needs a shot, then another; each answer is size or move.
+export function seqItems(set) {
+  const tall = tallPlace(set); const wide = placeOf(set, set.offer[0]) || set.places[0];
+  const S = [
+    { note: `A film about ${tall.label}: first show where it stands in the town, then how tall it is.`, a: ['wide', 'tilt'], shots: [{ move: 'wide', sub: 'town' }, { move: 'tilt', sub: `place:${tall.id}` }],
+      qs: ['First: where it stands in the town.', 'Then: how tall it is.'], hints: ['Where it stands in the town: how much does the audience need to see?', 'From the ground to the top: which way does the camera turn?'] },
+    { note: 'Travel down the river as if on a boat, then end on my face as I smile.', a: ['track', 'close'], shots: [{ move: 'track', sub: 'town' }, { move: 'cw-close', sub: 'who:florence' }],
+      qs: ['First: down the river, as if on a boat.', 'Then: my face as I smile.'], hints: ['The camera travels. Which move goes along with it?', 'A face, so you see the smile: which size?'] },
+    { note: `Show all of ${wide.label} from one spot, end to end, then me as I wave and talk about it.`, a: ['pan', 'medium'], shots: [{ move: 'pan', sub: `place:${wide.id}` }, { move: 'cw-medium', sub: 'who:florence' }],
+      qs: ['First: all of it from one spot, end to end.', 'Then: me as I wave and talk.'], hints: ['From one spot, end to end: does the camera move along, or turn?', 'My face and my waving arms, not the whole island: which size?'] },
+  ];
+  return S.map((x, i) => ({ note: x.note, shots: x.shots, items: [0, 1].map((k) => ({
+    q: `Shot ${k + 1} of 2. ${x.qs[k]}`,
+    say: k === 0 ? `Sequence ${i + 1}. ${x.note} Which shot comes first?` : 'And the second shot?',
+    opts: opts(['wide', 'medium', 'close', 'pan', 'tilt', 'track'], (o) => `${o.means} ${(x.a[k] in SIZES) === (o.id in SIZES) ? '' : (x.a[k] in SIZES) ? 'This shot is about how much to show.' : 'This shot is about how the camera moves.'}`.trim()),
+    answer: x.a[k], ok: ALL[x.a[k]].means, hint: x.hints[k] })) }));
+}
 // The record and the closing card: how many were named, how many at the first try.
-export const crewLines = (r) => [`You named ${r.of} shots and moves, ${r.first} of them at the first try.`, 'Wide, medium and close-up are sizes. Pan, tilt and track are moves.'];
+export const crewLines = (r) => [`You named ${num(r.of)} shots and moves${r.seq ? ` and planned ${num(r.seq)} two-shot sequences` : ''}.`, 'Wide, medium and close-up are sizes. Pan, tilt and track are moves.'];

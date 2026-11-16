@@ -1,3 +1,4 @@
+import { num } from './hour.js';
 // Mission 6, true or made up? Check media before using it, and ask before filming people. Pure: the pictures, the
 // choices and Florence's words. Everything is drawn and made up: no real people, no photographs, nothing frightening.
 // The ideas are the ones news teams use: a change is fine when it does not change what happened (brighter colours,
@@ -34,22 +35,35 @@ export function changeItems() {
 // clue: the one thing in the picture (or on it) that shows a machine made it. decoys: things that are true of the
 // picture but are not clues.
 export const PICTURES = [
-  { id: 'homes', from: 'From the town hall’s camera, with the date it was filmed.', made: false, decoys: ['The roofs are red.', 'There is a cloud.'] },
-  { id: 'sign', from: 'Shared online. Nobody says who made it.', made: true, clue: 'The letters on the sign are jumbled.', decoys: ['The stalls have roofs.', 'The sky is blue.'] },
-  { id: 'shadows', from: 'Sent in to the town news. It does not say by whom.', made: true, clue: 'One tree has two shadows pointing opposite ways, with one sun.', decoys: ['The tree is green.', 'The grass is short.'] },
-  { id: 'otters', from: 'From the river warden, who filmed it on her walk.', made: false, decoys: ['The water has ripples.', 'There are two otters.'] },
-  { id: 'sheep', from: 'Shared online. Nobody says who made it.', made: true, clue: 'The sheep has six legs.', decoys: ['The sheep is white.', 'There are trees behind it.'] },
-  { id: 'poster', from: 'The festival poster.', made: true, clue: 'It is labelled “Made with AI”.', decoys: ['The tent is pink.', 'It is evening.'], label: true },
+  { id: 'homes', from: 'From the town hall’s camera, with the date it was filmed.', made: false, decoys: ['The roofs are red.', 'There is a cloud.'],
+    ok: 'Nothing odd, and we know who filmed it and when. That is a good sign.' },
+  { id: 'sign', from: 'Shared online. Nobody says who made it.', made: true, clue: 'The letters on the sign are jumbled.', decoys: ['The stalls have roofs.', 'The sky is blue.'], alsoCant: true,
+    ok: 'Jumbled letters are a common clue in machine-made pictures. A real sign could be misspelt, so it is a clue, not proof. Check where it came from too.' },
+  { id: 'shadows', from: 'Sent in to the town news. It does not say by whom.', made: true, clue: 'One tree has two shadows pointing opposite ways, with one sun.', decoys: ['The tree is green.', 'The grass is short.'],
+    ok: 'With one sun, every shadow points the same way. Two opposite shadows could not happen in real life.' },
+  { id: 'otters', from: 'From the river warden, who filmed it on her walk.', made: false, decoys: ['The water has ripples.', 'There are two otters.'],
+    ok: 'Nothing odd, and we know who filmed it. That is a good sign.' },
+  { id: 'park', from: 'Shared online. Nobody says who made it.', made: null, decoys: ['The trees are green.', 'There is a cloud.'],
+    ok: 'No clue at all, and nobody says where it came from. No clue is not proof that it is real. Find out who made it before you use it.' },
+  { id: 'sheep', from: 'Shared online. Nobody says who made it.', made: true, clue: 'The sheep has six legs.', decoys: ['The sheep is white.', 'There are trees behind it.'],
+    ok: 'Sheep have four legs. A real picture could not show six.' },
+  { id: 'evening', from: 'Sent in by message, with no name on it.', made: null, senior: true, decoys: ['The sun is low.', 'The water is calm.'],
+    ok: 'Nothing odd in the picture, and no name on it. You cannot tell yet: ask who sent it, and where it came from.' },
+  { id: 'poster', from: 'The festival poster.', made: true, clue: 'It is labelled “Made with AI”.', decoys: ['The tent is pink.', 'It is evening.'], label: true,
+    ok: 'There is nothing odd in the picture itself. The label is what tells you. Always read it.' },
 ];
-export function pictureItems() {
-  return PICTURES.map((p, i) => {
-    const filmed = { id: 'filmed', icon: '📷', label: 'Filmed: no clue, and we know who filmed it', why: p.made ? 'Look again. Is there anything in or on it that could not be real?' : '' };
-    const clues = p.made ? [p.clue, p.decoys[0]] : p.decoys;
-    const opts = [filmed, ...clues.map((c, k) => ({ id: c === p.clue ? 'clue' : 'd' + k, icon: '🤖', label: `Made by a machine: ${c.charAt(0).toLowerCase() + c.slice(1)}`, why: p.made ? `That is true, but it could happen in a real picture too. It is not a clue.` : `That could be in a real picture too. It is not a clue.` }))];
-    return { id: p.id, from: p.from, q: 'Filmed, or made by a machine?', say: `${i === 0 ? 'Some pictures are filmed. Some are made by a machine. ' : ''}${p.from} Filmed, or made by a machine?`,
-      opts: order3(i, opts), answer: p.made ? 'clue' : 'filmed',
-      ok: p.label ? 'There is nothing odd in the picture itself. The label is what tells you. Always read it.' : p.made ? `${p.clue} A real picture could not show that.` : 'Nothing odd, and we know who filmed it and when. That is a good sign.',
-      hint: p.made ? 'Look for something that could not happen in real life, or a label.' : 'Think about where it came from as well.' };
+// made: true (a machine made it; there is a clue), false (filmed, and we know who filmed it), null (no clue and no
+// source: the only right answer is "can't tell yet"). Ages 8–12 see one picture like that, ages 13–17 two.
+export function pictureItems(senior = false) {
+  return PICTURES.filter((p) => senior || !p.senior).map((p, i) => {
+    const filmed = { id: 'filmed', icon: '📷', label: 'Filmed: no clue, and we know who filmed it', why: p.made ? 'Look again. Is there anything in or on it that could not be real?' : 'No clue is not proof. Do we know who filmed it?' };
+    const cant = { id: 'cant', icon: '❓', label: 'Can’t tell yet: check where it came from', why: p.made === false ? 'We do know where this came from: who filmed it, and when. Is there anything odd in it?' : p.label ? 'Look at the corner. It says how it was made.' : 'Look again: there is something in this picture you can check.' };
+    const clues = p.made ? [p.clue, p.decoys[0]] : p.decoys.slice(0, 2);
+    const made = clues.map((c, k) => ({ id: c === p.clue ? 'clue' : 'd' + k, icon: '🤖', label: `Made by a machine: ${c.charAt(0).toLowerCase() + c.slice(1)}`, why: 'That could be in a real picture too. It is not a clue.' }));
+    const opts = [[filmed, made[0], cant, made[1]], [made[0], filmed, made[1], cant], [cant, made[1], filmed, made[0]], [made[1], cant, made[0], filmed]][i % 4];
+    return { id: p.id, from: p.from, q: 'Filmed, made by a machine, or can’t tell yet?', say: `${i === 0 ? 'Some pictures are filmed. Some are made by a machine. Some you cannot tell yet. ' : ''}${p.from} What do you think?`,
+      opts, answer: p.made ? 'clue' : p.made === false ? 'filmed' : 'cant', ...(p.alsoCant ? { answers: ['clue', 'cant'] } : {}), ok: p.ok,
+      hint: p.made ? 'Look for something that could not happen in real life, or a label.' : 'Think about where it came from as well as what is in it.' };
   });
 }
 export const HONEST = [
@@ -69,11 +83,11 @@ export const PERMISSION = [
   { art: 'wave', q: 'A friend from school wants to be in your film. It will go on the town website. What do you do?', answer: 'carer',
     opts: [{ id: 'enough', label: 'Their yes is enough.', why: 'For children, a parent or carer should say yes too, especially before it goes online.' }, { id: 'carer', label: 'Check that a parent or carer says yes too.' }, { id: 'later', label: 'Put it online, then tell them.', why: 'Once it is online, it is hard to take back. Ask first.' }],
     ok: 'For children, ask a parent or carer too, before anything goes online.' },
-  { art: 'hall', q: 'Florence offers to make a picture of a big crowd at the hall’s opening, for your news film. Only a few people came. What do you say?', answer: 'no',
-    opts: [{ id: 'yes', label: 'Yes: a big crowd looks better.', why: 'Only a few people came. A made-up crowd makes people believe something untrue.' }, { id: 'no', label: 'No thanks: news should show what really happened.' }, { id: 'secret', label: 'Yes, and don’t tell anyone.', why: 'A made-up picture in the news, kept secret, misleads everyone who sees it.' }],
-    ok: 'A news film shows what really happened. I would not make that picture for the news.' },
-  { art: 'credits', q: 'The last card of your film. What should it say about Florence’s part?', answer: 'both',
-    opts: [{ id: 'me', label: 'Made by me.', why: 'Florence worked the camera. Leaving her out is not the whole truth.' }, { id: 'flo', label: 'Made by Florence.', why: 'You directed it: you chose the place, the people, the mood and the changes.' }, { id: 'both', label: 'Directed by me. Camera by Florence, an AI helper.' }],
+  { art: 'hall', q: 'Your news film needs a shot of the hall’s opening. Only a few people came. Someone says: “Ask an AI to make a picture of a big crowd.” What do you do?', answer: 'real',
+    opts: [{ id: 'yes', label: 'Make the crowd picture: it looks better.', why: 'Only a few people came. A made-up crowd makes people believe something untrue.' }, { id: 'real', label: 'Show the few people who really came.' }, { id: 'secret', label: 'Make it, and don’t say it was made.', why: 'A made-up picture in the news, kept secret, misleads everyone who sees it.' }],
+    ok: 'News shows what really happened. If you ever use a made picture somewhere else, label it.' },
+  { art: 'credits', q: 'The last card of your film. What should it say about my part?', answer: 'both',
+    opts: [{ id: 'me', label: 'Made by me.', why: 'I worked the camera. Leaving me out is not the whole truth.' }, { id: 'flo', label: 'Made by Florence.', why: 'You directed it: you chose the place, the people, the mood and the changes.' }, { id: 'both', label: 'Directed by me. Camera by Florence, an AI helper.' }],
     ok: 'That says who did what, and that an AI helped. Honest credits matter.' },
 ];
 export const permissionItems = () => PERMISSION.map((p, i) => ({ ...p, say: `${i === 0 ? 'Now, filming real people. ' : ''}${p.q}`, opts: p.opts.map((o) => ({ ...o, why: o.why || '' })), hint: i < 3 ? 'Think about how the people in the film would feel.' : 'What would be true, and fair to the people watching?' }));
@@ -83,4 +97,4 @@ export const PARTS = [
   { id: 'made', title: 'Part 2: filmed, or made by a machine?', line: 'Look for clues, and look at where each picture came from.' },
   { id: 'ask', title: 'Part 3: asking first', line: 'A film crew asks people before filming them. What would you do?' },
 ];
-export const truthLines = (r) => [`You checked ${r.pics} pictures and found the clue in each machine-made one${r.first ? `, ${r.first} at the first try` : ''}.`, 'You chose to ask before filming people, and to credit Florence honestly.'];
+export const truthLines = (r) => [`You checked ${num(r.pics)} pictures for clues and for where they came from.`, 'You chose to ask before filming people, and to credit Florence honestly.'];

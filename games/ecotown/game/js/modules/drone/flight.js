@@ -14,6 +14,7 @@ const DOOR = 3.6;               // the doorstep: the parcel is lowered just outs
 const HOVER = 11;               // how high the drone hangs over the doorstep while it lowers the parcel
 const FLAT = new Set(['road', 'carpark', 'path', 'cycle', 'bigfield', 'mixed', 'allot', 'hedge', 'raingarden', 'reedbed', 'festival', 'park', 'hives', 'compost']); // builds a camera can see over
 const SCALE = 1.5;
+const COMPASS = true;          // the arrows fly north, south, east and west (the same in every mission)
 const smooth = (t) => t * t * (3 - 2 * t);
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
@@ -72,9 +73,9 @@ export function createFlight(ctx, tileKeys) {
   function view(dt) {
     if (S.view === 'door' && S.door) { const d = S.door; wantP.set(d.x + d.ux * 14 - d.uz * 5, d.g + 19, d.z + d.uz * 14 + d.ux * 5); wantL.set(d.x, d.g + 6, d.z); } // from the open side: the drone, the rope, the parcel and the doorstep
     else if (S.view === 'still' && S.still) { wantP.copy(S.still.p); wantL.copy(S.still.l); }                                       // reduced motion: one still view of the whole route
-    else if (reduce) { wantP.set(S.x, S.y + 26, S.z + 32); wantL.set(S.x, S.y, S.z - 3); }                                        // steady: it follows, it never turns
+    else if (reduce || S.handCam) { wantP.set(S.x, S.y + 26, S.z + 32); wantL.set(S.x, S.y, S.z - 3); }                                        // steady: it follows, it never turns
     else { const fx = Math.sin(S.cam), fz = -Math.cos(S.cam); wantP.set(S.x - fx * 18, S.y + 8, S.z - fz * 18); wantL.set(S.x + fx * 9, S.y - 1.5, S.z + fz * 9); }
-    if (!camSet || reduce || S.blend <= 0) { camP.copy(wantP); camL.copy(wantL); camSet = true; }
+    if (!camSet || reduce || S.blend <= 0 || S.handCam) { camP.copy(wantP); camL.copy(wantL); camSet = true; }
     else { const k = 1 - Math.exp(-dt * 7); camP.lerp(wantP, k); camL.lerp(wantL, k); S.blend -= dt; }
     camera.position.copy(camP); camera.lookAt(camL);
     if (camera.fov !== 50) { camera.fov = 50; camera.updateProjectionMatrix(); }
@@ -112,11 +113,11 @@ export function createFlight(ctx, tileKeys) {
     setView('chase');
   }
 
-  // One frame of hand flying. input: { f, t } (forward and turn), or { x, z } (screen directions) with reduced motion.
+  // One frame of hand flying. input: { x, z } (north, south, east and west, as in missions 2 and 5).
   // The drone holds its height and cannot crash; the island's edge gently pulls it back. Returns how far it moved.
   function steer(dt, inp) {
     const x0 = S.x, z0 = S.z;
-    if (reduce) {
+    if (COMPASS) {
       const n = Math.hypot(inp.x, inp.z) || 1; const k = Math.min(1, dt * 5);
       S.vx += (inp.x / n * HAND_SPEED - S.vx) * k; S.vz += (inp.z / n * HAND_SPEED - S.vz) * k;
       S.x += S.vx * dt; S.z += S.vz * dt; S.speed = Math.hypot(S.vx, S.vz); if (S.speed > 1) S.heading = bearing(0, 0, S.vx, S.vz); S.y = CRUISE;
@@ -133,14 +134,14 @@ export function createFlight(ctx, tileKeys) {
   // ---- by hand. Resolves with { secs, tiles, trail, hoops, of } when every parcel is down. The drone starts side-on,
   // so the first thing to do is turn; gold hoops mark a winding way to the marker. Missing a hoop costs nothing.
   async function hand(input, { onTick, onDrop, onHoop, onCheer } = {}) {
-    park(); let started = false; let secs = 0; let last = 0; let dist = 0; let hoopsDone = 0, hoopsAll = 0; const trail = [[places.from.gx, places.from.gz]]; let prev = places.from;
+    park(); S.handCam = true; let started = false; let secs = 0; let last = 0; let dist = 0; let hoopsDone = 0, hoopsAll = 0; const trail = [[places.from.gx, places.from.gz]]; let prev = places.from;
     for (let i = 0; i < places.drops.length; i++) {
       const target = places.drops[i]; const [tx, tz] = placeXZ(target); setBeacon(target);
       hoops = hoopsFor(prev, target, 3).map((h) => { const mesh = makeHoop(4.6, h.facing); mesh.group.position.set(h.x, CRUISE + 0.4, h.z); root.add(mesh.group); return { ...h, mesh }; });
       hoopsAll += hoops.length; let hi = 0; last = now();
       if (i === 0) { const aim = hoops[0] || { x: tx, z: tz }; S.heading = bearing(S.x, S.z, aim.x, aim.z) + Math.PI / 2; S.cam = S.heading; }
       await until((dt) => {
-        const inp = input(); const active = reduce ? (inp.x || inp.z) : (inp.f || inp.t);
+        const inp = input(); const active = COMPASS ? (inp.x || inp.z) : (inp.f || inp.t);
         if (active && !started) { started = true; S.spin = true; last = now(); }
         if (started) {
           const t = now(); secs += Math.min(1, Math.max(0, (t - last) / 1000)); last = t; // real time, not game time: a slow device does not make the flight look quicker
@@ -156,7 +157,7 @@ export function createFlight(ctx, tileKeys) {
         }
         const aim = hi < hoops.length ? hoops[hi] : { x: tx, z: tz }; const da = Math.hypot(aim.x - S.x, aim.z - S.z); const to = bearing(S.x, S.z, aim.x, aim.z);
         const d = Math.hypot(tx - S.x, tz - S.z);
-        onTick?.({ target, hoop: hi < hoops.length ? { n: hi + 1, of: hoops.length } : null, tilesAway: Math.max(0, Math.round(da / T)), secs: Math.floor(secs), tiles: Math.round(dist / T), way: reduce ? to : turnTo(S.heading, to), turn: turnTo(S.heading, to), dx: (aim.x - S.x) / T, dz: (aim.z - S.z) / T, started });
+        onTick?.({ target, hoop: hi < hoops.length ? { n: hi + 1, of: hoops.length } : null, tilesAway: Math.max(0, Math.round(da / T)), secs: Math.floor(secs), tiles: Math.round(dist / T), way: COMPASS ? to : turnTo(S.heading, to), turn: turnTo(S.heading, to), dx: (aim.x - S.x) / T, dz: (aim.z - S.z) / T, started });
         return started && d < REACH && S.y > CRUISE - 2.5;
       });
       trail.push([target.gx, target.gz]); clearHoops();
@@ -168,7 +169,7 @@ export function createFlight(ctx, tileKeys) {
   }
   // ---- free flying after the delivery: the same controls, nowhere to be. stopFree() ends it.
   let freeEnd = null;
-  function free(input) { S.spin = true; setView('chase'); return new Promise((res) => { freeEnd = res; S.step = (dt) => { steer(dt, input()); return false; }; }); }
+  function free(input) { S.spin = true; S.handCam = true; setView('chase'); return new Promise((res) => { freeEnd = res; S.step = (dt) => { steer(dt, input()); return false; }; }); }
   function stopFree() { if (!freeEnd) return; S.step = null; S.speed = 0; S.vx = 0; S.vz = 0; S.tilt = 0; const res = freeEnd; freeEnd = null; res(); }
 
   // With reduced motion the automatic flight is watched from one still place that shows the whole route.
@@ -181,7 +182,7 @@ export function createFlight(ctx, tileKeys) {
 
   // ---- by itself: fly a route.fly() result exactly. onStep(i) names the step being flown.
   async function auto(result, onStep, { onCheer, onMiss } = {}) {
-    park(); const done = []; const next = () => places.drops.find((d) => !done.includes(d.k));
+    park(); S.handCam = false; const done = []; const next = () => places.drops.find((d) => !done.includes(d.k));
     if (reduce) stillView(result);
     await tween(0.5);
     for (const leg of result.legs) {

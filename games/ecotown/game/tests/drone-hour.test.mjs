@@ -3,11 +3,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MISSIONS, IDS, restoreHour, nextMission, isOpen, allDone, finishMission, hourRecord, hourPicture, practisedFor, lineFor } from '../js/modules/drone/missions.js';
-import { CHECKS, DAYS, look, dayAnswer, checkReply, dayReply, PLANS, planReply, fixReply } from '../js/modules/drone/m1-ground.js';
+import { CHECKS, DAYS, look, dayAnswer, checkReply, dayReply, PLANS, plansFor, planReply, fixReply } from '../js/modules/drone/m1-ground.js';
+import { vertical } from '../js/modules/drone/fly-physics.js';
 import { TAKEOFF, HOVERS, windAt, course, landing, pickOpen, RING } from '../js/modules/drone/m2-hand.js';
-import { FIELDS, plan, result, overlapOf, NEED, tapReply, SICK, sickShare, adviceReply, health, PLOTS } from '../js/modules/drone/m4-survey.js';
+import { FIELDS, plan, result, overlapOf, NEED, tapReply, SICK, sickShare, adviceReply, health, PLOTS, frontOf } from '../js/modules/drone/m4-survey.js';
 import { SAFE, SPOT_R, clearance, turbineParts, turbineSpots, bridgeShape, bridgeSpots, photoReply, isDamage, actionFor, actionReply, photoSvg } from '../js/modules/drone/m5-inspect.js';
-import { sensorReply, PATTERNS, finds, minutesToFind, covered, W, H, kindReply, SPOTS, extend, TEAM, shortest, passable } from '../js/modules/drone/m6-rescue.js';
+import { sensorReply, PATTERNS, finds, minutesToFind, covered, W, H, kindReply, SPOTS, extend, TEAM, shortest, passable, SCENES, compareSearch, walkerOf } from '../js/modules/drone/m6-rescue.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
 import mod from '../js/modules/drone/index.js';
 import { makeTerrain } from '../js/world/terrain.js';
@@ -47,11 +48,14 @@ test('the record: one line per mission, two to four practised lines, a small pic
     assert.ok(rec.made.picture.length < 20000);
   }
   assert.match(lineFor('hand', sums.hand, false), /24 km\/h/); assert.doesNotMatch(lineFor('hand', sums.hand, true), /km\/h|m\/s/);
+  // with no summary, a line says what the mission is, never a result the child did not have
+  for (const id of IDS) for (const j of [true, false]) { const l = lineFor(id, {}, j); assert.ok(l.length <= 120, l); assert.doesNotMatch(l, /\b\d+\b/, l); }
+  assert.ok(lineFor('rescue', { pattern: 'square', searches: 2, path: 35 }, false).length <= 120);
   assert.equal(practisedFor(restoreHour(null)).length, 0);
 });
 
-test('ground school: three days with a different call each; replies point where to look before they tell', () => {
-  assert.deepEqual(DAYS.map(dayAnswer), ['fly', 'fly', 'stay']);
+test('ground school: four days with a different problem each; replies point where to look before they tell', () => {
+  assert.deepEqual(DAYS.map(dayAnswer), ['fly', 'fly', 'stay', 'fly']); assert.equal(DAYS[3].state.area, 'people');
   for (const d of DAYS) for (const c of CHECKS) { assert.ok(look(c, d.state[c], true).length > 10); assert.ok(look(c, d.state[c], false).length > 10); }
   assert.doesNotMatch(look('weather', 'gale', true), /km\/h|\d/); assert.match(look('weather', 'gale', false), /km\/h/);
   const first = checkReply('props', 'chipped', 'ok', 0); assert.equal(first.right, false); assert.match(first.text, /Look again/); assert.doesNotMatch(first.text, /chip/);
@@ -60,8 +64,10 @@ test('ground school: three days with a different call each; replies point where 
   assert.match(dayReply(DAYS[2], 'fly', 0).text, /Look at the checks again/); assert.equal(dayReply(DAYS[2], 'stay', 0).right, true);
 });
 
-test('ground school: six flight plans judged against the Drone Code', () => {
-  assert.equal(PLANS.length, 6); assert.deepEqual([...new Set(PLANS.map((p) => p.answer))].sort(), ['change', 'fly', 'no']);
+test('ground school: flight plans judged against the Drone Code, airfields and emergencies included', () => {
+  assert.equal(plansFor(true).length, 8); assert.equal(plansFor(false).length, 9); assert.ok(PLANS.some((p) => p.id === 'airfield' && p.answer === 'no'));
+  assert.match(PLANS.find((p) => p.id === 'cliffs').rule, /Many nesting birds are protected by law/); assert.doesNotMatch(PLANS.find((p) => p.id === 'cliffs').rule, /Disturbing wild birds .* is against the law/);
+  assert.match(planReply(PLANS.find((p) => p.id === 'airfield'), 'no', 0, false).text, /safety map/); assert.doesNotMatch(planReply(PLANS.find((p) => p.id === 'airfield'), 'no', 0, true).text, /safety map/); assert.deepEqual([...new Set(PLANS.map((p) => p.answer))].sort(), ['change', 'fly', 'no']);
   for (const p of PLANS) {
     const wrong = ['fly', 'no', 'change'].find((x) => x !== p.answer);
     assert.match(planReply(p, wrong, 0).text, /^Look again/); assert.ok(planReply(p, wrong, 1).told);
@@ -77,6 +83,13 @@ test('hand flying: a course on open ground, two winds, and honest landings', () 
   const c = course(spot); assert.equal(c.hoops.length, 4); assert.ok(new Set(c.hoops.map((h) => h.h)).size >= 3); // different heights
   assert.ok(TAKEOFF.lo < TAKEOFF.hi && RING > 2);
   const w0 = windAt(0, 1), w1 = [0, 1, 2, 3, 4, 5].map((t) => windAt(1, t).kmh); assert.ok(w0.x > 0 && Math.abs(w0.z) < 1e-9); assert.ok(Math.max(...w1) > HOVERS[1].kmh && Math.min(...w1) < HOVERS[1].kmh);
+  // every landing counts, however gently it comes down (review: slow descents used to rest on the pad without landing)
+  for (const fps of [60, 30, 15]) for (const tap of [0, 0.15, 0.4, 0.8, 3]) {
+    const S = { y: 3, vy: 0, floor: 0, airborne: true }; let t = 0, press = 0, touched = null; const dt = 1 / fps;
+    for (let i = 0; i < fps * 60 && touched === null; i++) { t += dt; if (Math.abs(S.vy) < 0.05 && t > press + 0.1) press = t + tap; touched = vertical(S, tap === 0 ? (S.y > 0.5 ? -1 : 0) : t < press ? -1 : 0, dt); if (tap === 0 && S.y <= 0.5 && Math.abs(S.vy) < 0.01) { /* let go near the pad: it settles */ } }
+    assert.ok(touched !== null, `fps ${fps}, taps of ${tap}s: no landing`); if (tap <= 0.4 && tap > 0) assert.ok(touched < 1.8, `fps ${fps} taps ${tap}: ${touched}`);
+  }
+  { const S = { y: 0, vy: 0, floor: 0, airborne: false }; assert.equal(vertical(S, 0, 1 / 60), null); vertical(S, 1, 0.5); assert.ok(S.y > 0); } // resting: no landing; climbing works
   assert.equal(landing(1, 0).kind, 'soft'); assert.equal(landing(2.2, 1).kind, 'firm'); assert.equal(landing(4, 0).ok, false); assert.equal(landing(1, 4).kind, 'off');
 });
 
@@ -90,13 +103,15 @@ test('farm survey: overlap, gaps and the battery decide whether the photos join'
   assert.deepEqual(ok, ['ew2']); assert.equal(result(farm, plan(farm, farm.start)).kind, 'battery');
   assert.match(result(farm, plan(farm, { dir: 'ew', spacing: 2 }), false).text, /60% overlap/); assert.doesNotMatch(result(farm, plan(farm, { dir: 'ew', spacing: 2 }), true).text, /%/);
   assert.ok(NEED >= 60);
+  // ages 13-17 also need the photos to overlap along the line
+  assert.equal(frontOf(1), 75); assert.equal(result(farm, plan(farm, { dir: 'ew', spacing: 2, along: 2 }), false).kind, 'front'); assert.equal(result(farm, plan(farm, { dir: 'ew', spacing: 2, along: 1 }), false).ok, true);
 });
 
 test('farm survey: reading the map, with the sick patch only seen in the health view', () => {
   assert.equal(tapReply('dry', 2, 2, 'normal', 0).right, true); assert.equal(tapReply('dry', 12, 7, 'normal', 0).right, false);
   assert.match(tapReply('sick', 0, 6, 'normal', 0).text, /health view/);
   assert.equal(tapReply('sick', SICK.x, SICK.z, 'health', 0).right, true);
-  assert.ok(health(SICK.x, SICK.z) < 0.45 && health(14, 7) > 0.75);
+  assert.ok(health(SICK.x, SICK.z) < 0.45 && health(14, 7) > 0.75); assert.ok(health(0, 8) > 0.6 && health(0, 8) < 0.75); // a stressed corner that is not the sick patch
   assert.equal(sickShare(), Math.round(9 / 40 * 100)); assert.equal(PLOTS.length, 4);
   assert.equal(adviceReply('target').right, true); assert.equal(adviceReply('all').right, false);
 });
@@ -117,7 +132,10 @@ test('search and rescue: the heat camera, two real patterns with honest times, w
   assert.equal(sensorReply('heat', 0).right, true); assert.equal(sensorReply('camera', 0).told, false); assert.equal(sensorReply('zoom', 1).told, true);
   for (const p of PATTERNS) { const path = p.path(); assert.equal(covered(path).size, W * H, p.id); assert.ok(finds(path).some((f) => f.spot.id === 'walker')); }
   const sq = minutesToFind(PATTERNS[0].path()), ln = minutesToFind(PATTERNS[1].path()); assert.ok(sq < ln, `${sq} ${ln}`);
-  for (const p of PATTERNS) { const f = finds(p.path()); assert.ok(f.findIndex((x) => x.spot.kind === 'animal') < f.findIndex((x) => x.spot.id === 'walker'), p.id); } // an animal is met first either way
+  // the second search (ages 13-17): no last sighting, so the lines are quicker; each pattern is a real choice
+  assert.equal(compareSearch(SCENES[0], 'square').best, 'square'); assert.equal(compareSearch(SCENES[1], 'lines').best, 'lines');
+  for (const sc of SCENES) { assert.ok(shortest(sc) > 0, sc.id); assert.ok(passable(walkerOf(sc).x, walkerOf(sc).z, sc)); for (const p of PATTERNS) { const f = finds(p.path(sc), sc); assert.ok(f.findIndex((x) => x.spot.kind === 'animal') < f.findIndex((x) => x.spot.kind === 'person'), `${sc.id} ${p.id}`); } }
+  assert.doesNotMatch(sensorReply('camera', 0).text, /almost nothing/);
   assert.equal(kindReply(SPOTS[0], 'person', 0).right, false); assert.equal(kindReply(SPOTS[0], 'person', 1).told, true);
   const walker = SPOTS.find((s) => s.id === 'walker'); assert.ok(passable(walker.x, walker.z)); assert.ok(shortest() > 0);
   assert.equal(extend([TEAM], TEAM.x + 2, TEAM.z).ok, false); // not next to the end

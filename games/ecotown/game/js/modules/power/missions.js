@@ -59,11 +59,17 @@ export function cleanProgress(saved, junior = true) {
     demand: r.demand ? { moved: num(r.demand.moved, 0, 99), kwh: num(r.demand.kwh, 0, 9999) } : null,
     storm: r.storm ? { trips: num(r.storm.trips, 0, 99) } : null,
   };
-  const c = s.cur && typeof s.cur === 'object' && MISSION_IDS.includes(s.cur.id) ? s.cur : null;
-  const cur = c ? { id: c.id, round: num(c.round, 0, 5) || 0, part: c.part && typeof c.part === 'object' ? c.part : null } : null; // a mission left part-way: the next round
-  return { v: 2, done, res, cur, hand: readHand(s.hand), rules: cleanRules(s.rules, junior), changed: !!s.changed, improved: !!s.improved };
+  // missions left part-way: each keeps its own next round (an older save kept only one, as cur)
+  const rounds = {}; const raw = s.rounds && typeof s.rounds === 'object' ? { ...s.rounds } : {};
+  if (s.cur && typeof s.cur === 'object' && !raw[s.cur.id]) raw[s.cur.id] = s.cur;
+  for (const id of MISSION_IDS) { const c = raw[id]; const round = c && typeof c === 'object' ? num(c.round, 0, 5) : 0; if (round) rounds[id] = { round, part: c.part && typeof c.part === 'object' ? c.part : null }; }
+  return { v: 2, done, res, rounds, hand: readHand(s.hand), rules: cleanRules(s.rules, junior), changed: !!s.changed, improved: !!s.improved };
 }
-export const packProgress = (p) => ({ v: 2, done: p.done, res: p.res, cur: p.cur || null, hand: writeHand(p.hand), rules: p.rules, changed: p.changed, improved: p.improved });
+export const packProgress = (p) => ({ v: 2, done: p.done, res: p.res, rounds: p.rounds || {}, hand: writeHand(p.hand), rules: p.rules, changed: p.changed, improved: p.improved });
+// A round finished inside a mission: kept for that mission only. A mission finished: its own round is cleared,
+// and every other mission's saved round stays.
+export function keepRound(p, id, round, part) { p.rounds = { ...(p.rounds || {}), [id]: { round, part } }; return p; }
+export function finishMission(p, i, res) { const id = MISSION_IDS[i]; p.res[id] = res; p.done[i] = true; const r = { ...(p.rounds || {}) }; delete r[id]; p.rounds = r; return p; }
 // The first mission not yet done (or -1 when all six are done). Missions up to it are open; later ones are locked.
 export const nextMission = (done) => done.findIndex((d) => !d);
 export const isOpen = (done, i) => { const n = nextMission(done); return n < 0 || i <= n; };

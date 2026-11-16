@@ -19,6 +19,8 @@ export const shotSentence = (shot, set) => (shot.move === 'pull' ? `The camera s
 export const TAG = { new: 'New', moved: 'Moved', changed: 'Changed', gone: 'Cut' };
 export const tagMeans = { new: 'a new shot', moved: 'moved to a new place in the film', changed: 'made longer or shorter', gone: 'cut from the film' };
 export const cutName = (n) => (n === 1 ? 'First cut' : `Cut ${n}`);
+// Mission 1's crew words for Florence's moves: a push in and a pull back are tracks in and out, a street pass is a track
+export const CREW_LINE = 'In crew words: Push in, Pull back and Street pass are tracks; Circle round is a track in an arc; Rise up is a crane shot.';
 export const cutFacts = (cut) => `${count(cut.shots.length, 'shot')} · about ${secsWord(cutSecs(cut))}`;
 export const musicLine = (cut) => { const m = moodOf(cut.mood); return `${m.icon} ${cap(m.tune)}, ${m.light}`; };
 

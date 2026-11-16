@@ -51,18 +51,23 @@ export const STORY_ART = {
   'w-wind': () => frame('night', at(70, 78, 1.25, turbine(true)) + gust(28) + gust(48)),
   'w-lit': () => frame('night', island(true), { ground: false }),
   'b-park': () => frame('day', at(80, 66, 1.2, ART.trees()) + at(40, 66, 0.9, ART.trees())),
-  'b-family': () => frame('day', at(70, 76, 1.5, pawn(-12, 1.25, '#ff8a5c', '#c68a5e') + pawn(14, 1.25, '#2f6fd8', '#f1c9a5') + pawn(4, 0.85, '#ffd23f', '#e0ac7e')) + ball(98, 63)),
+  // medium shots: people from the waist up (the frame cuts them at the waist), as mission 1 teaches
+  'b-family': () => frame('day', at(54, 122, 1, pawn(0, 5, '#ff8a5c', '#c68a5e')) + at(110, 122, 1, pawn(0, 5, '#2f6fd8', '#f1c9a5')) + ball(82, 60, 7), { horizon: 62 }),
   'b-river': () => frame('day', at(80, 72, 2, water(80, 14)) + ball(86, 66, 5) + '<path d="M70 70 q4 -3 8 0 M92 72 q4 -3 8 0" stroke="#d7f1ff" stroke-width="1.4" fill="none"/>', { horizon: 50 }),
-  'b-net': () => frame('day', at(80, 80, 1, water(160, 16)) + florence(60, 76, 1.4, net) + ball(108, 54, 3.5), { horizon: 62 }),
+  'b-net': () => frame('day', florence(68, 106, 1.9, net) + '<path d="M0 80 h160 v10 h-160 Z" fill="#5bbcf0"/>', { horizon: 64 }),
   'b-smile': () => frame('day', face(80, 46, 2.1, '#c68a5e', '#ff8a5c') + ball(108, 78, 8), { horizon: 70 }),
   'm-dawn': () => frame('dawn', island(false), { ground: false }),
-  'm-setup': () => frame('day', at(80, 72, 1.6, stall(-16, false) + stall(16, false, '#3f8fd0')) + at(80, 80, 1, crowd(-40, 2) + crowd(28, 2))),
+  'm-setup': () => frame('day', at(116, 98, 2.6, stall(0, false)) + at(52, 124, 1, pawn(0, 5, '#5bbd5a', '#8d5a3b'))),
   'm-clouds': () => frame('storm', at(80, 72, 1.2, stall(-16, false) + stall(16, false, '#3f8fd0')) + cloud(40, 18, 1.6, '#59606b') + cloud(100, 14, 2, '#4d535d') + cloud(140, 26, 1.2, '#59606b')),
   'm-cover': () => frame('storm', at(80, 74, 1.6, stall(-16, true) + stall(16, true, '#3f8fd0')) + rain(6, 156, 4, 60) + at(80, 82, 0.9, crowd(-34, 2) + crowd(26, 2))),
   'm-sun': () => frame('day', at(80, 70, 1.4, stall(-24, false) + stall(0, false, '#3f8fd0') + stall(24, false)) + at(80, 84, 1, crowd(-60, 6) + crowd(14, 6)) + cloud(36, 20)),
   'm-gull': () => frame('day', at(80, 62, 2.6, seagull) + at(80, 86, 1, water(160, 14)), { horizon: 74 }),
+  // the otters come home (ages 13–17)
+  'o-peek': () => frame('day', at(80, 96, 1, water(220, 40)) + at(66, 66, 5, otter(0)), { horizon: 44 }),
+  'o-litter': () => RIVER_LITTER(true),
+  'o-clean': () => RIVER_LITTER(false),
 };
-export const storyPic = (id, label = '') => svg((STORY_ART[id] || STORY_ART['m-dawn'])(), label);
+export const storyPic = (id, label = '') => svg((STORY_ART[id] || SHOT_ART[id] || STORY_ART['m-dawn'])(), label);
 
 // ---- the takes (mission 4): the same shot, once good and once with a fault a camera operator can make
 const HALL = () => frame('day', at(80, 74, 1.9, ART.hall()) + at(30, 74, 0.9, ART.trees()) + cloud(40, 20));
@@ -108,13 +113,16 @@ export const SHOT_ART = {
 };
 export const shotPic = (id, label = '') => svg((SHOT_ART[id] || SHOT_ART['wide-town'])(), label);
 // A frame with a caption on it, as it would look on screen (mission 5)
-export const captionPic = (id, text, label = '') => svg((SHOT_ART[id] || SHOT_ART['wide-town'])() + (text ? `<rect x="14" y="70" width="132" height="14" rx="2" fill="#000"/><text x="80" y="80.5" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Inter, Arial, sans-serif">${esc(text)}</text>` : ''), label);
+// (a long caption is set smaller so it stays inside its black box, as a long line would on screen)
+export const captionPic = (id, text, label = '') => { const fs = Math.min(8.5, Math.round(250 / Math.max(1, String(text).length) * 10) / 10);
+  return svg((SHOT_ART[id] || SHOT_ART['wide-town'])() + (text ? `<rect x="8" y="70" width="144" height="14" rx="2" fill="#000"/><text x="80" y="${79 + fs * 0.18}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" font-family="Inter, Arial, sans-serif">${esc(text)}</text>` : ''), label); };
 
 // ---- mission 6: a picture as it was filmed, and as it was shown. And pictures with or without a machine's clues.
 const RIVER_LITTER = (litter) => frame('day', at(80, 70, 2.2, water(100, 18)) + at(24, 60, 0.9, ART.trees()) + (litter ? can(60, 64) + can(84, 70, '#3f8fd0') + can(104, 62) + '<path d="M70 74 h9 l-2 4 h-6 Z" fill="#fffaf0" opacity="0.9"/>' : ''), { horizon: 52 });
 const OTTERS_N = (k) => frame('day', at(80, 70, 2, water(110, 18)) + Array.from({ length: k }, (_, i) => at(k === 1 ? 80 : 30 + i * 33, 70, 1.6, otter(0))).join(''), { horizon: 52 });
 export const CHANGE_ART = {
-  colour: [() => frame('dull', at(80, 74, 1.9, ART.hall()) + at(30, 74, 0.9, ART.trees())), () => HALL()],
+  // the same scene twice: the colours were dull and dark as filmed, and brightened for the film (nothing else changed)
+  colour: [() => { const id = nid('fmdull'); return `<defs><filter id="${id}"><feColorMatrix type="saturate" values="0.2"/><feComponentTransfer><feFuncR type="linear" slope="0.75"/><feFuncG type="linear" slope="0.75"/><feFuncB type="linear" slope="0.75"/></feComponentTransfer></filter></defs><g filter="url(#${id})">${HALL()}</g>`; }, () => HALL()],
   level:  [() => `<g transform="rotate(-9 80 45) scale(1.15) translate(-10 -6)">${frame('day', at(80, 74, 1.4, ART.stalls()))}</g>`, () => frame('day', at(80, 74, 1.4, ART.stalls()))],
   litter: [() => RIVER_LITTER(true), () => RIVER_LITTER(false)],
   copies: [() => OTTERS_N(1), () => OTTERS_N(4)],
@@ -128,6 +136,9 @@ export const MADE_ART = {
   shadows: () => frame('day', '<ellipse cx="62" cy="76" rx="18" ry="3" fill="#5f8a3c"/><ellipse cx="100" cy="76" rx="18" ry="3" fill="#5f8a3c"/>' + at(80, 75, 1.6, tree(0, 1.3)) + '<circle cx="20" cy="18" r="8" fill="#fff3b0"/>', { horizon: 56, sun: false }),
   otters: () => OTT(),
   sheep: () => frame('day', at(70, 76, 1.8, sheep(6)) + at(124, 72, 0.9, ART.trees())),
+  // no clue in these two, and no source: you cannot tell yet
+  park: () => frame('day', at(80, 66, 1.2, ART.trees()) + at(30, 66, 0.9, ART.trees()) + cloud(112, 20)),
+  evening: () => SHOT_ART['river-evening'](),
   poster: () => frame('evening', at(80, 74, 1.6, ART.tent()) + at(80, 86, 1, crowd(-44, 4) + crowd(14, 4)) + '<rect x="104" y="4" width="52" height="13" rx="3" fill="#fffaf0"/><text x="130" y="13.4" text-anchor="middle" font-size="7.4" font-weight="800" fill="#3b2a1e" font-family="Inter, Arial, sans-serif">Made with AI</text>'),
 };
 export const madePic = (id, label = '') => svg((MADE_ART[id] || MADE_ART.homes)(), label);
@@ -137,7 +148,7 @@ export const PEOPLE_ART = {
   picnic: () => frame('day', at(80, 80, 1.6, blanket + pawn(-10, 1, '#ff8a5c', '#c68a5e') + pawn(10, 1, '#2f6fd8', '#f1c9a5') + pawn(1, 0.7, '#ffd23f', '#e0ac7e')) + at(28, 66, 0.9, ART.trees()) + at(136, 66, 1, ART.trees()), { horizon: 60 }),
   wave: () => frame('day', at(80, 80, 1.6, pawn(-8, 1, '#5bbd5a', '#8d5a3b') + pawn(10, 0.9, '#ff7eb6', '#e0ac7e')) + at(140, 70, 1.6, ART.school()), { horizon: 62 }),
   park: () => frame('day', at(80, 66, 1.2, ART.trees()) + at(36, 66, 0.9, ART.trees()) + at(128, 66, 1, ART.trees())),
-  hall: () => frame('day', at(80, 74, 1.9, ART.hall()) + at(80, 86, 0.9, crowd(-70, 9) + crowd(10, 8))),
+  hall: () => frame('day', at(80, 74, 1.9, ART.hall()) + at(80, 86, 0.9, crowd(-14, 3))), // only a few people came
   credits: () => `<rect width="${FW}" height="${FH}" fill="#17110c"/><text x="80" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#fff6e0" font-family="Inter, Arial, sans-serif">The end</text><text x="80" y="52" text-anchor="middle" font-size="7.5" fill="#fff6e0" font-family="Inter, Arial, sans-serif">Directed by: ?</text><text x="80" y="64" text-anchor="middle" font-size="7.5" fill="#fff6e0" font-family="Inter, Arial, sans-serif">Camera by: ?</text>`,
 };
 export const peoplePic = (id, label = '') => svg((PEOPLE_ART[id] || PEOPLE_ART.park)(), label);
