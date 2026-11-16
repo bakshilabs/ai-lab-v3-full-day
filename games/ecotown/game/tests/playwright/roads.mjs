@@ -97,7 +97,8 @@ const mod = (f) => p.evaluate((src) => import(src), `./js/modules/roads/${f}`).c
 // ---- mission 1: sensor views
 const t0m = Date.now();
 await openMission(1);
-const R1 = await p.evaluate(async () => { const s = await import('./js/modules/roads/sensors.js'); return s.ROUNDS.map((r) => s.answer(r)); });
+const R1 = await p.evaluate(async (jr) => { const s = await import('./js/modules/roads/sensors.js'); return s.roundsFor(jr).map((r) => s.answer(r)); }, junior);
+must('m1-roundsForAge', R1.length === (junior ? 5 : 7), R1.length);
 for (let i = 0; i < R1.length; i++) {
   await p.waitForSelector(M + '[data-view="radar"]', { timeout: LONG });
   await p.click(M + '[data-view="radar"]'); if (i === 1) await shot('m1-radar');
@@ -120,11 +121,11 @@ await primary(); await closeMission(1); checks.m1secs = Math.round((Date.now() -
 
 // ---- mission 2: labelling
 await openMission(2);
-const L2 = await p.evaluate(async () => { const l = await import('./js/modules/roads/labels.js'); return [...l.EASY, ...l.HARD].map((pic) => pic.things.map((t) => [t.id, l.CASES[t.case].label])); });
+const L2 = await p.evaluate(async (jr) => { const l = await import('./js/modules/roads/labels.js'); return [...l.EASY, ...l.hardFor(jr)].map((pic) => pic.things.map((t) => [t.id, l.CASES[t.case].label])); }, junior);
 const tapThing = (id) => p.evaluate(([m, i]) => { const g = document.querySelector(`${m}[data-thing="${i}"]`); const r = g.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, [M, id]);
 for (let k = 0; k < L2.length; k++) {
   if (k === 2) { await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary(); }   // train and test after the easy pictures
-  if (k === 2) { await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test1 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M); must('m2-firstTestMissesHardOnes', /4 of 9|4\/9/.test(checks.m2test1), checks.m2test1); await shot('m2-test1'); await layout('m2-test1'); await primary(); }
+  if (k === 2) { await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test1 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M); must('m2-firstTestMissesHardOnes', (junior ? /4 of 9/ : /4\/10/).test(checks.m2test1), checks.m2test1); await shot('m2-test1'); await layout('m2-test1'); await primary(); }
   await p.waitForSelector(M + '[data-thing]', { timeout: LONG });
   if (k === 0) { await p.click(tray('[data-act="done"]')); checks.m2miss = await hint(); must('m2-missNoLocationFirst', /Look again/.test(checks.m2miss) && !/left|right|van/.test(checks.m2miss), checks.m2miss); }
   for (const [id, label] of L2[k]) {
@@ -136,7 +137,7 @@ for (let k = 0; k < L2.length; k++) {
 }
 await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary();
 await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test2 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M);
-must('m2-retestBetter', /9 of 9|9\/9/.test(checks.m2test2), checks.m2test2); await shot('m2-test2');
+must('m2-retestFreshPictures', (junior ? /New test pictures: 9 of 11/ : /Fresh test pictures: 10\/12/).test(checks.m2test2), checks.m2test2); await shot('m2-test2');
 await primary(); await closeMission(2);
 
 // leave mid-way and come back: finished missions are kept, and the map opens again
@@ -148,7 +149,7 @@ checks.hubResume = await hubState(); must('resumeAtMap', checks.hubResume.join()
 
 // ---- mission 3: rules of the road
 await openMission(3);
-const S3 = await p.evaluate(async () => { const r = await import('./js/modules/roads/rules.js'); return r.SCENES.map((s) => ({ id: s.id, safe: String(s.opts.find((o) => s.safe(o.v)).v), unsafe: String(s.opts.find((o) => !s.safe(o.v)).v) })); });
+const S3 = await p.evaluate(async (jr) => { const r = await import('./js/modules/roads/rules.js'); return r.scenesFor(jr).map((s) => ({ id: s.id, safe: String(s.opts.find((o) => s.safe(o.v)).v), unsafe: String(s.opts.find((o) => !s.safe(o.v)).v) })); }, junior);
 for (let i = 0; i < S3.length; i++) {
   await p.waitForSelector(tray('[data-opt]'), { timeout: LONG });
   if (i === 1) {                                                                   // 30 mph past the school: a near miss and a hint
@@ -162,7 +163,7 @@ for (let i = 0; i < S3.length; i++) {
   if (motion) { await p.click(tray('[data-act="skip"]'), { timeout: 3000 }).catch(() => {}); }
   await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); if (i === 2) await shot('m3-cyclist-safe'); await primary();
 }
-await p.waitForSelector(M + '.rd-rules', { timeout: LONG }); must('m3-rulesListed', (await p.$$(M + '.rd-rules li')).length === 6); await shot('m3-rules');
+await p.waitForSelector(M + '.rd-rules', { timeout: LONG }); must('m3-rulesListed', (await p.$$(M + '.rd-rules li')).length === S3.length); await shot('m3-rules');
 await primary(); await closeMission(3);
 
 // ---- mission 4: testing in simulation, one change at a time
@@ -188,12 +189,16 @@ const cars = async (d, times) => { for (let i = 0; i < times; i++) await p.click
 const runFleet = async () => { await p.click(tray('[data-act="run"]')); await p.waitForTimeout(400); };
 await runFleet(); checks.m5first = await topText(); must('m5-tooFewCarsSaysSo', /Too long a wait|Waits too long/.test(checks.m5first), checks.m5first);
 await shot('m5-first'); await layout('m5-first');
-await cars(1, 7); await runFleet(); await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
+await cars(1, 3); await runFleet(); await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
 await p.click(tray('[data-spot="homesW"]')); await p.click(tray('[data-spot="homesN"]')); await cars(-1, 3); await runFleet();
 await shot('m5-where'); await layout('m5-where');
 await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
 await p.click(tray('[data-charger="shops"]')); await cars(1, 3); await runFleet();
 await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await shot('m5-charge'); await primary();
+if (!junior) {                                                                   // ages 13–17: the peak round, an extra train at the station
+  await p.waitForSelector(tray('[data-spot="station"]'), { timeout: LONG }); await p.click(tray('[data-spot="station"]')); await p.click(tray('[data-charger="station"]')); await runFleet();
+  await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await shot('m5-peak'); await primary();
+}
 await closeMission(5);
 
 // ---- mission 6: the street (the first loop). The opening card, then straight to the first drop-off point by a tap on the 3D street
@@ -310,8 +315,8 @@ if (motion) {
   // every caption must stay up long enough to read
   const seen = []; let prev = null; const t0 = Date.now(); let shots = 0;
   while (!(await p.$(M + '[data-act="next"]')) && Date.now() - t0 < 180000) { const t = await topText(); if (t !== prev) { seen.push({ t, at: Date.now() }); prev = t; if (shots < 3 && seen.length > 1) { shots++; await shot(`ride-${shots}`, 700); } } await p.waitForTimeout(120); }
-  const holds = seen.slice(1).map((s, i) => (s.at - seen[i].at) / 1000); checks.rideCaptions = seen.length; checks.rideHolds = holds.map((h) => +h.toFixed(1));
-  must('captionsHold', seen.length >= 5 && holds.every((h) => h >= 2.4), checks.rideHolds);
+  const holds = seen.slice(2).map((s, i) => (s.at - seen[i + 1].at) / 1000);   // the first caption may be seen late (it shows while the test is still taking a screenshot), so its hold is not measured checks.rideCaptions = seen.length; checks.rideHolds = holds.map((h) => +h.toFixed(1));
+  must('captionsHold', seen.length >= 5 && holds.every((h) => h >= 2.6), checks.rideHolds);
   await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); await focusOk('ride-end'); lastCaption = await topText(); await shot('ride-end'); await layout('ride-end'); await p.click(M + '[data-act="next"]');
 } else {
   let views = 0;
@@ -339,7 +344,7 @@ await p.waitForFunction(() => window.__roads !== undefined, null, { timeout: LON
 const result = await p.evaluate(() => window.__roads);
 must('finished', result?.finished === true); checks.title = result?.record?.made?.title; checks.lines = result?.record?.made?.lines; checks.practised = result?.record?.practised;
 must('practised', checks.practised?.length >= 3 && checks.practised.every((l) => !/\byou\b|\byour\b/i.test(l)), checks.practised);
-must('recordSixLines', checks.lines?.length === 6 && /Sensor/.test(checks.lines[0]) && /abel/.test(checks.lines[1]) && /street|drop-off/i.test(checks.lines[5]), checks.lines);
+must('recordSixLines', checks.lines?.length === 6 && /camera, radar and lidar/.test(checks.lines[0]) && !checks.lines.some((l) => /first time|100%/.test(l)) && /abel/.test(checks.lines[1]) && /street|drop-off/i.test(checks.lines[5]), checks.lines);
 must('picture', /^<svg/.test(result?.record?.made?.picture || '')); checks.town = result?.town;
 await p.waitForTimeout(1500);
 const town = () => p.evaluate(() => {

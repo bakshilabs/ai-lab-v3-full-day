@@ -9,6 +9,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { HorizontalTiltShiftShader } from 'three/addons/shaders/HorizontalTiltShiftShader.js';
 import { VerticalTiltShiftShader } from 'three/addons/shaders/VerticalTiltShiftShader.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 
 export const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 export const lerp = (a, b, t) => a + (b - a) * t;
@@ -19,10 +20,14 @@ export const ease = {
   back: (t) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); },
 };
 
+// Anti-aliasing: low draws straight to the canvas (the canvas's own antialias); mid and high draw through the
+// composer, whose targets have no samples, so they smooth edges themselves: mid with an SMAA pass at the end
+// (FXAA was cheaper but smeared the small voxel detail by about a third),
+// high with a multisampled scene target (msaa: 4x, or 2x on high-DPI screens).
 export const TIERS = {
-  low:  { ratio: 1,    shadows: false, shadowSize: 1024, post: false, bloom: false, particles: 0.4, residents: 10, grass: 0.35 },
-  mid:  { ratio: 1.25, shadows: true,  shadowSize: 2048, post: true,  bloom: false, particles: 0.7, residents: 18, grass: 0.7 },
-  high: { ratio: 2,    shadows: true,  shadowSize: 4096, post: true,  bloom: true,  particles: 1,   residents: 28, grass: 1 },
+  low:  { ratio: 1,    shadows: false, shadowSize: 1024, post: false, bloom: false, aa: 'canvas', particles: 0.4, residents: 10, grass: 0.35 },
+  mid:  { ratio: 1.25, shadows: true,  shadowSize: 2048, post: true,  bloom: false, aa: 'smaa',   particles: 0.7, residents: 18, grass: 0.7 },
+  high: { ratio: 2,    shadows: true,  shadowSize: 4096, post: true,  bloom: true,  aa: 'msaa',   particles: 1,   residents: 28, grass: 1 },
 };
 
 // hour → [sky top, horizon, sun colour, sun intensity, ambient intensity]
@@ -103,14 +108,20 @@ export function createStage(canvas, skyEl) {
 
   let composer = null; const fx = {};
   function buildComposer(q) {
+    if (composer) { for (const p of composer.passes) p.dispose?.(); composer.dispose(); }
     composer = null; if (!q.post) return;
-    composer = new EffectComposer(renderer);
+    // high: the composer's own targets are multisampled, so the scene pass is anti-aliased (WebGL 2 resolves it);
+    // on a sharp (high-DPI) screen the pixels are already small, so 2 samples do and cost half as much
+    const size = renderer.getDrawingBufferSize(new THREE.Vector2()), samples = renderer.getPixelRatio() >= 1.75 ? 2 : 4;
+    composer = new EffectComposer(renderer, q.aa === 'msaa' ? new THREE.WebGLRenderTarget(size.x, size.y, { samples, type: THREE.HalfFloatType }) : undefined);
     composer.addPass(new RenderPass(scene, camera));
     if (q.bloom) { fx.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.22, 0.6, 0.94); composer.addPass(fx.bloom); }
     fx.tiltH = new ShaderPass(HorizontalTiltShiftShader); fx.tiltV = new ShaderPass(VerticalTiltShiftShader);
     composer.addPass(fx.tiltH); composer.addPass(fx.tiltV);
     fx.grade = new ShaderPass(GradeShader); composer.addPass(fx.grade);
     composer.addPass(new OutputPass());
+    // mid: SMAA last, on the tone-mapped sRGB image (where its edge test works); the composer keeps it sized
+    if (q.aa === 'smaa') composer.addPass(new SMAAPass(size.x, size.y));
   }
 
   const stage = {

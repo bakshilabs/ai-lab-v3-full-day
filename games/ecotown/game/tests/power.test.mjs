@@ -199,7 +199,7 @@ test('Florence drafts the first rules from the hand-run day, and the comparison 
   assert.deepEqual(draftFromHand(fc.map((f, i) => (i === 3 ? 'charge' : 'hold'))), [], 'one hour is not a habit');
   const cmp = compare(kitM, modes, GOOD, { seed: 3 });
   assert.equal(cmp.hand.dayId, 'today'); assert.equal(cmp.auto.dayId, 'today'); assert.equal(cmp.diff, cmp.auto.litHours - cmp.hand.litHours); assert.equal(cmp.test.days.length, 3);
-  const lines = compareLines(cmp, true, true); assert.equal(lines.length, 3); assert.match(lines[0], /^By hand, today: \d+ lit hours out of 192\.$/); assert.match(lines[2], /windy day \d+\/192, still day \d+\/192, winter night \d+\/192/);
+  const lines = compareLines(cmp, true, true); assert.equal(lines.length, 3); assert.match(lines[0], /^By hand, today: \d+ lit hours out of 192\.$/); assert.match(lines[2], /windy day \d+\/192, still day \d+\/192, winter day \d+\/192/);
   assert.equal(compareLines(cmp, true, false).length, 1, 'no hand-run day this time: only the test days');
   for (const j of [true, false]) for (const diff of [5, 0, -5]) { const s = compareSay({ ...cmp, diff }, j, true) + compareLines({ ...cmp, diff }, j, true).join(' '); assert.doesNotMatch(s, /pass|fail|wrong|score|well done|correct/i, 'no pass or fail'); }
 });
@@ -237,10 +237,10 @@ test('the record: the rules as lines, the results, a chart of the three test day
     const rules = { list: (j ? GOOD.list : [...GOOD.list.slice(0, 3), { when: 'low', then: 'hold' }, { when: 'evening', then: 'use' }, { when: 'always', then: 'use' }]), school: true };
     const cmp = compare(kitM, Array(24).fill('hold'), rules, { seed: 3 });
     const lines = madeLines(rules, cmp, j, true); assert.ok(lines.length <= 6 && lines.length >= 3); assert.ok(lines.every((l) => l.length <= 120), lines.join(' | '));
-    assert.match(lines[0], /^1\. In the morning, .* 2\. If the wind is strong, charge the battery\.$/); assert.ok(lines.some((l) => /^Homes lit: windy day \d+%, still day \d+%, winter night \d+%\.$/.test(l))); assert.ok(lines.some((l) => /^By hand \d+% lit; the rules on the same day \d+%\.$/.test(l)));
+    assert.match(lines[0], /^1\. In the morning, .* 2\. If the wind is strong, charge the battery\.$/); assert.ok(lines.some((l) => /^Homes lit: windy day \d+%, still day \d+%, winter day \d+%\.$/.test(l))); assert.ok(lines.some((l) => /^By hand \d+% lit; the rules on the same day \d+%\.$/.test(l)));
     assert.ok(!madeLines(rules, cmp, j, false).some((l) => /By hand/.test(l)));
     const pic = picture(kitM, cmp.test.days, j); assert.ok(pic.startsWith('<svg') && pic.length < 200000, `picture size ${pic.length}`);
-    assert.doesNotMatch(pic, /<script|on\w+\s*=|javascript:|NaN|undefined/i); assert.match(pic, /A windy day/); assert.match(pic, /A still day/); assert.match(pic, /A winter night/);
+    assert.doesNotMatch(pic, /<script|on\w+\s*=|javascript:|NaN|undefined/i); assert.match(pic, /A windy day/); assert.match(pic, /A still day/); assert.match(pic, /A winter day/);
     const did = { hand: true, charged: true, used: true, rules: rules.list.length, tests: 2, changed: true, improved: true };
     const r = cleanResult({ finished: true, record: { made: { title: madeTitle(j), lines, picture: pic }, practised: practised(did, j) }, town: { kind: 'power-rules', data: { v: 1, rules } } });
     assert.equal(r.finished, true); assert.equal(r.record.made.picture, pic, 'the contract keeps the picture'); assert.equal(r.record.made.lines.length, lines.length); assert.equal(r.record.practised.length, 4); assert.deepEqual(r.town.data.rules, rules);

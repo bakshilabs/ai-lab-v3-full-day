@@ -2,11 +2,11 @@
 // the honest feedback (never the answer on the first miss), and the hour's record.
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { MISSIONS, cleanHub, openable, nextUp, allDone, streetResult, hourLines, hourPractised, hourTitle, hourPicture } from '../js/modules/roads/missions.js';
-import { SENSORS, ROUNDS, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
-import { EASY, HARD, CASES, TEST, test as carTest, reviewSay, LABELS } from '../js/modules/roads/labels.js';
-import { SCENES, resultSay, stopM } from '../js/modules/roads/rules.js';
+import { SENSORS, ROUNDS, roundsFor, m1Line, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
+import { EASY, HARD, CASES, TEST, test as carTest, testFor, hardFor, m2Line, reviewSay, LABELS } from '../js/modules/roads/labels.js';
+import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
-import { simulate as fleetSim, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
+import { simulate as fleetSim, fleetSay, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
 import { cameraView, radarView, lidarView, boxOf } from '../js/modules/roads/art.js';
 import { scenePic } from '../js/modules/roads/m3-rules.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
@@ -29,7 +29,9 @@ test('roads missions: missions open in order; finished ones can be replayed; old
 });
 
 test('roads mission 1: each round has one clear answer, and a wrong answer gets a hint, not the answer, until the third miss', () => {
-  assert.deepEqual(ROUNDS.map((r) => answer(r).join('+')), ['camera', 'radar+lidar', 'radar', 'radar', 'camera+lidar']);
+  assert.deepEqual(ROUNDS.map((r) => answer(r).join('+')), ['camera', 'radar+lidar', 'radar', 'radar', 'camera+lidar', 'radar+lidar', 'lidar']);
+  assert.equal(roundsFor(true).length, 5); assert.equal(roundsFor(false).length, 7, 'ages 13–17 also measure range and see through spray');
+  assert.equal(sees('camera', { kind: 'person', z: 30 }, 'rain'), false, 'spray blurs far things for the camera, as mission 4 says');
   for (const r of ROUNDS) {
     const wrong = SENSORS.filter((s) => !answer(r).includes(s)).slice(0, 1); const res = check(r, wrong.length ? wrong : []);
     assert.equal(res.right, false);
@@ -48,7 +50,8 @@ test('roads mission 1: all three sensors leave the fewest gaps, and Florence say
   const g = (k) => cover(k).gaps;
   assert.ok(g(['camera', 'radar', 'lidar']) < g(['camera', 'radar'])); assert.ok(g(['camera', 'radar']) < g(['camera']));
   assert.equal(g(['camera', 'radar', 'lidar']), 2, 'thick fog still hides far shapes and signs from every sensor');
-  assert.match(kitSay(['camera'], true), /gaps/); assert.match(kitSay(['camera', 'radar', 'lidar'], false), /fog/);
+  assert.match(kitSay(['camera'], true), /gaps/); assert.match(kitSay(['camera'], false), /^Camera: /, 'sensor names start with a capital');
+  assert.doesNotMatch(m1Line({ first: 0, rounds: 5, kit: ['radar'] }, true), /of 5|1 sensors|first time/); assert.match(m1Line({ rounds: 5, kit: ['radar'] }, true), /chose radar/); assert.match(kitSay(['camera', 'radar', 'lidar'], false), /fog/);
 });
 
 test('roads mission 2: training on everyday pictures misses the hard cases; labelling the edge cases fixes them', () => {
@@ -56,6 +59,15 @@ test('roads mission 2: training on everyday pictures misses the hard cases; labe
   const a = carTest(lab(EASY)), b = carTest(lab([...EASY, ...HARD]));
   assert.equal(a.of, TEST.length); assert.ok(a.right < b.right); assert.equal(b.right, TEST.length);
   assert.equal(a.rows.find((r) => r.case === 'mirror').ok, false); assert.equal(a.rows.find((r) => r.case === 'person').ok, true);
+  // the second test is on fresh pictures with two new hard cases nobody labelled: never 100%
+  for (const j of [true, false]) {
+    const t2 = carTest(lab([...EASY, ...hardFor(j)]), testFor(j, 2));
+    assert.equal(t2.of - t2.right, 2, 'the two new cases fail'); assert.ok(t2.rows.some((r) => r.case === 'scooter' && !r.ok));
+    assert.ok(!testFor(j, 1).includes('scooter'));
+    assert.doesNotMatch(m2Line({ labels: 16, pics: 6, hard: 5, a: 4, aOf: 9, b: 9, bOf: 11 }, j), /100%/);
+  }
+  assert.equal(carTest(lab(EASY), testFor(false, 1)).falseAlarms, 2, 'reflection and poster are false alarms'); assert.equal(testFor(false, 1).length, 10);
+  assert.match(reviewSay(EASY[0], new Set(), {}, 1, true).text, /There are 3 more things/);
   // a wrong label teaches nothing about that case
   assert.equal(carTest([{ case: 'mirror', label: 'person' }]).rows.find((r) => r.case === 'mirror').ok, false);
   for (const pic of [...EASY, ...HARD]) for (const t of pic.things) { assert.ok(LABELS.includes(CASES[t.case].label)); const bx = boxOf(t); assert.ok(bx.w > 10 && bx.h > 10 && bx.x > -20 && bx.x + bx.w < 840, `${t.kind} box on the picture`); }
@@ -72,9 +84,11 @@ test('roads mission 2: the reviewer never points at a missed thing on the first 
 });
 
 test('roads mission 3: the safe choices are the Highway Code’s, and stopping distances are the code’s', () => {
-  assert.equal(stopM(20), 8); assert.equal(stopM(30), 16); assert.equal(stopM(40), 26);
+  assert.deepEqual([stopM(20), stopM(30), stopM(40)], [8, 17, 28], 'braking 6/14/24 m plus 0.2 s of reaction'); assert.deepEqual(HUMAN_M, { 20: 12, 30: 23, 40: 36 }, 'Highway Code typical stopping distances');
   const safe = Object.fromEntries(SCENES.map((s) => [s.id, s.opts.filter((o) => s.safe(o.v)).map((o) => o.v)]));
-  assert.deepEqual(safe, { zebra: ['stop'], school: [20], cyclist: [1.5, 2], narrow: ['wait'], rain: [4], turn: ['person'] });
+  assert.deepEqual(safe, { zebra: ['stop'], school: [20], cyclist: [1.5, 2], narrow: ['wait'], rain: [4], turn: ['person'], ambulance: ['pull'], ice: [20] });
+  assert.equal(scenesFor(true).length, 7); assert.equal(scenesFor(false).length, 8, 'ages 13–17 also get the icy road');
+  assert.ok(SCENES.some((sc) => sc.opts.some((o) => !sc.safe(o.v) && /stop/.test(o.v))), 'one scene where stopping dead is wrong: caution is not always safe');
   for (const s of SCENES) for (const o of s.opts) {
     for (const j of [true, false]) {
       const t1 = resultSay(s, o.v, 1, j); if (!s.safe(o.v)) assert.doesNotMatch(t1, /safe choice is|Safe setting/);
@@ -103,8 +117,13 @@ test('roads mission 5: more cars cut the wait, waiting near the homes cuts empty
   assert.ok(meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'shops' }, { charge: true })), 'the test’s plan for round 3 meets the goal');
   assert.ok(!meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'depot' }, { charge: true })), 'a charger at the depot means too much empty driving');
   assert.equal(curve({ cars: 4, spots: ['depot'] }, false).length, 13);
+  const peak = (pl) => fleetSim(pl, { charge: true, peak: true });
+  assert.ok(!meets(FLEET[3], peak({ cars: 11, spots: ['homesW', 'homesN'], charger: 'shops' })), 'the peak round needs a re-plan');
+  assert.ok(meets(FLEET[3], peak({ cars: 11, spots: ['homesN', 'station'], charger: 'station' })), 'cars waiting at the station meet it');
+  assert.equal(FLEET[3].only, 's');
   assert.deepEqual(cleanPlan({ cars: 99, spots: ['x', 'shops', 'station', 'homesN'] }), { cars: 14, spots: ['shops', 'station'], charger: 'depot' });
-  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'just under half'); assert.equal(shareWords(54), 'about half');
+  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'half or a little less'); assert.equal(shareWords(52), 'just over half', '52% fails a no-more-than-half goal, and the words say so');
+  const at8 = fleetSim({ cars: 8, spots: ['homesW', 'homesN'] }); assert.doesNotMatch(fleetSay(FLEET[1], at8, null, { cars: 8, spots: ['homesW', 'homesN'] }, true), /Could fewer do/, 'no fewer-cars nudge at the smallest fleet that works');
 });
 
 test('roads missions: the hour’s record passes the contract and fits the save', () => {

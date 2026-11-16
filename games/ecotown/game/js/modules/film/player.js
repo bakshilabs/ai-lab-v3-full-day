@@ -4,7 +4,7 @@
 import { moodOf, riverX } from './kit.js';
 import { poseFor, stillAt, otterAt } from './camera.js';
 
-const TITLE_MS = 2800, END_MS = 2600, DARK_MS = 170;
+const TITLE_MS = 2800, END_MS = 2600, DARK_MS = 170, LOOP_REST = 0.35;
 const smooth = (t) => t * t * (3 - 2 * t);
 const lerp = (a, b, t) => a + (b - a) * t;
 
@@ -26,11 +26,20 @@ export function createPlayer(ctx, set, { reduce }) {
     if (set.who.otters.here) out.otters = otterAt(S.gameT, riverX);
     return out;
   }
+  // Florence turns to the camera when a shot is of her (she looks about by herself otherwise, and a close-up of the
+  // back of her head is no use)
+  let faced = 0;
+  function faceCamera(pose) {
+    const sub = (S.shot || S.view)?.sub; const now2 = now(); if (now2 - faced < 400) return; faced = now2;
+    try { if (sub === 'who:florence' && ctx.engine.THREE) florence?.look?.(new ctx.engine.THREE.Vector3(pose.pos[0], pose.pos[1], pose.pos[2])); else if (S.facing) florence?.look?.(null); S.facing = sub === 'who:florence'; } catch { /* she is not on the island */ }
+  }
   function apply(pose) {
+    faceCamera(pose);
     camera.position.set(pose.pos[0], pose.pos[1], pose.pos[2]); camera.lookAt(pose.look[0], pose.look[1], pose.look[2]);
     if (camera.fov !== pose.fov) { camera.fov = pose.fov; camera.updateProjectionMatrix(); }
     S.last = pose;
   }
+  const aimLow = (pose) => { const d = Math.hypot(pose.pos[0] - pose.look[0], pose.pos[1] - pose.look[1], pose.pos[2] - pose.look[2]); return { ...pose, look: [pose.look[0], pose.look[1] - d * Math.tan(pose.fov * Math.PI / 360) * S.low, pose.look[2]] }; };
   const mix = (a, b, k) => ({ pos: a.pos.map((v, i) => lerp(v, b.pos[i], k)), look: a.look.map((v, i) => lerp(v, b.look[i], k)), fov: lerp(a.fov, b.fov, k) });
 
   let lastNow = now();
@@ -41,13 +50,19 @@ export function createPlayer(ctx, set, { reduce }) {
     // the light follows the mood, easing over a second or so (a cut with reduced motion)
     if (S.hour !== S.hourTo) { const d = S.hourTo - S.hour; S.hour = reduce || Math.abs(d) < 0.05 ? S.hourTo : S.hour + d * Math.min(1, dt * 2.5); stage.setTime(S.hour, 0); }
     let pose = null;
-    if (S.shot) { const u = S.held !== null ? S.held : Math.min(1, (now() - S.t0) / (S.secs * 1000)); pose = poseFor(S.shot, set, u, live()); }
+    if (S.shot) {
+      let u = S.held !== null ? S.held : Math.min(1, (now() - S.t0) / (S.secs * 1000));
+      // a looping shot (mission 1): plays, holds its last frame a moment, then starts again
+      if (S.loop && S.held === null) { const k = ((now() - S.t0) / (S.secs * 1000)) % (1 + LOOP_REST); u = Math.min(1, k); }
+      pose = poseFor(S.shot, set, u, live());
+      if (S.loop) { S.low = reduce ? S.lowTo : S.low + (S.lowTo - S.low) * Math.min(1, dt * 3); pose = aimLow(pose); }
+    }
     else if (S.view) {
       S.low = reduce ? S.lowTo : S.low + (S.lowTo - S.low) * Math.min(1, dt * 3);
       if (!reduce) S.drift += dt; const u = reduce ? (S.still ?? stillAt(S.view.move)) : S.viewU + Math.sin(S.drift * 0.22) * 0.16; // a slow sway, so the set feels alive
       pose = poseFor(S.view, set, u, live());
       // the panels cover the lower part of the screen: aim a little low, so the subject sits in the clear part above them
-      { const d = Math.hypot(pose.pos[0] - pose.look[0], pose.pos[1] - pose.look[1], pose.pos[2] - pose.look[2]); pose = { ...pose, look: [pose.look[0], pose.look[1] - d * Math.tan(pose.fov * Math.PI / 360) * S.low, pose.look[2]] }; }
+      pose = aimLow(pose);
       if (S.from) { const k = Math.min(1, (now() - S.fromT) / 1300); pose = mix(S.from, pose, smooth(k)); if (k >= 1) S.from = null; }
     }
     if (pose) apply(pose);
@@ -55,9 +70,11 @@ export function createPlayer(ctx, set, { reduce }) {
 
   // Look at one shot's view while the child chooses or reads the storyboard: glide there (cut with reduced motion).
   function look(shot, u = null) {
-    S.shot = null; S.held = null; S.view = shot; S.viewU = u ?? stillAt(shot.move); S.still = u; S.drift = 0;
+    S.loop = false; S.shot = null; S.held = null; S.view = shot; S.viewU = u ?? stillAt(shot.move); S.still = u; S.drift = 0;
     S.from = !reduce && S.last ? S.last : null; S.fromT = now();
   }
+  // Play one shot over and over (mission 1: name the camera move). With reduced motion: a still of its start or end.
+  function loop(shot, secs = 4) { if (reduce) { look(shot, 0); return; } S.view = null; S.from = null; S.shot = shot; S.held = null; S.loop = true; S.secs = secs; S.t0 = now(); }
   function setMood(id) { const m = moodOf(id); S.hourTo = m.hour; ctx.engine.setMusic?.(m.music === 'celebrate' ? 'day' : m.music); }
 
   // Play a cut: the title card over the first frame, each shot, then the end card over the last frame.
@@ -71,13 +88,14 @@ export function createPlayer(ctx, set, { reduce }) {
     const tap = () => new Promise((res) => { wake = () => { wake = null; res(); }; });
     hooks.onSkip = () => { skipped = true; wake?.(); }; hooks.onNext = () => wake?.();
     const onAbort = () => { skipped = true; wake?.(); }; ctx.signal.addEventListener('abort', onAbort);
-    const mood = moodOf(cut.mood); S.hourTo = mood.hour; S.view = null; S.from = null;
+    const mood = moodOf(cut.mood); S.hourTo = mood.hour; S.view = null; S.from = null; S.loop = false;
     ctx.engine.setMusic?.(mood.music === 'celebrate' ? 'day' : mood.music); if (mood.music === 'celebrate') ctx.engine.setMusic?.('celebrate');
     const hold = (shot, u) => { S.shot = shot; S.held = u; };
     hold(cut.shots[0], reduce ? stillAt(cut.shots[0].move) : 0); hooks.title();
     await (reduce ? tap() : sleep(TITLE_MS * pace));
     for (let i = 0; i < cut.shots.length && !skipped; i++) {
       const shot = cut.shots[i]; hooks.shot(i, shot);
+      if (shot.music) ctx.engine.setMusic?.(shot.music); // mission 4: the music changes where the editor chose
       if (shot.sub === 'who:florence' && !reduce) { try { florence?.wave?.(); } catch { /* she only waves on the island */ } }
       if (reduce) { hold(shot, stillAt(shot.move)); await tap(); continue; }
       S.shot = shot; S.held = null; S.secs = shot.secs * pace; S.t0 = now(); hooks.dark(false);
@@ -92,5 +110,5 @@ export function createPlayer(ctx, set, { reduce }) {
 
   // Put the light and the music back as the town had them.
   function dispose() { if (S.gone) return; S.gone = true; try { stage.setTime(hourWas, winterWas); } catch { /* the stage is gone */ } try { if (floWas) { florence.appear(floWas); florence.show(floWas.visible); } } catch { /* she stays by the Lab */ } ctx.engine.setMusic?.('day'); }
-  return { look, setMood, play, dispose, setLow(f) { S.lowTo = f; } };
+  return { look, loop, setMood, play, dispose, setLow(f) { S.lowTo = f; } };
 }

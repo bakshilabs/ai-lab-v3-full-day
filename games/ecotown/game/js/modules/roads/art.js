@@ -26,10 +26,14 @@ export const SHAPES = {
   mirror: () => `<rect x="-1.5" y="-2.5" width="3" height="2.5" fill="#6b4a33"/><rect x="-1.38" y="-2.38" width="2.76" height="2.2" fill="#a9d4ea"/><path d="M-1.38 -.9 L-.3 -2.38 L.2 -2.38 L-1.38 -.2z" fill="#e6f4fb" opacity=".7"/><g opacity=".55" transform="translate(.35 -.2) scale(.9)">${SHAPES.person('#c8553d', 0)}</g><text x="0" y="-2.55" font-size=".3" font-weight="800" text-anchor="middle" fill="#3b2a1e">SHOP</text>`,
   // a bus-stop poster with a person printed on it
   poster: () => `<rect x="-.08" y="-2.3" width=".08" height="2.3" fill="#5a6470"/><rect x="-.66" y="-2.3" width="1.32" height="2.05" fill="#2a2f35"/><rect x="-.58" y="-2.22" width="1.16" height="1.89" fill="#ffe9a8"/><g transform="translate(0 -.45) scale(.95)">${SHAPES.person('#1f7f49', 1)}</g><text y="-.38" font-size=".18" font-weight="800" text-anchor="middle" fill="#b23a26">JUICE!</text>`,
+  // a person carrying a big box in front of them: the box hides most of their shape
+  boxcarry: (c = '#7a4fb0', i = 2) => `${SHAPES.person(c, i)}<rect x="-.36" y="-1.42" width=".72" height=".56" fill="#c69a5b" stroke="#7a5a33" stroke-width=".03"/><path d="M-.36 -1.14 h.72" stroke="#7a5a33" stroke-width=".03"/>`,
+  // a mobility scooter with its rider
+  scooter: (c = '#c8553d') => `<rect x="-.55" y="-.42" width="1.1" height=".26" rx=".08" fill="${c}"/><circle cx="-.4" cy="-.12" r=".12" fill="#2a2f35"/><circle cx=".42" cy="-.12" r=".12" fill="#2a2f35"/><rect x=".35" y="-1" width=".06" height=".6" fill="#5a6470"/><rect x=".28" y="-1.04" width=".2" height=".06" fill="#2a2f35"/><rect x="-.4" y="-1.05" width=".42" height=".62" rx=".1" fill="#3d6e8a"/><circle cx="-.18" cy="-1.22" r=".16" fill="#e0ac7e"/><path d="M-.34 -1.27 a.16 .16 0 0 1 .32 0z" fill="#d8d2c4"/>`,
   bag: () => `<path d="M-.2 0 L-.24 -.36 L.22 -.4 L.2 0z" fill="#f0e6d0" stroke="#a89c86" stroke-width=".03"/>`,
 };
 // how big each thing is, in metres (for boxes and lidar points): [width, height]
-export const SIZE = { person: [.6, 1.8], child: [.45, 1.3], cyclist: [1.8, 1.8], car: [1.9, 1.5], van: [2.2, 2.4], light: [.5, 3.7], sign: [.8, 2.9], dog: [.9, .7], chair: [1, 1.5], post: [.3, 1], bag: [.5, .4], mirror: [1.1, 2.2], poster: [1.3, 2.3] };
+export const SIZE = { person: [.6, 1.8], child: [.45, 1.3], cyclist: [1.8, 1.8], car: [1.9, 1.5], van: [2.2, 2.4], light: [.5, 3.7], sign: [.8, 2.9], dog: [.9, .7], chair: [1, 1.5], post: [.3, 1], bag: [.5, .4], mirror: [1.1, 2.2], poster: [1.3, 2.3], boxcarry: [.75, 1.8], scooter: [1.2, 1.4] };
 
 // the street from the driver's seat, without things: sky, houses, pavements, road
 function streetBack(tone) {
@@ -69,7 +73,7 @@ export function cameraView(things, cond, seen = () => true) {
   for (const t of [...things].sort((a, b) => b.z - a.z)) {
     const ok = seen(t);
     if (cond === 'dark' && !ok) continue;                       // beyond the headlights, unlit: nothing in the picture
-    out.push(thingAt(t, cond === 'fog' && !ok ? ' opacity=".1"' : cond === 'rain' ? ' opacity=".9"' : ''));
+    out.push(thingAt(t, cond === 'fog' && !ok ? ' opacity=".1"' : cond === 'rain' ? (ok ? ' opacity=".9"' : ' opacity=".22"') : ''));   // rain: spray blurs far things
   }
   if (cond === 'rain') out.push(`<g stroke="#e8f2f8" stroke-width="2" opacity=".7">${RAIN.map(([x, y]) => `<line x1="${x}" y1="${y}" x2="${x - 8}" y2="${y + 22}"/>`).join('')}</g><rect width="${W}" height="${H}" fill="#7c8d99" opacity=".18"/>`);
   if (cond === 'fog') out.push(`<rect width="${W}" height="${H}" fill="#e4e8e8" opacity=".55"/>`);

@@ -41,7 +41,7 @@ export const REPLAY = {
   spray: { j: 'Replay: spray from the car in front hid it from the camera.', s: 'Replay: road spray blinded the camera; the lead car was lost for 2 s.' },
   speed: { j: 'Replay: a child stepped out between parked cars. The car was too fast to stop.', s: 'Replay: a child stepped out 12 m ahead; at this speed the car could not stop.' },
   unsure: { j: 'Replay: the car saw a shape it was not sure about, and did not brake. It was a child.', s: 'Replay: an unclear shape stayed below the brake threshold. It was a child.' },
-  dark: { j: 'Replay: in the low light, the car could not make out a person in dark clothes.', s: 'Replay: low light; neither camera nor radar resolved a pedestrian in dark clothing.' },
+  dark: { j: 'Replay: in the low light, radar knew something was there, but not that it was a person. The camera saw too little. Lidar shows shapes.', s: 'Replay: radar detected an object but its blurry return could not classify it as a person; the camera saw too little in the low light. Lidar resolves the shape.' },
   stops: { j: 'Replay: the car braked hard for paper bags and shadows. The car behind nearly hit it.', s: 'Replay: frequent emergency stops for bags and shadows; a following car nearly rear-ended it.' },
 };
 // Florence's line after a run. prev: the last run's results (or null), ch: what was changed
@@ -55,10 +55,11 @@ export function runSay(res, prev, ch, cfg, was, j) {
 }
 function diffSay(res, prev, j) {
   const parts = []; for (const r of res) { const p = prev.find((x) => x.id === r.id); if (!p) continue; if (p.near !== r.near) parts.push(`${(j ? DAY[r.id].name.j : DAY[r.id].name.s)}: ${p.near} → ${r.near} near misses`); if (p.stops !== r.stops) parts.push(`${j ? 'needless stops' : 'needless stops'} ${p.stops} → ${r.stops}`); }
-  return parts.length ? `${[...new Set(parts)].join('; ')}.` : (j ? 'No result changed.' : 'No result changed.');
+  const said = [...new Set(parts)].join('; ');
+  return parts.length ? `${said.charAt(0).toUpperCase()}${said.slice(1)}.` : 'No result changed.';
 }
 export const M4 = {
-  start: { j: 'This is the car as it came from the factory. Let’s test it on two days: a sunny morning and a rainy one. Each test is 100 drives in the computer.', s: 'The car’s factory settings. Run it through two test days, 100 simulated drives each.' },
+  start: { j: 'This is a new test car, straight from the factory. Nobody has set its rules yet. Let’s test it on two days: a sunny morning and a rainy one. Each test is 100 drives in the computer.', s: 'A new test car on factory settings, before anyone has loaded rules into it. Run it through two test days, 100 simulated drives each.' },
   rule: { j: 'Change one thing at a time. Then you know what made the difference.', s: 'Change one setting per run, so each difference has one cause.' },
   locked: { j: 'One change at a time. To change something else, put this one back first.', s: 'One change per run. Revert this one to change another.' },
   next: (d, j) => (j ? `Every test passed! Now a new test day: ${DAY[d].name.j.toLowerCase()}.` : `All passing. New test added: ${DAY[d].name.s.toLowerCase()}.`),

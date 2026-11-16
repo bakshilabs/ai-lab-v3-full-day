@@ -129,7 +129,7 @@ ${P} .rd-big { min-width: 4.5em; text-align: center; font-size: 1.2rem; font-wei
 ${P} .rd-fnums { display: flex; flex-wrap: wrap; gap: 8px; }
 ${P} .rd-fnums span { flex: 1 1 130px; padding: 6px 10px; border-radius: 10px; background: #f3e4c6; }
 ${P} .rd-fnums small { display: block; font-size: .82rem; font-weight: 700; color: #5e4936; } ${P} .rd-fnums b { font-size: 1.15rem; }
-${P} .rd-map .rd-frame { min-height: 160px; }
+${P} .rd-map .rd-frame { min-height: 200px; } ${P} .rd-set button { min-width: 44px; }
 ${P} svg.rd-chart { width: auto; max-width: 420px; height: 24vh; min-height: 120px; flex: none; align-self: center; border-radius: 8px; }
 ${P} .rd-hub { margin: auto; width: 100%; max-width: 860px; }
 ${P} .rd-missions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }

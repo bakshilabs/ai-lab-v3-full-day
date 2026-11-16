@@ -9,7 +9,7 @@ export async function playDemand(d) {
     const round = DEMAND_ROUNDS[r]; const plan = startPlan(round); const habit = { ...plan }; const ids = round.jobs.map(([id]) => id);
     let sel = ids[0]; let tries = 0; let star = null; const best = solve(round);
     d.mode('desk', 'jobs'); d.report(`Smart demand: day ${r + 1} of 3`);
-    const showSlot = (s) => { const c = slotClock(s); d.view.setHour(c + 1, r === 2); d.view.setLit(d.allLit(), true); d.plate(pick(DEM.round[round.id]).replace(/^Day \d of 3: /, ''), slotWord(s, j)); };
+    const showSlot = (s) => { const c = slotClock(s); d.view.setHour(c + 1, round.id === 'scarce' || round.id === 'shift'); d.view.setLit(d.allLit(), true); const t = pick(DEM.round[round.id]).replace(/^Day \d of \d: /, ''); d.plate(t.charAt(0).toUpperCase() + t.slice(1), slotWord(s, j)); };
     const drawJobs = (f) => {
       const l = layout(round, plan);
       d.side.innerHTML = `<h3>${esc(demDay(round.id, j))}</h3><p class="pw-note">${esc(demNote(round.id, j))}</p><div class="pw-jobs" role="group" aria-label="${j ? 'Jobs to move' : 'Flexible jobs'}">${ids.map((id) => { const x = l.perJob[id]; const st = x.gas === 0 ? 'clean' : x.clean === 0 ? 'gas' : 'part';
@@ -56,14 +56,14 @@ export async function playDemand(d) {
     for (;;) {
       const a = await d.press(); if (a !== 'run') continue;
       const l = layout(round, plan);
-      if (!l.done) { tries++; if (tries >= 3 && best) { const bad = ids.find((id) => l.perJob[id].gas > 0 || !l.perJob[id].ok) || ids[0]; sel = bad; star = best[bad]; } }
+      if (!l.done) { tries++; if (tries >= 3 && best) { const bad = ids.find((id) => (l.perJob[id].gas > 0 && id !== 'nurse') || !l.perJob[id].ok) || ids[0]; sel = bad; star = best[bad]; } }
       d.say(runSay(l, tries, j)); all(l.done ? '[data-act]' : `[data-job="${sel}"]`);
       if (l.done) break;
     }
     d.setTap(null); d.setKey(null);
-    const n = ids.filter((id) => plan[id] !== habit[id]).length; moved += n; kwh += ids.reduce((x, id) => x + JOBS[id].p * JOBS[id].len * BLOCK_KW * 2, 0);
+    const mv = ids.filter((id) => plan[id] !== habit[id]); moved += mv.length; kwh += mv.reduce((x, id) => x + JOBS[id].p * JOBS[id].len * BLOCK_KW * 2, 0);
     const last = r === DEMAND_ROUNDS.length - 1;
-    ctl.innerHTML = `<p class="pw-sum ok">✓ ${j ? 'Every job on clean power' : 'All flexible demand on renewables'}</p><button class="go" type="button" data-act="next">${last ? 'Finish the mission ➜' : 'Next day ➜'}</button>`; d.focusFirst('[data-act]');
+    ctl.innerHTML = `<p class="pw-sum ok">✓ ${layout(round, plan).gas ? (j ? 'The least gas possible' : 'Minimum gas') : (j ? 'Every job on clean power' : 'All flexible demand on renewables')}</p><button class="go" type="button" data-act="next">${last ? 'Finish the mission ➜' : 'Next day ➜'}</button>`; d.focusFirst('[data-act]');
     await d.press();
   }
   return { moved, kwh };

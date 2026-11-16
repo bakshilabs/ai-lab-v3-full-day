@@ -39,7 +39,7 @@ export const T = {
   forecast: { j: 'Forecast for the day', s: 'Forecast: supply and demand' },
   window: { j: 'Your town', s: 'The town' },
   school: 'the school',
-  day: { today: { j: 'Today', s: 'Today' }, windy: { j: 'A windy day', s: 'A windy day' }, still: { j: 'A still day', s: 'A still day' }, winter: { j: 'A winter night', s: 'A winter night' }, grey: { j: 'A grey morning', s: 'A grey morning' }, front: { j: 'A winter day', s: 'A winter day' } },
+  day: { today: { j: 'Today', s: 'Today' }, windy: { j: 'A windy day', s: 'A windy day' }, still: { j: 'A still day', s: 'A still day' }, winter: { j: 'A winter day', s: 'A winter day' }, grey: { j: 'A grey morning', s: 'A grey morning' }, front: { j: 'A winter day', s: 'A winter day' } },
   dayNote: {
     today: { j: 'Windy morning. Sunny midday. A still evening.', s: 'Windy morning, sunny midday, a still evening.' },
     windy: { j: 'Strong wind all day. Grey sky.', s: 'Strong wind all day, little sun.' },
@@ -118,7 +118,7 @@ export function spellLine(sp, hours, j) {
 
 // ---- the hand-run day, summed up (no pass or fail: only what happened)
 export function handSummary(kit, day, j) {
-  const out = [`${j ? 'Your homes had' : 'Homes had'} ${day.litHours} ${pick(T.litHours, j)} out of ${day.total}.`];
+  const out = [j ? `${day.homes} homes × 24 hours = ${day.total} lit hours if every home stays lit. You had ${day.litHours}.` : `Homes had ${day.litHours} ${pick(T.litHours, j)} out of ${day.total}.`];
   if (day.allLit) out.push(pick(T.allLit, j) + (j ? ' The school too.' : ' The school as well.'));
   else { const sp = [...day.spells].sort((x, y) => (y.to - y.from) * 2 + y.most - ((x.to - x.from) * 2 + x.most))[0]; out.push((j ? 'The longest dark spell: ' : 'Longest outage: ') + spellLine(sp, day.hours, j)); }
   return out;
@@ -220,7 +220,7 @@ export function practised(did, j) {
   const out = [];
   if (did.hand) out.push(did.charged && did.used ? 'reading a forecast to choose when to charge a battery and when to use it' : 'running a town’s power by hand through a whole day');
   out.push(`writing ${did.rules === 1 ? 'a rule' : `${did.rules} rules`} for a system that runs by itself`);
-  out.push(did.tests > 1 ? `testing the rules ${did.tests === 2 ? 'twice' : `${did.tests} times`} on a windy day, a still day and a winter night` : 'testing the rules on a windy day, a still day and a winter night');
+  out.push(did.tests > 1 ? `testing the rules ${did.tests === 2 ? 'twice' : `${did.tests} times`} on a windy day, a still day and a winter day` : 'testing the rules on a windy day, a still day and a winter day');
   if (did.improved) out.push('finding the hour homes went dark and changing a rule to fix it');
   else if (did.changed) out.push('changing a rule and testing again to see what it did');
   return out.slice(0, 4);
