@@ -195,6 +195,10 @@ await shot('m5-where'); await layout('m5-where');
 await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
 await p.click(tray('[data-charger="shops"]')); await cars(1, 3); await runFleet();
 await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await shot('m5-charge'); await primary();
+if (!junior) {                                                                   // ages 13–17: the peak round, an extra train at the station
+  await p.waitForSelector(tray('[data-spot="station"]'), { timeout: LONG }); await p.click(tray('[data-spot="station"]')); await p.click(tray('[data-charger="station"]')); await runFleet();
+  await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await shot('m5-peak'); await primary();
+}
 await closeMission(5);
 
 // ---- mission 6: the street (the first loop). The opening card, then straight to the first drop-off point by a tap on the 3D street

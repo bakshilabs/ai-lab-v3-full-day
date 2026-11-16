@@ -1,7 +1,7 @@
 // Mission 5, "A shared fleet": three rounds on a map of the town. First choose how many cars; then where they wait;
 // then where they charge. Run the morning each time and read the waits and the empty driving (ages 13–17 also see
 // the trade-off between the number of cars and the longest wait as a chart). Rules and words: fleet.js.
-import { PLACES, WAIT_SPOTS, CHARGERS, CARS, START, ROUNDS, GOAL, M5, simulate, meets, curve, shareWords, idleWords, fleetSay, cleanPlan } from './fleet.js';
+import { PLACES, WAIT_SPOTS, CHARGERS, CARS, START, roundsFor, GOAL, M5, simulate, meets, curve, shareWords, idleWords, fleetSay, cleanPlan } from './fleet.js';
 import { esc } from './kit.js';
 
 const W = 800, H = 420, X0 = 70, Y0 = 50, DX = 94, DY = 100;
@@ -24,7 +24,7 @@ function map(plan, round, res, j) {
 }
 // the trade-off chart for ages 13–17: longest wait (minutes) against the number of cars
 function chart(plan, round) {
-  const pts = curve(plan, !!round.charge); const w = 360, h = 190, x0 = 46, y0 = 16, maxY = Math.ceil(Math.max(20, ...pts.map((p) => p.longest)) / 10) * 10;
+  const pts = curve(plan, !!round.charge, !!round.peak); const w = 360, h = 190, x0 = 46, y0 = 16, maxY = Math.ceil(Math.max(20, ...pts.map((p) => p.longest)) / 10) * 10;
   const X = (c) => x0 + ((c - CARS.min) / (CARS.max - CARS.min)) * (w - x0 - 10), Y = (m) => y0 + (1 - Math.min(m, maxY) / maxY) * (h - y0 - 30);
   const line = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.cars).toFixed(1)} ${Y(p.longest).toFixed(1)}`).join(' '); const me = pts.find((p) => p.cars === plan.cars);
   return `<svg class="rd-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Chart: the longest wait for each number of cars" font-family="Inter, Arial, sans-serif"><rect width="${w}" height="${h}" fill="#fffaf0"/>
@@ -36,10 +36,10 @@ function chart(plan, round) {
 }
 
 export async function fleetMission(K) {
-  const { j, pick, say, swap, tray, stage } = K; let plan = cleanPlan(START); let runs = 0, res = null;
+  const { j, pick, say, swap, tray, stage } = K; let plan = cleanPlan(START); let runs = 0, res = null; const ROUNDS = roundsFor(j);
   for (let ri = 0; ri < ROUNDS.length; ri++) {
     const round = ROUNDS[ri]; let prev = null; res = null; let tries = 0;
-    K.ctx.report({ stage: `Mission 5: round ${ri + 1} of 3 (${round.id})` });
+    K.ctx.report({ stage: `Mission 5: round ${ri + 1} of ${ROUNDS.length} (${round.id})` });
     const card = () => `<div class="rd-map"><div class="rd-viewbar"><b>${esc(pick(GOAL[round.id]))}</b><span class="rd-step">${ri + 1} of ${ROUNDS.length}</span></div><div class="rd-frame">${map(plan, round, res, j)}</div>
       ${res ? `<div class="rd-fnums"><span><small>${j ? 'Longest wait' : 'Longest wait'}</small><b>${res.longest} min</b></span>${j ? '' : `<span><small>Average wait</small><b>${res.average} min</b></span>`}<span><small>${j ? 'Driving with nobody inside' : 'Empty driving'}</small><b>${j ? shareWords(res.emptyPct) : `${res.emptyPct}%`}</b></span><span><small>${j ? 'Cars standing idle' : 'Cars busy'}</small><b>${j ? idleWords(res.busyPct) : `${res.busyPct}%`}</b></span></div>` : ''}
       ${!j && res ? chart(plan, round) : ''}</div>`;
@@ -59,12 +59,12 @@ export async function fleetMission(K) {
         if (b.dataset.charger) { plan = cleanPlan({ ...plan, charger: b.dataset.charger }); redo(`[data-charger="${b.dataset.charger}"]`); return; }
         if (b.dataset.act === 'run') { tray.onclick = null; done(); }
       }; });
-      prev = res; res = simulate(plan, { charge: !!round.charge }); runs++; tries++;
+      prev = res; res = simulate(plan, { charge: !!round.charge, peak: !!round.peak }); runs++; tries++;
       K.showStage(card()); const line = fleetSay(round, res, prev, plan, j); say(line);
       if (meets(round, res)) break;
       hint.textContent = '';
       // after several tries, Florence names one thing worth trying (she never sets it herself)
-      if (tries >= 4) say(`${line} ${round.id === 'size' ? (j ? 'Try a lot more cars, then fewer, and watch the wait.' : 'Sweep the fleet size and read the curve.') : round.id === 'where' ? (j ? 'Try the two homes, where most calls come from, with 8 cars.' : 'Wait where demand is: both homes, around 8 cars.') : (j ? 'Charging takes cars away for a while. Put the charger where cars wait, and add cars.' : 'Charging removes capacity: site the hub near the waiting places and add cars.')}`);
+      if (tries >= 4) say(`${line} ${round.id === 'size' ? (j ? 'Try a lot more cars, then fewer, and watch the wait.' : 'Sweep the fleet size and read the curve.') : round.id === 'peak' ? (j ? 'The new people all start at the station. Do some cars wait there?' : 'The new demand is all at the station: move one waiting place there, and size up.') : round.id === 'where' ? (j ? 'Try the two homes, where most calls come from, with 8 cars.' : 'Wait where demand is: both homes, around 8 cars.') : (j ? 'Charging takes cars away for a while. Put the charger where cars wait, and add cars.' : 'Charging removes capacity: site the hub near the waiting places and add cars.')}`);
     }
     swap(`<div class="rd-row end"><p class="rd-hint">${j ? 'Goal met!' : 'Goal met.'}</p><button class="go" type="button" data-primary data-act="next">${ri < ROUNDS.length - 1 ? (j ? 'Next round ➜' : 'Next round ➜') : 'Next ➜'}</button></div>`);
     await K.press();
