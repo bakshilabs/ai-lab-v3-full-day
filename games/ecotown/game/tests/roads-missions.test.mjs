@@ -117,6 +117,10 @@ test('roads mission 5: more cars cut the wait, waiting near the homes cuts empty
   assert.ok(meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'shops' }, { charge: true })), 'the test’s plan for round 3 meets the goal');
   assert.ok(!meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'depot' }, { charge: true })), 'a charger at the depot means too much empty driving');
   assert.equal(curve({ cars: 4, spots: ['depot'] }, false).length, 13);
+  const peak = (pl) => fleetSim(pl, { charge: true, peak: true });
+  assert.ok(!meets(FLEET[3], peak({ cars: 11, spots: ['homesW', 'homesN'], charger: 'shops' })), 'the peak round needs a re-plan');
+  assert.ok(meets(FLEET[3], peak({ cars: 11, spots: ['homesN', 'station'], charger: 'station' })), 'cars waiting at the station meet it');
+  assert.equal(FLEET[3].only, 's');
   assert.deepEqual(cleanPlan({ cars: 99, spots: ['x', 'shops', 'station', 'homesN'] }), { cars: 14, spots: ['shops', 'station'], charger: 'depot' });
   assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'half or a little less'); assert.equal(shareWords(52), 'just over half', '52% fails a no-more-than-half goal, and the words say so');
   const at8 = fleetSim({ cars: 8, spots: ['homesW', 'homesN'] }); assert.doesNotMatch(fleetSay(FLEET[1], at8, null, { cars: 8, spots: ['homesW', 'homesN'] }, true), /Could fewer do/, 'no fewer-cars nudge at the smallest fleet that works');
