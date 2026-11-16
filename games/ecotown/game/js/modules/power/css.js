@@ -94,7 +94,7 @@ ${P} .pw-cmp em { font-style: normal; text-align: right; font-variant-numeric: t
   ${P} .pw-dials { grid-template-columns: repeat(4, 1fr); } ${P} .pw-modes { flex-direction: row; } ${P} .pw-modes button { flex: 1 1 0; grid-template-columns: 1.6em 1fr; } ${P} .pw-modes button u { display: none; }
   ${P} .pw-screen { overflow: visible; }
 }
-@media (max-width: 560px) { ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-slots { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} .pw-slots button { min-height: 96px; } ${P} .pw-dials { grid-template-columns: 1fr 1fr; } ${P} ol.pw-rules li { grid-template-columns: 1.7em 1fr; } ${P} .pw-arrow { display: none; } ${P} .pw-modes button small { display: none; } }
+@media (max-width: 560px) { ${P} .pw-prep { grid-template-columns: 1fr; } ${P} ol.pw-rules li > .pw-tile, ${P} ol.pw-rules li > .pw-ops { grid-column: 2; } ${P} .pw-top { top: 88px; left: 12px; right: 12px; padding: 8px 10px; font-size: 14px; max-height: calc(36vh - 100px); overflow: auto; } ${P} .pw-top p small { display: none; } ${P} .pw-win { min-height: 36vh; } ${P} .pw-desk { max-height: 60vh; } ${P} .pw-dials { grid-template-columns: 1fr 1fr; } ${P} ol.pw-rules li { grid-template-columns: 1.7em 1fr; } ${P} .pw-arrow { display: none; } ${P} .pw-modes button small { display: none; } }
 @media (max-height: 640px) { ${P} .pw-dial svg { width: 54px; } ${P} .pw-modes button { min-height: 48px; } ${P} .pw-desk { padding: 6px 8px 8px; } }
 
 ${P} .pw-desk[data-mode="full"] { display: block; overflow: auto; } ${P} .pw-desk[data-mode="full"] > :not(.pw-full) { display: none; } ${P} .pw-desk[data-mode="desk"] > .pw-full { display: none; }
@@ -168,5 +168,5 @@ ${P} .pw-meter { display: grid; grid-template-columns: 1fr auto; gap: 8px; align
   ${P} .pw-switches { grid-template-columns: 1fr 1fr; } ${P} .pw-jobs { grid-template-columns: 1fr 1fr; } ${P} .pw-slots button { min-height: 120px; }
   ${P} .pw-side.scale { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; } ${P} .pw-side.scale .pw-scale { grid-row: span 3; }
 }
-@media (max-width: 560px) { ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { ${P} .pw-slots { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} .pw-slots button { min-height: 96px; } ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
 `;
