@@ -11,7 +11,7 @@ export function missionLine(m, s, j) {
   if (m === 1) return j ? `Matched ${s.mr} of ${s.mo} jobs to a sensor first time, and said what the robot would do ${s.pr} of ${s.po} times.`
     : `Sensors: ${s.mr} of ${s.mo} jobs matched first time; ${s.pr} of ${s.po} moves predicted from the sensor reading.`;
   if (m === 2) return j ? `Programmed a robot arm, fixed a broken program, and packed all 4 seedlings with ${n(s.steps, 'step')} repeated ${s.rep} times.`
-    : `Arm program: fixed a bug, packed 4 seedlings with a ${s.steps}-step loop run ${s.rep} times${s.order ? ', then filled an order by x' : ''}.`;
+    : `Arm program: fixed a bug, packed 4 seedlings with ${s.steps === 8 || s.steps === 11 || s.steps === 18 ? "an" : "a"} ${s.steps}-step loop run ${s.rep} times${s.order ? ', then filled an order by x' : ''}.`;
   if (m === 3) { const safe = (s.rules || []).filter(([c, a]) => a && !badRule({ cond: c, act: a })).length;
     return j ? `Wrote ${n(safe, 'rule')} for a hospital robot. It took the medicine safely on every trip, even upstairs.`
       : `Hospital robot: ${safe} ordered if-then rules; a safe delivery upstairs in ${s.secs} s.`; }

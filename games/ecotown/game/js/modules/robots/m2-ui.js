@@ -22,7 +22,7 @@ const armLabel = (arm) => `The robot arm is ${arm.down ? 'down' : 'up'} at ${arm
 export function armSvg(arm, senior = false) {
   return `<svg class="rb-armsvg" viewBox="0 10 480 232" role="img" aria-label="${armLabel(arm)}">
     <rect x="0" y="214" width="480" height="26" fill="#d6a469"/><rect x="20" y="20" width="440" height="14" rx="5" fill="#8d98a3" stroke="${INK}" stroke-width="2.6"/>
-    ${senior ? Array.from({ length: 11 }, (_, i) => `<path d="M${px(i * 10)} 34v6" stroke="${INK}" stroke-width="1.5"/>`).join('') : ''}
+    ${senior ? Array.from({ length: 9 }, (_, i) => `<path d="M${px(i * 10)} 34v6" stroke="${INK}" stroke-width="1.5"/>`).join('') : ''}
     <g class="rb-scenery">${scenery(arm, senior)}</g>
     <g class="rb-armg" style="transform: translateX(${px(arm.x)}px)">
       <g class="rb-grip" style="transform: translateY(${arm.down ? DROP : 0}px)"><g transform="translate(0 92)"><rect x="-5" y="-112" width="10" height="106" fill="#b9c2cb" stroke="${INK}" stroke-width="2.2"/><rect x="-20" y="-6" width="40" height="10" rx="3" fill="#f4b73b" stroke="${INK}" stroke-width="2.4"/><g class="rb-fing">${fingers(arm.open)}</g><g class="rb-held">${arm.hold !== null ? seed(0, 28) : ''}</g></g></g>
@@ -51,7 +51,7 @@ export async function playM2(ctx, sh, cur, keep) {
     let sel = prog.length - 1; let arm = startArm(task.tray); let cursor = 0; let running = false; let fails = 0; let verdict = null; let solved = false; let stepX = 10; const stepTexts = [];
     sh.setup({ mission: { n: 2, icon: '🦾' }, steps, stage: `m2-${task.id}` }); sh.step(part); ctx.report({ stage: stageOf(2, steps[part].toLowerCase()) });
     sh.say(TASK_TEXT[task.id][j ? 'j' : 's']);
-    const save = () => { d.prog = prog; d.at = part; d.rep = repeat; keep(part, d); };
+    const save = () => { d.prog = prog; d.at = part; if (task.repeat) d.rep = repeat; keep(part, d); };
     await sh.wait((done) => {
       const flat = () => { const out = []; for (let r = 0; r < repeat; r++) prog.forEach((c, i) => out.push({ c, i, r })); return out; };
       const reset = () => { arm = startArm(task.tray); cursor = 0; verdict = null; stepTexts.length = 0; };
