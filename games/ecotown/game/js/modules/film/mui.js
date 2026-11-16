@@ -46,7 +46,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       <p class="fm-job">${esc(m.job)}</p><p class="fm-how"><b>How:</b> ${esc(pick(m.how, junior))}</p>
       <div class="fm-row"><button type="button" class="fm-btn" data-fm-tomap>← The missions</button><button type="button" class="fm-btn go big" data-fm-start>Start ➜</button></div>
     </section>`, 'intro-' + m.id);
-    ui.talk(`${m.job} ${pick(m.how, junior)}`); focus('[data-fm-start]');
+    ui.talk(m.job, { quiet: true }); ctx.say(`${m.use}. ${m.job} ${pick(m.how, junior)}`); focus('[data-fm-start]');
     return wait((b, res) => { if (b.dataset.fmStart !== undefined) { clear(); res('start'); } else if (b.dataset.fmTomap !== undefined) { clear(); res('map'); } });
   }
 
@@ -104,7 +104,9 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       ${kick ? `<p class="fm-kick">${esc(kick)}</p>` : ''}<h2>${esc(title)}</h2>
       ${pic ? `<figure class="fm-npic">${pic}</figure>` : ''}${lines.map((l) => `<p>${esc(l)}</p>`).join('')}
       <div class="fm-row end"><button type="button" class="fm-btn go big" data-fm-ok>${esc(btn)}</button></div></section>`, stage);
-    ui.talk(say ?? [title, ...lines].join(' ')); focus('[data-fm-ok]');
+    // Florence's written line stays short (the card has the rest); the whole card is read aloud
+    const full = say ?? [title, ...lines].map((t) => (/[.!?:]$/.test(t) ? t : t + '.')).join(' ');
+    ui.talk(say ?? (lines[0] || title), { quiet: true }); ctx.say(full); focus('[data-fm-ok]');
     return wait((b, res) => { if (b.dataset.fmOk !== undefined) { clear(); res(); } });
   }
 
@@ -149,7 +151,8 @@ ${M} .fm-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 ${M} .fm-opts { display: grid; grid-template-columns: repeat(var(--fm-oc, 3), minmax(0, 1fr)); gap: 9px; margin-top: 10px; }
 ${M} .fm-opts:not([style*="--fm-oc"]) { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 ${M} .fm-opt { position: relative; display: flex; align-items: center; gap: 9px; min-height: 56px; padding: 8px 12px; border: 0; border-radius: 14px; background: #f3e6cc; color: #3b2a1e; font-weight: 700; font-size: 1em; line-height: 1.3; text-align: left; box-shadow: inset 0 0 0 2px #b08a55, 0 4px 0 #7a5a33; cursor: pointer; flex-wrap: wrap; }
-${M} .fm-opts.pics .fm-opt { flex-direction: column; align-items: stretch; text-align: center; }
+${M} .fm-opts.pics .fm-opt { flex-direction: column; flex-wrap: nowrap; align-items: stretch; text-align: center; }
+${M} .fm-opts.pics .fm-opt .fm-lab { flex: none; }
 ${M} .fm-opic svg { display: block; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 0 0 2px #3b2a1e; }
 ${M} .fm-opt .fm-ico { font-size: 1.6em; line-height: 1; flex: none; }
 ${M} .fm-opt .fm-lab { flex: 1 1 60%; min-width: 0; }
