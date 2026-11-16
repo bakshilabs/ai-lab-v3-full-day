@@ -12,12 +12,13 @@ export async function playTruth(env) {
 
   await mui.note({ kick, title: PARTS[0].title, lines: [PARTS[0].line], btn: 'Start ➜', stage: 'part-change' });
   const changes = changeItems();
+  const pairPic = (c) => `<p class="fm-hear">${esc(c.about)}</p>${changePair(c.id)}`;
+  // first spot every change (one list, so a question set aside comes back after the others), then judge each one
+  await mui.askList(changes, (c, i, again) => { ctx.report({ stage: `Checking: what changed, ${i + 1} of ${changes.length}` });
+    return mui.ask({ head: { kick: again ? 'What changed? · again' : 'What changed?', step: [i + 1, changes.length] }, item: c.what, pic: pairPic(c), wide: true, cols: 1, limit: mui.LIMIT, reveal: again }); });
   for (let i = 0; i < changes.length; i++) {
-    const c = changes[i]; ctx.report({ stage: `Checking: what changed, ${i + 1} of ${changes.length}` });
-    const pic = `<p class="fm-hear">${esc(c.about)}</p>${changePair(c.id)}`;
-    const [a] = await mui.askList([c.what], (item, _k, again) => mui.ask({ head: { kick: again ? 'What changed? · again' : 'What changed?', step: [i + 1, changes.length] }, item, pic, wide: true, cols: 1, limit: mui.LIMIT, reveal: again }));
-    const b = await mui.ask({ head: { kick: 'Fine or misleading?', step: [i + 1, changes.length] }, item: c.judge, pic, wide: true, cols: 1 });
-    if (a.tries + b.tries === 0) r.first++;
+    const c = changes[i]; ctx.report({ stage: `Checking: fine or misleading, ${i + 1} of ${changes.length}` });
+    await mui.ask({ head: { kick: 'Fine or misleading?', step: [i + 1, changes.length] }, item: c.judge, pic: pairPic(c), wide: true, cols: 1 });
   }
 
   await mui.note({ kick, title: PARTS[1].title, lines: [PARTS[1].line], btn: 'Start ➜', stage: 'part-made' });

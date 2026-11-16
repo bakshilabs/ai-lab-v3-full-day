@@ -7,8 +7,10 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const LEN_LABEL = { quick: 'Quick', medium: 'Medium', long: 'Long' };
 
 export async function playEdit(env) {
-  const { ctx, ui, mui, player, set, junior, reduce } = env; const r = { takes: 0, first: 0 };
+  const { ctx, ui, mui, player, set, junior, reduce } = env; const r = { takes: 3 }; // three takes are compared in part 1
   const kick = 'Mission 4 · Editing';
+  // the parts already finished on an earlier visit are kept (env.parts is saved with the hour)
+  const skip = (id) => !!env.parts?.has(id); const mark = (id) => env.parts?.add(id);
   const watch = async (cut, title, capOf) => {
     const f = ui.film({ title, total: cut.shots.length, credit: 'Edited by you', skip: 'Skip the film', back: 'Next ➜', capOf });
     await player.play(cut, { title: () => f.title(), shot: (k, s) => f.shot(k, s, set), end: () => f.end(), dark: (on) => f.dark(on), set onNext(fn) { f.onNext = fn; }, set onSkip(fn) { f.onSkip = fn; } });
@@ -17,17 +19,21 @@ export async function playEdit(env) {
   player.setMood('cheerful'); player.look({ move: 'wide', sub: 'town' });
 
   // ---- part 1: the best takes
+  if (!skip('takes')) {
   await mui.note({ kick, title: PARTS[0].title, lines: [PARTS[0].line], btn: 'Start ➜', stage: 'part-takes' });
   const takes = takeItems(takePic);
   for (let i = 0; i < takes.length; i++) {
     ctx.report({ stage: `Editing: best takes, ${i + 1} of ${takes.length}` });
     await mui.ask({ head: { kick: 'Best takes', step: [i + 1, takes.length] }, item: takes[i].pickOne, cols: 2 });
-    // naming the fault: two misses and it is asked again, so tapping every answer does not win
-    await mui.askList([takes[i].whatWrong], (item, _k, again) => mui.ask({ head: { kick: again ? 'Best takes · again' : 'Best takes', step: [i + 1, takes.length] }, item, pic: takes[i].pic, wide: true, cols: 1, limit: mui.LIMIT, reveal: again }));
-    r.takes++;
-  }
 
+  }
+  // then naming each fault, as one list: a question set aside comes back after the others
+  await mui.askList(takes, (t, i, again) => { ctx.report({ stage: `Editing: what went wrong, ${i + 1} of ${takes.length}` });
+    return mui.ask({ head: { kick: again ? 'What went wrong · again' : 'What went wrong', step: [i + 1, takes.length] }, item: t.whatWrong, pic: t.pic, wide: true, cols: 1, limit: mui.LIMIT, reveal: again }); });
+
+  mark('takes'); }
   // ---- part 2: trim the rough cut. Tap a clip to cut it (or bring it back), then check.
+  if (!skip('trim')) {
   await mui.note({ kick, title: PARTS[1].title, lines: [PARTS[1].line], btn: 'Start ➜', stage: 'part-trim' });
   ctx.report({ stage: 'Editing: trimming the rough cut' });
   await new Promise((done) => {
@@ -48,7 +54,9 @@ export async function playEdit(env) {
     draw(); mui.say('Here is everything the camera filmed. Tap a clip to cut it. Some clips are not needed.');
   });
 
+  mark('trim'); }
   // ---- part 3: the pace. Set each shot's length, watch it, and Florence says how it feels.
+  if (!skip('pace')) {
   await mui.note({ kick, title: PARTS[2].title, lines: [PARTS[2].line, reduce ? 'With still pictures on, press Next for each shot. The lengths still show.' : 'Then watch it in your town.'].filter(Boolean), btn: 'Start ➜', stage: 'part-pace' });
   for (const pace of PACES) {
     const lens = FINAL.map(() => 'medium'); let said = paceAsk(pace, junior); let done = false;
@@ -58,7 +66,7 @@ export async function playEdit(env) {
         const draw = (focusSel) => {
           const total = lens.reduce((s, l) => s + LENGTHS[l], 0);
           const p = mui.custom(`<section class="fm-m fm-pace" data-fm-pace="${pace.id}" aria-label="${esc(pace.title)}">
-            <div class="fm-qhead"><span class="fm-kick">The pace</span></div><h2>${esc(pace.title)}</h2>${junior ? '' : `<p class="fm-hint">Target: ${pace.secs[0]} to ${pace.secs[1]} seconds in all, average shot ${pace.id === 'fast' ? '2.2 s or less' : '4.2 s or more'}.</p>`}
+            <div class="fm-qhead"><span class="fm-kick">The pace</span></div><h2>${esc(pace.title)}</h2>${junior ? '' : `<p class="fm-hint">Target: ${pace.id === 'fast' ? `${pace.secs[1]} seconds or less in all` : `${pace.secs[0]} to ${pace.secs[1]} seconds in all`}.</p>`}
             <ol class="fm-tl">${FINAL.map((c, i) => `<li style="--w:${LENGTHS[lens[i]]}"><div class="fm-tlpic">${shotPic(c.art)}</div><span>${i + 1}. ${esc(c.words)}</span>
               <div class="fm-len" role="radiogroup" aria-label="Length of shot ${i + 1}">${LENGTH_IDS.map((l) => `<button type="button" role="radio" aria-checked="${lens[i] === l}" class="${lens[i] === l ? 'on' : ''}" data-fm-len="${l}" data-i="${i}">${LEN_LABEL[l]}${junior ? '' : ` ${LENGTHS[l]} s`}</button>`).join('')}</div></li>`).join('')}</ol>
             <p class="fm-hint" aria-live="polite">${junior ? `The whole film: about ${Math.round(total)} seconds.` : `Running time ${total} s · average shot ${(total / lens.length).toFixed(1)} s`}</p>
@@ -79,7 +87,9 @@ export async function playEdit(env) {
     }
   }
 
+  mark('pace'); }
   // ---- part 4: the music. Where the story turns, then which music plays in each part.
+  if (!skip('music')) {
   await mui.note({ kick, title: PARTS[3].title, lines: [PARTS[3].line], btn: 'Start ➜', stage: 'part-music' });
   const turns = turnItems((art) => shotPic(art));
   await mui.askList(turns, (item, i, again) => { ctx.report({ stage: 'Editing: where the music changes' }); return mui.ask({ head: { kick: again ? 'Music · again' : 'Music', step: [i + 1, 5] }, item, limit: mui.LIMIT, reveal: again }); });
@@ -91,5 +101,6 @@ export async function playEdit(env) {
   });
   await watch(editCut(set, { music, mood: 'cheerful' }), 'Market day', (i) => ({ cap: `${FINAL[i].words}${i === 0 ? ` · ♪ ${TUNES[music.start].label}` : i === 2 ? ` · ♪ now ${TUNES[music.middle].label.toLowerCase()}` : i === 4 ? ` · ♪ now ${TUNES[music.end].label.toLowerCase()}` : ''}` }));
   ctx.engine.setMusic?.('day');
+  mark('music'); }
   return { res: r, lines: editLines() };
 }

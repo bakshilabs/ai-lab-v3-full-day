@@ -54,7 +54,9 @@ export default {
       ctx.report({ stage: `Mission ${m.n}: ${m.use}` });
       let out;
       if (m.id === 'direct') { const d = await playDirect(env, hour.m3, (s) => { hour.m3 = s; save(); }); out = { res: { cuts: d.st.cut.n }, lines: [d.line] }; }
-      else out = await PLAY[m.id](env);
+      else if (m.id === 'edit') { // mission 4 is long: its finished parts are saved, so leaving part way keeps them
+        const parts = new Set(hour.m4 || []); out = await playEdit({ ...env, parts: { has: (p) => parts.has(p), add: (p) => { parts.add(p); hour.m4 = [...parts]; save(); } } }); hour.m4 = null;
+      } else out = await PLAY[m.id](env);
       finishMission(hour, a.i, out.res); save(); // saved after every mission: leaving later keeps it
       ctx.report({ stage: `Mission ${m.n} done: ${m.use}` });
       await mui.outro(m, out.lines);

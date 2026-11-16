@@ -96,13 +96,18 @@ export const partsFor = (junior) => PARTS.filter((p) => !p.senior || !junior);
 // ---- part 4 (ages 13–17): a two-shot sequence. Each note needs a shot, then another; each answer is size or move.
 export function seqItems(set) {
   const tall = tallPlace(set); const wide = placeOf(set, set.offer[0]) || set.places[0];
+  // each pair needs a judgement part 3 did not ask for: what the audience must learn first, or which way round
+  const it = tall.id === 'wood' ? 'they stand' : 'it stands';
   const S = [
-    { note: `A film about ${tall.label}: first show where it stands in the town, then how tall it is.`, a: ['wide', 'tilt'], shots: [{ move: 'wide', sub: 'town' }, { move: 'tilt', sub: `place:${tall.id}` }],
-      qs: ['First: where it stands in the town.', 'Then: how tall it is.'], hints: ['Where it stands in the town: how much does the audience need to see?', 'From the ground to the top: which way does the camera turn?'] },
-    { note: 'Travel down the river as if on a boat, then end on my face as I smile.', a: ['track', 'close'], shots: [{ move: 'track', sub: 'town' }, { move: 'cw-close', sub: 'who:florence' }],
-      qs: ['First: down the river, as if on a boat.', 'Then: my face as I smile.'], hints: ['The camera travels. Which move goes along with it?', 'A face, so you see the smile: which size?'] },
-    { note: `Show all of ${wide.label} from one spot, end to end, then me as I wave and talk about it.`, a: ['pan', 'medium'], shots: [{ move: 'pan', sub: `place:${wide.id}` }, { move: 'cw-medium', sub: 'who:florence' }],
-      qs: ['First: all of it from one spot, end to end.', 'Then: me as I wave and talk.'], hints: ['From one spot, end to end: does the camera move along, or turn?', 'My face and my waving arms, not the whole island: which size?'] },
+    { note: 'Someone calls out: the audience must see who it is first, and only then where she is. It is me, calling beside the AI Lab.', a: ['close', 'wide'],
+      shots: [{ move: 'cw-close', sub: 'who:florence' }, { move: 'cw-wide', sub: 'who:florence' }],
+      qs: ['First: who is calling.', 'Then: where she is.'], hints: ['They must know who it is: what do people look at to know someone?', 'Now where she is: how much of the place around her?'] },
+    { note: `The surprise is the size: show that ${tallWords(tall)} tall first, and only then where ${it} in the town.`, a: ['tilt', 'wide'],
+      shots: [{ move: 'tilt', sub: `place:${tall.id}` }, { move: 'wide', sub: 'town' }],
+      qs: ['First: how tall it is.', `Then: where ${it} in the town.`], hints: ['Tall, from the ground up: which way does the camera turn?', 'Where in the town: how much should the audience see?'] },
+    { note: 'A tense moment: the camera hurries down the river after a boat, then shows me pointing at what I have spotted, so you see my hand and my face.', a: ['track', 'medium'],
+      shots: [{ move: 'track', sub: 'town' }, { move: 'cw-medium', sub: 'who:florence' }],
+      qs: ['First: hurrying down the river after a boat.', 'Then: my hand and my face as I point.'], hints: ['The camera goes after the boat: which move travels?', 'A hand and a face: a close-up shows only the face. Which size shows both?'] },
   ];
   return S.map((x, i) => ({ note: x.note, shots: x.shots, items: [0, 1].map((k) => ({
     q: `Shot ${k + 1} of 2. ${x.qs[k]}`,

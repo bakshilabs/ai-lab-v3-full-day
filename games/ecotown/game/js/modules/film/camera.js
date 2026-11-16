@@ -33,6 +33,8 @@ export function targetOf(shot, set, live) {
 }
 
 // ages 13-17 see the numbers: how far a pan turns and how far a tilt looks up
+// places on the water: a close-up of one is a detail of the water itself
+const WATER = new Set(['river', 'crossing', 'bridge', 'dock']);
 export const PAN_DEG = 70, TILT_DEG = 36;
 // where a close shot or a medium shot of someone aims: a face for a close-up, the middle of the body for a medium shot
 function whoLook(id, P, size) {
@@ -75,7 +77,8 @@ export function poseFor(shot, set, u = 0.5, live = null) {
         if (id === 'family') { const face = live?.familyFace ?? 0; pos = around(L, 2.8 * far, 10, lerp(face - 8, face + 8, t)); }  // from their door side: they face the camera
         else if (id === 'otters') pos = around(L, 4.5 * far, 22, lerp(70, 96, t));                                                 // from the east bank
         else pos = around(L, 10.5 * far, 5, lerp(HOME - 5, HOME + 3, t));
-      } else { pos = around(P, 11 * far, 16, lerp(HOME - 4, HOME + 4, t)); fov = 28; } break;
+      } else if (WATER.has(id)) { const L = [P[0], P[1] - 2.3, P[2]]; look = L; pos = around(L, 4.5 * far, 30, lerp(HOME - 6, HOME + 6, t)); fov = 24; } // a detail on the water
+      else { pos = around(P, 11 * far, 16, lerp(HOME - 4, HOME + 4, t)); fov = 28; } break;
     case 'pan': { // the camera stands still and turns from one side to the other
       const c = place ? [P[0], P[1] - 1.6, P[2]] : set.town; const st = around(c, (place ? 42 : 70) * far, place ? 24 : 22, HOME); pos = st;
       const [dx, dz] = [c[0] - st[0], c[2] - st[2]]; const L = Math.hypot(dx, dz) || 1; const side = Math.tan(PAN_DEG / 2 * DEG) * L * lerp(-1, 1, t);
