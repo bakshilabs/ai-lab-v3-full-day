@@ -1,7 +1,7 @@
 // Mission 3, storage: the town battery run by hand through three days that get harder. Pure: no page, no 3D.
 //   1  Today: the battery starts a quarter full; a windy morning and a sunny midday give plenty to store.
 //   2  A still day, battery empty at dawn: the wind dies before lunch, so the store must be filled at the right time.
-//   3  A winter night, battery empty: dark at 4 pm, demand up a quarter, a short weak sun.
+//   3  A winter day, battery empty: dark at 4 pm, demand up a quarter, a short weak sun.
 // The goal for each day is honest: it comes from the best any plan can do on that day in this town (worked out below),
 // so a goal is never impossible, and "charge at midday, use in the evening" is not enough on days 2 and 3.
 import { MODES, HOURS, forecast, stepHour, isWinter, runModes, clockAt } from './model.js';
@@ -57,20 +57,19 @@ export function planLine(modes, j) {
 export function storeHint(tries, day, goal, j) {
   const spell = [...day.spells].sort((a, b) => b.to - b.from - (a.to - a.from))[0];
   const when = spell ? clockWord(day.hours[spell.from].clock, j) : '';
-  if (tries <= 1) return j ? 'Not yet. Look at the chart: when is there power to spare, and when is the town short? Store the spare for the short hours.' : 'Not yet. Find the surplus hours and the shortfall hours on the chart, and move energy from one to the other.';
+  if (tries <= 1) return j ? 'Look at the chart: when is there power to spare, and when is the town short? Store the spare for the short hours.' : 'Find the surplus hours and the shortfall hours on the chart, and move energy from one to the other.';
   if (tries === 2) return spell ? (j ? `The longest dark spell started at ${when}. Was the battery full before then? Did charging take power the homes needed?` : `The longest outage began at ${when}. Was the store full by then, and did charging ever take supply the homes needed?`) : (j ? 'So close. Try charging a little later, when there is lots to spare.' : 'Close. Charge only on a clear surplus.');
   return `${j ? 'Here is a plan that works. ' : 'A plan that meets the goal: '}${planLine(goal.plan, j)}`;
 }
 export function storeGoalLine(goal, j) {
-  if (goal.maxDark <= 0) return j ? 'Goal: every home lit, every hour.' : 'Goal: no home-hours without power.';
-  return goal.bestDark > 0
-    ? (j ? `Goal: ${goal.maxDark} dark hours at most. Even the best plan has ${goal.bestDark}.` : `Goal: at most ${goal.maxDark} home-hours unsupplied (the best possible is ${goal.bestDark}).`)
-    : (j ? `Goal: ${goal.maxDark} dark hours at most, all day and all night.` : `Goal: at most ${goal.maxDark} home-hours unsupplied over the whole day.`);
+  if (goal.maxDark <= 0) return j ? 'Goal: every square in the Lights row stays yellow.' : 'Goal: no home-hours without power.';
+  if (j) return `Goal: the numbers in the dark squares of the Lights row add up to ${goal.maxDark} or less.${goal.bestDark > 0 ? ` Even the best plan has ${goal.bestDark}.` : ''}`;
+  return goal.bestDark > 0 ? `Goal: at most ${goal.maxDark} home-hours unsupplied (the best possible is ${goal.bestDark}).` : `Goal: at most ${goal.maxDark} home-hours unsupplied over the whole day.`;
 }
 export const STORE_DAY = {
   today: { j: 'Day 1 of 3: today. The battery starts a quarter full.', s: 'Day 1 of 3: today, battery at 25%.' },
   still: { j: 'Day 2 of 3: a still day. The battery starts empty.', s: 'Day 2 of 3: a still day, battery empty at dawn.' },
-  winter: { j: 'Day 3 of 3: a winter night. The battery starts empty, and it is dark at 4 pm.', s: 'Day 3 of 3: a winter day, battery empty, dark from 16:00, demand up 25%.' },
+  winter: { j: 'Day 3 of 3: a winter day. The battery starts empty, and it gets dark at 4 pm.', s: 'Day 3 of 3: a winter day, battery empty, dark from 16:00, demand up 25%.' },
 };
 export const storeDayLine = (round, j) => pick(STORE_DAY[round.day] || STORE_DAY.today, j);
 export { MODES };

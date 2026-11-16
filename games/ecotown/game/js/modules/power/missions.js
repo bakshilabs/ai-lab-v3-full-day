@@ -23,17 +23,17 @@ export const MISSIONS = [
   { id: 'rules', icon: '📋', built: true,
     use: { j: 'Automation rules', s: 'Automation rules' },
     job: { j: 'Control engineers write rules, so the system can run itself day and night.', s: 'Control engineers write the rules automated systems follow, then test them on many kinds of day.' },
-    how: { j: 'Write rules from tiles. Test them on a windy day, a still day and a winter night.', s: 'Build rules from tiles, test them on three days, find the gaps and fix them.' },
+    how: { j: 'Write rules from tiles. Test them on a windy day, a still day and a winter day.', s: 'Build rules from tiles, test them on three days, find the gaps and fix them.' },
     can: { j: 'You can write rules for a machine and test them.', s: 'You can write, test and debug the rules an automated system follows.' } },
   { id: 'demand', icon: '🔌',
     use: { j: 'Smart demand', s: 'Smart demand' },
     job: { j: 'Energy planners help people run washing and car charging when there is spare clean power.', s: 'Demand-response planners shift flexible demand into hours of surplus renewable power, within what people need.' },
-    how: { j: 'Move the jobs to times with spare wind and sun. Keep to the times people need.', s: 'Move each flexible job into surplus hours, inside its time window.' },
+    how: { j: 'Move the jobs to times with spare wind and sun. Keep to the times people need. Four days.', s: 'Move each flexible job into surplus hours, inside its time window. Four days.' },
     can: { j: 'You can move power use to greener times and still meet people’s needs.', s: 'You can shift flexible demand to surplus hours while respecting each user’s constraints.' } },
   { id: 'storm', icon: '⛈️',
     use: { j: 'Storm night', s: 'Storm night' },
     job: { j: 'Emergency planners and engineers decide who gets power first after a storm, and bring it back safely.', s: 'Emergency planners and network engineers isolate faults, restore priority sites first and re-energise safely.' },
-    how: { j: 'Find the broken line, choose who gets power first, then bring everyone back safely.', s: 'Isolate the fault, restore by priority within capacity, then repair and restore safely.' },
+    how: { j: 'Get ready for the storm. Then find the broken line, choose who gets power first, and bring everyone back safely.', s: 'Prepare for the storm, isolate the fault, restore by priority within capacity, then repair and restore safely.' },
     can: { j: 'You can put people’s safety first in an emergency and restore a system step by step.', s: 'You can prioritise in an emergency and restore a network safely, one step at a time.' } },
 ];
 export const MISSION_IDS = MISSIONS.map((m) => m.id);
@@ -77,8 +77,8 @@ export function recordLines(p, j) {
   out.push(r.forecast?.spells ? (j ? `Read three forecasts and found every hour of short power.` : `Forecasting: found every shortfall hour on three days${r.forecast.kwh ? ', and sized it in kWh' : ''}.`) : 'Read three forecasts and found the short hours.');
   out.push(r.storage ? (j ? 'Ran the town battery by hand for three days, and met the goal each day.' : `Storage: three days by hand, ${r.storage.dark.map((d) => `${pct(r.storage.total - d, r.storage.total)}%`).join(' / ')} of home-hours supplied.`) : 'Ran the town battery by hand for three days.');
   const n = p.rules?.list?.length || 0;
-  out.push(r.rules ? (j ? `Wrote ${n} rule${n === 1 ? '' : 's'} and tested them on a windy day, a still day and a winter night.` : `Automation: ${n} rule${n === 1 ? '' : 's'}, ${r.rules.share}% of home-hours supplied on the three test days.`) : `Wrote ${n || 'some'} rules for the system to follow.`);
-  out.push(r.demand ? (j ? `Moved ${r.demand.moved} jobs to spare wind and sun. None used gas.` : `Demand response: ${r.demand.moved} jobs (${r.demand.kwh} kWh) moved onto surplus renewables.`) : 'Moved jobs to times with spare clean power.');
+  out.push(r.rules ? (j ? `Wrote ${n} rule${n === 1 ? '' : 's'} and tested them on a windy day, a still day and a winter day.` : `Automation: ${n} rule${n === 1 ? '' : 's'}, ${r.rules.share}% of home-hours supplied on the three test days.`) : `Wrote ${n || 'some'} rules for the system to follow.`);
+  out.push(r.demand ? (j ? `Moved ${r.demand.moved} jobs to spare wind and sun, and still got the nurse to work on time.` : `Demand response: ${r.demand.moved} jobs (${r.demand.kwh} kWh) moved to surplus; gas only for a need that could not move.`) : 'Moved jobs to times with spare clean power.');
   out.push(j ? 'Storm night: cut off the broken line, lit the health centre and shelter first, brought everyone back.' : 'Storm night: isolated the fault, restored priority sites first, re-energised safely.');
   return out.slice(0, 6);
 }

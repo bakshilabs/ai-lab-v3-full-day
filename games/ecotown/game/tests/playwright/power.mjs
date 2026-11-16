@@ -154,7 +154,8 @@ const clockIs = () => text(M + '[data-clock]');
 const hourIndex = (c) => (junior ? ['6 am', '7 am', '8 am', '9 am', '10 am', '11 am', '12 noon', '1 pm', '2 pm', '3 pm', '4 pm', '5 pm', '6 pm', '7 pm', '8 pm', '9 pm', '10 pm', '11 pm', 'midnight', '1 am', '2 am', '3 am', '4 am', '5 am'].indexOf(c) : (parseInt(c, 10) + 18) % 24);
 const runDay = async (modes, label) => {
   await p.waitForSelector(M + '[data-mode="charge"]', { timeout: LONG });
-  if (!motion) {
+  if (!motion && label === 'd0') { for (let k = 0; k < 8 && !(await p.$(M + '.pw-lines')); k++) await p.click(M + '[data-skipto]'); checks.skipTo = true; }
+  else if (!motion) {
     for (let i = 0; i < 24; i++) {
       const m = modes[i];
       if (i === 2 && label === 'd1') { await p.keyboard.press(String(['charge', 'hold', 'use'].indexOf(m) + 1)); checks.keyMode = (await p.getAttribute(M + `[data-mode="${m}"]`, 'aria-pressed')) === 'true'; }
@@ -208,18 +209,23 @@ await debrief(3);
 // ---- mission 5: smart demand
 await startMission(4, true);
 const SOL = await pure((mods) => mods.m5.DEMAND_ROUNDS.map((r) => mods.m5.solve(r)));
-for (let r = 0; r < 3; r++) {
+for (let r = 0; r < 4; r++) {
   await p.waitForSelector(M + '.pw-slots', { timeout: LONG });
   if (r === 0) { await click(M + '[data-act="run"]'); await p.waitForTimeout(300); checks.m5Miss = await says(); await fit('m5-start'); await shot('m5-habit'); }
   if (r === 1) { await click(M + '[data-job="carA"]'); await p.click(M + '[data-slot="2"]'); checks.m5Refuse = await says(); }
   for (const [id, s] of Object.entries(SOL[r])) { await click(M + `[data-job="${id}"]`); if (r === 2 && id === 'wash') { const now = await p.evaluate((m) => Number(document.querySelector(m + '.pw-slots button.here')?.dataset.slot), M); for (let k = now; k !== s; k += s > now ? 1 : -1) { await p.focus(M + `[data-job="${id}"]`); await p.keyboard.press(s > now ? 'ArrowRight' : 'ArrowLeft'); } } else await p.click(M + `[data-slot="${s}"]`); }
   if (r === 2) { await fit('m5-solved'); await shot('m5-solved'); }
+  if (r === 3) { await click(M + '[data-act="run"]'); checks.m5Shift = await says(); await shot('m5-night-shift'); await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); await click(M + '[data-act="next"]'); continue; }
   await click(M + '[data-act="run"]'); await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); await click(M + '[data-act="next"]');
 }
 await debrief(4);
 
 // ---- mission 6: storm night
 await startMission(5, true);
+await p.waitForSelector(M + '[data-prep]', { timeout: LONG });
+await click(M + '[data-prep="crewsout"]'); await click(M + '[data-prep="charge"]'); await click(M + '[data-act="check"]'); checks.m6PrepMiss = await says(); await fit('m6-prep'); await shot('m6-prep-miss');
+await click(M + '[data-prep="crewsout"]'); for (const id of ['crews', 'call', 'shelter']) await click(M + `[data-prep="${id}"]`); await click(M + '[data-act="check"]');
+await click(M + '[data-act="next"]');
 await p.waitForSelector(M + '[data-sw="3A"]', { timeout: LONG }); await fit('m6-fault'); await shot('m6-fault');
 await p.click(M + '[data-sw="3A"]'); checks.m6Trip = await says(); await p.click(M + '[data-sw="3B"]'); await p.click(M + '[data-sw="3A"]');
 await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); checks.m6R1 = await says(); await shot('m6-isolated'); await click(M + '[data-act="next"]');
@@ -274,7 +280,7 @@ checks.times = times;
 const ok = checks.finished && checks.picture && checks.practised?.length >= 2 && checks.lines?.length === 6 && checks.moduleGone && checks.viewRemoved && checks.townScenery === 1 && Object.values(checks.putBack).every(Boolean)
   && checks.saved?.done && checks.saved?.town === 'power-rules' && checks.saved.missions?.every(Boolean) && checks.backButton && checks.mapLocked.join() === 'false,true,true,true,true,true'
   && checks.leftMid.result === null && checks.leftMid.gone && checks.resumeMap.next === 2 && checks.resumeMap.done === 2
-  && /goal is 6/i.test(checks.m1Miss) && checks.moreLit && checks.draft.length >= 1 && /never .*|not right yet|hour/i.test(checks.m2Miss) && /Goal/.test(checks.m3Miss) && /Goal met/.test(checks.m3Met)
+  && /goal is 6/i.test(checks.m1Miss) && checks.moreLit && checks.draft.length >= 1 && /never .*|not right yet|hour/i.test(checks.m2Miss) && /Goal/.test(checks.m3Miss) && /Goal met/.test(checks.m3Met) && /nurse|could not move/i.test(checks.m5Shift) && /Not yet/.test(checks.m6PrepMiss)
   && checks.againMap.done === 6 && checks.againMap.finish && !checks.leftAgain.finished && checks.leftAgain.stillDone && checks.leftAgain.gone
   && checks.fits.length === 0 && checks.noOutsideRequests && errors.length === 0;
 console.log(JSON.stringify({ band, motion, large, town: townKind, size: `${W}x${H}`, ok, checks, errors }, null, 2));

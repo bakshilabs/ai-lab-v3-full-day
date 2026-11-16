@@ -41,7 +41,7 @@ export async function playForecast(d) {
     d.setTap(null); d.setKey(null);
     // the forecast was right: show the day as it will go, with no battery, and the hours homes would go dark
     const sp = spells(hours); spellCount += sp.length; const worst = hours.reduce((a, h) => (h.need - h.made > a.need - a.made ? h : a), hours[0]); reveal(worst.i);
-    d.screen.innerHTML = `${d.chart(dayId, { cursor: worst.i, marks: hours.map((h) => marked.has(h.i)), h: 150 })}<ul class="pw-lines"><li class="ok">✓ ${esc(checkSay({ right: true }, tries, hours, j))}</li><li class="note">${esc(j ? `Without a battery, homes would go dark at ${clockWord(worst.clock, j)}. Now the control room knows to plan for it.` : `With no storage, the worst hour is ${clockWord(worst.clock, j)}: a ${Math.round((worst.need - worst.made) * 5)} kW gap. That is the case to plan for.`)}</li></ul>`;
+    d.screen.innerHTML = `${d.chart(dayId, { cursor: worst.i, marks: hours.map((h) => marked.has(h.i)), h: 150 })}<ul class="pw-lines"><li class="ok">✓ ${esc(checkSay({ right: true }, tries, hours, j))}</li><li class="note">${esc(j ? `Without a battery, homes would go dark at ${clockWord(worst.clock, j)}. Now the control room knows to plan for it.` : `With no storage, the worst hour is ${clockWord(worst.clock, j)}, with a gap of ${Math.round((worst.need - worst.made) * 5)} kW. That is the case to plan for.`)}</li></ul>`;
     // ages 13-17, days 2 and 3: from kW to kWh
     if (!j && r >= 1) {
       const opts = energyChoices(hours, r); const tried = new Set();

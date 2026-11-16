@@ -25,7 +25,7 @@ const PLAY = {
   forecast: async (d) => { const r = await playForecast(d); return { res: r, lines: [d.j ? `Three forecasts read. ${r.spells} short spells found.` : `Three forecasts read; ${r.spells} shortfall spells found${r.kwh ? ' and sized in kWh' : ''}.`] }; },
   storage: async (d, st, save) => { const r = await playStorage(d, st, save); return { res: r, lines: r.dark.map((x, n) => (d.j ? `Day ${n + 1}: ${x} dark hours.` : `Day ${n + 1}: ${x} home-hours unsupplied.`)) }; },
   rules: async (d, st, save) => { const r = await playRules(d, st, save); return { res: { share: r.share, diff: r.diff }, lines: [d.j ? `${st.rules.list.length} rules. Homes lit on the test days: ${r.share}%.` : `${st.rules.list.length} rules; ${r.share}% of home-hours supplied across the test days.`] }; },
-  demand: async (d) => { const r = await playDemand(d); return { res: r, lines: [d.j ? `${r.moved} jobs moved. All of them on spare wind and sun.` : `${r.moved} jobs moved; ${r.kwh} kWh of flexible demand on renewables.`] }; },
+  demand: async (d) => { const r = await playDemand(d); return { res: r, lines: [d.j ? `${r.moved} jobs moved to spare wind and sun.` : `${r.moved} jobs moved; ${r.kwh} kWh of flexible demand shifted to surplus renewables.`] }; },
   storm: async (d) => { const r = await playStorm(d); return { res: r, lines: [d.j ? 'The broken line was cut off, the safe places came first, and everyone is back.' : `Fault isolated, priority load first, all supply restored${r.trips ? ` (${r.trips} trip${r.trips === 1 ? '' : 's'} on the way)` : ' with no trips'}.`] }; },
 };
 

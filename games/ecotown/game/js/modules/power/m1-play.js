@@ -58,7 +58,7 @@ function playRound(d, round, r, guide) {
   const { j, pick, reduce, ctl, prog, kit, view } = d;
   d.mode('desk', 'scale'); const flexes = []; const steps = []; let i = 0, flex = r === 0 ? 0 : clampFlex(needFlex(round, 0) - 2), t = 0, paused = false, note = '';
   const ms = j ? STEP_MS.j : STEP_MS.s;
-  d.say(pick(BAL.how), `${pick(BAL.round[round.id])}. ${pick(BAL.roundNote[round.id])}`);
+  d.say(pick(BAL.how), r === 0 ? pick(BAL.warn) : `${pick(BAL.round[round.id])}. ${pick(BAL.roundNote[round.id])}`);
   const drawSide = () => {
     const diff = gap(round, i, flex);
     d.side.innerHTML = `${scaleSvg(round, i, flex, j)}<p class="pw-state ${diff === 0 ? 'ok' : 'bad'}" aria-live="polite">${esc(stateWord(diff, j))}</p>${j ? '' : `<p class="pw-hz">${hz(diff).toFixed(2)} Hz <small>keep 49.80–50.20</small></p>`}${legendHtml(j)}`;
