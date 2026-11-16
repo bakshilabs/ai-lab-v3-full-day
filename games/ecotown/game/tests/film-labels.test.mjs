@@ -10,6 +10,8 @@ import { firstCut } from '../js/modules/film/cut.js';
 import { storyboardSvg } from '../js/modules/film/picture.js';
 import * as M2 from '../js/modules/film/m2-story.js';
 import * as M4 from '../js/modules/film/m4-edit.js';
+import * as M6 from '../js/modules/film/m6-truth.js';
+import { missLimit } from '../js/modules/film/mui.js';
 import { num, restoreHour } from '../js/modules/film/hour.js';
 
 const terrain = makeTerrain(); const tiles = [...terrain.tiles.values()];
@@ -65,6 +67,17 @@ test('ages 13–17 running times: more than one way to hit each, and the range m
 test('mission 4 keeps its finished parts between visits, and nothing else', () => {
   assert.deepEqual(restoreHour({ v: 2, done: [true, true, true, false, false, false], m4: ['takes', 'trim', 'nonsense'] }).m4, ['takes', 'trim']);
   assert.equal(restoreHour({ v: 2, done: [true, false, false, false, false, false] }).m4, null);
+});
+
+test('a question is set aside while a wrong tile is still open, so the open tiles never give the answer away', () => {
+  const q = (n, answers) => ({ opts: Array.from({ length: n }, (_, i) => ({ id: 'o' + i })), answer: 'o0', ...(answers ? { answers } : {}) });
+  assert.equal(missLimit(q(3)), 1); assert.equal(missLimit(q(4)), 2); assert.equal(missLimit(q(6)), 4);
+  assert.equal(missLimit(q(4, ['o0', 'o1'])), 1); // two right of four: after one miss, one right and one wrong are open
+  // every real question in the hour: when it stops, at least one wrong tile is still open
+  for (const it of [...M4.musicItems(), ...M6.pictureItems(true)]) {
+    const right = it.answers ? it.answers.length : 1; const open = it.opts.length - missLimit(it);
+    assert.ok(open - right >= 1, `${it.q}: ${open} open, ${right} right`);
+  }
 });
 
 test('numbers in words go past fifteen (the 13–17 record names twenty shots)', () => {

@@ -24,7 +24,7 @@ export const STORIES = [
     { id: 'b1', art: 'b-park', beat: 'where', size: 'Wide', words: 'The park on a sunny day', shot: ['wide', 'park'] },
     { id: 'b2', art: 'b-family', beat: 'who', size: 'Medium', words: 'Two friends play with a ball', shot: ['cw-medium', 'family'] },
     { id: 'b3', art: 'b-river', beat: 'problem', size: 'Close-up', words: 'The ball rolls into the river', shot: ['cw-close', 'river'] },
-    { id: 'b4', art: 'b-net', beat: 'act', size: 'Medium', words: 'Florence fishes it out with a net', shot: ['cw-medium', 'florence'] },
+    { id: 'b4', art: 'b-net', beat: 'act', size: 'Medium', words: 'Florence comes to fish it out', shot: ['cw-medium', 'florence'] },
     { id: 'b5', art: 'b-smile', beat: 'end', size: 'Close-up', words: 'A big smile: the ball is back', shot: ['cw-close', 'family'] },
   ] },
   { id: 'market', title: 'Market day', cards: [
@@ -39,7 +39,7 @@ export const STORIES = [
     { id: 'o1', art: 'river-evening', beat: 'where', size: 'Wide', words: 'The river at evening', shot: ['wide', 'town'] },
     { id: 'o2', art: 'o-peek', beat: 'who', size: 'Close-up', words: 'An otter peeks out of the water', shot: ['cw-close', 'otters'] },
     { id: 'o3', art: 'o-litter', beat: 'problem', size: 'Wide', words: 'Litter floats down the river', shot: ['push', 'river'] },
-    { id: 'o4', art: 'b-net', beat: 'act', size: 'Medium', words: 'Florence nets the litter', shot: ['cw-medium', 'florence'] },
+    { id: 'o4', art: 'b-net', beat: 'act', size: 'Medium', words: 'Florence clears the litter', shot: ['cw-medium', 'florence'] },
     { id: 'o5', art: 'o-clean', beat: 'act', after: 'o4', size: 'Wide', words: 'The river runs clean again', shot: ['push', 'river'] },
     { id: 'o6', art: 'otters', beat: 'end', size: 'Medium', words: 'Two otters swim home', shot: ['cw-medium', 'otters'] },
   ], spares: [{ id: 'o8', art: 'm-gull', beat: null, size: 'Close-up', words: 'A seagull on the ferry dock', shot: ['cw-close', 'dock'] },

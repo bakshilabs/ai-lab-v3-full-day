@@ -105,9 +105,9 @@ export function seqItems(set) {
     { note: `The surprise is the size: show that ${tallWords(tall)} tall first, and only then where ${it} in the town.`, a: ['tilt', 'wide'],
       shots: [{ move: 'tilt', sub: `place:${tall.id}` }, { move: 'wide', sub: 'town' }],
       qs: ['First: how tall it is.', `Then: where ${it} in the town.`], hints: ['Tall, from the ground up: which way does the camera turn?', 'Where in the town: how much should the audience see?'] },
-    { note: 'A tense moment: the camera hurries down the river after a boat, then shows me pointing at what I have spotted, so you see my hand and my face.', a: ['track', 'medium'],
+    { note: 'A tense moment: the camera hurries down the river as if on a boat, then shows me pointing at what I have spotted, so you see my hand and my face.', a: ['track', 'medium'],
       shots: [{ move: 'track', sub: 'town' }, { move: 'cw-medium', sub: 'who:florence' }],
-      qs: ['First: hurrying down the river after a boat.', 'Then: my hand and my face as I point.'], hints: ['The camera goes after the boat: which move travels?', 'A hand and a face: a close-up shows only the face. Which size shows both?'] },
+      qs: ['First: hurrying down the river, as if on a boat.', 'Then: my hand and my face as I point.'], hints: ['The camera hurries along the river: which move travels?', 'A hand and a face: a close-up shows only the face. Which size shows both?'] },
   ];
   return S.map((x, i) => ({ note: x.note, shots: x.shots, items: [0, 1].map((k) => ({
     q: `Shot ${k + 1} of 2. ${x.qs[k]}`,

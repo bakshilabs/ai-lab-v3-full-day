@@ -11,7 +11,8 @@ export async function playCrew(env) {
   const r = { of: 0, first: 0, seq: 0 };
   const lists = { size: sizeItems(set, junior), move: moveItems(set, junior), scene: sceneItems(set) };
   const show = (shot, answer) => { if (['pan', 'tilt', 'track'].includes(answer)) player.loop(shot, 4.5); else player.look(shot, 0.5); if (answer === 'medium') wave(); };
-  for (const part of partsFor(junior)) {
+  const partList = partsFor(junior);
+  for (const part of partList) {
     player.setMood('cheerful'); player.look({ move: 'wide', sub: 'town' });
     await mui.note({ kick: 'Mission 1 · The film crew’s language', title: part.title, lines: [part.line], btn: 'Start ➜', stage: 'part-' + part.id });
     if (part.id === 'seq') { await sequences(); continue; }
@@ -26,9 +27,9 @@ export async function playCrew(env) {
         else { player.loop(item.shot, 4.5); tools = [{ id: 'again', label: '↺ Play it again', on: () => player.loop(item.shot, 4.5) }]; }
       } else player.look({ move: 'wide', sub: 'town' });
       const res = await mui.ask({ head, item, tools, limit: mui.LIMIT, reveal: again, onRight: () => { if (part.id === 'scene') show(item.shot, item.answer); } });
-      if (!res.missed) { r.of++; if (res.tries === 0 && !again) r.first++; }
+      if (!res.missed && !res.revealed) { r.of++; if (res.tries === 0 && !again) r.first++; }
       return res;
-    });
+    }, { more: part !== partList[partList.length - 1] });
   }
   player.look({ move: 'wide', sub: 'town' });
   return { res: r, lines: crewLines(r) };
@@ -41,7 +42,7 @@ export async function playCrew(env) {
     await mui.askList(all, async (x, _n, again) => {
       ctx.report({ stage: `Crew words: sequence ${x.i + 1} of ${seqs.length}` });
       const res = await mui.ask({ head: { kick: `Sequence ${x.i + 1} of ${seqs.length}${again ? ' · again' : ''}`, step: [x.k + 1, 2] }, item: x.item, pic: x.note, limit: mui.LIMIT, reveal: again });
-      if (!res.missed) r.of++; return res;
+      if (!res.missed && !res.revealed) r.of++; return res;
     });
     for (let i = 0; i < seqs.length; i++) {
       const sq = seqs[i]; ctx.report({ stage: `Crew words: filming sequence ${i + 1} of ${seqs.length}` });
