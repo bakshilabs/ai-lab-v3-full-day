@@ -1,5 +1,5 @@
 // Mission 5 page: the weeding robot. Check how sure it is, then set how sure it must be before it pulls a plant.
-import { FIELDS, NAMES, SETTINGS, SURE, sureWords, whyUnsure, weed, best, resultLine, okRow, table, pct, CHECK, plant, FARMER_TIME } from './m5-weeds.js';
+import { FIELDS, NAMES, SETTINGS, SURE, sureWords, whyUnsure, weed, best, resultLine, grade, passes, table, pct, CHECK, plant, FARMER_TIME } from './m5-weeds.js';
 import { esc } from './shell.js';
 import { stageOf } from './missions.js';
 
@@ -50,7 +50,7 @@ export async function playM5(ctx, sh, cur, keep) {
   // ---------- Parts B and C: set the threshold and weed a row
   for (; part <= 2; part++) {
     if (ctx.signal.aborted) return null;
-    const field = FIELDS[part - 1]; const withAsk = !j && part === 2; let pull = null; let ask = null; let res = null; let ok = false;
+    const field = FIELDS[part - 1]; const withAsk = !j && part === 2; let pull = null; let ask = null; let res = null; let ok = false; let rowTries = 0; let g = null;
     setup(part); ctx.report({ stage: stageOf(5, `weeding the ${field.crop.s} field`) });
     const crop = field.crop[j ? 'j' : 's'];
     sh.say(part === 1 ? (j ? `Here is a row of ${crop}s and weeds, with how sure the robot is about each. A pulled ${crop} is lost for good. A weed left behind can be pulled next week. Choose how sure it must be before it pulls a plant.` : `Set the confidence needed to pull. A pulled ${crop} is lost; a missed weed waits a week. Which mistake costs more?`)
@@ -59,28 +59,28 @@ export async function playM5(ctx, sh, cur, keep) {
     await sh.wait((done) => {
       const draw = () => {
         const rows = res ? res.rows : field.plants.map((pl) => ({ ...pl, did: null }));
-        const out = (r) => (!r.did ? '' : r.did === 'pull' ? (r.weed ? '<em class="ok">Pulled ✓</em>' : '<em class="miss">Crop lost ✗</em>') : r.did === 'flag' ? (r.checked ? `<em class="ask">Flag: farmer ${r.weed ? 'pulled' : 'kept'}</em>` : '<em class="miss">Flag: no time</em>') : (r.weed ? '<em class="ask">Weed left</em>' : '<em class="ok">Kept ✓</em>'));
+        const out = (r) => (!r.did ? '' : r.did === 'pull' ? (r.weed ? '<em class="ok">Pulled ✓</em>' : '<em class="miss">Crop lost ✗</em>') : r.did === 'flag' ? (r.checked ? `<em class="ask">Flag: farmer ${r.weed ? 'pulled' : 'kept'}</em>` : '<em class="wait">Flag: no time, left in</em>') : (r.weed ? '<em class="ask">Weed left</em>' : '<em class="ok">Kept ✓</em>'));
         const tb = res && !j ? table(res) : null;
         sh.main.innerHTML = `<div class="rb-m5"><div class="rb-panel rb-row"><h3>The ${esc(crop)} row<small>${j ? 'The bar shows how sure the robot is that it is a weed.' : 'Confidence that each plant is a weed.'}</small></h3>
-          <ol class="rb-plants">${rows.map((r) => `<li class="${r.did ? (r.did === 'pull' && !r.weed ? 'lost' : r.did === 'pull' ? 'gone' : '') : ''}" aria-label="${esc(name(r))}: robot ${esc(sureWords(r.p))}${j ? '' : `, ${r.p}%`}">${plantSvg(r, 58)}<b>${esc(name(r))}</b>${bar(r.p, j, pull)}${out(r)}</li>`).join('')}</ol></div>
+          <ol class="rb-plants">${rows.map((r, k) => `<li class="${r.did ? (r.did === 'pull' && !r.weed ? 'lost' : r.did === 'pull' ? 'gone' : '') : ''}" aria-label="${esc(!j && !res ? `Plant ${k + 1}` : name(r))}: robot ${esc(sureWords(r.p))}${j ? '' : `, ${r.p}%`}">${plantSvg(r, 58)}<b>${esc(!j && !res ? `Plant ${k + 1}` : name(r))}</b>${bar(r.p, j, pull)}${out(r)}</li>`).join('')}</ol></div>
           <div class="rb-panel rb-setbox"><h3>${j ? 'Pull a plant when the robot is at least…' : 'Pull when confidence ≥'}</h3>
             <div class="rb-sets" role="radiogroup" aria-label="Pull setting">${SETTINGS.map((t) => `<button type="button" role="radio" class="rb-set${pull === t ? ' on' : ''}" data-t="${t}" aria-checked="${pull === t}">${j ? esc(SURE[t]) : `${t}%`}</button>`).join('')}</div>
             ${withAsk ? `<h3>Flag for the farmer from</h3><div class="rb-sets" role="radiogroup" aria-label="Flag setting"><button type="button" role="radio" class="rb-ask${ask === null ? ' on' : ''}" data-a="" aria-checked="${ask === null}">No flags</button>${SETTINGS.filter((t) => pull === null || t < pull).map((t) => `<button type="button" role="radio" class="rb-ask${ask === t ? ' on' : ''}" data-a="${t}" aria-checked="${ask === t}">${t}%</button>`).join('')}</div>` : ''}
-            ${res ? `<p class="rb-verdict ${okRow(res) ? 'ok' : 'miss'}" aria-live="polite">${esc(resultLine(field, res, j, withAsk))}</p>` : ''}
+            ${res ? `<p class="rb-verdict ${g === 'lost' ? 'miss' : g === 'weedy' ? 'ask' : 'ok'}" aria-live="polite">${esc(resultLine(field, res, j, withAsk, rowTries))}</p>` : ''}
             ${tb ? `<table class="rb-conf"><caption>What happened</caption><thead><tr><th></th><th scope="col">Pulled</th>${withAsk ? '<th scope="col">Flagged</th>' : ''}<th scope="col">Left</th></tr></thead><tbody><tr><th scope="row">Weeds (${res.weeds})</th><td class="hit">${tb.weed[0]}</td>${withAsk ? `<td>${tb.weed[1]}</td>` : ''}<td class="${tb.weed[2] ? 'off' : 'zero'}">${tb.weed[2]}</td></tr><tr><th scope="row">${esc(crop)}s (${res.crops})</th><td class="${tb.crop[0] ? 'off' : 'zero'}">${tb.crop[0]}</td>${withAsk ? `<td>${tb.crop[1]}</td>` : ''}<td class="hit">${tb.crop[2]}</td></tr></tbody></table>
               <p class="rb-tunenote">Weeds removed: ${pct(res.weedsPulled + res.weedsByFarmer, res.weeds)}%. Crops lost: ${pct(res.cropsPulled, res.crops)}%.</p>` : ''}</div></div>`;
         sh.main.querySelectorAll('.rb-set').forEach((b) => { b.onclick = () => { pull = +b.dataset.t; if (ask !== null && ask >= pull) ask = null; res = null; draw(); foot(); if (sh.keys()) sh.main.querySelector(`.rb-set[data-t="${pull}"]`)?.focus(); }; });
         sh.main.querySelectorAll('.rb-ask').forEach((b) => { b.onclick = () => { ask = b.dataset.a ? +b.dataset.a : null; res = null; draw(); foot(); if (sh.keys()) sh.main.querySelector(`.rb-ask[data-a="${b.dataset.a}"]`)?.focus(); }; });
       };
       const foot = () => {
-        sh.foot.innerHTML = `<p class="rb-hint">${ok ? (j ? 'No crop lost. Try another setting, or carry on.' : 'No crop lost. Tune further or carry on.') : j ? 'Choose a setting, then weed the row.' : 'Set the threshold, then run.'}</p><button type="button" class="rb-btn ${ok ? 'alt' : 'go'}" data-run ${pull === null ? 'disabled' : ''}>🌱 Weed the row</button>${ok ? `<button type="button" class="rb-btn go" data-next>${part === 1 ? 'Next field' : 'Carry on'} ➜</button>` : ''}`;
+        sh.foot.innerHTML = `<p class="rb-hint">${ok ? (j ? 'Well set. Try another setting, or carry on.' : 'Well tuned. Try more, or carry on.') : j ? 'Choose a setting, then weed the row.' : 'Set the threshold, then run.'}</p><button type="button" class="rb-btn ${ok ? 'alt' : 'go'}" data-run ${pull === null ? 'disabled' : ''}>🌱 Weed the row</button>${ok ? `<button type="button" class="rb-btn go" data-next>${part === 1 ? 'Next field' : 'Carry on'} ➜</button>` : ''}`;
         sh.foot.querySelector('[data-run]').onclick = run; const n = sh.foot.querySelector('[data-next]'); if (n) n.onclick = () => done();
       };
       const fresh = sh.guard();
       const run = () => {
         if (pull === null || !fresh()) return; res = weed(field, pull, withAsk ? ask : null); d.tries++;
-        ok = okRow(res); if (ok) { const keepIt = { pull, ask: withAsk ? ask : null, left: res.weedsLeft, weeds: res.weeds, best: best(field, withAsk).weedsLeft }; if (part === 1) d.f1 = keepIt; else d.f2 = keepIt; }
-        keep(part, d); draw(); foot(); ctx.say(resultLine(field, res, j, withAsk)); sh.focusSoon(ok ? '[data-next]' : '.rb-set');
+        rowTries++; g = grade(field, res, withAsk, rowTries); ok = passes(g); if (ok) { const keepIt = { pull, ask: withAsk ? ask : null, left: res.weedsLeft, weeds: res.weeds, best: best(field, withAsk).weedsLeft }; if (part === 1) d.f1 = keepIt; else d.f2 = keepIt; }
+        keep(part, d); draw(); foot(); ctx.say(resultLine(field, res, j, withAsk, rowTries)); sh.main.querySelector('.rb-setbox .rb-verdict')?.scrollIntoView({ block: 'nearest' }); sh.focusSoon(ok ? '[data-next]' : '.rb-set');
       };
       draw(); foot(); sh.focusSoon('.rb-set');
     });

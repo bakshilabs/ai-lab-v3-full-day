@@ -2,7 +2,7 @@
 // Every line is built from the mission's saved summary, so it says only what the child did.
 import { SURE } from './m5-weeds.js';
 import { designWords } from './m6-flood.js';
-import { CONDS, ACTS } from './m3-rules.js';
+import { CONDS, ACTS, badRule } from './m3-rules.js';
 
 const n = (k, word) => `${k} ${word}${k === 1 ? '' : 's'}`;
 // One line per mission (shown on the map, on the closing card and on the take-home page). sum: the mission's summary.
@@ -12,7 +12,7 @@ export function missionLine(m, s, j) {
     : `Sensors: ${s.mr} of ${s.mo} jobs matched first time; ${s.pr} of ${s.po} moves predicted from the sensor reading.`;
   if (m === 2) return j ? `Programmed a robot arm, fixed a broken program, and packed all 4 seedlings with ${n(s.steps, 'step')} repeated ${s.rep} times.`
     : `Arm program: fixed a bug, then packed 4 seedlings with a ${s.steps}-step loop run ${s.rep} times.`;
-  if (m === 3) { const safe = (s.rules || []).filter(([, a]) => a).length;
+  if (m === 3) { const safe = (s.rules || []).filter(([c, a]) => a && !badRule({ cond: c, act: a })).length;
     return j ? `Wrote ${n(safe, 'rule')} for a hospital robot. It took the medicine safely on every trip, even upstairs.`
       : `Hospital robot: ${safe} ordered if-then rules; a safe delivery upstairs in ${s.secs} s.`; }
   if (m === 4) return j ? `Trained a recycling robot with ${n(s.ex, 'example')}: ${s.first} of ${s.of} right at first, then ${s.last} of ${s.of}. ${s.sr} of ${s.so} right in the street.`

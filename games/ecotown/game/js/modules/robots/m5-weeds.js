@@ -15,12 +15,13 @@ export const FIELDS = [
 ];
 export const NAMES = { lettuce: 'lettuce', carrot: 'carrot', dandelion: 'dandelion', thistle: 'thistle', clover: 'clover', grass: 'couch grass', chickweed: 'chickweed', cowparsley: 'cow parsley' };
 export const SETTINGS = [50, 60, 70, 80, 90];
-export const SURE = { 50: 'Half sure', 60: 'A bit sure', 70: 'Quite sure', 80: 'Very sure', 90: 'Very, very sure' };
+export const SURE = { 50: 'A little sure', 60: 'Fairly sure', 70: 'Quite sure', 80: 'Very sure', 90: 'Extremely sure' }; // rising, and the same words as sureWords
 export const FARMER_TIME = 3; // flags the farmer has time to check in a morning (ages 13–17, second field)
 // How sure, in words (ages 8–12 see words and a bar, never the number)
 export function sureWords(p) {
-  if (p >= 90) return 'is very sure it is a weed'; if (p >= 75) return 'is fairly sure it is a weed'; if (p >= 60) return 'thinks it is a weed';
-  if (p >= 40) return 'is not sure'; if (p >= 20) return 'thinks it is a crop'; return 'is very sure it is a crop';
+  if (p >= 90) return 'is extremely sure it is a weed'; if (p >= 80) return 'is very sure it is a weed'; if (p >= 70) return 'is quite sure it is a weed';
+  if (p >= 60) return 'is fairly sure it is a weed'; if (p >= 50) return 'is a little sure it is a weed'; if (p >= 40) return 'is not sure';
+  if (p >= 20) return 'thinks it is a crop'; return 'is very sure it is a crop';
 }
 export const whyUnsure = { chewed: 'Its leaves are chewed by slugs, so it looks ragged, like a weed.', hidden: 'It is half hidden under leaves, so the camera sees only part of it.', small: 'It is tiny, so the camera sees few leaves.', feathery: 'Its feathery leaves look a lot like cow parsley, a weed.' };
 
@@ -43,15 +44,26 @@ export function best(field, withAsk = false) {
   }
   return out;
 }
+// How good a row's result is: 'lost' (a crop pulled), 'weedy' (no crop lost, but more weeds left than the best setting
+// leaves), 'near' (one weed more than the best, accepted after three tries) or 'best'.
+export function grade(field, r, withAsk = false, tries = 0) {
+  if (r.cropsPulled) return 'lost'; const b = best(field, withAsk).weedsLeft;
+  return r.weedsLeft <= b ? 'best' : r.weedsLeft === b + 1 && tries >= 3 ? 'near' : 'weedy';
+}
+export const passes = (g) => g === 'best' || g === 'near';
 // One true line about a row's result. j: ages 8–12.
-export function resultLine(field, r, junior, withAsk = false) {
-  const crop = field.crop[junior ? 'j' : 's']; const b = best(field, withAsk);
-  const lost = r.cropsPulled ? (junior ? `It pulled up ${r.cropsPulled === 1 ? `a ${crop}` : `${r.cropsPulled} ${crop}s`}. ${r.cropsPulled === 1 ? 'That one is' : 'Those are'} lost for good.` : `${r.cropsPulled} ${crop} plant${r.cropsPulled === 1 ? '' : 's'} pulled: a lost crop.`) : '';
-  const left = r.weedsLeft ? (junior ? `${r.weedsLeft} weed${r.weedsLeft === 1 ? ' was' : 's were'} left for next week.` : `${r.weedsLeft} of ${r.weeds} weeds left for next week.`) : (junior ? 'Every weed is gone.' : `All ${r.weeds} weeds removed.`);
+export function resultLine(field, r, junior, withAsk = false, tries = 0) {
+  const crop = field.crop[junior ? 'j' : 's']; const b = best(field, withAsk); const g = grade(field, r, withAsk, tries);
   const farmer = withAsk && r.flags ? ` ${r.flags} flagged; the farmer checked ${Math.min(r.flags, FARMER_TIME)}${r.unchecked ? ` and had no time for ${r.unchecked}` : ''}.` : '';
-  if (r.cropsPulled) return `${lost} ${left}${farmer} ${junior ? 'It needs to be more sure before it pulls.' : 'Raise the pull setting.'}`;
-  const better = b && r.weedsLeft > b.weedsLeft ? (junior ? ' No crop was lost. A different setting could leave fewer weeds.' : ` No crop lost. A different setting can leave ${b.weedsLeft}.`) : (junior ? ' And no crop was lost. That is the best this row allows.' : ' No crop lost: the best this row allows.');
-  return `${left}${farmer}${better}`;
+  if (g === 'lost') {
+    const lost = junior ? `It pulled up ${r.cropsPulled === 1 ? `a ${crop}` : `${r.cropsPulled} ${crop}s`}. ${r.cropsPulled === 1 ? 'That one is' : 'Those are'} lost for good.` : `${r.cropsPulled} ${crop} plant${r.cropsPulled === 1 ? '' : 's'} pulled: a lost crop.`;
+    return `${lost}${farmer} ${junior ? 'It needs to be more sure before it pulls.' : 'Raise the pull setting.'}`;
+  }
+  if (g === 'weedy') return junior ? `No ${crop} lost, but ${r.weedsLeft} weed${r.weedsLeft === 1 ? ' stays' : 's stay'} and steal${r.weedsLeft === 1 ? 's' : ''} water and light for a week.${farmer} Can it pull more weeds and still keep every ${crop}?`
+    : `No crop lost, but ${r.weedsLeft} of ${r.weeds} weeds remain for a week, taking water and light.${farmer} Lower the setting as far as it stays safe.`;
+  const left = r.weedsLeft ? (junior ? `${r.weedsLeft} weed${r.weedsLeft === 1 ? ' was' : 's were'} left for next week.` : `${r.weedsLeft} of ${r.weeds} weeds left for next week.`) : (junior ? 'Every weed is gone.' : `All ${r.weeds} weeds removed.`);
+  if (g === 'near') return junior ? `${left}${farmer} No ${crop} lost. That is close: one setting leaves ${b.weedsLeft === 0 ? 'no weeds' : `${b.weedsLeft}`}. You can carry on, or try once more.` : `${left}${farmer} No crop lost; one weed more than the best setting (${b.weedsLeft}). Good enough to carry on.`;
+  return junior ? `${left}${farmer} And no ${crop} was lost. That is the best this row allows.` : `${left}${farmer} No crop lost: the best this row allows.`;
 }
 export const okRow = (r) => r.cropsPulled === 0;
 // Ages 13–17: the table of what happened. Rows: weed / crop. Columns: pulled / flagged / left.

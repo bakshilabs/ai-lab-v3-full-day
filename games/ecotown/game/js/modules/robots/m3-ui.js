@@ -1,5 +1,5 @@
 // Mission 3 page: rules for the hospital delivery robot, tested on three trips that get harder.
-import { CONDS, ACTS, ROUNDS, trip, tripLine, passed, orderNote, cleanRules } from './m3-rules.js';
+import { CONDS, ACTS, ROUNDS, trip, tripLine, passed, orderNote, cleanRules, unusedLine } from './m3-rules.js';
 import { esc } from './shell.js';
 import { stageOf } from './missions.js';
 
@@ -20,7 +20,7 @@ export function planSvg(round, robotAt = null, done = []) {
     <polyline points="${pts}" fill="none" stroke="#c9d6e6" stroke-width="34" stroke-linejoin="round" stroke-linecap="round"/><polyline points="${pts}" fill="none" stroke="#7f95b5" stroke-width="3" stroke-dasharray="8 8" stroke-linejoin="round"/>
     ${upstairs ? '<rect x="410" y="110" width="44" height="70" rx="6" fill="#b9c2cb" stroke="#3b2a1e" stroke-width="2.5"/><text x="432" y="150" font-size="13" font-weight="800" text-anchor="middle" fill="#3b2a1e">LIFT</text>' : ''}
     <g transform="translate(${start[0] * SX} ${start[1] * SY})"><rect x="-40" y="-56" width="80" height="34" rx="8" fill="#fff" stroke="#3a6fc9" stroke-width="3"/><text y="-34" font-size="13" font-weight="800" text-anchor="middle" fill="#2b3a55">Pharmacy</text></g>
-    <g transform="translate(${end[0] * SX} ${end[1] * SY})"><rect x="-46" y="${end[1] < 50 ? 20 : -56}" width="92" height="34" rx="8" fill="#fff" stroke="#1f7a44" stroke-width="3"/><text y="${end[1] < 50 ? 42 : -34}" font-size="13" font-weight="800" text-anchor="middle" fill="#17603a">Ward</text></g>
+    <g transform="translate(${end[0] * SX} ${end[1] * SY})"><rect x="-46" y="${end[1] < 50 ? 24 : -66}" width="92" height="34" rx="8" fill="#fff" stroke="#1f7a44" stroke-width="3"/><text y="${end[1] < 50 ? 46 : -44}" font-size="13" font-weight="800" text-anchor="middle" fill="#17603a">Ward</text></g>
     ${ev}${bot}</svg>`;
 }
 
@@ -32,9 +32,9 @@ export async function playM3(ctx, sh, cur, keep) {
     const round = ROUNDS[part]; let rules = cleanRules(d.rules, round.conds); let result = null; let shownAt = round.route[0]; let doneEv = []; let running = false; let passedOnce = false;
     sh.setup({ mission: { n: 3, icon: '🏥' }, steps, stage: `m3-r${part + 1}` }); sh.step(part); ctx.report({ stage: stageOf(3, steps[part].toLowerCase()) });
     const intro = [
-      j ? 'The robot takes medicine from the pharmacy to the ward. Nurses walk the corridor. Choose what it does when a person is near, then press Test run.' : 'Deliver from the pharmacy to Ward 1. Set the rule for people nearby, then test run.',
-      j ? 'Now the ward is upstairs, and a trolley is in the way. Set the new rules, then test.' : 'Ward 3 is upstairs, and the corridor has a trolley. Set rules for both, then test.',
-      j ? 'A new rule: someone steps right in front. That person is also near, so two rules fit. The robot uses the first rule in its list. Use the arrows to put the safest rule first.' : 'New rule: someone steps into its path. That also matches “a person is near”. The robot applies the first match, so order the rules.',
+      j ? 'The robot takes medicine from the pharmacy to the ward. Nurses walk the corridor, and trolleys get left in the way. Choose what it does in each case, then press Test run.' : 'Deliver from the pharmacy to Ward 1. Set a rule for people nearby and one for a blocked corridor, then test run.',
+      j ? 'Now the ward is upstairs, and the medicine is needed soon. Stopping for every nurse takes too long. Set the rules, then test.' : `Ward 3 is upstairs, and the medicine is due within ${round.due} s. Each rule costs time. Set them, then test.`,
+      j ? 'A new rule: someone steps right in front. That person is also near, so two rules fit. The robot uses the first rule in its list. Every rule must be safe, and the medicine must still arrive in time.' : `New rule: someone steps into its path. That also matches “a person is near”, and the robot applies the first match. Every rule must be safe; due within ${round.due} s.`,
     ][part];
     sh.say(intro);
     const save = () => { d.rules = rules.map((r) => ({ ...r })); keep(part, d); };
@@ -42,9 +42,9 @@ export async function playM3(ctx, sh, cur, keep) {
       function draw(focus = null) {
         const allSet = rules.every((r) => r.act);
         sh.main.innerHTML = `<div class="rb-m3"><div class="rb-left3"><div class="rb-panel rb-planbox">${planSvg(round, shownAt, doneEv)}
-          ${doneEv.length ? `<ol class="rb-log">${doneEv.map((e) => { const note = orderNote(e, rules, j); return `<li class="${e.out}"><span aria-hidden="true">${CONDS[e.kind].icon}</span><div><b>${esc(NOTE[e.kind])}:</b> ${esc(e.text)}${note ? `<small>${esc(note)}</small>` : ''}</div><em class="rb-mk ${e.out}">${MARK[e.out]}</em></li>`; }).join('')}</ol>` : ''}
-          ${result ? `<p class="rb-verdict ${passed(result) ? (result.events.some((e) => e.out === 'late') ? 'ask' : 'ok') : 'miss'}" aria-live="polite">${esc(tripLine(result, round, j))}</p>` : ''}</div></div>
-          <div class="rb-panel rb-rulebox"><h3>${j ? 'The robot’s rules' : 'Rules (checked from the top)'}<small>${j ? 'If this happens, then do that.' : 'First match wins.'}</small></h3>
+          ${doneEv.length ? `<ol class="rb-log">${doneEv.map((e) => { const note = orderNote(e, rules, j); return `<li class="${e.out}"><span aria-hidden="true">${CONDS[e.kind].icon}</span><div><b>${esc(NOTE[e.kind])}:</b> ${esc(e.text)}${note ? `<small>${esc(note)}</small>` : ''}</div><em class="rb-mk ${e.out}">${MARK[e.out]}</em></li>`; }).join('')}${result ? result.bad.map((i) => `<li class="unsafe"><span aria-hidden="true">⚠️</span><div><b>${j ? 'A rule to fix' : 'Untriggered rule'}:</b> ${esc(unusedLine(rules, i, j))}</div><em class="rb-mk unsafe">✗</em></li>`).join('') : ''}</ol>` : ''}
+          ${result ? `<p class="rb-verdict ${passed(result) ? (result.events.some((e) => e.out === 'late') ? 'ask' : 'ok') : result.arrived && result.safe && !result.bad.length ? 'ask' : 'miss'}" aria-live="polite">${esc(tripLine(result, round, j))}</p>` : ''}</div></div>
+          <div class="rb-panel rb-rulebox"><h3>${j ? 'The robot’s rules' : 'Rules (checked from the top)'}<small>${j ? 'If this happens, then do that.' : 'First match wins.'}${round.due && !j ? ` Due within ${round.due} s.` : ''}</small></h3>
           <ol class="rb-rlist">${rules.map((r, i) => `<li><div class="rb-rif"><span class="rb-rnum">${i + 1}</span><span aria-hidden="true">${CONDS[r.cond].icon}</span><b>If ${esc(CONDS[r.cond][j ? 'j' : 's'].replace(/^./, (c) => c.toLowerCase()))}</b>
               ${part === 2 ? `<span class="rb-order"><button type="button" class="rb-mv" data-mv="${i}" data-dir="-1" aria-label="Move this rule up" ${i === 0 || running ? 'disabled' : ''}>▲</button><button type="button" class="rb-mv" data-mv="${i}" data-dir="1" aria-label="Move this rule down" ${i === rules.length - 1 || running ? 'disabled' : ''}>▼</button></span>` : ''}</div>
             <div class="rb-ract" role="radiogroup" aria-label="Then"><small>then</small>${CONDS[r.cond].acts.map((a) => `<button type="button" role="radio" class="rb-act${r.act === a ? ' on' : ''}" data-r="${i}" data-a="${a}" aria-checked="${r.act === a}" ${running ? 'disabled' : ''}>${esc(ACTS[a][j ? 'j' : 's'])}</button>`).join('')}</div></li>`).join('')}</ol>
@@ -64,7 +64,7 @@ export async function playM3(ctx, sh, cur, keep) {
         if (running || !fresh() || !rules.every((r) => r.act)) return; const t = trip(round, rules, j); d.tests++; running = true; doneEv = []; result = null; foot();
         let i = 0;
         const end = () => { running = false; result = t; if (!t.arrived) { /* stays where it stopped */ } else shownAt = round.route[round.route.length - 1];
-          if (passed(t)) { passedOnce = true; d.secs = t.seconds; } save(); draw(); foot(); ctx.say(tripLine(t, round, j)); sh.focusSoon(passedOnce ? '[data-next]' : '.rb-act'); };
+          if (passed(t)) { passedOnce = true; d.secs = t.seconds; } save(); draw(); foot(); ctx.say(tripLine(t, round, j)); sh.main.querySelector('.rb-planbox .rb-verdict')?.scrollIntoView({ block: 'nearest' }); sh.focusSoon(passedOnce ? '[data-next]' : '.rb-act'); };
         const next = () => { if (ctx.signal.aborted) return; if (i >= t.events.length) { end(); return; } const e = t.events[i]; shownAt = [e.x, e.y]; doneEv = t.events.slice(0, i + 1); i++; draw(); ctx.say(e.text); sh.later(next, 1500); };
         if (sh.still) { doneEv = t.events; if (!t.arrived) shownAt = [t.events[t.events.length - 1].x, t.events[t.events.length - 1].y]; end(); return; }
         next();
