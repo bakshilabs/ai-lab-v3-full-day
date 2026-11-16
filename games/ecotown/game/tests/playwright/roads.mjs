@@ -97,7 +97,8 @@ const mod = (f) => p.evaluate((src) => import(src), `./js/modules/roads/${f}`).c
 // ---- mission 1: sensor views
 const t0m = Date.now();
 await openMission(1);
-const R1 = await p.evaluate(async () => { const s = await import('./js/modules/roads/sensors.js'); return s.ROUNDS.map((r) => s.answer(r)); });
+const R1 = await p.evaluate(async (jr) => { const s = await import('./js/modules/roads/sensors.js'); return s.roundsFor(jr).map((r) => s.answer(r)); }, junior);
+must('m1-roundsForAge', R1.length === (junior ? 5 : 7), R1.length);
 for (let i = 0; i < R1.length; i++) {
   await p.waitForSelector(M + '[data-view="radar"]', { timeout: LONG });
   await p.click(M + '[data-view="radar"]'); if (i === 1) await shot('m1-radar');
@@ -120,11 +121,11 @@ await primary(); await closeMission(1); checks.m1secs = Math.round((Date.now() -
 
 // ---- mission 2: labelling
 await openMission(2);
-const L2 = await p.evaluate(async () => { const l = await import('./js/modules/roads/labels.js'); return [...l.EASY, ...l.HARD].map((pic) => pic.things.map((t) => [t.id, l.CASES[t.case].label])); });
+const L2 = await p.evaluate(async (jr) => { const l = await import('./js/modules/roads/labels.js'); return [...l.EASY, ...l.hardFor(jr)].map((pic) => pic.things.map((t) => [t.id, l.CASES[t.case].label])); }, junior);
 const tapThing = (id) => p.evaluate(([m, i]) => { const g = document.querySelector(`${m}[data-thing="${i}"]`); const r = g.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, [M, id]);
 for (let k = 0; k < L2.length; k++) {
   if (k === 2) { await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary(); }   // train and test after the easy pictures
-  if (k === 2) { await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test1 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M); must('m2-firstTestMissesHardOnes', /4 of 9|4\/9/.test(checks.m2test1), checks.m2test1); await shot('m2-test1'); await layout('m2-test1'); await primary(); }
+  if (k === 2) { await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test1 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M); must('m2-firstTestMissesHardOnes', (junior ? /4 of 9/ : /4\/10/).test(checks.m2test1), checks.m2test1); await shot('m2-test1'); await layout('m2-test1'); await primary(); }
   await p.waitForSelector(M + '[data-thing]', { timeout: LONG });
   if (k === 0) { await p.click(tray('[data-act="done"]')); checks.m2miss = await hint(); must('m2-missNoLocationFirst', /Look again/.test(checks.m2miss) && !/left|right|van/.test(checks.m2miss), checks.m2miss); }
   for (const [id, label] of L2[k]) {
@@ -136,7 +137,7 @@ for (let k = 0; k < L2.length; k++) {
 }
 await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary();
 await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test2 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M);
-must('m2-retestBetter', /9 of 9|9\/9/.test(checks.m2test2), checks.m2test2); await shot('m2-test2');
+must('m2-retestFreshPictures', (junior ? /New test pictures: 9 of 11/ : /Fresh test pictures: 10\/12/).test(checks.m2test2), checks.m2test2); await shot('m2-test2');
 await primary(); await closeMission(2);
 
 // leave mid-way and come back: finished missions are kept, and the map opens again
@@ -148,7 +149,7 @@ checks.hubResume = await hubState(); must('resumeAtMap', checks.hubResume.join()
 
 // ---- mission 3: rules of the road
 await openMission(3);
-const S3 = await p.evaluate(async () => { const r = await import('./js/modules/roads/rules.js'); return r.SCENES.map((s) => ({ id: s.id, safe: String(s.opts.find((o) => s.safe(o.v)).v), unsafe: String(s.opts.find((o) => !s.safe(o.v)).v) })); });
+const S3 = await p.evaluate(async (jr) => { const r = await import('./js/modules/roads/rules.js'); return r.scenesFor(jr).map((s) => ({ id: s.id, safe: String(s.opts.find((o) => s.safe(o.v)).v), unsafe: String(s.opts.find((o) => !s.safe(o.v)).v) })); }, junior);
 for (let i = 0; i < S3.length; i++) {
   await p.waitForSelector(tray('[data-opt]'), { timeout: LONG });
   if (i === 1) {                                                                   // 30 mph past the school: a near miss and a hint
@@ -162,7 +163,7 @@ for (let i = 0; i < S3.length; i++) {
   if (motion) { await p.click(tray('[data-act="skip"]'), { timeout: 3000 }).catch(() => {}); }
   await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); if (i === 2) await shot('m3-cyclist-safe'); await primary();
 }
-await p.waitForSelector(M + '.rd-rules', { timeout: LONG }); must('m3-rulesListed', (await p.$$(M + '.rd-rules li')).length === 6); await shot('m3-rules');
+await p.waitForSelector(M + '.rd-rules', { timeout: LONG }); must('m3-rulesListed', (await p.$$(M + '.rd-rules li')).length === S3.length); await shot('m3-rules');
 await primary(); await closeMission(3);
 
 // ---- mission 4: testing in simulation, one change at a time
