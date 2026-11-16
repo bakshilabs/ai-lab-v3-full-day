@@ -15,9 +15,9 @@ const rate = (t, secs) => Math.round(words(t) / secs * 10) / 10;
 
 // ---- part 1: captions. hear: what happens in the sound. secs: how long the caption is on screen.
 const CAPTIONS = [
-  { art: 'otters', hear: 'Florence, who is off screen, says: “Look, the otters are back!”', secs: 3, answer: 'a',
+  { art: 'otters', hear: 'I say this from off screen: “Look, the otters are back!”', secs: 3, answer: 'a',
     opts: { a: 'FLORENCE: Look, the otters are back!', b: 'Look, the otters are back!', c: 'Florence the robot, who is standing by the river where nobody can see her, says that she can see the otters have come back again.' },
-    why: { b: 'Who is speaking? Florence is off screen, so the caption must say it is her.', c: 'Too long to read before it disappears.' },
+    why: { b: 'Who is speaking? I am off screen, so the caption must say it is me.', c: 'Too long to read before it disappears.' },
     ok: 'It says who is speaking, and it is short enough to read.', hint: 'You cannot see who is talking. Which caption helps?' },
   { art: 'splash', hear: 'An otter dives in with a big splash.', secs: 2, answer: 'a',
     opts: { a: '[Big splash]', b: '(no caption)', c: 'SPLASH SPLASH SPLASH SPLASH SPLASH' },
@@ -37,7 +37,7 @@ export function captionItems(junior) {
     art: c.art, hear: c.hear, q: 'Which caption is best?', say: `${i === 0 ? 'Captions show the sound as words, for people who cannot hear it. ' : ''}${c.hear} Which caption is best?`,
     opts: ['a', 'b', 'c'].map((k) => ({ id: k, label: c.opts[k], why: (c.why[k] || '') + (!junior && k === 'c' && words(c.opts[k]) > 8 ? ` ${words(c.opts[k])} words in ${c.secs} seconds is ${rate(c.opts[k], c.secs)} words a second: most people read about ${READ_WPS}.` : '') })).sort(byOrder(i)),
     answer: c.answer, ok: c.ok, hint: c.hint,
-    more: junior ? '' : `On screen for ${c.secs} seconds: ${words(c.opts[c.answer])} word${words(c.opts[c.answer]) === 1 ? '' : 's'}, about ${rate(c.opts[c.answer], c.secs)} a second. Most people can read about ${READ_WPS} words a second.`,
+    more: junior ? '' : `On screen for ${c.secs} seconds: ${words(c.opts[c.answer])} word${words(c.opts[c.answer]) === 1 ? '' : 's'}, about ${rate(c.opts[c.answer], c.secs)} a second. Most adults read about ${READ_WPS} words a second; programmes for young children often go slower.`,
     caption: c.opts[c.answer],
   }));
 }
@@ -88,7 +88,7 @@ export const BUILDS = [
   { id: 'tea', art: 'homes-evening', secs: 2, hear: 'Mum, who is off screen, calls: “Tea is ready!” Then a door bangs.', speaker: 'MUM:',
     tiles: [{ t: 'MUM:', kind: 'speaker', good: true }, { t: 'FLORENCE:', kind: 'speaker' }, { t: 'Tea is ready!', kind: 'words', good: true },
       { t: 'Tea is ready! Come and get it while it is nice and hot, everyone!', kind: 'words', long: true }, { t: '[Door bangs]', kind: 'sound', good: true }, { t: 'BANG!', kind: 'noise' }, { t: '[Music]', kind: 'sound', wrong: 'There is no music here.' }] },
-  { id: 'whisper', senior: true, art: 'splash', secs: 2, hear: 'Florence, off screen, whispers: “Look, an otter!” as the otter dives in with a splash.', speaker: 'FLORENCE:',
+  { id: 'whisper', senior: true, art: 'splash', secs: 2, hear: 'I whisper from off screen: “Look, an otter!” Then it dives in with a splash.', speaker: 'FLORENCE:',
     tiles: [{ t: 'FLORENCE:', kind: 'speaker', good: true }, { t: 'MUM:', kind: 'speaker' }, { t: '(whispering)', kind: 'manner', good: true }, { t: 'Look, an otter!', kind: 'words', good: true },
       { t: 'Look over there, I think I can just see an otter swimming!', kind: 'words', long: true }, { t: '[Splash]', kind: 'sound', good: true }, { t: 'SPLASH!', kind: 'noise' }] },
 ];

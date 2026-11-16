@@ -54,7 +54,7 @@ export const STORY_ART = {
   // medium shots: people from the waist up (the frame cuts them at the waist), as mission 1 teaches
   'b-family': () => frame('day', at(54, 122, 1, pawn(0, 5, '#ff8a5c', '#c68a5e')) + at(110, 122, 1, pawn(0, 5, '#2f6fd8', '#f1c9a5')) + ball(82, 60, 7), { horizon: 62 }),
   'b-river': () => frame('day', at(80, 72, 2, water(80, 14)) + ball(86, 66, 5) + '<path d="M70 70 q4 -3 8 0 M92 72 q4 -3 8 0" stroke="#d7f1ff" stroke-width="1.4" fill="none"/>', { horizon: 50 }),
-  'b-net': () => frame('day', florence(70, 124, 2.7, net) + '<path d="M0 80 h160 v10 h-160 Z" fill="#5bbcf0"/>', { horizon: 64 }),
+  'b-net': () => frame('day', florence(68, 106, 1.9, net) + '<path d="M0 80 h160 v10 h-160 Z" fill="#5bbcf0"/>', { horizon: 64 }),
   'b-smile': () => frame('day', face(80, 46, 2.1, '#c68a5e', '#ff8a5c') + ball(108, 78, 8), { horizon: 70 }),
   'm-dawn': () => frame('dawn', island(false), { ground: false }),
   'm-setup': () => frame('day', at(116, 98, 2.6, stall(0, false)) + at(52, 124, 1, pawn(0, 5, '#5bbd5a', '#8d5a3b'))),
