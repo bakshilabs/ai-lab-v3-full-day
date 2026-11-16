@@ -101,3 +101,6 @@ export function storyboardSvg({ title, cut, set }) {
     + `<rect width="${W}" height="${H}" fill="#fffaf0"/><text x="${pad}" y="22" font-size="16" font-weight="800" fill="${INK}" ${font}>${esc(title)}</text>`
     + `<text x="${pad}" y="36" font-size="9.5" fill="#5e4936" ${font}>${esc(`${cutName(cut.n)} · ${cutFacts(cut)} · ${m.tune}`)}</text>${cells}</svg>`;
 }
+
+// The small drawings, for the missions own pictures (art.js).
+export { g as at, house, tree, pine, pawn, water, otter, ART, LIGHT, INK, esc, arrow, corners };
