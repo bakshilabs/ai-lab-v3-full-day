@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { PARTS, SCENES, EVERYWHERE, progress, LABEL } from '../js/series.js';
 import { ON_BOARD } from '../js/modules/contract.js';
 
-test('four parts in order: the town, then the three modules', () => {
-  assert.deepEqual(PARTS.map((p) => p.id), ['town', 'drone', 'robots', 'roads']); assert.ok(PARTS.slice(1).every((p) => ON_BOARD.includes(p.id)), 'every part on the start page is a built module'); assert.deepEqual(PARTS.map((p) => p.n), [1, 2, 3, 4]);
+test('six parts in order: the town, then the five modules', () => {
+  assert.deepEqual(PARTS.map((p) => p.id), ['town', 'drone', 'robots', 'roads', 'film', 'power']); assert.ok(PARTS.slice(1).every((p) => ON_BOARD.includes(p.id)), 'every part on the start page is a built module'); assert.deepEqual(PARTS.map((p) => p.n), [1, 2, 3, 4, 5, 6]);
   for (const p of PARTS) { assert.equal(p.how.length, 3, p.id); for (const l of [...p.how, p.blurb]) assert.ok(l.length <= 160, `${p.id}: short lines`); assert.match(p.query, p.id === 'town' ? /^\?part=town$/ : new RegExp(`^\\?module=${p.id}$`)); }
   assert.equal(EVERYWHERE.length, 3);
 });
@@ -13,7 +13,7 @@ test('four parts in order: the town, then the three modules', () => {
 test('the welcome film names every part once, in order, in short spoken lines', () => {
   assert.deepEqual(SCENES.filter((s) => s.part).map((s) => s.part), PARTS.map((p) => p.id));
   for (const s of SCENES) { assert.ok(s.title && s.say && s.icon && s.view, s.id); assert.ok(s.say.length <= 150, `${s.id}: a line a child can follow`); assert.ok(s.say.split(/[.?!]/).filter((x) => x.trim()).every((x) => x.trim().split(/\s+/).length <= 20), `${s.id}: short sentences`); }
-  assert.ok(SCENES.length >= 6 && SCENES.length <= 8);
+  assert.ok(SCENES.length >= 6 && SCENES.length <= 9);
   assert.doesNotMatch(JSON.stringify([SCENES, PARTS]), /you will learn|improve|better at/i, 'says what you will do, not what you will learn');
 });
 
@@ -25,8 +25,8 @@ test('the start page’s ticks follow what has been done', () => {
   assert.equal(building.town, 'started'); assert.equal(building.townNote, '1 of 6 missions done'); assert.equal(building.next, 'town');
   const morning = progress({ band: 'junior', cells: [['1,1', {}]], sessionDone: true, modules: { drone: { state: {} } } }, true);
   assert.equal(morning.town, 'done'); assert.equal(morning.drone, 'started'); assert.equal(morning.next, 'drone');
-  const all = progress({ band: 'junior', cells: [], completeShown: true, modules: { drone: { done: true }, robots: { done: true }, roads: { done: true } } }, true);
-  assert.equal(all.next, null); assert.deepEqual([all.town, all.drone, all.robots, all.roads], ['done', 'done', 'done', 'done']);
+  const all = progress({ band: 'junior', cells: [], completeShown: true, modules: { drone: { done: true }, robots: { done: true }, roads: { done: true }, film: { done: true }, power: { done: true } } }, true);
+  assert.equal(all.next, null); assert.deepEqual([all.town, all.drone, all.robots, all.roads, all.film, all.power], ['done', 'done', 'done', 'done', 'done', 'done']);
   const skipped = progress({ band: 'junior', cells: [], sessionDone: true, modules: { robots: { done: true } } }, true);
   assert.equal(skipped.next, 'drone', 'the first part not done yet');
   assert.deepEqual(Object.keys(LABEL), ['done', 'started', 'new']);
