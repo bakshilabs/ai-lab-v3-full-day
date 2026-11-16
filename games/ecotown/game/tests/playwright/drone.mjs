@@ -111,7 +111,7 @@ async function closeMission(id, last) {
 
 const M = {
   async ground() {
-    const data = await p.evaluate(async () => { const m = await import('./js/modules/drone/m1-ground.js'); return { days: m.DAYS, plans: m.PLANS }; });
+    const data = await p.evaluate(async (band) => { const m = await import('./js/modules/drone/m1-ground.js'); return { days: m.DAYS, plans: m.plansFor(band === 'junior') }; }, band);
     for (const [di, day] of data.days.entries()) {
       await p.waitForSelector('#module [data-dk-panel="ground"] .dk-checks', { timeout: LONG });
       for (const c of ['battery', 'props', 'weather', 'area']) {
@@ -119,16 +119,19 @@ const M = {
         const bad = day.state[c] !== 'ok';
         if (di === 1 && c === 'props') { await click('#module [data-mark="ok"]'); checks.groundHint = await p.textContent('#module [data-dk-reply]'); await shot('ground-look-again'); }
         await click(`#module [data-mark="${bad ? 'problem' : 'ok'}"]`);
+        if (c === 'area' && di === 0) checks.groundFocusAfterFourth = await p.evaluate(() => Object.keys(document.activeElement?.dataset || {}).join(','));
       }
       for (const f of await p.$$eval('#module [data-fix]', (x) => x.map((e) => e.dataset.fix))) await click(`#module [data-fix="${f}"]`);
       if (di === 0) { await shot('ground-checked'); await look('ground checks'); }
       const ans = day.state.weather === 'gale' ? 'stay' : 'fly';
-      if (di === 2) { await click('#module [data-day="fly"]'); checks.groundGale = await p.textContent('#module [data-dk-reply]'); await shot('ground-gale'); }
+      if (di === 2) checks.groundTopLineBefore = await say();
+      if (di === 2) { await click('#module [data-day="fly"]'); checks.groundGale = await p.textContent('#module [data-dk-reply]'); checks.groundTopLine = await say(); await shot('ground-gale'); }
       await click(`#module [data-day="${ans}"]`); await click('#module .dk-side [data-k="next"]');
     }
     for (const [pi, plan] of data.plans.entries()) {
       await p.waitForSelector(`#module .dk-steps li:nth-child(${pi + 1}).now`, { timeout: LONG });
       if (pi === 0) { await shot('ground-map'); await look('ground map'); }
+      if (plan.id === 'airfield') { await shot('ground-airfield'); checks.groundAirfield = true; }
       if (plan.id === 'high') { await click('#module [data-say="fly"]'); checks.groundHighHint = await p.textContent('#module [data-dk-reply]'); await shot('ground-high-side-view'); }
       await click(`#module [data-say="${plan.answer}"]`);
       if (plan.answer === 'change') await click(`#module [data-fixid="${plan.fixes[0].id}"]`);
@@ -149,7 +152,7 @@ const M = {
     while (Date.now() - t0 < LONG) {
       const s = await p.evaluate(() => { const h = document.querySelector('#module [data-dr-hud]'); return { stage: document.querySelector('#module .modroot')?.dataset.drStage, dx: +h?.dataset.dx, dz: +h?.dataset.dz, turn: +h?.dataset.turn }; });
       if (s.stage !== 'hand') break;
-      if (Number.isFinite(s.dx)) { if (reduce) await hold(Math.abs(s.dx) > 0.3 ? [s.dx > 0 ? 'ArrowRight' : 'ArrowLeft'] : Math.abs(s.dz) > 0.3 ? [s.dz > 0 ? 'ArrowDown' : 'ArrowUp'] : []); else await hold(Math.abs(s.turn) > 0.25 ? [s.turn > 0 ? 'ArrowRight' : 'ArrowLeft', ...(Math.abs(s.turn) < 1.2 ? ['ArrowUp'] : [])] : ['ArrowUp']); }
+      if (Number.isFinite(s.dx)) await hold(Math.abs(s.dx) > 0.3 ? [s.dx > 0 ? 'ArrowRight' : 'ArrowLeft'] : Math.abs(s.dz) > 0.3 ? [s.dz > 0 ? 'ArrowDown' : 'ArrowUp'] : []);
       else await hold(['ArrowUp']);
       await p.waitForTimeout(120);
     }
@@ -175,7 +178,9 @@ const M = {
     for (let i = 0; i < 4; i++) await click('#module [data-gap="-1"]');
     await click('#module [data-fly]'); await p.waitForSelector('#module .dk-side [data-k="next"]', { timeout: LONG }); await shot('survey-joined'); await click('#module .dk-side [data-k="next"]');
     await click('#module [data-fly]'); await p.waitForSelector('#module [data-dk-reply]', { timeout: LONG }); checks.surveyBattery = await p.textContent('#module [data-dk-reply]'); await shot('survey-battery');
-    await click('#module [data-dir="ew"]'); await click('#module [data-fly]'); await p.waitForSelector('#module .dk-side [data-k="next"]', { timeout: LONG }); await shot('survey-farm-joined'); await click('#module .dk-side [data-k="next"]');
+    await click('#module [data-dir="ew"]');
+    if (band === 'senior') { await click('#module [data-fly]'); await p.waitForSelector('#module [data-dk-reply]', { timeout: LONG }); checks.surveyFront = await p.textContent('#module [data-dk-reply]'); await click('#module [data-along="-1"]'); }
+    await click('#module [data-fly]'); await p.waitForSelector('#module .dk-side [data-k="next"]', { timeout: LONG }); await shot('survey-farm-joined'); await click('#module .dk-side [data-k="next"]');
     await p.waitForSelector('#module .dk-farm svg'); await shot('survey-map'); await look('survey map');
     await p.click('#module .dk-farm rect[data-x="12"][data-z="7"]'); checks.surveyMiss = await p.textContent('#module [data-dk-reply]');
     await p.click('#module .dk-farm rect[data-x="2"][data-z="2"]');
@@ -199,22 +204,24 @@ const M = {
     await p.waitForSelector('#module [data-sensor]', { timeout: LONG }); await shot('rescue-start'); await look('rescue start');
     await click('#module [data-sensor="camera"]'); checks.rescueCamera = await p.textContent('#module [data-dk-reply]'); await shot('rescue-wrong-camera');
     await click('#module [data-sensor="heat"]'); await click('#module .dk-side [data-k="next"]');
-    await click('#module [data-pattern="square"]');
-    const kinds = { deer: 'animal', sheep: 'animal', walker: 'person' };
-    for (;;) {
-      await p.waitForSelector('#module [data-kind], #module [data-step]', { timeout: LONG });
-      if (await p.$('#module [data-step]')) break;
-      const id = await p.evaluate(async () => { const m = await import('./js/modules/drone/m6-rescue.js'); const svg = document.querySelector('#module .dk-side svg g')?.innerHTML || ''; return m.SPOTS.find((s) => svg.includes(s.id === 'walker' ? 'circle' : s.id === 'deer' ? 'ellipse cx="0"' : 'ellipse cx="-9"'))?.id; });
-      await shot(`rescue-warm-${id}`); await click(`#module [data-kind="${kinds[id]}"]`); await click('#module .dk-side [data-k="go"]');
+    const scenes = band === 'senior' ? 2 : 1;
+    for (let si = 0; si < scenes; si++) {
+      await click(`#module [data-pattern="${si ? 'lines' : 'square'}"]`);
+      for (;;) {
+        await p.waitForSelector('#module [data-kind], #module .dk-times', { timeout: LONG });
+        if (await p.$('#module .dk-times')) break;
+        const kind = await p.evaluate(() => { const g = document.querySelector('#module .dk-side svg g')?.innerHTML || ''; return g.includes('circle') ? 'person' : 'animal'; });
+        await shot(`rescue-${si}-warm-${kind}`); await click(`#module [data-kind="${kind}"]`); await click('#module .dk-side [data-k="go"]');
+      }
+      checks[`rescueTimes${si}`] = await p.textContent('#module .dk-times'); await shot(`rescue-${si}-times`); await click('#module .dk-side [data-k="go"]');
+      await p.waitForSelector('#module [data-step]', { timeout: LONG }); await shot(`rescue-${si}-guide`); await look('rescue guide');
+      if (si === 0) { await click('#module [data-step="s"]'); checks.rescueRiver = await p.evaluate(() => document.querySelector('#module [data-dk-reply]')?.textContent || ''); }
+      const way = await p.evaluate(async (si) => { const m = await import('./js/modules/drone/m6-rescue.js'); const sc = m.SCENES[si]; const w = m.walkerOf(sc); const prev = new Map(); const q = [sc.team]; prev.set(`${sc.team.x},${sc.team.z}`, null);
+        for (let i = 0; i < q.length; i++) { const c = q[i]; for (const [d, [dx, dz]] of Object.entries(m.STEPS)) { const x = c.x + dx, z = c.z + dz; const k = `${x},${z}`; if (!m.passable(x, z, sc) || prev.has(k)) continue; prev.set(k, [`${c.x},${c.z}`, d]); q.push({ x, z }); } }
+        const out = []; let k = `${w.x},${w.z}`; while (prev.get(k)) { const [from, d] = prev.get(k); out.unshift(d); k = from; } return out; }, si);
+      for (const d of way) await click(`#module [data-step="${d}"]`);
+      await shot(`rescue-${si}-reached`); await click('#module [data-k="done"]');
     }
-    await shot('rescue-guide'); await look('rescue guide');
-    await click('#module [data-step="s"]'); checks.rescueRiver = await p.evaluate(() => document.querySelector('#module [data-dk-reply]')?.textContent || '');
-    const way = await p.evaluate(async () => { const m = await import('./js/modules/drone/m6-rescue.js'); const w = m.SPOTS.find((s) => s.id === 'walker'); const prev = new Map(); const q = [m.TEAM]; prev.set(`${m.TEAM.x},${m.TEAM.z}`, null);
-      for (let i = 0; i < q.length; i++) { const c = q[i]; for (const [d, [dx, dz]] of Object.entries(m.STEPS)) { const x = c.x + dx, z = c.z + dz; const k = `${x},${z}`; if (!m.passable(x, z) || prev.has(k)) continue; prev.set(k, [`${c.x},${c.z}`, d]); q.push({ x, z }); } }
-      const out = []; let k = `${w.x},${w.z}`; while (prev.get(k)) { const [from, d] = prev.get(k); out.unshift(d); k = from; } return out; });
-    const path = await p.evaluate(() => document.querySelectorAll('#module .dk-team polyline').length);
-    void path; for (const d of way) await click(`#module [data-step="${d}"]`);
-    await shot('rescue-reached'); await click('#module [data-k="done"]');
   },
 };
 
@@ -255,9 +262,9 @@ const must = {
   leavingKeepsFinished: checks.sceneAfterLeaving === '' && before.every((x) => checks.keptAfterLeaving.includes(x)),
   everyMissionSaved: play.every((id) => checks[`${id}Saved`]),
   openingsSayTheJob: play.every((id) => (checks[`${id}Opening`] || '').length > 40),
-  ...(play.includes('ground') ? { groundHonest: /Look again/.test(checks.groundHint) && /Look at the checks again/.test(checks.groundGale) } : {}),
+  ...(play.includes('ground') ? { groundHonest: /Look again/.test(checks.groundHint) && /Look at the checks again/.test(checks.groundGale) && checks.groundTopLine === checks.groundGale && checks.groundFocusAfterFourth === 'day' && checks.groundAirfield } : {}),
   ...(play.includes('survey') ? { surveyHonest: /gap/i.test(checks.surveyGaps) && /battery/i.test(checks.surveyBattery) } : {}),
-  ...(play.includes('rescue') ? { rescueHonest: /almost nothing/.test(checks.rescueCamera) && /outside/.test(checks.rescueRiver) } : {}),
+  ...(play.includes('rescue') ? { rescueHonest: /hard to pick out/.test(checks.rescueCamera) && /outside/.test(checks.rescueRiver) && /yours/.test(checks.rescueTimes0) && (band === 'junior' || /yours/.test(checks.rescueTimes1 || '')) } : {}),
   ...(all ? { finished: checks.finished === true && checks.lines?.length === 6 && checks.practised?.length >= 2 && checks.townKind === 'drone-route' && checks.picture > 0 && checks.sceneAfter === 'drone-route' && checks.moduleLayerGone } : {}),
   nothingClipped: problems.length === 0,
   quiet: !errors.length && !outside.length,
