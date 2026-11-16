@@ -13,7 +13,9 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   const root = ctx.root; let panel = null;
   const clear = () => { panel?.remove(); panel = null; };
   const put = (html, stage) => { clear(); ui.setStage(stage); panel = el(html); root.appendChild(panel); measure(); return panel; };
-  const measure = () => { if (!panel || !onPanel) return; const H = root.clientHeight || innerHeight; const top = root.querySelector('.fm-talk')?.getBoundingClientRect().bottom || 70; const mid = (top + Math.max(top, panel.getBoundingClientRect().top)) / 2; onPanel(Math.max(0, Math.min(0.72, (H / 2 - mid) / (H / 2)))); };
+  const measure = () => { if (!panel) return; const H = root.clientHeight || innerHeight; const top = root.querySelector('.fm-talk')?.getBoundingClientRect().bottom || 70;
+    panel.style.maxHeight = `${Math.max(240, H - top - 26)}px`; // never under Florence's line
+    if (!onPanel) return; const mid = (top + Math.max(top, panel.getBoundingClientRect().top)) / 2; onPanel(Math.max(0, Math.min(0.72, (H / 2 - mid) / (H / 2)))); };
   const focus = (sel) => (panel?.querySelector(sel) || panel?.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
   const wait = (handler) => new Promise((res) => { panel.onclick = (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return; handler(b, res); }; });
 
@@ -65,8 +67,10 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   // A wrong tile says why it is not right (and, the first time, a hint); it never gives the answer after one miss.
   // The right tile shows Florence's line and a Next button. Resolves { tries } (wrong taps before the right one).
   // head: { kick, step: [i, n] }. pic: an SVG drawing beside the question. tools: extra buttons [{ id, label, on() }].
-  async function ask({ head = {}, item, pic = '', picLabel = '', tools = [], wide = false, cols = 0, onRight = null }) {
-    let misses = 0; let chosen = null; const off = new Set(); const imgs = item.opts.some((o) => o.pic);
+  // limit: after this many misses the question stops (so tapping every tile cannot win). It resolves { missed: true }
+  // and the caller brings it back later; with reveal, Florence shows the answer and explains it instead.
+  async function ask({ head = {}, item, pic = '', picLabel = '', tools = [], wide = false, cols = 0, onRight = null, limit = Infinity, reveal = false }) {
+    let misses = 0; let chosen = null; let outcome = {}; const off = new Set(); const imgs = item.opts.some((o) => o.pic);
     const isRight = (id) => (item.answers ? item.answers.includes(id) : id === item.answer); // some questions have more than one good answer
     const p = put(`<section class="fm-m fm-ask ${pic ? 'has-pic' : ''} ${wide ? 'wide' : ''}" data-fm-ask aria-label="${esc(item.q)}">
       ${pic ? `<figure class="fm-qpic" ${picLabel ? `role="img" aria-label="${esc(picLabel)}"` : ''}>${pic}</figure>` : ''}
@@ -82,7 +86,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
     const mark = (id, cls, note) => { const b = p.querySelector(`[data-fm-opt="${CSS.escape(id)}"]`); if (!b) return; b.classList.add(cls); const s = b.querySelector('small'); s.hidden = false; s.textContent = note; if (cls === 'off') b.setAttribute('aria-disabled', 'true'); };
     return wait((b, res) => {
       if (b.dataset.fmTool) { tools.find((t) => t.id === b.dataset.fmTool)?.on(); return; }
-      if (b.dataset.fmNext !== undefined) { clear(); res({ tries: misses, id: chosen }); return; }
+      if (b.dataset.fmNext !== undefined) { clear(); res({ tries: misses, id: chosen, ...outcome }); return; }
       const id = b.dataset.fmOpt; if (id === undefined || off.has(id) || !p.querySelector('[data-fm-next]').hidden) return;
       const o = item.opts.find((x) => x.id === id);
       if (isRight(id)) {
@@ -92,11 +96,30 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
         const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
       } else {
         misses++; off.add(id); mark(id, 'off', 'Not this one');
+        const left = item.opts.filter((x) => !off.has(x.id)).length;
+        if (misses >= limit && left > 1) {
+          for (const x of p.querySelectorAll('[data-fm-opt]')) x.disabled = true;
+          if (reveal) { // the second time round: show the answer, and why
+            const r = item.opts.find((x) => isRight(x.id)); mark(r.id, 'right', 'This one'); chosen = r.id; outcome = { revealed: true };
+            ui.talk(`${o?.why || 'Not this one.'} The answer is “${r.label}”. ${item.ok}`);
+          } else { outcome = { missed: true }; ui.talk(`${o?.why || 'Not this one.'} Let’s leave this one for now. It comes back at the end, so look out for it.`); }
+          const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
+          return;
+        }
         ui.talk(`${o?.why || 'Not this one.'}${misses === 1 && item.hint ? ' ' + item.hint : ' Try another.'}`);
         p.querySelector('[data-fm-opt]:not(.off)')?.focus({ preventScroll: true });
       }
     });
   }
+
+  // ---- a list of questions. run(item, i, again) asks one (passing limit and reveal on to ask); a question missed
+  // twice is set aside and asked again at the end, once, with the answer shown if it is missed twice again.
+  async function askList(items, run) {
+    const queue = items.map((it, i) => ({ it, i, again: false })); const out = [];
+    while (queue.length) { const q = queue.shift(); const r = await run(q.it, q.i, q.again); if (r.missed && !q.again) { queue.push({ ...q, again: true }); continue; } out.push({ i: q.i, again: q.again, ...r }); }
+    return out;
+  }
+  const LIMIT = 2;
 
   // ---- a note: a heading, a few lines, an optional drawing and one button
   async function note({ kick = '', title, lines = [], pic = '', btn = 'Next ➜', say = null, stage = 'note' }) {
@@ -114,7 +137,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   function custom(html, stage) { return put(html, stage); }
 
   addEventListener('resize', measure);
-  return { map, intro, outro, ask, note, custom, clear, measure, off() { clear(); removeEventListener('resize', measure); } };
+  return { map, intro, outro, ask, askList, LIMIT, note, custom, clear, measure, off() { clear(); removeEventListener('resize', measure); } };
 }
 
 const M = '#module[data-module="film"]';
@@ -211,5 +234,12 @@ ${M} .fm-desc[hidden] { display: none; }
 }
 @media (max-width: 520px) { ${M} .fm-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); } ${M} .fm-clips { grid-template-columns: repeat(3, minmax(0, 1fr)); } ${M} .fm-tl { flex-wrap: wrap; } ${M} .fm-tl li { flex: 1 1 40%; } }
 ${M} .fm-still * { transition: none !important; }
+${M} .fm-buildtop { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 14px; align-items: start; }
+${M} .fm-capline { display: flex; flex-wrap: wrap; gap: 6px; min-height: 52px; margin: 8px 0 0; padding: 8px; border-radius: 12px; background: #17110c; align-items: center; }
+${M} .fm-capline .fm-hint { color: #d8cfc0; }
+${M} .fm-bank { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding: 10px; border-radius: 14px; background: #f3e6cc; }
+${M} .fm-tok { min-height: 46px; padding: 6px 12px; border: 0; border-radius: 10px; background: #fffaf0; color: #3b2a1e; font-weight: 800; font-size: 1em; box-shadow: inset 0 0 0 2px #b08a55, 0 3px 0 #7a5a33; cursor: pointer; text-align: left; }
+${M} .fm-tok.on { background: #000; color: #fff; box-shadow: inset 0 0 0 2px #fff6e0; }
+@media (max-width: 820px) { ${M} .fm-buildtop { grid-template-columns: 1fr; } ${M} .fm-buildtop .fm-qpic { max-width: 460px; } }
 @media (max-width: 520px) { ${M} .fm-mlist { grid-template-columns: 1fr; } ${M} .fm-opts { grid-template-columns: 1fr 1fr !important; } }
 `;

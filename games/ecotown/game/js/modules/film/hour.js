@@ -59,20 +59,20 @@ export const mapLine = (st, j) => {
   const n = doneCount(st);
   if (n === 0) return j ? 'Welcome to the film studio. Six jobs, one at a time. Start with the first.' : 'Six missions, six real jobs in film and TV. Start with the first.';
   if (n === MISSIONS.length) return 'All six missions done. Replay any of them, or see what you made.';
-  return `${n} of six done. Next: ${MISSIONS[n].use}.`;
+  return `${num(n).charAt(0).toUpperCase() + num(n).slice(1)} of six done. Next: ${MISSIONS[n].use}.`;
 };
 export const lockedLine = (i) => `Finish mission ${i} first. The missions open in order.`;
 
 // ---- the record. One line a mission, from what the child did. res keys are set by each mission's play file.
-const num = (n) => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'][n] ?? String(n);
+export const num = (n) => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'][n] ?? String(n);
 export function hourLines(st, m3Line) {
   const r = st.res; const out = [];
-  if (r.crew) out.push(`Crew words: named ${num(r.crew.of)} shots and moves, ${num(r.crew.first)} at the first try.`);
-  if (r.story) out.push(`Storyboards: put ${num(r.story.stories)} stories in order${r.story.spare ? ', and left out the shot that did not belong' : ''}.`);
+  if (r.crew) out.push(`Crew words: named ${num(r.crew.of)} shots and moves${r.crew.seq ? `, and planned ${num(r.crew.seq)} two-shot sequences` : ''}.`);
+  if (r.story) out.push(`Storyboards: put ${num(r.story.stories)} stories in order${r.story.spare ? ', and left out the cards that did not belong' : ''}.`);
   if (m3Line) out.push(m3Line);
   if (r.edit) out.push(`Editing: picked ${num(r.edit.takes)} best takes, cut a quick film and a calm one, and changed the music at the turn.`);
-  if (r.access) out.push(`For everyone: chose ${num(r.access.caps)} captions and ${num(r.access.descs)} spoken descriptions.`);
-  if (r.truth) out.push(`Checking: found the clues in ${num(r.truth.clues)} pictures and chose to ask before filming people.`);
+  if (r.access) out.push(`For everyone: chose ${num(r.access.caps)} captions, built ${r.access.built > 1 ? num(r.access.built) + ' more' : 'one more'} from tiles, and chose ${num(r.access.descs)} spoken descriptions.`);
+  if (r.truth) out.push(`Checking: looked at ${num(r.truth.pics)} pictures for clues and where they came from, and chose to ask before filming people.`);
   return out.slice(0, 6).map((l) => l.slice(0, 120));
 }
 export function hourPractised(st) {

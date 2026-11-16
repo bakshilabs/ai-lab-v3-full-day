@@ -47,23 +47,31 @@ export function checkTrim(cutIds) {
 // ---- part 3: the pace. The same five shots, cut two ways. Each shot is quick, medium or long.
 export const LENGTHS = { quick: 1.5, medium: 3, long: 5 };
 export const LENGTH_IDS = Object.keys(LENGTHS);
+// Ages 13–17 also have a running time to hit, in seconds, as an editor cutting a trailer to a slot would.
 export const PACES = [
-  { id: 'fast', title: 'An exciting trailer', ask: 'First, make it an exciting trailer: the kind that makes you want to see the film.', test: (avg) => avg <= 2.2, mood: 'party' },
-  { id: 'slow', title: 'A calm film', ask: 'Now make the same shots into a calm, gentle film.', test: (avg) => avg >= 4.2, mood: 'calm' },
+  { id: 'fast', title: 'An exciting trailer', ask: 'First, make it an exciting trailer: the kind that makes you want to see the film.', test: (avg) => avg <= 2.2, mood: 'party',
+    secs: [8, 10], askS: 'First, an exciting trailer that runs between 8 and 10 seconds, with an average shot of 2.2 seconds or less.' },
+  { id: 'slow', title: 'A calm film', ask: 'Now make the same shots into a calm, gentle film.', test: (avg) => avg >= 4.2, mood: 'calm',
+    secs: [20, 23], askS: 'Now a calm film of the same shots, between 20 and 23 seconds long, with an average shot of 4.2 seconds or more.' },
 ];
 export const avgSecs = (lens) => lens.reduce((s, l) => s + LENGTHS[l], 0) / lens.length;
+export const totalSecs = (lens) => lens.reduce((s, l) => s + LENGTHS[l], 0);
+export const paceAsk = (pace, junior) => (junior ? pace.ask : pace.askS);
 export function paceVerdict(pace, lens, junior) {
-  const avg = avgSecs(lens); const ok = pace.test(avg); const quick = lens.filter((l) => l === 'quick').length, long = lens.filter((l) => l === 'long').length;
-  const nums = junior ? '' : ` Average shot length: ${avg.toFixed(1)} s, so about ${Math.round(60 / avg)} cuts a minute.`;
-  if (pace.id === 'fast') return { ok, avg, say: ok ? `Most shots are quick, so the cuts come fast. That feels exciting.${nums}` : `${quick} of 5 shots are quick. For an exciting trailer, the cuts need to come faster: make more shots quick.${nums}` };
-  return { ok, avg, say: ok ? `The shots are long, so you have time to look. That feels calm.${nums}` : `${long} of 5 shots are long. For a calm film, give the eye more time: make more shots long.${nums}` };
+  const avg = avgSecs(lens); const total = totalSecs(lens); const quick = lens.filter((l) => l === 'quick').length, long = lens.filter((l) => l === 'long').length;
+  const feel = pace.test(avg); const inTime = junior || (total >= pace.secs[0] && total <= pace.secs[1]); const ok = feel && inTime;
+  const nums = junior ? '' : ` Running time ${total} s; average shot ${avg.toFixed(1)} s, so about ${Math.round(60 / avg)} cuts a minute.`;
+  const time = !junior && feel && !inTime ? (total > pace.secs[1] ? ` It runs ${total} seconds: too long for the slot. Trim one shot.` : ` It runs ${total} seconds: too short for the slot. Let one shot run longer.`) : '';
+  const say = (good, bad) => (ok ? good : feel ? time : bad) + nums;
+  if (pace.id === 'fast') return { ok, avg, total, say: say('Most shots are quick, so the cuts come fast. That feels exciting.', `${['No', 'One', 'Two', 'Three', 'Four', 'Five'][quick]} of the five shots ${quick === 1 ? 'is' : 'are'} quick. For an exciting trailer, the cuts need to come faster: make more shots quick.`).trim() };
+  return { ok, avg, total, say: say('The shots are long, so you have time to look. That feels calm.', `${['No', 'One', 'Two', 'Three', 'Four', 'Five'][long]} of the five shots ${long === 1 ? 'is' : 'are'} long. For a calm film, give the eye more time: make more shots long.`).trim() };
 }
 
 // ---- part 4: the music. Where does the story turn, and what music fits each part?
 // The game's own tunes (ctx.engine.setMusic): day, night, lab, celebrate.
 export const TUNES = {
   day: { label: 'Bright daytime music', feel: 'cheerful' }, night: { label: 'Slow evening music', feel: 'calm' },
-  lab: { label: 'Thoughtful music', feel: 'a bit worried, mysterious' }, celebrate: { label: 'Party music', feel: 'excited' },
+  lab: { label: 'Thoughtful music', feel: 'curious, a little mysterious' }, celebrate: { label: 'Party music', feel: 'excited' },
 };
 const tuneOpts = (why) => Object.entries(TUNES).map(([id, t]) => ({ id, icon: id === 'day' ? '☀️' : id === 'night' ? '🌙' : id === 'lab' ? '🔎' : '🎉', label: `${t.label} (${t.feel})`, why: why[id] || '' }));
 // the five shots of the trimmed film, and the parts the music marks

@@ -107,14 +107,29 @@ test('mission 2: a story is checked by its beats, the hint points at the problem
     assert.equal(M2.checkOrder(s, s.cards).ok, true, s.id);
     const dealt = M2.dealt(s, false); assert.notDeepEqual(dealt.map((c) => c.id), s.cards.map((c) => c.id));
     const bad = M2.checkOrder(s, dealt.slice(0, s.cards.length)); assert.equal(bad.ok, false); assert.ok(bad.say.length > 10);
-    for (const c of s.cards) assert.ok(A.STORY_ART[c.art], c.art);
+    for (const c of [...s.cards, ...(s.spares || [])]) assert.ok(A.STORY_ART[c.art] || A.SHOT_ART[c.art], c.art);
     for (const set of [fullSet, bareSet]) for (const c of s.cards) { const sh = M2.shotOf(c, set); assert.ok(sh.sub === 'town' || sh.sub.startsWith('who:') || bareSet.places.length, c.id); }
   }
-  const mk = M2.STORIES[2]; assert.equal(M2.dealt(mk, true).length, mk.cards.length + 1);
-  const withSpare = [...mk.cards.slice(0, 4), mk.spare]; assert.equal(M2.checkOrder(mk, withSpare).code, 'spare');
+  const mk = M2.STORIES[2]; assert.equal(M2.dealt(mk, true).length, mk.cards.length + 1); assert.equal(M2.dealt(mk, false).length, mk.cards.length);
+  const withSpare = [...mk.cards.slice(0, 4), mk.spares[0]]; assert.equal(M2.checkOrder(mk, withSpare).code, 'spare');
   const swapped = [mk.cards[0], mk.cards[1], mk.cards[3], mk.cards[2], mk.cards[4]]; assert.equal(M2.checkOrder(mk, swapped).code, 'problem');
   assert.equal(M2.checkOrder(mk, [mk.cards[1], mk.cards[0], ...mk.cards.slice(2)]).code, 'start');
   assert.match(M2.splitLine(mk), /15-second film\. Beginning 40%, middle 40%, end 20%/);
+  // ages 13–17: a fourth story, six cards and two spares; a clean river cannot come before the netting
+  assert.equal(M2.storiesFor(false).length, 3); assert.equal(M2.storiesFor(true).length, 4);
+  const ot = M2.STORIES[3]; assert.equal(M2.dealt(ot, true).length, 8);
+  const swap = ot.cards.slice(); [swap[3], swap[4]] = [swap[4], swap[3]]; assert.equal(M2.checkOrder(ot, swap).code, 'after');
+});
+
+test('every shot label agrees with mission 1: a card’s size is filmed with mission 1’s framing for that size', () => {
+  for (const s of M2.STORIES) for (const c of [...s.cards, ...(s.spares || [])]) assert.ok(M2.SIZE_MOVES[c.size].includes(c.shot[0]), `${c.id}: ${c.size} filmed as ${c.shot[0]}`);
+  // and the frame really is that size: how much height the view takes in (2 · distance · tan(fov / 2)), for Florence
+  // (about 7.3 units tall) a close-up shows less than her head and shoulders' worth, a medium less than her whole body
+  const h = (move, u = 0.5) => { const p = poseFor({ move, sub: 'who:florence' }, fullSet, u); return 2 * Math.hypot(...p.pos.map((v, k) => v - p.look[k])) * Math.tan(p.fov / 2 * Math.PI / 180); };
+  assert.ok(h('cw-close') < 0.65 * 7.3); assert.ok(h('cw-medium') > h('cw-close') && h('cw-medium') < 7.3); assert.ok(h('cw-wide') > 2 * 7.3);
+  // mission 3's "Close-up" is the same framing as mission 1's close-up
+  for (const sub of ['who:florence', 'who:family', 'who:otters', 'place:market']) assert.deepEqual(poseFor({ move: 'close', sub }, fullSet, 0.3), poseFor({ move: 'cw-close', sub }, fullSet, 0.3));
+  for (const set of [fullSet, bareSet]) for (const s of M2.STORIES) for (const c of s.cards) { const sh = M2.shotOf(c, set); assert.equal(sh.move, c.shot[0]); }
 });
 
 test('mission 4: the trim check, the pace verdicts and the music cut', () => {
@@ -135,12 +150,22 @@ test('mission 5: captions name the speaker and the sound; descriptions fit the g
   assert.match(caps[0].caption, /^FLORENCE:/); assert.ok(caps.slice(1).every((c) => /^\[.+\]$/.test(c.caption)));
   for (const c of caps) assert.ok(M5.words(c.caption) / 2 <= M5.READ_WPS, c.caption);
   for (const d of M5.descItems(false)) { assert.ok(M5.words(d.desc) / M5.SPEAK_WPS <= 4, d.desc); const long = d.opts.reduce((a, o) => (M5.words(o.label) > M5.words(a.label) ? o : a)); assert.ok(long.id === d.answer || M5.words(long.label) / M5.SPEAK_WPS > 4 || long.why); }
-  const show = M5.screening(caps, M5.descItems(true)); assert.equal(show.length, 6); assert.ok(show.every((s) => A.SHOT_ART[s.art]));
+  const show = M5.screening(caps, M5.descItems(true), [{ art: 'homes-evening', text: 'MUM: Tea is ready! [Door bangs]' }]); assert.equal(show.length, 8); assert.ok(show.every((s) => A.SHOT_ART[s.art]));
+  assert.ok(show.every((s) => !(s.cap && s.desc)), 'a slide has a caption or a description, never both');
+  assert.equal(show.find((s) => /Laughter/.test(s.cap)).art, 'family');
 });
 
 test('mission 6: changes, machine-made clues and asking first; everything drawn and made up', () => {
   const ch = M6.changeItems(); assert.deepEqual(ch.map((c) => c.judge.answer), ['fine', 'fine', 'mislead', 'mislead']);
-  const pics = M6.pictureItems(); assert.deepEqual(pics.map((p) => p.answer), ['filmed', 'clue', 'clue', 'filmed', 'clue', 'clue']);
+  const pics = M6.pictureItems(); assert.deepEqual(pics.map((p) => p.answer), ['filmed', 'clue', 'clue', 'filmed', 'cant', 'clue', 'clue']);
+  assert.equal(M6.pictureItems(true).filter((p) => p.answer === 'cant').length, 2);
+  assert.ok(pics.every((p) => p.opts.some((o) => o.id === 'cant')));
+  // a jumbled sign is a clue, not proof; "could not happen" only where it really could not
+  assert.match(pics.find((p) => p.id === 'sign').ok, /clue, not proof/); assert.deepEqual(pics.find((p) => p.id === 'sign').answers, ['clue', 'cant']);
+  for (const p of pics) if (/could not/.test(p.ok)) assert.ok(['shadows', 'sheep'].includes(p.id), p.id);
+  // the crowd question: someone else suggests the fake picture; the drawing shows only a few people
+  const crowd = M6.PERMISSION.find((p) => p.art === 'hall'); assert.match(crowd.q, /Someone says/); assert.doesNotMatch(crowd.q, /Florence/);
+  assert.ok((A.peoplePic('hall').match(/<circle/g) || []).length < 12);
   assert.ok(pics.every((p) => A.MADE_ART[p.id])); assert.ok(M6.CHANGES.every((c) => A.CHANGE_ART[c.id])); assert.ok(M6.PERMISSION.every((p) => A.PEOPLE_ART[p.art]));
   assert.match(M6.HONEST.join(' '), /no clue at all/); assert.match(M6.HONEST.join(' '), /where did it come from/i);
   assert.equal(M6.PERMISSION.at(-1).answer, 'both');
