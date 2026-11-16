@@ -154,7 +154,10 @@ if (only >= 6) {
   await p.waitForSelector('#modal:not(.hide) [data-act="ok"]', { timeout: LONG }); await shot('record-card', 800);
   checks.card = await p.evaluate(() => document.querySelector('#modal').innerText.replace(/\s+/g, ' ').slice(0, 900));
   await click('#modal:not(.hide) [data-act="ok"]');
-  await p.waitForSelector('#modal:not(.hide) [data-act="go"]', { timeout: 120000 }); await shot('talk-it-over', 600); await click('#modal:not(.hide) [data-act="go"]');
+  // the loader's shared end of a part: "Jobs that use this" (newer builds), then "Talk it over", then the break
+  await p.waitForSelector('#modal:not(.hide) [data-act="go"]', { timeout: 120000 });
+  if (await p.$('#modal:not(.hide) .jobs')) { checks.jobsScreen = true; await shot('jobs', 600); await click('#modal:not(.hide) [data-act="go"]'); await p.waitForSelector('#modal:not(.hide) .talkqs', { timeout: 120000 }); }
+  await shot('talk-it-over', 600); await click('#modal:not(.hide) [data-act="go"]');
   await p.waitForSelector('#modal:not(.hide) [data-act="stay"]', { timeout: 120000 }); await shot('break', 600); await click('#modal:not(.hide) [data-act="stay"]');
   await p.waitForFunction(() => window.__filmDone, null, { timeout: 120000 });
   const result = await p.evaluate(() => window.__film);
