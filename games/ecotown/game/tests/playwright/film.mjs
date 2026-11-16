@@ -108,9 +108,11 @@ for (let guard = 0; guard < 900; guard++) {
     }
     if (/again/.test(kickNow)) cameBack++;
     // a question set aside never comes straight back on the very next screen
-    if (lastAside) { if ((await p.textContent("#module [data-fm-ask] h2")) === lastAside && /at the end/.test(setAside[setAside.length - 1].said)) asideNext++; lastAside = null; }
+    if (lastAside) { if (/again/.test(kickNow) && /at the end/.test(setAside[setAside.length - 1].said)) asideNext++; lastAside = null; } // many questions share a heading: the "again" mark tells
     // every other question: one wrong answer first. Florence says why, and the right one is still to find.
-    if (asks % 2 === 0) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right')) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
+    // (only where one miss does not set it aside: four choices or more, or a question already on its second go)
+    if (asks % 2 === 0 && (nOpts >= 4 || /again/.test(kickNow))) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right') && !/The answer is/.test(line)) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
+    if (await p.$('#module [data-fm-next]:not([hidden])')) { await click('#module [data-fm-next]'); continue; } // shown with its reason after a second go
     await click('#module [data-fm-right]'); if (mission === 'crew' && asks > 10 && !seen.has('crew-scene-filmed')) await firstLook('crew-scene-filmed', reduce ? 800 : 3500);
     if (!seen.has(`${mission}-right`)) await firstLook(`${mission}-right`, 300);
     await click('#module [data-fm-next]'); continue;
