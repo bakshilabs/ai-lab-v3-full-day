@@ -1,12 +1,12 @@
 // Mission 1, "How a self-driving car sees": switch between the camera, radar and lidar views of the same street in
 // sun, rain, fog and dark; tick every sensor that can answer the question; then choose the car's sensors and read
 // which jobs are covered in which weather. Rules and words: sensors.js. Pictures: art.js.
-import { SENSORS, SENSOR, COND, CONDS, ROUNDS, JOBS, JOB, sees, check, missSay, cover, kitSay, M1 } from './sensors.js';
+import { SENSORS, SENSOR, COND, CONDS, roundsFor, JOBS, JOB, sees, check, missSay, cover, kitSay, M1 } from './sensors.js';
 import { cameraView, radarView, lidarView, svg } from './art.js';
 import { esc } from './kit.js';
 
 export async function sensorsMission(K) {
-  const { j, pick, say, swap, tray, stage } = K; let first = 0;
+  const { j, pick, say, swap, tray, stage } = K; let first = 0; const ROUNDS = roundsFor(j);
   // the views of one round. view: which sensor is shown.
   const picture = (r, view) => {
     const things = [...r.things, r.target]; const seen = (t) => sees(view, t, r.cond);
@@ -67,5 +67,5 @@ export async function sensorsMission(K) {
     if (b.dataset.act === 'fit') { tray.onclick = null; done(); }
   }; });
   const chosen = SENSORS.filter((x) => kit.has(x));
-  return { first, kit: chosen, gaps: cover(chosen).gaps };
+  return { first, rounds: ROUNDS.length, kit: chosen, gaps: cover(chosen).gaps };
 }

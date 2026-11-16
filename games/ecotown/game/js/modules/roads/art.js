@@ -69,7 +69,7 @@ export function cameraView(things, cond, seen = () => true) {
   for (const t of [...things].sort((a, b) => b.z - a.z)) {
     const ok = seen(t);
     if (cond === 'dark' && !ok) continue;                       // beyond the headlights, unlit: nothing in the picture
-    out.push(thingAt(t, cond === 'fog' && !ok ? ' opacity=".1"' : cond === 'rain' ? ' opacity=".9"' : ''));
+    out.push(thingAt(t, cond === 'fog' && !ok ? ' opacity=".1"' : cond === 'rain' ? (ok ? ' opacity=".9"' : ' opacity=".22"') : ''));   // rain: spray blurs far things
   }
   if (cond === 'rain') out.push(`<g stroke="#e8f2f8" stroke-width="2" opacity=".7">${RAIN.map(([x, y]) => `<line x1="${x}" y1="${y}" x2="${x - 8}" y2="${y + 22}"/>`).join('')}</g><rect width="${W}" height="${H}" fill="#7c8d99" opacity=".18"/>`);
   if (cond === 'fog') out.push(`<rect width="${W}" height="${H}" fill="#e4e8e8" opacity=".55"/>`);

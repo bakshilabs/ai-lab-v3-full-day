@@ -2,7 +2,7 @@
 // the honest feedback (never the answer on the first miss), and the hour's record.
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { MISSIONS, cleanHub, openable, nextUp, allDone, streetResult, hourLines, hourPractised, hourTitle, hourPicture } from '../js/modules/roads/missions.js';
-import { SENSORS, ROUNDS, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
+import { SENSORS, ROUNDS, roundsFor, m1Line, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
 import { EASY, HARD, CASES, TEST, test as carTest, reviewSay, LABELS } from '../js/modules/roads/labels.js';
 import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
@@ -29,7 +29,9 @@ test('roads missions: missions open in order; finished ones can be replayed; old
 });
 
 test('roads mission 1: each round has one clear answer, and a wrong answer gets a hint, not the answer, until the third miss', () => {
-  assert.deepEqual(ROUNDS.map((r) => answer(r).join('+')), ['camera', 'radar+lidar', 'radar', 'radar', 'camera+lidar']);
+  assert.deepEqual(ROUNDS.map((r) => answer(r).join('+')), ['camera', 'radar+lidar', 'radar', 'radar', 'camera+lidar', 'radar+lidar', 'lidar']);
+  assert.equal(roundsFor(true).length, 5); assert.equal(roundsFor(false).length, 7, 'ages 13–17 also measure range and see through spray');
+  assert.equal(sees('camera', { kind: 'person', z: 30 }, 'rain'), false, 'spray blurs far things for the camera, as mission 4 says');
   for (const r of ROUNDS) {
     const wrong = SENSORS.filter((s) => !answer(r).includes(s)).slice(0, 1); const res = check(r, wrong.length ? wrong : []);
     assert.equal(res.right, false);
@@ -48,7 +50,8 @@ test('roads mission 1: all three sensors leave the fewest gaps, and Florence say
   const g = (k) => cover(k).gaps;
   assert.ok(g(['camera', 'radar', 'lidar']) < g(['camera', 'radar'])); assert.ok(g(['camera', 'radar']) < g(['camera']));
   assert.equal(g(['camera', 'radar', 'lidar']), 2, 'thick fog still hides far shapes and signs from every sensor');
-  assert.match(kitSay(['camera'], true), /gaps/); assert.match(kitSay(['camera', 'radar', 'lidar'], false), /fog/);
+  assert.match(kitSay(['camera'], true), /gaps/); assert.match(kitSay(['camera'], false), /^Camera: /, 'sensor names start with a capital');
+  assert.doesNotMatch(m1Line({ first: 0, rounds: 5, kit: ['radar'] }, true), /of 5|1 sensors|first time/); assert.match(m1Line({ rounds: 5, kit: ['radar'] }, true), /chose radar/); assert.match(kitSay(['camera', 'radar', 'lidar'], false), /fog/);
 });
 
 test('roads mission 2: training on everyday pictures misses the hard cases; labelling the edge cases fixes them', () => {
