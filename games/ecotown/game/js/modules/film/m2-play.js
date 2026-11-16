@@ -30,18 +30,18 @@ export async function playStory(env) {
           const b = e.target.closest('button'); if (!b || b.disabled) return;
           if (b.dataset.fmCard) {
             const id = b.dataset.fmCard; const at = slots.findIndex((c) => c?.id === id);
-            if (at >= 0) slots[at] = null; else { const free = slots.indexOf(null); if (free < 0) { ui.talk('All the boxes are full. Tap a card in a box to take it out first.'); return; } slots[free] = pool.find((c) => c.id === id); }
+            if (at >= 0) slots[at] = null; else { const free = slots.indexOf(null); if (free < 0) { mui.say('All the boxes are full. Tap a card in a box to take it out first.'); return; } slots[free] = pool.find((c) => c.id === id); }
             draw(slots.every(Boolean) ? '[data-fm-check]' : null); return;
           }
           if (b.dataset.fmCheck !== undefined) {
-            checks++; const res = checkOrder(story, slots); ui.talk(res.say);
+            checks++; const res = checkOrder(story, slots); mui.say(res.say);
             if (res.ok) { solved = true; if (checks === 1) r.first++; if (story.spares) r.spare = !junior; draw('[data-fm-watch]'); }
             return;
           }
           if (b.dataset.fmWatch !== undefined) { mui.clear(); done(); }
         };
       };
-      draw(); ui.talk(said);
+      draw(); mui.say(said);
     });
     // the storyboard, filmed in the child's own town
     const cut = storyCut(story, slots, set);

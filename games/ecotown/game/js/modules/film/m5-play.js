@@ -77,11 +77,11 @@ export async function playAccess(env) {
           const t = e.target.closest('button'); if (!t || t.disabled) return; const d = t.dataset;
           if (d.fmTile !== undefined) { placed.push(b.tiles[+d.fmTile]); draw(); }
           else if (d.fmOff !== undefined) { placed.splice(+d.fmOff, 1); draw(); }
-          else if (d.fmCheck !== undefined) { const res = checkBuild(b, placed, junior); ui.talk(res.say); if (res.ok) { ok = true; draw('[data-fm-next]'); } }
+          else if (d.fmCheck !== undefined) { const res = checkBuild(b, placed, junior); mui.say(res.say); if (res.ok) { ok = true; draw('[data-fm-next]'); } }
           else if (d.fmNext !== undefined) { mui.clear(); done(builtText(placed)); }
         };
       };
-      draw(); ui.talk(`${b.hear} Build the caption from the tiles.`);
+      draw(); mui.say(`${b.hear} Build the caption from the tiles.`);
     });
   }
 }

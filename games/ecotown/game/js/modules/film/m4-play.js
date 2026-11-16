@@ -41,11 +41,11 @@ export async function playEdit(env) {
       p.onclick = (e) => {
         const b = e.target.closest('button'); if (!b || b.disabled) return;
         if (b.dataset.fmClip) { const id = b.dataset.fmClip; if (cut.has(id)) cut.delete(id); else cut.add(id); draw(`[data-fm-clip="${id}"]`); }
-        else if (b.dataset.fmCheck !== undefined) { const res = checkTrim([...cut]); ui.talk(res.say); if (res.ok) { ok = true; draw('[data-fm-next]'); } }
+        else if (b.dataset.fmCheck !== undefined) { const res = checkTrim([...cut]); mui.say(res.say); if (res.ok) { ok = true; draw('[data-fm-next]'); } }
         else if (b.dataset.fmNext !== undefined) { mui.clear(); done(); }
       };
     };
-    draw(); ui.talk('Here is everything the camera filmed. Tap a clip to cut it. Some clips are not needed.');
+    draw(); mui.say('Here is everything the camera filmed. Tap a clip to cut it. Some clips are not needed.');
   });
 
   // ---- part 3: the pace. Set each shot's length, watch it, and Florence says how it feels.
@@ -70,7 +70,7 @@ export async function playEdit(env) {
             else if (b.dataset.fmWatch !== undefined) { mui.clear(); go(); }
           };
         };
-        draw(); ui.talk(said);
+        draw(); mui.say(said);
       });
       await watch(editCut(set, { lens, mood: pace.mood }), pace.title, (i) => ({ cap: `${FINAL[i].words} · ${LEN_LABEL[lens[i]]}` }));
       const v = paceVerdict(pace, lens, junior); said = v.say;

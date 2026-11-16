@@ -14,8 +14,9 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   const clear = () => { panel?.remove(); panel = null; };
   const put = (html, stage) => { clear(); ui.setStage(stage); panel = el(html); root.appendChild(panel); measure(); return panel; };
   const measure = () => { if (!panel) return; const H = root.clientHeight || innerHeight; const top = root.querySelector('.fm-talk')?.getBoundingClientRect().bottom || 70;
-    panel.style.maxHeight = `${Math.max(240, H - top - 26)}px`; // never under Florence's line
+    panel.style.maxHeight = `${Math.max(160, H - top - 26)}px`; // never under Florence's line
     if (!onPanel) return; const mid = (top + Math.max(top, panel.getBoundingClientRect().top)) / 2; onPanel(Math.max(0, Math.min(0.72, (H / 2 - mid) / (H / 2)))); };
+  const talk = (text, o) => { ui.talk(text, o); measure(); }; // Florence's line can grow: keep the panel below it
   const focus = (sel) => (panel?.querySelector(sel) || panel?.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
   const wait = (handler) => new Promise((res) => { panel.onclick = (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return; handler(b, res); }; });
 
@@ -33,11 +34,11 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       <ol class="fm-mlist">${MISSIONS.map(card).join('')}</ol>
       <div class="fm-row end">${done ? '<button type="button" class="fm-btn go big" data-fm-finish>See what you made ➜</button>' : `<button type="button" class="fm-btn go big" data-fm-carry>▶ Carry on: ${esc(MISSIONS[next].use)}</button>`}</div>
     </section>`, 'map');
-    ui.talk(mapLine(st, junior)); focus(done ? '[data-fm-finish]' : '[data-fm-carry]');
+    talk(mapLine(st, junior)); focus(done ? '[data-fm-finish]' : '[data-fm-carry]');
     return wait((b, res) => {
       if (b.dataset.fmFinish !== undefined) { clear(); res({ act: 'finish' }); }
       else if (b.dataset.fmCarry !== undefined) { clear(); res({ act: 'play', i: next }); }
-      else if (b.dataset.fmMission !== undefined) { const i = +b.dataset.fmMission; if (!isOpen(st, i)) { ui.talk(lockedLine(i)); return; } clear(); res({ act: 'play', i }); }
+      else if (b.dataset.fmMission !== undefined) { const i = +b.dataset.fmMission; if (!isOpen(st, i)) { talk(lockedLine(i)); return; } clear(); res({ act: 'play', i }); }
     });
   }
 
@@ -48,7 +49,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       <p class="fm-job">${esc(m.job)}</p><p class="fm-how"><b>How:</b> ${esc(pick(m.how, junior))}</p>
       <div class="fm-row"><button type="button" class="fm-btn" data-fm-tomap>← The missions</button><button type="button" class="fm-btn go big" data-fm-start>Start ➜</button></div>
     </section>`, 'intro-' + m.id);
-    ui.talk(m.job, { quiet: true }); ctx.say(`${m.use}. ${m.job} ${pick(m.how, junior)}`); focus('[data-fm-start]');
+    talk(m.job, { quiet: true }); ctx.say(`${m.use}. ${m.job} ${pick(m.how, junior)}`); focus('[data-fm-start]');
     return wait((b, res) => { if (b.dataset.fmStart !== undefined) { clear(); res('start'); } else if (b.dataset.fmTomap !== undefined) { clear(); res('map'); } });
   }
 
@@ -59,7 +60,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       ${lines.length ? `<ul class="fm-did">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}
       <div class="fm-row end"><button type="button" class="fm-btn go big" data-fm-tomap>Back to the missions ➜</button></div>
     </section>`, 'outro-' + m.id);
-    ui.talk(m.can); focus('[data-fm-tomap]');
+    talk(m.can); focus('[data-fm-tomap]');
     return wait((b, res) => { if (b.dataset.fmTomap !== undefined) { clear(); res(); } });
   }
 
@@ -82,7 +83,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
         <p class="fm-more" hidden></p>
         <div class="fm-row end"><button type="button" class="fm-btn go big" data-fm-next hidden>Next ➜</button></div>
       </div></section>`, 'ask');
-    ui.talk(item.say || item.q); focus('[data-fm-opt]');
+    talk(item.say || item.q); focus('[data-fm-opt]');
     const mark = (id, cls, note) => { const b = p.querySelector(`[data-fm-opt="${CSS.escape(id)}"]`); if (!b) return; b.classList.add(cls); const s = b.querySelector('small'); s.hidden = false; s.textContent = note; if (cls === 'off') b.setAttribute('aria-disabled', 'true'); };
     return wait((b, res) => {
       if (b.dataset.fmTool) { tools.find((t) => t.id === b.dataset.fmTool)?.on(); return; }
@@ -91,7 +92,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       const o = item.opts.find((x) => x.id === id);
       if (isRight(id)) {
         chosen = id; onRight?.(id); mark(id, 'right', '✓'); for (const x of p.querySelectorAll('[data-fm-opt]')) if (x.dataset.fmOpt !== id) x.disabled = true;
-        ui.talk(`${misses === 0 ? 'Yes. ' : 'That’s it. '}${item.ok}`);
+        talk(`${misses === 0 ? 'Yes. ' : 'That’s it. '}${item.ok}`);
         if (item.more) { const m = p.querySelector('.fm-more'); m.hidden = false; m.textContent = item.more; }
         const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
       } else {
@@ -100,12 +101,12 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
           for (const x of p.querySelectorAll('[data-fm-opt]')) x.disabled = true;
           if (reveal) { // the second time round: show the answer, and why
             const r = item.opts.find((x) => isRight(x.id)); mark(r.id, 'right', 'This one'); chosen = r.id; outcome = { revealed: true };
-            ui.talk(`${o?.why || 'Not this one.'} The answer is “${r.label}”. ${item.ok}`);
-          } else { outcome = { missed: true }; ui.talk(`${o?.why || 'Not this one.'} Let’s leave this one for now. It comes back at the end, so look out for it.`); }
+            talk(`${o?.why || 'Not this one.'} The answer is “${r.label}”. ${item.ok}`);
+          } else { outcome = { missed: true }; talk(`${o?.why || 'Not this one.'} Let’s leave this one for now. It comes back at the end, so look out for it.`); }
           const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
           return;
         }
-        ui.talk(`${o?.why || 'Not this one.'}${misses === 1 && item.hint ? ' ' + item.hint : ' Try another.'}`);
+        talk(`${o?.why || 'Not this one.'}${misses === 1 && item.hint ? ' ' + item.hint : ' Try another.'}`);
         p.querySelector('[data-fm-opt]:not(.off)')?.focus({ preventScroll: true });
       }
     });
@@ -128,7 +129,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
       <div class="fm-row end"><button type="button" class="fm-btn go big" data-fm-ok>${esc(btn)}</button></div></section>`, stage);
     // Florence's written line stays short (the card has the rest); the whole card is read aloud
     const full = say ?? [title, ...lines].map((t) => (/[.!?:]$/.test(t) ? t : t + '.')).join(' ');
-    ui.talk(say ?? (lines[0] || title), { quiet: true }); ctx.say(full); focus('[data-fm-ok]');
+    talk(say ?? (lines[0] || title), { quiet: true }); ctx.say(full); focus('[data-fm-ok]');
     return wait((b, res) => { if (b.dataset.fmOk !== undefined) { clear(); res(); } });
   }
 
@@ -136,7 +137,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   function custom(html, stage) { return put(html, stage); }
 
   addEventListener('resize', measure);
-  return { map, intro, outro, ask, askList, LIMIT, note, custom, clear, measure, off() { clear(); removeEventListener('resize', measure); } };
+  return { map, intro, outro, ask, askList, LIMIT, note, custom, clear, measure, say: talk, off() { clear(); removeEventListener('resize', measure); } };
 }
 
 const M = '#module[data-module="film"]';
