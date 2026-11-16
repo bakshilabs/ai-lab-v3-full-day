@@ -27,14 +27,16 @@ export const CASES = {
   // two cases nobody labels: they turn up only in the second test, as new hard cases do in real life
   boxcarry: { label: 'person', hard: true, fresh: true, name: { j: 'a person carrying a big box', s: 'a person carrying a large box' } },
   scooter: { label: 'person', hard: true, fresh: true, name: { j: 'someone on a mobility scooter', s: 'a mobility-scooter user' } },
+  // a new case the car does get right: under the umbrella it still looks like the people it has learnt
+  umbrella: { label: 'person', hard: true, fresh: true, like: 'person', name: { j: 'a person with an umbrella', s: 'a pedestrian with an umbrella' } },
 };
 // the pictures to label: first the everyday ones, then the hard ones. Each thing has a case (and is drawn by art.js).
 export const EASY = [
   { cond: 'sun', things: [{ id: 'a', kind: 'person', case: 'person', x: 4.8, z: 13, colour: '#1c6fd0' }, { id: 'b', kind: 'car', case: 'car', x: -1.7, z: 22, colour: '#c8553d' }, { id: 'c', kind: 'sign', case: 'sign', x: -4.7, z: 10, text: '20' }] },
-  { cond: 'sun', things: [{ id: 'a', kind: 'cyclist', case: 'cyclist', x: 2, z: 15, colour: '#7a4fb0' }, { id: 'b', kind: 'dog', case: 'dog', x: 4.8, z: 9 }, { id: 'c', kind: 'person', case: 'person', x: -5, z: 18, colour: '#1f7442', i: 1 }] },
+  { cond: 'sun', things: [{ id: 'a', kind: 'cyclist', case: 'cyclist', x: 2, z: 15, colour: '#7a4fb0' }, { id: 'b', kind: 'dog', case: 'dog', x: 4.2, z: 10 }, { id: 'c', kind: 'person', case: 'person', x: -5, z: 18, colour: '#1f7442', i: 1 }] },
 ];
 export const HARD = [
-  { cond: 'sun', things: [{ id: 'a', kind: 'van', case: 'car', x: 1.6, z: 13 }, { id: 'b', kind: 'person', case: 'hidden', x: 2.75, z: 15.5, colour: '#b23a26', i: 3 }, { id: 'c', kind: 'light', case: 'sign', x: -4.6, z: 20, lamp: 'green' }] },
+  { cond: 'sun', things: [{ id: 'a', kind: 'van', case: 'car', x: 1.2, z: 13 }, { id: 'b', kind: 'person', case: 'hidden', x: 3.2, z: 15.5, colour: '#b23a26', i: 3 }, { id: 'c', kind: 'light', case: 'sign', x: -4.6, z: 20, lamp: 'green' }] },
   { cond: 'sun', things: [{ id: 'a', kind: 'chair', case: 'chair', x: 4.6, z: 10, colour: '#2f6fd8' }, { id: 'b', kind: 'child', case: 'child', x: -4.6, z: 11, colour: '#e0a020' }] },
   { cond: 'sun', things: [{ id: 'a', kind: 'mirror', case: 'mirror', x: 5.8, z: 11 }, { id: 'b', kind: 'person', case: 'person', x: -4.8, z: 14, colour: '#3d6e8a', i: 2 }] },
   { cond: 'sun', things: [{ id: 'a', kind: 'poster', case: 'poster', x: -5.6, z: 10 }, { id: 'b', kind: 'dog', case: 'dog', x: 4.6, z: 12, colour: '#3b2a1e' }, { id: 'c', kind: 'cyclist', case: 'cyclist', x: 1.4, z: 24, colour: '#1f7f49' }] },
@@ -46,13 +48,20 @@ export const hardFor = (j) => (j ? HARD : [...HARD, NIGHT]);
 // the same ones again (testing on what you fixed would overstate how good the car is), and they include two new
 // hard cases nobody labelled.
 export const TEST = ['person', 'cyclist', 'dog', 'car', 'hidden', 'chair', 'child', 'mirror', 'poster'];
-export const testFor = (j, round = 1) => [...TEST, ...(j ? [] : ['night']), ...(round === 2 ? ['boxcarry', 'scooter'] : [])];
+// which new cases turn up in the second test changes from play to play: two of these three
+export const FRESH_CASES = ['boxcarry', 'scooter', 'umbrella'];
+export const freshPick = (r = Math.random()) => FRESH_CASES.filter((_, i) => i !== Math.floor(r * 3) % 3);
+export const testFor = (j, round = 1, fresh = ['boxcarry', 'scooter']) => [...TEST, ...(j ? [] : ['night']), ...(round === 2 ? fresh : [])];
 
 // is a label right for this thing?
 export const rightLabel = (thing, label) => CASES[thing.case].label === label;
 // what the car learnt: the set of cases with a correct label in the pictures labelled so far.
 // labelled: [{ case, label }]
-export function learnt(labelled) { return new Set(labelled.filter((t) => CASES[t.case] && CASES[t.case].label === t.label).map((t) => t.case)); }
+export function learnt(labelled) {
+  const know = new Set(labelled.filter((t) => CASES[t.case] && CASES[t.case].label === t.label).map((t) => t.case));
+  for (const [c, v] of Object.entries(CASES)) if (v.like && know.has(v.like)) know.add(c);   // close enough to a learnt case
+  return know;
+}
 // the test result: each test case, whether the car got it right, and what happened if not
 export function test(labelled, cases = TEST) {
   const know = learnt(labelled);
@@ -68,6 +77,7 @@ export function missWhat(c, j) {
   if (c === 'child') return j ? 'It was not sure: children are smaller than the people it had seen.' : 'Low confidence: smaller than any person in the training set.';
   if (c === 'night') return j ? 'It did not spot the person in the dark.' : 'Missed: no night-time examples in training.';
   if (c === 'boxcarry') return j ? 'New! The box hid the person’s shape. Nobody had labelled one like this.' : 'Missed (new case): the box hid the body shape; no such example was labelled.';
+  if (c === 'umbrella') return j ? 'New, but it still looked like a person.' : 'Correct: close enough to the people it had learnt.';
   if (c === 'scooter') return j ? 'New! It had never seen a mobility scooter, so it did not know how it would move.' : 'Low confidence (new case): no mobility scooter in the training data.';
   return j ? 'It did not know what this was.' : 'Not recognised.';
 }
@@ -95,8 +105,8 @@ export const M2 = {
   test1: (r, j) => (j ? `The car got ${r.right} of ${r.of} test pictures right. It does well on things like your pictures, and badly on the hard ones it has never seen.` : `Test: ${r.right}/${r.of} correct (${Math.round((100 * r.right) / r.of)}%): ${r.misses} misses, ${r.falseAlarms} false alarms. Strong on cases like the training set; weak on unseen hard cases.`),
   next: { j: 'Next picture. Tap each thing the car must know about, then choose its label.', s: 'Next picture: box and label every object.' },
   hard: { j: 'Now label pictures with the hard ones in them. These are the edge cases.', s: 'Now label pictures that contain the hard cases: the edge cases.' },
-  test2: (a, b, j) => (j ? `New test pictures, never seen before. The car got ${b.right} of ${b.of} right. Your hard examples taught it a lot. But two new hard cases turned up that nobody had labelled. That is why teams keep testing on pictures the car has never seen.` : `Fresh test set: ${b.right}/${b.of} (${Math.round((100 * b.right) / b.of)}%), against ${a.right}/${a.of} before. The labelled edge cases now pass, but ${b.of - b.right} new ones failed. Never retest on the pictures you fixed: new hard cases keep turning up.`),
+  test2: (a, b, j) => { const n = b.of - b.right; return j ? `New test pictures, never seen before. The car got ${b.right} of ${b.of} right. Your hard examples taught it a lot. But new hard cases turned up that nobody had labelled, and the car missed ${n === 1 ? 'one' : n}. That is why teams keep testing on pictures the car has never seen.` : `Fresh test set: ${b.right}/${b.of} (${Math.round((100 * b.right) / b.of)}%), against ${a.right}/${a.of} before. The labelled edge cases now pass, but ${n} new ${n === 1 ? 'case' : 'cases'} failed. Never retest on the pictures you fixed: new hard cases keep turning up.`; },
 };
 export function m2Line(rec, j) {
-  return j ? `Labelled ${rec?.labels ?? 0} things in ${rec?.pics ?? 0} street pictures, ${rec?.hard ?? 0} of them hard ones, and tested the car on new pictures` : `Labelled ${rec?.labels ?? 0} objects (${rec?.hard ?? 0} edge cases); the car on unseen pictures: ${rec?.a ?? 0}/${rec?.aOf ?? 9} before, ${rec?.b ?? 0}/${rec?.bOf ?? 11} after`;
+  return j ? `Labelled ${rec?.labels ?? 0} things in ${rec?.pics ?? 0} street pictures, ${rec?.hard ?? 0} of them hard ones, and tested the car on new pictures` : `Labelled ${rec?.labels ?? 0} objects (${rec?.hard ?? 0} edge cases) and tested the car on two sets of unseen pictures`;
 }

@@ -19,7 +19,7 @@ const warn = (x, y) => `<g transform="translate(${x} ${y})"><circle r="20" fill=
 const tick = (x, y) => `<g transform="translate(${x} ${y})"><circle r="20" fill="#1f7f49" stroke="#fff" stroke-width="3"/><path d="M-9 0 l6 7 l12 -14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></g>`;
 const mark = (ok, x, y) => (ok ? tick(x, y) : warn(x, y));
 const tag = (x, y, text) => `<rect x="${x - text.length * 4.6 - 8}" y="${y - 15}" width="${text.length * 9.2 + 16}" height="22" rx="6" fill="#3b2a1e"/><text x="${x}" y="${y + 1}" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">${text}</text>`;
-function road(id, j) {
+function road(id, j, done = false) {
   const o = [`<rect width="${W}" height="${H}" fill="#cfe6b8"/><rect y="96" width="${W}" height="28" fill="#e6dcc8"/><rect y="${KERB_S}" width="${W}" height="28" fill="#e6dcc8"/><rect y="${KERB_N}" width="${W}" height="${KERB_S - KERB_N}" fill="#6b7178"/>`];
   for (let x = 10; x < W; x += 60) o.push(`<rect x="${x}" y="209" width="34" height="4" fill="#f6f3ea"/>`);
   for (let x = 20; x < W; x += 130) if (!(id === 'turn' && x > 500 && x < 700)) o.push(`<rect x="${x}" y="22" width="90" height="62" fill="${['#e9c9a0', '#d98b5f', '#f2dcb0'][(x / 130) % 3 | 0]}" stroke="#9a6a4a" stroke-width="2"/><path d="M${x - 6} 26 L${x + 45} 4 L${x + 96} 26z" fill="#b5523b"/>`);
@@ -28,7 +28,7 @@ function road(id, j) {
   if (id === 'zebra') { for (let i = 0; i < 9; i++) o.push(`<rect x="560" y="${128 + i * 19.5}" width="44" height="11" fill="#fff"/>`); o.push('<rect x="548" y="88" width="6" height="36" fill="#2a2f35"/><circle cx="551" cy="86" r="9" fill="#ffb000"/><rect x="610" y="88" width="6" height="36" fill="#2a2f35"/><circle cx="613" cy="86" r="9" fill="#ffb000"/>'); }
   if (id === 'school') {
     o.push('<rect x="560" y="336" width="200" height="70" fill="#f2b8a0" stroke="#9a6a4a" stroke-width="2"/><text x="660" y="380" font-size="24" font-weight="800" text-anchor="middle" fill="#3b2a1e">SCHOOL</text>');
-    if (j) o.push('<g transform="translate(470 345)"><rect x="-3" y="0" width="6" height="40" fill="#8a9099"/><circle cy="-6" r="20" fill="#fff" stroke="#d8261c" stroke-width="6"/><text y="2" font-size="18" font-weight="800" text-anchor="middle">20</text></g>');
+    if (j && done) o.push('<g transform="translate(470 345)"><rect x="-3" y="0" width="6" height="40" fill="#8a9099"/><circle cy="-6" r="20" fill="#fff" stroke="#d8261c" stroke-width="6"/><text y="2" font-size="18" font-weight="800" text-anchor="middle">20</text></g>');
     for (const x of [380, 470, 650, 740]) o.push(car(x, 143, ['#c8553d', '#3d6e8a', '#5a6d50', '#e6a15a'][(x / 90) % 4 | 0]));   // parked on the north kerb
   }
   if (id === 'turn') o.push(`<rect x="560" y="0" width="110" height="${KERB_N}" fill="#6b7178"/><rect x="548" y="0" width="12" height="96" fill="#e6dcc8"/><rect x="670" y="0" width="12" height="96" fill="#e6dcc8"/>`);
@@ -38,7 +38,7 @@ function road(id, j) {
 // the scene at progress p (0: before the test, 1: the end). v: the chosen setting, or null before a choice.
 // An unsafe test ends frozen at the moment of the near miss, with the marker beside the person or vehicle at risk.
 export function scenePic(id, v, p, safe, j = false) {
-  const o = [road(id, j)]; const done = p >= 1 && v !== null;
+  const done = p >= 1 && v !== null; const o = [road(id, j, done)];   // the 20 sign shows only after the test, so it does not give the answer away
   if (id === 'zebra') {
     // the person waits on the north pavement and crosses south; our car comes along the north lane
     const stop = v === 'stop'; const cx = stop ? lerp(80, 500, ease(p / 0.6)) : lerp(80, 596, ease(p));
@@ -80,7 +80,7 @@ export function scenePic(id, v, p, safe, j = false) {
     const back = p < 0.3 ? lerp(startBack, startBack + 180, p / 0.3) : lerp(startBack + 180, endBack, ease((p - 0.3) / 0.6));
     o.push(car(lead, LANE, '#c8553d'), car(back, LANE, '#2f6fd8', 0, true));
     if (p > 0.3) o.push(`<rect x="${lead - 38}" y="152" width="6" height="28" fill="#ff3b2f"/>`);
-    if (p > 0.95 && v !== null) o.push(tag((back + 34 + lead - 34) / 2, 214, left ? (j ? 'room left' : `gap left`) : (j ? 'no room!' : 'no gap')));
+    if (p > 0.95 && v !== null) o.push(tag((back + 34 + lead - 34) / 2, 214, left > 10 ? (j ? 'room left' : 'gap left') : left ? 'only just' : (j ? 'no room!' : 'no gap')));
     if (done) o.push(mark(safe, 640, 108));
   }
   if (id === 'turn') {

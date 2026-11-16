@@ -24,7 +24,7 @@ export async function sensorsMission(K) {
     const show = (v) => { view = v; looked.add(v); frame.innerHTML = picture(r, v); does.textContent = `${SENSOR[v].name}: ${pick(SENSOR[v].does)}`; for (const b of stage.querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === v)); };
     show('camera');
     say(pick(r.q), i === 0 ? pick(M1.intro) : '');
-    swap(`<p class="rd-ask">${esc(pick(r.q))}</p><div class="rd-row rd-ticks" role="group" aria-label="Which sensors?">${SENSORS.map((s) => `<button type="button" data-tick="${s}" aria-pressed="false"><span class="box" aria-hidden="true"></span><span class="ico" aria-hidden="true">${SENSOR[s].icon}</span> ${SENSOR[s].name}</button>`).join('')}
+    swap(`<div class="rd-row rd-ticks" role="group" aria-label="Which sensors?">${SENSORS.map((s) => `<button type="button" data-tick="${s}" aria-pressed="false"><span class="box" aria-hidden="true"></span><span class="ico" aria-hidden="true">${SENSOR[s].icon}</span> ${SENSOR[s].name}</button>`).join('')}
       <p class="rd-hint" aria-live="polite"></p><button class="go" type="button" data-primary data-act="check" disabled>Check</button></div>`);
     const hint = tray.querySelector('.rd-hint'); const checkBtn = tray.querySelector('[data-act="check"]');
     const draw = () => { for (const b of tray.querySelectorAll('[data-tick]')) b.setAttribute('aria-pressed', String(picked.has(b.dataset.tick))); checkBtn.disabled = !picked.size; };

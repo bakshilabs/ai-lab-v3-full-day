@@ -6,7 +6,9 @@
 
 export const W = 800, H = 420, HOR = 168;           // picture size and the horizon line
 const F = 520, CAM_H = 1.3;                          // focal length in pixels, the camera's height in metres
-export const project = (x, y, z) => ({ sx: W / 2 + (x * F) / z, sy: HOR + ((CAM_H - y) * F) / z, s: F / z });
+// UK cars drive on the left: the driver's eye sits 1.8 m left of the centre line, so the dashed line runs to the right
+export const CAM_X = -1.8;
+export const project = (x, y, z) => ({ sx: W / 2 + ((x - CAM_X) * F) / z, sy: HOR + ((CAM_H - y) * F) / z, s: F / z });
 const r2 = (n) => Math.round(n * 100) / 100;
 
 // ---- the things, in metres: origin at the feet, y up (so drawn with negative y)
@@ -30,10 +32,12 @@ export const SHAPES = {
   boxcarry: (c = '#7a4fb0', i = 2) => `${SHAPES.person(c, i)}<rect x="-.36" y="-1.42" width=".72" height=".56" fill="#c69a5b" stroke="#7a5a33" stroke-width=".03"/><path d="M-.36 -1.14 h.72" stroke="#7a5a33" stroke-width=".03"/>`,
   // a mobility scooter with its rider
   scooter: (c = '#c8553d') => `<rect x="-.55" y="-.42" width="1.1" height=".26" rx=".08" fill="${c}"/><circle cx="-.4" cy="-.12" r=".12" fill="#2a2f35"/><circle cx=".42" cy="-.12" r=".12" fill="#2a2f35"/><rect x=".35" y="-1" width=".06" height=".6" fill="#5a6470"/><rect x=".28" y="-1.04" width=".2" height=".06" fill="#2a2f35"/><rect x="-.4" y="-1.05" width=".42" height=".62" rx=".1" fill="#3d6e8a"/><circle cx="-.18" cy="-1.22" r=".16" fill="#e0ac7e"/><path d="M-.34 -1.27 a.16 .16 0 0 1 .32 0z" fill="#d8d2c4"/>`,
+  // a person holding an open umbrella
+  umbrella: (c = '#3d6e8a', i = 3) => `${SHAPES.person(c, i)}<path d="M-.55 -1.95 a.55 .32 0 0 1 1.1 0z" fill="#d8261c"/><rect x="-.02" y="-1.95" width=".04" height=".6" fill="#2a2f35"/>`,
   bag: () => `<path d="M-.2 0 L-.24 -.36 L.22 -.4 L.2 0z" fill="#f0e6d0" stroke="#a89c86" stroke-width=".03"/>`,
 };
 // how big each thing is, in metres (for boxes and lidar points): [width, height]
-export const SIZE = { person: [.6, 1.8], child: [.45, 1.3], cyclist: [1.8, 1.8], car: [1.9, 1.5], van: [2.2, 2.4], light: [.5, 3.7], sign: [.8, 2.9], dog: [.9, .7], chair: [1, 1.5], post: [.3, 1], bag: [.5, .4], mirror: [1.1, 2.2], poster: [1.3, 2.3], boxcarry: [.75, 1.8], scooter: [1.2, 1.4] };
+export const SIZE = { person: [.6, 1.8], child: [.45, 1.3], cyclist: [1.8, 1.8], car: [1.9, 1.5], van: [2.2, 2.4], light: [.5, 3.7], sign: [.8, 2.9], dog: [.9, .7], chair: [1, 1.5], post: [.3, 1], bag: [.5, .4], mirror: [1.1, 2.2], poster: [1.3, 2.3], boxcarry: [.75, 1.8], scooter: [1.2, 1.4], umbrella: [1.2, 2.1] };
 
 // the street from the driver's seat, without things: sky, houses, pavements, road
 function streetBack(tone) {
@@ -86,7 +90,7 @@ export function radarView(things, cond, seen = () => true, numbers = false) {
   for (let d = 20; d <= 80; d += 20) out.push(`<path d="M${cx - d * k} ${cy} A${d * k} ${d * k} 0 0 1 ${cx + d * k} ${cy}" fill="none" stroke="#2f6b4a" stroke-width="1.5"/><text x="${cx + d * k * .7 + 6}" y="${cy - d * k * .72}" font-size="15" fill="#5fae80">${d} m</text>`);
   out.push(`<path d="M${cx} ${cy} L${cx - 330} ${cy - 330} M${cx} ${cy} L${cx + 330} ${cy - 330}" stroke="#2f6b4a" stroke-width="1.5"/><rect x="${cx - 14}" y="${cy - 10}" width="28" height="20" rx="5" fill="#ffd166"/>`);
   for (const t of things) {
-    if (!seen(t)) continue; const x = cx + t.x * k * 1.6, y = cy - t.z * k; const r = { car: 22, van: 26, cyclist: 14, chair: 11, person: 10, child: 8, dog: 8, light: 9, sign: 9, post: 9, bag: 0 }[t.kind] ?? 10;
+    if (!seen(t)) continue; const x = cx + (t.x - CAM_X) * k * 1.6, y = cy - t.z * k; const r = { car: 22, van: 26, cyclist: 14, chair: 11, person: 10, child: 8, dog: 8, light: 9, sign: 9, post: 9, bag: 0 }[t.kind] ?? 10;
     if (!r) continue;
     out.push(`<ellipse cx="${r2(x)}" cy="${r2(y)}" rx="${r}" ry="${r * .7}" fill="#6dff9e" opacity=".85"/><ellipse cx="${r2(x)}" cy="${r2(y)}" rx="${r * 1.8}" ry="${r * 1.2}" fill="#6dff9e" opacity=".18"/>`);
     if (numbers) out.push(`<text x="${r2(x + r * 1.9 + 4)}" y="${r2(y + 5)}" font-size="17" font-weight="700" fill="#c9ffd9">${Math.round(t.z)} m${t.mph !== undefined ? ` · ${t.mph} mph` : ''}</text>`);

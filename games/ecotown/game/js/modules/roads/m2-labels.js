@@ -1,11 +1,11 @@
 // Mission 2, "Teaching the car to recognise things": find and label everything in street pictures, train the car,
 // test it on pictures it has never seen, then label the hard cases (edge cases) and test again.
 // Rules and words: labels.js. Pictures: art.js.
-import { LABELS, LABEL, CASES, EASY, hardFor, testFor, test, missWhat, caseName, reviewSay, M2 } from './labels.js';
+import { LABELS, LABEL, CASES, EASY, hardFor, testFor, freshPick, test, missWhat, caseName, reviewSay, M2 } from './labels.js';
 import { cameraView, boxOf, svg, svgCrop, W, H } from './art.js';
 import { esc } from './kit.js';
 
-const TEST_THING = { person: { kind: 'person', colour: '#7a4fb0' }, cyclist: { kind: 'cyclist', colour: '#2f6fd8' }, dog: { kind: 'dog' }, car: { kind: 'car', colour: '#1f7f49' }, hidden: { kind: 'person', colour: '#c8553d' }, chair: { kind: 'chair', colour: '#b23a26' }, child: { kind: 'child', colour: '#2f6fd8' }, mirror: { kind: 'mirror' }, poster: { kind: 'poster' }, night: { kind: 'person', colour: '#2a2f35', cond: 'dark' }, boxcarry: { kind: 'boxcarry' }, scooter: { kind: 'scooter' } };
+const TEST_THING = { person: { kind: 'person', colour: '#7a4fb0' }, cyclist: { kind: 'cyclist', colour: '#2f6fd8' }, dog: { kind: 'dog' }, car: { kind: 'car', colour: '#1f7f49' }, hidden: { kind: 'person', colour: '#c8553d' }, chair: { kind: 'chair', colour: '#b23a26' }, child: { kind: 'child', colour: '#2f6fd8' }, mirror: { kind: 'mirror' }, poster: { kind: 'poster' }, night: { kind: 'person', colour: '#2a2f35', cond: 'dark' }, boxcarry: { kind: 'boxcarry' }, scooter: { kind: 'scooter' }, umbrella: { kind: 'umbrella' } };
 // the second test's pictures are fresh: other people, other colours, other places in the picture
 const FRESH = ['#1f7442', '#e0a020', '#3b2a1e', '#b23a26', '#5a6d50', '#2f6fd8'];
 
@@ -81,6 +81,6 @@ export async function labelsMission(K) {
   K.showStage(`<div class="rd-card"><h3>${j ? 'Teaching the car again' : 'Retraining'}</h3><p class="rd-job">${j ? `Now ${done.length} labels, with the hard ones.` : `${done.length} labelled objects, edge cases included.`}</p></div>`);
   say(j ? 'Let’s teach the car again. This time we test it on new pictures it has never seen. Testing on the same pictures would not be fair.' : 'Retrain, then test on a fresh set. Retesting on the pictures you fixed would overstate the result.');
   swap(`<div class="rd-row end"><button class="go" type="button" data-primary data-act="train">${j ? 'Teach and test again ➜' : 'Retrain and test ➜'}</button></div>`); await K.press();
-  const b = test(done, testFor(j, 2)); await showTest(b, M2.test2(a, b, j), false, 2);
+  const b = test(done, testFor(j, 2, freshPick())); await showTest(b, M2.test2(a, b, j), false, 2);
   return { labels: done.length, pics, hard: hardFound, a: a.right, aOf: a.of, b: b.right, bOf: b.of };
 }

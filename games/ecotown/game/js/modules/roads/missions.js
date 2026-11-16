@@ -64,7 +64,7 @@ export function streetResult(m6, families, junior) {
 // the take-home record for the whole hour: one line per mission, a picture, and two to four practised lines
 export function hourLines(rec, j, street) {
   const out = [m1Line(rec[1], j), m2Line(rec[2], j), m3Line(rec[3], j), m4Line(rec[4], j), m5Line(rec[5], j)];
-  if (street) { const c = counts(street.layout); out.push(j ? `Redesigned the street: ${c.drop} drop-off ${c.drop === 1 ? 'point' : 'points'}, ${c.crossings} ${c.crossings === 1 ? 'crossing' : 'crossings'}, longest wait ${wait(street.res.longestWait, true)}` : `${madeLines(street.layout, street.res, street.plots, j)[0]}; ${street.res.safe} of ${street.res.lines} crossings safe`); }
+  if (street) { const c = counts(street.layout); out.push(j ? `Redesigned the street: ${c.drop} drop-off ${c.drop === 1 ? 'point' : 'points'}, ${c.crossings} ${c.crossings === 1 ? 'crossing' : 'crossings'}, longest wait ${wait(street.res.longestWait, true)}` : `${madeLines(street.layout, street.res, street.plots, j)[0]}; crossings marked where people cross${street.res.safe === street.res.lines ? '' : ` (${street.res.safe} of ${street.res.lines} places)`}`); }
   return out.map((l) => l.slice(0, 120));
 }
 export function hourPractised(rec, j, street) {

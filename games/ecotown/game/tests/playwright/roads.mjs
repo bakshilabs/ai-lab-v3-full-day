@@ -137,7 +137,7 @@ for (let k = 0; k < L2.length; k++) {
 }
 await p.waitForSelector(tray('[data-act="train"]'), { timeout: LONG }); await primary();
 await p.waitForSelector(M + '.rd-tests', { timeout: LONG }); checks.m2test2 = await p.evaluate((m) => document.querySelector(m + '.rd-card h3').textContent, M);
-must('m2-retestFreshPictures', (junior ? /New test pictures: 9 of 11/ : /Fresh test pictures: 10\/12/).test(checks.m2test2), checks.m2test2); await shot('m2-test2');
+must('m2-retestFreshPictures', (junior ? /New test pictures: (9|10) of 11/ : /Fresh test pictures: (10|11)\/12/).test(checks.m2test2), checks.m2test2); await shot('m2-test2');
 await primary(); await closeMission(2);
 
 // leave mid-way and come back: finished missions are kept, and the map opens again

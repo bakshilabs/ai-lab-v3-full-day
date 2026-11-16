@@ -32,7 +32,7 @@ export async function simMission(K) {
       tray.onclick = on; stage.onclick = on;
     });
     const ch = runs ? changed(last, cfg) : []; const was = last; prev = res; res = runAll(STAGES[stageN], cfg); runs++;
-    if (ch.length) log.push(`${j ? 'Run' : 'Run'} ${runs}: ${pick(SET[ch[0]].name)} → ${SET[ch[0]].label(cfg[ch[0]], j)}. ${res.filter((r) => !r.pass).length ? `${res.filter((r) => !r.pass).length} ${j ? 'failing' : 'failing'}` : (j ? 'all pass' : 'all pass')}`);
+    if (ch.length) log.push(`${j ? 'Run' : 'Run'} ${runs}: ${pick(SET[ch[0]].name)} → ${SET[ch[0]].label(cfg[ch[0]], j)}. ${res.filter((r) => !r.pass).length ? `${res.filter((r) => !r.pass).length} failing` : 'All pass'}`);
     else log.push(`Run ${runs}: ${runs === 1 ? (j ? 'factory settings' : 'factory settings') : (j ? 'no change' : 'no change')}. ${res.filter((r) => !r.pass).length} ${j ? 'failing' : 'failing'}`);
     last = { ...cfg };
     const line = runSay(res, prev && prev.length === res.length ? prev : null, ch, cfg, was, j);

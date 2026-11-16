@@ -102,6 +102,8 @@ export function fleetSay(round, r, prev, plan, j) {
   const fewer = plan.cars > CARS.min && meets(round, simulate({ ...plan, cars: plan.cars - 1 }, { charge: !!round.charge, peak: !!round.peak }));
   if (ok) return `${lead}${worst} ${j ? `Goal met with ${plan.cars} cars!` : `Goal met with ${plan.cars} cars.`}${fewer ? (j ? ' Some cars stand idle a lot. Could fewer do?' : ' Utilisation is low: could fewer cars do it?') : (j ? ' One car fewer would not be enough.' : ' One car fewer would miss the goal: this is the smallest fleet that works.')}`;
   const why = r.longest > round.goal.wait ? (j ? ' Too long a wait.' : ' Waits too long.') : (j ? ' Too much empty driving.' : ' Too much empty driving.');
+  // in the charging round the problem is charging, so the tip is about where the charger is
+  if (round.id === 'charge') return `${lead}${worst}${why}${j ? ' Charging takes cars away for 15 minutes. Is the charger far from where the cars wait?' : ' Charging takes each car out for 15 minutes: check how far the hub is from the waiting places.'}`;
   const tip = r.longest > round.goal.wait && round.id === 'size' ? (j ? ' More cars means shorter waits.' : '') : r.longest > round.goal.wait ? (j ? ' Where do most people call from?' : '') : (j ? ' Are the cars waiting near where people call?' : '');
   return `${lead}${worst}${why}${tip}`;
 }
