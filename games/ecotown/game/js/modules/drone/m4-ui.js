@@ -154,7 +154,7 @@ export async function runSurvey(ctx, kit, scope) {
     };
   });
   P.remove();
-  return { sum: { lanes: sum.lanes, overlap: sum.overlap, along: sum.along },
+  return { sum: { lanes: sum.lanes, overlap: sum.overlap, along: sum.along, ...(sum.front ? { front: sum.front } : {}) },
     lines: [junior ? `You planned survey lines close enough for the photos to overlap, and turned them to fit the battery.` : `You planned ${sum.lanes} lines with ${sum.overlap}% overlap, running ${sum.along === 'ew' ? 'east to west' : 'north to south'} to fit the battery.`,
       'You found the dry field in the photo and the sick patch in the plant health view.'] };
 }
