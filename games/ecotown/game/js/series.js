@@ -13,7 +13,7 @@ export const PARTS = [
   { id: 'robots', n: 3, icon: '🤖', title: 'Robots at work', query: '?module=robots',
     blurb: 'Six jobs robots do: sensing, a greenhouse arm, hospital deliveries, recycling, farm weeding and flood rescue. Program them, teach them and test them.',
     how: ['Pick a mission on the map. They open one after another.', 'Tap tiles to build a program or rules, then press Run to test it.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', query: '?module=roads',
+  { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', time: 'about an hour', query: '?module=roads',
     blurb: 'Six jobs behind a self-driving car: its sensors, labelling pictures, rules of the road, testing, a shared fleet and redesigning the street.',
     how: ['Pick a mission on the map. They open one after another.', 'Choose, label or set things, then press Run or Test to see what the car does.', 'Every mission says the real job first, and what you can now do at the end.'] },
 ];
