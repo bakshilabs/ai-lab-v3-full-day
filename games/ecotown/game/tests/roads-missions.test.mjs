@@ -3,7 +3,7 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { MISSIONS, cleanHub, openable, nextUp, allDone, streetResult, hourLines, hourPractised, hourTitle, hourPicture } from '../js/modules/roads/missions.js';
 import { SENSORS, ROUNDS, roundsFor, m1Line, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
-import { EASY, HARD, CASES, TEST, test as carTest, reviewSay, LABELS } from '../js/modules/roads/labels.js';
+import { EASY, HARD, CASES, TEST, test as carTest, testFor, hardFor, m2Line, reviewSay, LABELS } from '../js/modules/roads/labels.js';
 import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
 import { simulate as fleetSim, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
@@ -59,6 +59,15 @@ test('roads mission 2: training on everyday pictures misses the hard cases; labe
   const a = carTest(lab(EASY)), b = carTest(lab([...EASY, ...HARD]));
   assert.equal(a.of, TEST.length); assert.ok(a.right < b.right); assert.equal(b.right, TEST.length);
   assert.equal(a.rows.find((r) => r.case === 'mirror').ok, false); assert.equal(a.rows.find((r) => r.case === 'person').ok, true);
+  // the second test is on fresh pictures with two new hard cases nobody labelled: never 100%
+  for (const j of [true, false]) {
+    const t2 = carTest(lab([...EASY, ...hardFor(j)]), testFor(j, 2));
+    assert.equal(t2.of - t2.right, 2, 'the two new cases fail'); assert.ok(t2.rows.some((r) => r.case === 'scooter' && !r.ok));
+    assert.ok(!testFor(j, 1).includes('scooter'));
+    assert.doesNotMatch(m2Line({ labels: 16, pics: 6, hard: 5, a: 4, aOf: 9, b: 9, bOf: 11 }, j), /100%/);
+  }
+  assert.equal(carTest(lab(EASY), testFor(false, 1)).falseAlarms, 2, 'reflection and poster are false alarms'); assert.equal(testFor(false, 1).length, 10);
+  assert.match(reviewSay(EASY[0], new Set(), {}, 1, true).text, /There are 3 more things/);
   // a wrong label teaches nothing about that case
   assert.equal(carTest([{ case: 'mirror', label: 'person' }]).rows.find((r) => r.case === 'mirror').ok, false);
   for (const pic of [...EASY, ...HARD]) for (const t of pic.things) { assert.ok(LABELS.includes(CASES[t.case].label)); const bx = boxOf(t); assert.ok(bx.w > 10 && bx.h > 10 && bx.x > -20 && bx.x + bx.w < 840, `${t.kind} box on the picture`); }
