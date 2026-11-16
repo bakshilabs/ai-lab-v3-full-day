@@ -236,6 +236,9 @@ if (all) {
   await p.waitForSelector('#modal:not(.hide) [data-act="ok"]', { timeout: LONG }); await shot('record-card');
   checks.card = await p.evaluate(() => document.querySelector('#modal').innerText.replace(/\s+/g, ' ').slice(0, 1200));
   await click('#modal:not(.hide) [data-act="ok"]');
+  // "Jobs that use this" (shared, js/ui/talk.js), then "Talk it over", then the break card
+  await p.waitForSelector('#modal:not(.hide) [data-act="go"]', { timeout: LONG });
+  if (await p.$('#modal:not(.hide) .jobs')) { await shot('jobs-that-use-this'); checks.jobs = true; await click('#modal:not(.hide) .jobs ~ * [data-act="go"], #modal:not(.hide) [data-act="go"]'); await p.waitForSelector('#modal:not(.hide) .talkqs', { timeout: LONG }); }
   await click('#modal:not(.hide) [data-act="go"]', LONG); await shot('talk-it-over-done');
   await click('#modal:not(.hide) [data-act="stay"]', LONG);
   await p.waitForFunction(() => window.__droneDone, null, { timeout: LONG });
