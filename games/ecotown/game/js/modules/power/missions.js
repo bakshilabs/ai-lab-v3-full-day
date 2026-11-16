@@ -8,7 +8,7 @@ export const MISSIONS = [
   { id: 'balance', icon: '⚖️',
     use: { j: 'The grid must balance', s: 'The grid must balance' },
     job: { j: 'Grid control engineers keep the power made level with the power used, every minute of every day.', s: 'Grid control engineers match supply to demand every second; if they drift apart, the grid’s frequency moves away from 50 Hz.' },
-    how: { j: 'Each ten minutes, set the town battery so the scale is level. Three rounds, faster each time.', s: 'Every ten minutes, set battery output so supply equals demand. Three rounds of eight steps.' },
+    how: { j: 'Each ten minutes, set the town battery so the scale is level. Three rounds, each one harder.', s: 'Every ten minutes, set battery output so supply equals demand. Three rounds of eight steps.' },
     can: { j: 'You can keep supply level with demand as it changes.', s: 'You can balance supply and demand as both change, reading frequency as the sign of imbalance.' } },
   { id: 'forecast', icon: '🌦️',
     use: { j: 'Forecasting', s: 'Forecasting' },
@@ -55,18 +55,32 @@ export function cleanProgress(saved, junior = true) {
     balance: r.balance ? { level: num(r.balance.level, 0, 24), of: num(r.balance.of, 1, 24) } : null,
     forecast: r.forecast ? { tries: num(r.forecast.tries, 0, 99), kwh: !!r.forecast.kwh, spells: num(r.forecast.spells, 0, 9) } : null,
     storage: r.storage && Array.isArray(r.storage.dark) ? { dark: r.storage.dark.slice(0, 3).map((x) => num(x, 0, 999)), total: num(r.storage.total, 1, 999) } : null,
-    rules: r.rules ? { share: num(r.rules.share, 0, 100), diff: num(r.rules.diff, -999, 999) } : null,
+    rules: r.rules ? { share: num(r.rules.share, 0, 100), diff: num(r.rules.diff, -999, 999), lit: num(r.rules.lit, 0, 9999), total: num(r.rules.total, 1, 9999) } : null,
     demand: r.demand ? { moved: num(r.demand.moved, 0, 99), kwh: num(r.demand.kwh, 0, 9999) } : null,
     storm: r.storm ? { trips: num(r.storm.trips, 0, 99) } : null,
   };
-  return { v: 2, done, res, hand: readHand(s.hand), rules: cleanRules(s.rules, junior), changed: !!s.changed, improved: !!s.improved };
+  const c = s.cur && typeof s.cur === 'object' && MISSION_IDS.includes(s.cur.id) ? s.cur : null;
+  const cur = c ? { id: c.id, round: num(c.round, 0, 5) || 0, part: c.part && typeof c.part === 'object' ? c.part : null } : null; // a mission left part-way: the next round
+  return { v: 2, done, res, cur, hand: readHand(s.hand), rules: cleanRules(s.rules, junior), changed: !!s.changed, improved: !!s.improved };
 }
-export const packProgress = (p) => ({ v: 2, done: p.done, res: p.res, hand: writeHand(p.hand), rules: p.rules, changed: p.changed, improved: p.improved });
+export const packProgress = (p) => ({ v: 2, done: p.done, res: p.res, cur: p.cur || null, hand: writeHand(p.hand), rules: p.rules, changed: p.changed, improved: p.improved });
 // The first mission not yet done (or -1 when all six are done). Missions up to it are open; later ones are locked.
 export const nextMission = (done) => done.findIndex((d) => !d);
 export const isOpen = (done, i) => { const n = nextMission(done); return n < 0 || i <= n; };
 export const allDone = (done) => done.every(Boolean);
 export const doneCount = (done) => done.filter(Boolean).length;
+
+// ---- the lines on a mission's "done" card, from what the mission handed back
+const ruleCount = (n) => `${n} ${n === 1 ? 'rule' : 'rules'}`;
+export function doneLines(id, r, j, nRules = 0) {
+  r = r || {};
+  if (id === 'balance') return [j ? `${r.level} of ${r.of} ten-minute steps level.` : `${r.level} of ${r.of} steps balanced at 50 Hz.`];
+  if (id === 'forecast') return [j ? `Three forecasts read. ${r.spells} short spells found.` : `Three forecasts read; ${r.spells} shortfall spells found${r.kwh ? ' and sized in kWh' : ''}.`];
+  if (id === 'storage') return (r.dark || []).map((x, n) => (j ? `Day ${n + 1}: the dark squares added up to ${x}.` : `Day ${n + 1}: ${x} home-hours unsupplied.`));
+  if (id === 'rules') return [ruleCount(nRules) + (j ? `. On the test days: ${r.lit} of ${r.total} lit hours.` : `; ${r.share}% of home-hours supplied across the test days.`)];
+  if (id === 'demand') return [j ? `${r.moved} jobs moved to spare wind and sun.` : `${r.moved} jobs moved; ${r.kwh} kWh of flexible demand shifted to surplus renewables.`];
+  return [j ? 'The broken line was cut off, the safe places came first, and everyone is back.' : `Fault isolated, priority load first, all supply restored${r.trips ? ` (${r.trips} trip${r.trips === 1 ? '' : 's'} on the way)` : ' with no trips'}.`];
+}
 
 // ---- the take-home record
 export const madeTitle = () => 'My power control room';

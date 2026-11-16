@@ -115,10 +115,10 @@ export const WHO_ICON = { health: '🏥', north: '🏠', shelter: '🏫', medica
 export const whoWord = (id, j) => pick(WHO[SECTIONS[id].who], j);
 export const CREW_WORD = {
   off: { j: 'Make sure the broken line is switched off', s: 'Isolate: switch the line off, lock it off and post a warning notice' },
-  dead: { j: 'Test that there is no power in it', s: 'Prove the line dead with a tester; the crew is issued a permit to work' },
-  earth: { j: '', s: 'Fit safety earths at both ends' },
+  dead: { j: 'Test that there is no power in it', s: 'Prove the line dead with a tester' },
+  earth: { j: '', s: 'Fit safety earths at both ends; then the crew is issued a permit to work' },
   mend: { j: 'Cut away the tree and mend the line', s: 'Clear the tree and repair the conductor' },
-  unearth: { j: '', s: 'Remove the earths; the crew stands clear and gives the all clear' },
+  unearth: { j: '', s: 'The crew stands clear and hands back the permit; then remove the earths' },
   on: { j: 'Crew stands clear, then switch it back on', s: 'Re-energise from the control room' },
 };
 export const crewWord = (id, j) => pick(CREW_WORD[id], j);
@@ -149,7 +149,7 @@ export function r1Hint(mistakes, j) {
 export function r2Say(event, sw, j, load, cap = BATTERY_ONLY) {
   if (event === 'locked') return j ? 'River Row stays off: its line is still broken.' : '3B is isolated for repair and cannot be closed.';
   if (event === 'overload') return j ? `Too much! ${load} blocks wanted, but the battery can only give ${cap}. It tripped, and everything went off. Start again: who needs power most?` : `Overload: ${load * KWB} kW demanded against ${cap * KWB} kW available. The battery tripped and dropped all load.`;
-  if (r2Best(sw, cap)) return j ? 'The health centre, the shelter and the medical homes have power, and nothing more fits.' : 'All priority load restored, and the remaining capacity is used.';
+  if (r2Best(sw, cap)) { const extra = IDS.filter((id) => !SECTIONS[id].prio && live(sw)[id]).map((id) => whoWord(id, j)); return j ? `The health centre, the shelter and the medical homes have power${extra.length ? `, and ${extra.join(' and ')} too` : ''}. Nothing more fits.` : `All priority load restored${extra.length ? `, plus ${extra.join(' and ')}` : ''}; the remaining capacity is used.`; }
   if (prioOn(sw)) return j ? 'The places that keep people safe have power. Does anything else still fit?' : 'Priority load is on. Check whether more load fits within capacity.';
   return '';
 }
@@ -157,7 +157,7 @@ export const r2Hint = (tries, j) => (tries <= 1
   ? (j ? 'Think: who could be hurt without power tonight? Switch them on first.' : 'Restore the sites where loss of supply puts lives at risk first.')
   : (j ? 'First the health centre (1A), the shelter (2A) and the medical homes (2B). That is 5 blocks. Then see what else fits in 7.' : 'Priority: 1A, 2A, 2B (25 kW). Then add what fits within 35 kW.'));
 export function crewSay(res, tries, j) {
-  if (res.done) return j ? 'That is the safe order. The crew can work, and nobody gets hurt.' : 'Correct sequence: isolate, prove dead, earth, repair, remove earths, re-energise.';
+  if (res.done) return j ? 'That is the safe order. The crew can work, and nobody gets hurt.' : 'Correct sequence: isolate, prove dead, earth, permit, repair, clear and hand back the permit, remove earths, re-energise.';
   if (tries <= 1) return j ? `${res.right} of ${res.of} are in the right place. What must happen before anyone touches the line?` : `${res.right} of ${res.of} in position. What must be true before anyone touches the conductor?`;
   return j ? `Step ${res.firstWrong + 1} is not right yet. Nobody may touch a line until it is off and tested.` : `Step ${res.firstWrong + 1} is out of order. Nothing is touched until it is isolated and proved dead.`;
 }

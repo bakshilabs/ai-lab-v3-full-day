@@ -76,8 +76,8 @@ export function daySvg(kit, dayId, opts = {}) {
 const key = (x, y, junior) => `<g transform="translate(${x} ${y})" font-family="${FONT}" font-size="9" font-weight="700" fill="${C.ink2}">
 <rect x="0" y="-8" width="10" height="10" fill="${C.wind}"/><text x="14" y="1">wind</text><rect x="46" y="-8" width="10" height="10" fill="${C.sun}"/><text x="60" y="1">sun</text>
 <path d="M88 -3H104" stroke="${C.need}" stroke-width="2.5"/><text x="108" y="1">${junior ? 'power needed' : 'demand'}</text><path d="M${junior ? 178 : 150} -3h16" stroke="${C.battery}" stroke-width="2.5" stroke-dasharray="5 2"/><text x="${junior ? 198 : 170}" y="1">battery</text>
-<rect x="${junior ? 240 : 212}" y="-8" width="10" height="10" rx="2" fill="${C.lit}"/><text x="${junior ? 254 : 226}" y="1">lit</text><rect x="${junior ? 274 : 246}" y="-8" width="10" height="10" rx="2" fill="${C.dark}"/><text x="${junior ? 288 : 260}" y="1">homes dark</text></g>`;
-export const legend = (junior) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 14" role="img" aria-label="Key">${key(2, 10, junior)}</svg>`;
+<rect x="${junior ? 240 : 212}" y="-8" width="10" height="10" rx="2" fill="${C.lit}"/><text x="${junior ? 254 : 226}" y="1">lit</text><rect x="${junior ? 274 : 246}" y="-8" width="10" height="10" rx="2" fill="${C.dark}"/><text x="${junior ? 288 : 260}" y="1">homes dark</text><rect x="${junior ? 344 : 316}" y="-8" width="10" height="10" rx="2" fill="${C.dark}"/><text x="${junior ? 346.5 : 318.5}" y="0" font-size="7.5" fill="#fff">S</text><text x="${junior ? 358 : 330}" y="1">school dark</text></g>`;
+export const legend = (junior) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 418 14" role="img" aria-label="Key">${key(2, 10, junior)}</svg>`;
 
 // The take-home chart: the three test days under the child's rules. days: from rules.testRules(kit, rules).days
 export function picture(kit, days, junior = true, seed = 1) {

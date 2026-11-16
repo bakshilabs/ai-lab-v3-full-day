@@ -4,7 +4,7 @@ import { BALANCE_ROUNDS, STEPS, FLEX_MIN, FLEX_MAX, BLOCK_KW, ROUND_GOAL, gap, n
 import { C } from './chart.js';
 import { esc } from './shell.js';
 
-const STEP_MS = { j: 10000, s: 8000 }; // how long one ten-minute step lasts on screen, with movement on
+const STEP_MS = { j: [10000, 8500, 7000], s: [8000, 7000, 6000] }; // how long one ten-minute step lasts on screen, with movement on: quicker each round
 
 // The balance scale: power made on the left pan, power used on the right. It tips towards the heavier side.
 export function scaleSvg(round, i, flex, j) {
@@ -26,9 +26,9 @@ export function scaleSvg(round, i, flex, j) {
 }
 const legendHtml = (j) => `<div class="pw-blocks"><span><i style="background:${C.wind}"></i>${j ? 'wind' : 'wind'}</span><span><i style="background:${C.sun}"></i>sun</span><span><i style="background:${C.battery}"></i>${j ? 'battery' : 'battery'}</span><span><i style="background:#f2a33a"></i>${j ? 'homes and school' : 'demand'}</span>${j ? '' : `<span>1 block = ${BLOCK_KW} kW</span>`}</div>`;
 
-export async function playBalance(d) {
-  const { j, pick, ctl, prog } = d; let total = 0, of = 0;
-  for (let r = 0; r < BALANCE_ROUNDS.length; r++) {
+export async function playBalance(d, rs = {}) {
+  const { j, pick, ctl, prog } = d; let total = rs.part?.level || 0, of = rs.part?.of || 0;
+  for (let r = rs.from || 0; r < BALANCE_ROUNDS.length; r++) {
     const round = BALANCE_ROUNDS[r]; let tries = 0;
     for (;;) {
       d.report(`Balance: round ${r + 1} of 3${tries ? `, try ${tries + 1}` : ''}`);
@@ -43,6 +43,7 @@ export async function playBalance(d) {
       d.focusFirst('[data-act]'); const a = await d.press();
       if (a === 'next') { total += res.level; of += res.of; break; }
     }
+    rs.done?.(r + 1, { level: total, of });
   }
   prog.hidden = true;
   return { level: total, of };
@@ -57,7 +58,7 @@ function timeline(round, steps, cur, j) {
 function playRound(d, round, r, guide) {
   const { j, pick, reduce, ctl, prog, kit, view } = d;
   d.mode('desk', 'scale'); const flexes = []; const steps = []; let i = 0, flex = r === 0 ? 0 : clampFlex(needFlex(round, 0) - 2), t = 0, paused = false, note = '';
-  const ms = j ? STEP_MS.j : STEP_MS.s;
+  const ms = (j ? STEP_MS.j : STEP_MS.s)[r] || 8000;
   d.say(pick(BAL.how), r === 0 ? pick(BAL.warn) : `${pick(BAL.round[round.id])}. ${pick(BAL.roundNote[round.id])}`);
   const drawSide = () => {
     const diff = gap(round, i, flex);
