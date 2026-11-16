@@ -40,7 +40,7 @@ export async function playCrew(env) {
       const sq = seqs[i]; ctx.report({ stage: `Crew words: sequence ${i + 1} of ${seqs.length}` }); player.look({ move: 'wide', sub: 'town' });
       const note = `<p class="fm-hear"><span aria-hidden="true">🎬</span> <b>Director’s note:</b> ${esc(sq.note)}</p>`;
       await mui.askList(sq.items, async (item, k, again) => {
-        const res = await mui.ask({ head: { kick: `Sequence ${i + 1} of ${seqs.length}`, step: [k + 1, 2] }, item, pic: note, limit: mui.LIMIT, reveal: again });
+        const res = await mui.ask({ head: { kick: `Sequence ${i + 1} of ${seqs.length}${again ? " · again" : ""}`, step: [k + 1, 2] }, item, pic: note, limit: mui.LIMIT, reveal: again });
         if (!res.missed) r.of++; return res;
       });
       const cut = { n: 1, mood: 'cheerful', shots: sq.shots.map((s, k) => ({ id: 'q' + k, ...s, secs: 4.5 })), tags: {}, gone: [], moodWas: null, dirty: false, next: 3 };
