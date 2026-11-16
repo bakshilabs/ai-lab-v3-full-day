@@ -19,7 +19,7 @@ export function takeItems(TAKEPIC) {
     const opts = [t.fault, ...t.decoys].sort().map((f) => ({ id: f, label: FAULTS[f].label, why: `Look at take ${bad} again. Is it ${FAULTS[f].short}?` }));
     const whatWrong = { q: `What is wrong with take ${bad}?`, say: `What is wrong with take ${bad}?`, opts, answer: t.fault,
       ok: `Take ${bad} is ${FAULTS[t.fault].short}. An editor would leave it out.`, hint: 'Compare it with the good take.' };
-    return { pic: `<div class="fm-pair">${pic(1)}${pic(2)}</div>`, pickOne, whatWrong };
+    return { pic: `<div class="fm-pair">${[1, 2].map((k) => `<figure>${pic(k)}<figcaption>Take ${k}</figcaption></figure>`).join("")}</div>`, pickOne, whatWrong };
   });
 }
 
@@ -50,10 +50,12 @@ export const LENGTH_IDS = Object.keys(LENGTHS);
 // Ages 13–17 also have a running time to hit, in seconds, as an editor cutting a trailer to a slot would.
 export const PACES = [
   { id: 'fast', title: 'An exciting trailer', ask: 'First, make it an exciting trailer: the kind that makes you want to see the film.', test: (avg) => avg <= 2.2, mood: 'party',
-    secs: [8, 10], askS: 'First, an exciting trailer that runs between 8 and 10 seconds, with an average shot of 2.2 seconds or less.' },
+    secs: [7.5, 10.5], askS: 'First, an exciting trailer of five shots that runs 10.5 seconds or less, so the average shot is about 2 seconds or less.' },
   { id: 'slow', title: 'A calm film', ask: 'Now make the same shots into a calm, gentle film.', test: (avg) => avg >= 4.2, mood: 'calm',
-    secs: [20, 23], askS: 'Now a calm film of the same shots, between 20 and 23 seconds long, with an average shot of 4.2 seconds or more.' },
+    secs: [21, 24], askS: 'Now a calm film of the same five shots that runs between 21 and 24 seconds, so the average shot is over 4 seconds.' },
 ];
+// "None of the five shots is quick." / "One of the five shots is quick." / "Three of the five shots are quick."
+export const howMany = (n, what) => (n === 0 ? `None of the five shots is ${what}.` : `${['', 'One', 'Two', 'Three', 'Four', 'Five'][n]} of the five shots ${n === 1 ? 'is' : 'are'} ${what}.`);
 export const avgSecs = (lens) => lens.reduce((s, l) => s + LENGTHS[l], 0) / lens.length;
 export const totalSecs = (lens) => lens.reduce((s, l) => s + LENGTHS[l], 0);
 export const paceAsk = (pace, junior) => (junior ? pace.ask : pace.askS);
@@ -63,8 +65,8 @@ export function paceVerdict(pace, lens, junior) {
   const nums = junior ? '' : ` Running time ${total} s; average shot ${avg.toFixed(1)} s, so about ${Math.round(60 / avg)} cuts a minute.`;
   const time = !junior && feel && !inTime ? (total > pace.secs[1] ? ` It runs ${total} seconds: too long for the slot. Trim one shot.` : ` It runs ${total} seconds: too short for the slot. Let one shot run longer.`) : '';
   const say = (good, bad) => (ok ? good : feel ? time : bad) + nums;
-  if (pace.id === 'fast') return { ok, avg, total, say: say('Most shots are quick, so the cuts come fast. That feels exciting.', `${['No', 'One', 'Two', 'Three', 'Four', 'Five'][quick]} of the five shots ${quick === 1 ? 'is' : 'are'} quick. For an exciting trailer, the cuts need to come faster: make more shots quick.`).trim() };
-  return { ok, avg, total, say: say('The shots are long, so you have time to look. That feels calm.', `${['No', 'One', 'Two', 'Three', 'Four', 'Five'][long]} of the five shots ${long === 1 ? 'is' : 'are'} long. For a calm film, give the eye more time: make more shots long.`).trim() };
+  if (pace.id === 'fast') return { ok, avg, total, say: say('Most shots are quick, so the cuts come fast. That feels exciting.', `${howMany(quick, 'quick')} For an exciting trailer, the cuts need to come faster: make more shots quick.`).trim() };
+  return { ok, avg, total, say: say('The shots are long, so you have time to look. That feels calm.', `${howMany(long, 'long')} For a calm film, give the eye more time: make more shots long.`).trim() };
 }
 
 // ---- part 4: the music. Where does the story turn, and what music fits each part?

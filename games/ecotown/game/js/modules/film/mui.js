@@ -71,6 +71,10 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   // limit: after this many misses the question stops (so tapping every tile cannot win). It resolves { missed: true }
   // and the caller brings it back later; with reveal, Florence shows the answer and explains it instead.
   async function ask({ head = {}, item, pic = '', picLabel = '', tools = [], wide = false, cols = 0, onRight = null, limit = Infinity, reveal = false }) {
+    // a set-aside question comes back with its tiles in a new order (moved round by one)
+    if (reveal && item.opts.length > 1) item = { ...item, opts: [...item.opts.slice(1), item.opts[0]] };
+    // how many misses before it stops: two tiles must still be left (one miss on three choices, two on four)
+    const lim = limit === Infinity ? Infinity : Math.max(1, item.opts.length - 2); const soon = lastInQueue;
     let misses = 0; let chosen = null; let outcome = {}; const off = new Set(); const imgs = item.opts.some((o) => o.pic);
     const isRight = (id) => (item.answers ? item.answers.includes(id) : id === item.answer); // some questions have more than one good answer
     const p = put(`<section class="fm-m fm-ask ${pic ? 'has-pic' : ''} ${wide ? 'wide' : ''}" data-fm-ask aria-label="${esc(item.q)}">
@@ -97,12 +101,12 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
         const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
       } else {
         misses++; off.add(id); mark(id, 'off', 'Not this one');
-        if (misses >= limit) { // even if only the answer is left: tapping every tile must not win
+        if (misses >= lim) { // two tiles are still left: tapping every tile must not win
           for (const x of p.querySelectorAll('[data-fm-opt]')) x.disabled = true;
           if (reveal) { // the second time round: show the answer, and why
             const r = item.opts.find((x) => isRight(x.id)); mark(r.id, 'right', 'This one'); chosen = r.id; outcome = { revealed: true };
             talk(`${o?.why || 'Not this one.'} The answer is “${r.label}”. ${item.ok}`);
-          } else { outcome = { missed: true }; talk(`${o?.why || 'Not this one.'} Let’s leave this one for now. It comes back at the end, so look out for it.`); }
+          } else { outcome = { missed: true }; talk(`${o?.why || 'Not this one.'} ${soon ? 'Let’s come back to this one in a moment, with fresh eyes.' : 'Let’s leave this one for now. It comes back at the end, so look out for it.'}`); }
           const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
           return;
         }
@@ -113,10 +117,11 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
   }
 
   // ---- a list of questions. run(item, i, again) asks one (passing limit and reveal on to ask); a question missed
-  // twice is set aside and asked again at the end, once, with the answer shown if it is missed twice again.
+  // (once on three choices, twice on four or more) is set aside and asked again at the end, once, with the answer shown if it is missed twice again.
+  let lastInQueue = false;
   async function askList(items, run) {
     const queue = items.map((it, i) => ({ it, i, again: false })); const out = [];
-    while (queue.length) { const q = queue.shift(); const r = await run(q.it, q.i, q.again); if (r.missed && !q.again) { queue.push({ ...q, again: true }); continue; } out.push({ i: q.i, again: q.again, ...r }); }
+    while (queue.length) { const q = queue.shift(); lastInQueue = queue.length === 0; const r = await run(q.it, q.i, q.again); lastInQueue = false; if (r.missed && !q.again) { queue.push({ ...q, again: true }); continue; } out.push({ i: q.i, again: q.again, ...r }); }
     return out;
   }
   const LIMIT = 2;
@@ -198,6 +203,7 @@ ${M} .fm-opt:active:not(:disabled), ${M} .fm-mcard:active:not([aria-disabled]) {
 
 ${M} .fm-hear { margin: 8px 0 0; padding: 7px 11px; border-radius: 10px; background: #f3e6cc; font-weight: 700; line-height: 1.35; }
 ${M} .fm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+${M} .fm-pair figure { margin: 0; } ${M} .fm-pair figcaption { margin-top: 4px; text-align: center; font-weight: 800; }
 ${M} .fm-qpic .fm-pair svg { box-shadow: 0 0 0 2px #3b2a1e; }
 ${M} .fm-story h2, ${M} .fm-trim h2, ${M} .fm-pace h2 { margin-bottom: 8px; }
 ${M} .fm-slots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--fm-n), minmax(0, 1fr)); gap: 8px; }

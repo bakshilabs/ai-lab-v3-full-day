@@ -93,7 +93,7 @@ export function storyboardSvg({ title, cut, set }) {
   const font = 'font-family="Inter, Arial, sans-serif"'; const TAGC = { new: '#2e9b5a', moved: '#1f6fd0', changed: '#b3541e' };
   const cells = shots.map((shot, i) => {
     const x = pad + (i % cols) * (FW + gap), y = top + Math.floor(i / cols) * (FH + capH + gap); const tag = cut.tags?.[shot.id];
-    return `<g transform="translate(${x} ${y})"><g>${frameInner(shot, set, cut.mood)}</g><rect width="${FW}" height="${FH}" fill="none" stroke="${INK}" stroke-width="2"/>`
+    return `<g transform="translate(${x} ${y})"><svg width="${FW}" height="${FH}" viewBox="0 0 ${FW} ${FH}" overflow="hidden">${frameInner(shot, set, cut.mood)}</svg><rect width="${FW}" height="${FH}" fill="none" stroke="${INK}" stroke-width="2"/>`
       + `<circle cx="11" cy="11" r="8.5" fill="${INK}"/><text x="11" y="14.6" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" ${font}>${i + 1}</text>`
       + (tag ? `<rect x="${FW - 50}" y="4" width="46" height="14" rx="7" fill="${TAGC[tag]}"/><text x="${FW - 27}" y="14.2" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" ${font}>${esc(TAG[tag])}</text>` : '')
       + `<text x="0" y="${FH + 13}" font-size="10.5" font-weight="800" fill="${INK}" ${font}>${esc(moveName(shot.move))}</text><text x="0" y="${FH + 25}" font-size="9.5" fill="#5e4936" ${font}>${esc(subjectLine(shot, set))}</text></g>`;

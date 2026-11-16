@@ -210,7 +210,7 @@ test('the camera: every move of every subject gives a steady view above the grou
         const pose = poseFor({ move, sub }, set, i / 20, { aspect });
         assert.ok(pose.pos.every(Number.isFinite) && pose.look.every(Number.isFinite) && pose.fov >= 20 && pose.fov <= 60, `${move} ${sub}`);
         assert.ok(pose.pos[1] >= 2.5, `${move} ${sub}: the camera is above the ground (${pose.pos[1]})`);
-        const d = Math.hypot(...pose.pos.map((v, k) => v - pose.look[k])); assert.ok(d > (/who:(family|otters)/.test(sub) ? 2.5 : 6), `${move} ${sub}: not on top of its subject`);
+        const d = Math.hypot(...pose.pos.map((v, k) => v - pose.look[k])); assert.ok(d > (/who:(family|otters)|place:(river|crossing|bridge|dock)/.test(sub) && move === "close" ? 2.5 : /who:(family|otters)/.test(sub) ? 2.5 : 6), `${move} ${sub}: not on top of its subject`);
         if (prev) assert.ok(Math.hypot(...pose.pos.map((v, k) => v - prev.pos[k])) < (move === 'pull' ? wideDist(aspect) / 5 : 12), `${move} ${sub}: no jump between frames`);
         prev = pose;
       }

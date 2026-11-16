@@ -53,15 +53,16 @@ export const STORY_ART = {
   'b-park': () => frame('day', at(80, 66, 1.2, ART.trees()) + at(40, 66, 0.9, ART.trees())),
   // medium shots: people from the waist up (the frame cuts them at the waist), as mission 1 teaches
   'b-family': () => frame('day', at(54, 122, 1, pawn(0, 5, '#ff8a5c', '#c68a5e')) + at(110, 122, 1, pawn(0, 5, '#2f6fd8', '#f1c9a5')) + ball(82, 60, 7), { horizon: 62 }),
-  'b-river': () => frame('day', at(80, 72, 2, water(80, 14)) + ball(86, 66, 5) + '<path d="M70 70 q4 -3 8 0 M92 72 q4 -3 8 0" stroke="#d7f1ff" stroke-width="1.4" fill="none"/>', { horizon: 50 }),
-  'b-net': () => frame('day', florence(68, 106, 1.9, net) + '<path d="M0 80 h160 v10 h-160 Z" fill="#5bbcf0"/>', { horizon: 64 }),
+  // close-ups: the ball fills the frame on the ripples; the gull stands big on a post of the dock
+  'b-river': () => `<rect width="${FW}" height="${FH}" fill="#5bbcf0"/>${[14, 30, 48, 66, 82].map((y, k) => `<path d="M${-10 + k * 9} ${y} q20 -6 40 0 t40 0 t40 0 t40 0" stroke="#d7f1ff" stroke-width="2" fill="none"/>`).join('')}<ellipse cx="82" cy="70" rx="40" ry="8" fill="#3f9fd6"/>${ball(82, 46, 26)}<path d="M50 74 q12 -5 24 0 M92 76 q12 -5 24 0" stroke="#fff" stroke-width="2" fill="none"/>`,
+  'b-net': () => frame('day', florence(70, 98, 1.45, net) + '<path d="M0 80 h160 v10 h-160 Z" fill="#5bbcf0"/>', { horizon: 64 }),
   'b-smile': () => frame('day', face(80, 46, 2.1, '#c68a5e', '#ff8a5c') + ball(108, 78, 8), { horizon: 70 }),
   'm-dawn': () => frame('dawn', island(false), { ground: false }),
   'm-setup': () => frame('day', at(116, 98, 2.6, stall(0, false)) + at(52, 124, 1, pawn(0, 5, '#5bbd5a', '#8d5a3b'))),
   'm-clouds': () => frame('storm', at(80, 72, 1.2, stall(-16, false) + stall(16, false, '#3f8fd0')) + cloud(40, 18, 1.6, '#59606b') + cloud(100, 14, 2, '#4d535d') + cloud(140, 26, 1.2, '#59606b')),
   'm-cover': () => frame('storm', at(80, 74, 1.6, stall(-16, true) + stall(16, true, '#3f8fd0')) + rain(6, 156, 4, 60) + at(80, 82, 0.9, crowd(-34, 2) + crowd(26, 2))),
   'm-sun': () => frame('day', at(80, 70, 1.4, stall(-24, false) + stall(0, false, '#3f8fd0') + stall(24, false)) + at(80, 84, 1, crowd(-60, 6) + crowd(14, 6)) + cloud(36, 20)),
-  'm-gull': () => frame('day', at(80, 62, 2.6, seagull) + at(80, 86, 1, water(160, 14)), { horizon: 74 }),
+  'm-gull': () => frame('day', `<rect x="58" y="62" width="28" height="40" fill="#9a6a42"/><rect x="58" y="60" width="28" height="5" fill="#7a5a33"/>` + at(72, 46, 4.4, seagull), { horizon: 70 }),
   // the otters come home (ages 13–17)
   'o-peek': () => frame('day', at(80, 96, 1, water(220, 40)) + at(66, 66, 5, otter(0)), { horizon: 44 }),
   'o-litter': () => RIVER_LITTER(true),
@@ -127,7 +128,7 @@ export const CHANGE_ART = {
   litter: [() => RIVER_LITTER(true), () => RIVER_LITTER(false)],
   copies: [() => OTTERS_N(1), () => OTTERS_N(4)],
 };
-export const changePair = (id) => { const [a, b] = CHANGE_ART[id]; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FW * 2 + 12} ${FH + 16}" aria-hidden="true"><g transform="translate(0 16)">${a()}</g><g transform="translate(${FW + 12} 16)">${b()}</g>`
+export const changePair = (id) => { const [a, b] = CHANGE_ART[id]; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FW * 2 + 12} ${FH + 16}" aria-hidden="true"><svg x="0" y="16" width="${FW}" height="${FH}" viewBox="0 0 ${FW} ${FH}" overflow="hidden">${a()}</svg><svg x="${FW + 12}" y="16" width="${FW}" height="${FH}" viewBox="0 0 ${FW} ${FH}" overflow="hidden">${b()}</svg>`
   + `<text x="0" y="11" font-size="10" font-weight="800" fill="${INK}" font-family="Inter, Arial, sans-serif">As it was filmed</text><text x="${FW + 12}" y="11" font-size="10" font-weight="800" fill="${INK}" font-family="Inter, Arial, sans-serif">As it was shown</text></svg>`; };
 
 export const MADE_ART = {

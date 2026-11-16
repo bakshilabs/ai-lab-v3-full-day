@@ -20,10 +20,10 @@ test('ages 13–17 get harder tasks: sequences, a running time, a second caption
     for (const sq of seqs) { assert.equal(sq.items.length, 2); assert.equal(sq.shots.length, 2); for (const it of sq.items) { assert.equal(it.opts.length, 6); assert.ok(it.opts.some((o) => o.id === it.answer)); } }
   }
   const [fast, slow] = M4.PACES; const L = (q, m, l) => [...Array(q).fill('quick'), ...Array(m).fill('medium'), ...Array(l).fill('long')];
-  assert.equal(M4.paceVerdict(fast, L(5, 0, 0), true).ok, true); assert.equal(M4.paceVerdict(fast, L(5, 0, 0), false).ok, false); // 7.5 s: under the slot
-  assert.match(M4.paceVerdict(fast, L(5, 0, 0), false).say, /too short/); assert.equal(M4.paceVerdict(fast, L(4, 1, 0), false).ok, true);
+  assert.equal(M4.paceVerdict(fast, L(5, 0, 0), true).ok, true); assert.equal(M4.paceVerdict(fast, L(4, 0, 1), false).ok, false); // 11 s: over the slot
+  assert.match(M4.paceVerdict(fast, L(4, 0, 1), false).say, /too long/); assert.equal(M4.paceVerdict(fast, L(4, 1, 0), false).ok, true);
   assert.equal(M4.paceVerdict(slow, L(0, 0, 5), false).ok, false); assert.match(M4.paceVerdict(slow, L(0, 0, 5), false).say, /too long/); assert.equal(M4.paceVerdict(slow, L(0, 1, 4), false).ok, true);
-  assert.match(M4.paceAsk(fast, false), /8 and 10 seconds/); assert.doesNotMatch(M4.paceAsk(fast, true), /\d/);
+  assert.match(M4.paceAsk(fast, false), /10\.5 seconds or less/); assert.doesNotMatch(M4.paceAsk(fast, true), /\d/);
   assert.equal(M5.buildsFor(true).length, 1); assert.equal(M5.buildsFor(false).length, 2);
 });
 

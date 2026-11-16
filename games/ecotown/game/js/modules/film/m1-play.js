@@ -35,17 +35,19 @@ export async function playCrew(env) {
 
   // ages 13–17: a director's note that needs two shots in a row; both are chosen, then the pair is filmed
   async function sequences() {
-    const seqs = seqItems(set);
+    const seqs = seqItems(set); player.look({ move: 'wide', sub: 'town' });
+    // all six choices as one list (a question set aside comes back after the others), then the three pairs are filmed
+    const all = seqs.flatMap((sq, i) => sq.items.map((item, k) => ({ item, i, k, note: `<p class="fm-hear"><span aria-hidden="true">🎬</span> <b>Director’s note ${i + 1}:</b> ${esc(sq.note)}</p>` })));
+    await mui.askList(all, async (x, _n, again) => {
+      ctx.report({ stage: `Crew words: sequence ${x.i + 1} of ${seqs.length}` });
+      const res = await mui.ask({ head: { kick: `Sequence ${x.i + 1} of ${seqs.length}${again ? ' · again' : ''}`, step: [x.k + 1, 2] }, item: x.item, pic: x.note, limit: mui.LIMIT, reveal: again });
+      if (!res.missed) r.of++; return res;
+    });
     for (let i = 0; i < seqs.length; i++) {
-      const sq = seqs[i]; ctx.report({ stage: `Crew words: sequence ${i + 1} of ${seqs.length}` }); player.look({ move: 'wide', sub: 'town' });
-      const note = `<p class="fm-hear"><span aria-hidden="true">🎬</span> <b>Director’s note:</b> ${esc(sq.note)}</p>`;
-      await mui.askList(sq.items, async (item, k, again) => {
-        const res = await mui.ask({ head: { kick: `Sequence ${i + 1} of ${seqs.length}${again ? " · again" : ""}`, step: [k + 1, 2] }, item, pic: note, limit: mui.LIMIT, reveal: again });
-        if (!res.missed) r.of++; return res;
-      });
+      const sq = seqs[i]; ctx.report({ stage: `Crew words: filming sequence ${i + 1} of ${seqs.length}` });
       const cut = { n: 1, mood: 'cheerful', shots: sq.shots.map((s, k) => ({ id: 'q' + k, ...s, secs: 4.5 })), tags: {}, gone: [], moodWas: null, dirty: false, next: 3 };
       const f = ui.film({ title: `Sequence ${i + 1}`, total: 2, credit: 'Planned by you · Camera by Florence', skip: 'Skip the film', back: 'Next ➜', capOf: (k) => ({ cap: `${sq.items[k].opts.find((o) => o.id === sq.items[k].answer).label} · ${sq.items[k].q.replace(/^Shot \d of 2\. /, '')}` }) });
-      await player.play(cut, { title: () => f.title(), shot: (k, s) => f.shot(k, s, set), end: () => f.end(), dark: (on) => f.dark(on), set onNext(fn) { f.onNext = fn; }, set onSkip(fn) { f.onSkip = fn; } });
+      await player.play(cut, { title: () => f.title(), shot: (k, s2) => f.shot(k, s2, set), end: () => f.end(), dark: (on) => f.dark(on), set onNext(fn) { f.onNext = fn; }, set onSkip(fn) { f.onSkip = fn; } });
       f.close(); r.seq++;
     }
   }
