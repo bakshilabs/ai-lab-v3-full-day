@@ -58,8 +58,8 @@ export const TALK = {
     s: ['What did the car get wrong before you labelled the hard cases?', 'In testing, why change only one setting at a time?', 'How many cars did your fleet need, and what did you trade off?', 'Should a town plan for self-driving cars before it knows how people will use them?'] },
   film: { j: ['How did your feedback change Florence’s film?', 'Which feedback worked best, and why?', 'What could Florence not do, and why?'],
     s: ['What made your feedback useful to Florence?', 'Who made the film: you, Florence, or both?', 'What should a person check before sharing something an AI helped to make?'] },
-  power: { j: ['When did homes go dark, and why?', 'How did you change your rules to fix it?', 'What should people decide, and not the machine?'],
-    s: ['Where did your rules have a gap, and how did the data show it?', 'How did the days run by rules compare with the day you ran by hand?', 'What should a person still decide when a system runs by itself?'] },
+  power: { j: ['Why must the power made always match the power used?', 'How did the forecast help you plan for a short spell?', 'Which jobs did you move to a windy or sunny time, and did people still get what they needed?', 'On storm night, who got power first, and why?'],
+    s: ['What is the difference between kW and kWh, and where did it matter today?', 'Where did your automation rules have a gap, and how did testing show it?', 'How did moving demand compare with storing power in the battery?', 'Who should decide the order power comes back after a storm: people or the machine?'] },
 };
 // The part after this one in the day, or null at the end (for the break screen).
 export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };
