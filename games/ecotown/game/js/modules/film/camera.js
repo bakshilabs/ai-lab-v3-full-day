@@ -2,7 +2,7 @@
 // poseFor(shot, set, u, live) gives { pos, look, fov } for u from 0 (the shot's first frame) to 1 (its last).
 // Angles: `a` is where the camera stands round its subject (0 = due south of it, positive = towards the east),
 // `p` is how steeply it looks down, `d` is how far away it is.
-import { CENTRE, SIDES_OUT, placeOf } from './kit.js';
+import { CENTRE, SIDES_OUT, placeOf, riverX } from './kit.js';
 
 const DEG = Math.PI / 180;
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -32,6 +32,19 @@ export function targetOf(shot, set, live) {
   return [set.town[0], set.town[1], set.town[2]];
 }
 
+// ages 13-17 see the numbers: how far a pan turns and how far a tilt looks up
+export const PAN_DEG = 70, TILT_DEG = 36;
+// where a close shot or a medium shot of someone aims: a face for a close-up, the middle of the body for a medium shot
+function whoLook(id, P, size) {
+  if (id === 'florence') return [P[0], P[1] + (size === 'close' ? 2.1 : 0.7), P[2]];
+  if (id === 'family') return [P[0], P[1] + (size === 'close' ? 0.9 : 0.4), P[2]];
+  return [P[0], P[1] + 0.2, P[2]];
+}
+// A real camera's lens for this view: the focal length (mm) that gives the same picture height on a full-frame camera
+// (a 24 mm tall sensor). fov is the view's height in degrees, as three.js uses it.
+export const lensMm = (fov) => Math.round(12 / Math.tan(fov / 2 * DEG));
+export const distOf = (pose) => Math.round(Math.hypot(pose.pos[0] - pose.look[0], pose.pos[1] - pose.look[1], pose.pos[2] - pose.look[2]));
+
 export function poseFor(shot, set, u = 0.5, live = null) {
   const t = ease(u); const P = targetOf(shot, set, live); const aspect = live?.aspect || 1.6; const D = wideDist(aspect);
   const far = aspect < 1 ? 1.35 : 1; // an upright screen is narrow: stand a little further back from a place
@@ -53,6 +66,28 @@ export function poseFor(shot, set, u = 0.5, live = null) {
       const [nx, nz] = SIDES_OUT[place?.side ?? 0]; const clear = place ? place.clear : true; const out = clear ? 10 : 12; const along = lerp(-8, 8, t);
       const g = place ? P[1] - 2.6 : P[1]; pos = [P[0] + nx * out - nz * along, g + (clear ? 3.6 : 10), P[2] + nz * out + nx * along];
       look = [P[0], g + (clear ? 1.8 : 1.5), P[2]]; fov = 50; break;
+    }
+    // ---- the film crew's words (mission 1): the same subject at three sizes, and the three camera moves
+    case 'cw-wide': if (kind === 'who') { const L = [P[0], P[1] - 0.6, P[2]]; look = L; pos = around(L, 46 * far, 20, lerp(HOME - 4, HOME + 4, t)); fov = 38; } else { pos = around(set.town, D, 31, HOME); look = set.town; fov = 40; } break;
+    case 'cw-medium': if (kind === 'who') { const L = whoLook(id, P, 'medium'); look = L; pos = around(L, (id === 'florence' ? 10.5 : id === 'family' ? 6.5 : 5.5) * far, 7, lerp(HOME - 6, HOME + 2, t)); fov = 30; } else { pos = around(P, 30 * far, 20, lerp(HOME - 4, HOME + 4, t)); fov = 34; } break;
+    case 'cw-close': if (kind === 'who') {
+        const L = whoLook(id, P, 'close'); look = L; fov = 24;
+        if (id === 'family') { const face = live?.familyFace ?? 0; pos = around(L, 7 * far, 14, lerp(face - 8, face + 8, t)); }  // from their door side: they face the camera
+        else if (id === 'otters') pos = around(L, 9 * far, 22, lerp(70, 96, t));                                                 // from the east bank
+        else pos = around(L, 10.5 * far, 5, lerp(HOME - 5, HOME + 3, t));
+      } else { pos = around(P, 11 * far, 16, lerp(HOME - 4, HOME + 4, t)); fov = 28; } break;
+    case 'pan': { // the camera stands still and turns from one side to the other
+      const c = place ? [P[0], P[1] - 1.6, P[2]] : set.town; const st = around(c, (place ? 42 : 70) * far, place ? 24 : 22, HOME); pos = st;
+      const [dx, dz] = [c[0] - st[0], c[2] - st[2]]; const L = Math.hypot(dx, dz) || 1; const side = Math.tan(PAN_DEG / 2 * DEG) * L * lerp(-1, 1, t);
+      look = [c[0] - dz / L * side, c[1], c[2] + dx / L * side]; fov = 36; break;
+    }
+    case 'tilt': { // the camera stands still at the foot of something tall and turns from its foot up to its top
+      const g = P[1] - 2.6; const base = [P[0], g, P[2]]; pos = around(base, 19 * far, 0, HOME); pos[1] = g + 1.8;
+      const [dx, dz] = [P[0] - pos[0], P[2] - pos[2]]; const L = Math.hypot(dx, dz) || 1; const up = Math.tan(lerp(-8, TILT_DEG - 8, t) * DEG) * L;
+      look = [P[0], pos[1] + up, P[2]]; fov = 40; break;
+    }
+    case 'track': { // the camera itself moves along beside what it films: here, down the river at the water's edge
+      const z = lerp(-14, 14, t); const rx = riverX(z); pos = [rx + 10, 7.5, z - 4]; look = [rx, 0.6, z + 6]; fov = 44; break;
     }
     case 'close': default: {
       if (id === 'otters') { pos = around(P, 18, 23, lerp(66, 104, t)); fov = 30; }           // from the east bank, following them down the river

@@ -94,21 +94,26 @@ export function createUi(ctx, { junior, reduce, onPanel }) {
   }
 
   // ---- the frame round the film while it plays: black bars, the title card, the shot's caption, Skip (or Next shot).
-  function film({ title, total }) {
+  // capOf(i, shot): { cap, sub, say } for the missions: cap replaces the shot's caption, sub is shown as a subtitle over
+  // the picture (mission 5's captions and spoken description), say is read aloud. credit: the line under the title.
+  function film({ title, total, capOf = null, credit = CREDIT, skip = 'Skip to the storyboard', back = 'Back to the storyboard ➜' }) {
     clear(); setStage('film'); talkBox.hidden = true;
     panel = el(`<section class="fm-film" data-fm-film aria-label="The film">
       <div class="fm-dark" aria-hidden="true"></div><div class="fm-bar top" aria-hidden="true"></div>
-      <div class="fm-card" data-fm-card hidden><span class="fm-clap" aria-hidden="true">🎬</span><h2></h2><p></p></div>
-      <div class="fm-bar bottom"><p class="fm-cap" role="status"></p><div class="fm-filmbtns"><button type="button" class="fm-btn go" data-fm-nextshot hidden>Next shot ➜</button><button type="button" class="fm-btn" data-fm-skip>Skip to the storyboard</button></div></div>
+      <p class="fm-sub" data-fm-sub hidden></p><div class="fm-card" data-fm-card hidden><span class="fm-clap" aria-hidden="true">🎬</span><h2></h2><p></p></div>
+      <div class="fm-bar bottom"><p class="fm-cap" role="status"></p><div class="fm-filmbtns"><button type="button" class="fm-btn go" data-fm-nextshot hidden>Next shot ➜</button><button type="button" class="fm-btn" data-fm-skip>${esc(skip)}</button></div></div>
     </section>`);
-    root.appendChild(panel); const card = panel.querySelector('[data-fm-card]'), cap = panel.querySelector('.fm-cap'), nextB = panel.querySelector('[data-fm-nextshot]'), skipB = panel.querySelector('[data-fm-skip]');
+    root.appendChild(panel); const subEl = panel.querySelector('[data-fm-sub]'); const card = panel.querySelector('[data-fm-card]'), cap = panel.querySelector('.fm-cap'), nextB = panel.querySelector('[data-fm-nextshot]'), skipB = panel.querySelector('[data-fm-skip]');
     let onNext = null, onSkip = null; nextB.onclick = () => onNext?.(); skipB.onclick = () => onSkip?.();
     if (reduce) nextB.hidden = false; (reduce ? nextB : skipB).focus({ preventScroll: true });
     const showCard = (h, p) => { card.hidden = false; card.querySelector('h2').textContent = h; card.querySelector('p').textContent = p; };
     return {
-      title() { card.classList.remove('end'); showCard(title, CREDIT); cap.textContent = ''; panel.dataset.fmShot = 'title'; ctx.say(title); if (reduce) nextB.textContent = 'Start the film ➜'; },
-      shot(i, shot, set) { card.hidden = true; panel.dataset.fmShot = String(i); cap.innerHTML = `<b>${esc(shotCount(i, total))}</b> ${esc(caption(shot, set))}`; if (reduce) nextB.textContent = i === total - 1 ? 'End of the film ➜' : 'Next shot ➜'; },
-      end() { showCard(THE_END, title); card.classList.add('end'); cap.textContent = ''; panel.dataset.fmShot = 'end'; if (reduce) nextB.textContent = 'Back to the storyboard ➜'; skipB.hidden = true; if (reduce) nextB.focus({ preventScroll: true }); },
+      title() { card.classList.remove('end'); subEl.hidden = true; showCard(title, credit); cap.textContent = ''; panel.dataset.fmShot = 'title'; ctx.say(title); if (reduce) nextB.textContent = 'Start the film ➜'; },
+      shot(i, shot, set) {
+        card.hidden = true; panel.dataset.fmShot = String(i); const c = capOf ? capOf(i, shot) : null;
+        cap.innerHTML = `<b>${esc(shotCount(i, total))}</b> ${esc(c?.cap ?? caption(shot, set))}`;
+        subEl.hidden = !c?.sub; subEl.innerHTML = c?.sub ? esc(c.sub).replace(/\n/g, '<br>') : ''; if (c?.say) ctx.say(c.say); if (reduce) nextB.textContent = i === total - 1 ? 'End of the film ➜' : 'Next shot ➜'; },
+      end() { subEl.hidden = true; showCard(THE_END, title); card.classList.add('end'); cap.textContent = ''; panel.dataset.fmShot = 'end'; if (reduce) nextB.textContent = back; skipB.hidden = true; if (reduce) nextB.focus({ preventScroll: true }); },
       dark(on) { panel.classList.toggle('dark', !!on); },
       set onNext(fn) { onNext = fn; }, set onSkip(fn) { onSkip = fn; },
       close() { clear(); talkBox.hidden = false; },
@@ -206,6 +211,8 @@ ${M} .fm-film.dark .fm-dark { opacity: 1; }
 ${M} .fm-still .fm-dark { transition: none; }
 ${M} .fm-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100% - 40px)); box-sizing: border-box; text-align: center; background: #fffaf0; border-radius: 22px; padding: 22px 26px 24px; box-shadow: inset 0 0 0 3px #b08a55, 0 6px 0 #7a5a33, 0 0 0 8px rgba(23, 17, 12, .35); }
 ${M} .fm-card[hidden] { display: none; }
+${M} .fm-sub { position: absolute; left: 50%; bottom: 100px; transform: translateX(-50%); width: max-content; max-width: min(760px, calc(100% - 32px)); margin: 0; padding: 6px 14px; background: #000; color: #fff; font-size: 1.35em; font-weight: 700; line-height: 1.3; text-align: center; border-radius: 6px; }
+${M} .fm-sub[hidden] { display: none; }
 ${M} .fm-card.end { top: auto; bottom: 96px; transform: translateX(-50%); width: min(460px, calc(100% - 40px)); padding: 12px 20px 14px; }
 ${M} .fm-card.end .fm-clap { display: none; }
 ${M} .fm-card.end h2 { font-size: 1.7em; }
