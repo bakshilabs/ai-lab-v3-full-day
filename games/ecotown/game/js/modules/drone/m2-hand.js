@@ -44,10 +44,14 @@ export function windAt(round, t) {
   return { x: dx * kmh * DRIFT, z: dz * kmh * DRIFT, kmh: Math.round(kmh) };
 }
 // The hoops and the landing pad, round the training place: offsets in metres, height above the ground.
-export function course(origin) {
+// clear(x, z) (optional): whether a point is open ground for the landing pad (not the river, not a building).
+export function course(origin, clear = () => true) {
   const at = (o) => { let x = origin.x + o.dx, z = origin.z + o.dz; const e = Math.hypot(x / (SAFE_RX - 5), z / (SAFE_RZ - 5)); if (e > 1) { x /= e; z /= e; } return { x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10 }; };
   const hoops = HOOPS.map((h, i) => { const p = at(h); const prev = i ? at(HOOPS[i - 1]) : { x: origin.x, z: origin.z }; return { ...p, h: h.h, facing: Math.atan2(p.x - prev.x, -(p.z - prev.z)) }; });
-  return { pad: { x: origin.x, z: origin.z }, hoops, land: at(LAND) };
+  // the landing pad: the first of a few spots round the field that is open ground
+  const spots = [LAND, { dx: 12, dz: 2 }, { dx: -2, dz: -12 }, { dx: -2, dz: 12 }, { dx: -10, dz: -8 }, { dx: 10, dz: 10 }, { dx: -8, dz: 9 }].map(at).filter((p) => Math.hypot(p.x - origin.x, p.z - origin.z) > 7);
+  const land = spots.find((p) => clear(p.x, p.z)) || spots[0] || at(LAND);
+  return { pad: { x: origin.x, z: origin.z }, hoops, land };
 }
 export const HOOP_R = 3.4;                                  // a hoop counts when the drone passes this close to its middle
 export const PAD_R = 2.6;                                   // the landing pad's radius

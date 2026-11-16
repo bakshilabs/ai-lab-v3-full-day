@@ -19,7 +19,8 @@ export function createKit(ctx, { reduce }) {
   const choose = (box, onOther) => new Promise((res) => {
     box.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || b.disabled || !box.contains(b)) return; if (b.dataset.k !== undefined) res(b.dataset.k); else onOther?.(b, e); });
   });
-  const focusFirst = (box, sel = '[data-k]') => { const b = box.querySelector(`${sel}:not(:disabled)`); if (b && keyboardUser()) b.focus({ preventScroll: true }); };
+  // the first selector in the list that matches an enabled button gets the focus (in the order given, not page order)
+  const focusFirst = (box, sel = '[data-k]') => { if (!keyboardUser()) return; for (const one of sel.split(',')) { const b = box.querySelector(`${one.trim()}:not(:disabled)`); if (b) { b.focus({ preventScroll: true }); return; } } };
 
   // ---- the mission map: six stops on a flight path. Resolves with { act: 'play', id } or { act: 'finish' }.
   async function hub(st, { first = false } = {}) {
@@ -91,6 +92,7 @@ ${M} .dk-t em { font-style: normal; font-size: .88em; font-weight: 800; color: #
 ${M} .dk-stop button:disabled .dk-t em { color: #6d6257; }
 ${M} .dk-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-end; }
 ${M} .dk-row .dr-btn { flex: 0 1 auto; }
+${M} .dk-hub .dr-btn.go:focus, ${M} .dk-card .dr-btn.go:focus { outline: 3px solid #1f6fd0; outline-offset: 3px; }
 ${M} .dk-card { width: min(640px, calc(100% - 24px)); text-align: left; }
 ${M} .dk-cardico { float: right; font-size: 2.6em; line-height: 1; margin: 0 0 6px 10px; }
 ${M} .dk-card.done .dk-cardico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #2e9b5a; color: #fff; font-size: 2em; font-weight: 800; }

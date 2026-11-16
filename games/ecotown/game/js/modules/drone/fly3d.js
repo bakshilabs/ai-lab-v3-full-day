@@ -5,8 +5,9 @@
 import * as THREE from 'three';
 import { makeDrone, makeShadow, dispose } from './model.js';
 import { key, T, X0, Z0 } from './geo.js';
+import { vertical } from './fly-physics.js';
 
-const SPEED = 6, CLIMB = 3.2, DOWN_ACC = 4.5, DOWN_MAX = 6, SCALE = 1.1;
+const SPEED = 6, SCALE = 1.1;
 
 // origin: { x, z } the world point the flying happens round. radius: how far from it the drone may go.
 export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19 } }) {
@@ -19,7 +20,7 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   const plumb = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1, 6), new THREE.MeshBasicMaterial({ color: '#3b2a1e' })); root.add(plumb);
   // ground height under a world point (the island's tile tops; 1 off the tiles)
   const groundAt = (x, z) => { const gx = Math.floor((x - X0) / T), gz = Math.floor((z - Z0) / T); const k = key(gx, gz); if (!tiles.has(k)) return 1; try { return world.tileTop(k).y; } catch { return 1; } };
-  const S = { x: origin.x, y: 0, z: origin.z, vx: 0, vy: 0, vz: 0, floor: null, wind: { x: 0, z: 0 }, gone: false, t: 0, spin: false, still: null };
+  const S = { x: origin.x, y: 0, z: origin.z, vx: 0, vy: 0, vz: 0, floor: null, wind: { x: 0, z: 0 }, gone: false, t: 0, spin: false, still: null, airborne: false };
   S.y = groundAt(S.x, S.z); S.floor = S.y;
   const camP = new THREE.Vector3(), camL = new THREE.Vector3(), wantP = new THREE.Vector3(), wantL = new THREE.Vector3(); let camSet = false;
   let step = null; let input = () => ({ x: 0, z: 0, y: 0 }); let frozen = true;
@@ -27,21 +28,15 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   // floor(x, z): what the drone lands on there (a pad's top or the ground). Missions may set it.
   let floorAt = (x, z) => groundAt(x, z);
   function move(dt) {
-    const inp = frozen ? { x: 0, z: 0, y: 0 } : input(); const onGround = S.y <= S.floor + 0.02;
-    // up and down: climb at a steady rate; coming down gets faster the longer it is held (let go to slow down)
-    if (inp.y > 0) S.vy += (CLIMB - S.vy) * Math.min(1, dt * 6);
-    else if (inp.y < 0) S.vy = Math.max(-DOWN_MAX, Math.min(0, S.vy) - DOWN_ACC * dt);
-    else S.vy += (0 - S.vy) * Math.min(1, dt * 5);
+    const inp = frozen ? { x: 0, z: 0, y: 0 } : input(); const onGround = !S.airborne;
     // sideways: towards where the keys point, plus the wind; on the ground the wind cannot move it
     const n = Math.hypot(inp.x, inp.z) || 1; const wx = onGround ? 0 : S.wind.x, wz = onGround ? 0 : S.wind.z;
     const tx = onGround ? 0 : inp.x / n * SPEED + wx, tz = onGround ? 0 : inp.z / n * SPEED + wz; const k = Math.min(1, dt * 2.6);
     S.vx += (tx - S.vx) * k; S.vz += (tz - S.vz) * k;
     S.x += S.vx * dt; S.z += S.vz * dt;
     const dx = S.x - origin.x, dz = S.z - origin.z, d = Math.hypot(dx, dz); if (d > radius) { S.x = origin.x + dx / d * radius; S.z = origin.z + dz / d * radius; S.vx *= 0.5; S.vz *= 0.5; }
-    S.floor = floorAt(S.x, S.z); const vyWas = S.vy; S.y += S.vy * dt;
-    let touched = null; if (S.y <= S.floor) { if (!onGround) touched = Math.max(0, -vyWas); S.y = S.floor; S.vy = Math.max(0, S.vy); } // touching down, also when the ground rises under it (the edge of a pad)
-    S.y = Math.min(S.y, S.floor + 60);
-    return touched; // the speed it came down at, on the frame it touched down
+    // up and down (fly-physics.js): returns the speed it came down at, on the frame it touched down
+    S.floor = floorAt(S.x, S.z); return vertical(S, inp.y, dt);
   }
   function place() {
     drone.group.position.set(S.x, S.y + 0.6 * SCALE, S.z); drone.group.rotation.y = 0;
@@ -51,7 +46,7 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   }
   function view(dt) {
     if (S.still) { wantP.copy(S.still.p); wantL.copy(S.still.l); }
-    else { wantP.set(S.x, S.y + cam.up, S.z + cam.back); wantL.set(S.x, S.y - (cam.down ?? 1.5), S.z - (cam.ahead ?? 3.5)); }
+    else { const ly = S.aimY ?? (S.y - (cam.down ?? 1.5)); const far = (camera.aspect || 1.6) < 1 ? 1.45 : 1; wantP.set(S.x, Math.max(S.y, ly) + cam.up * far, S.z + cam.back * far); /* an upright screen is narrow: stand further back */ wantL.set(S.x, ly, S.z - (cam.ahead ?? 3.5)); }
     if (!camSet || reduce) { camP.copy(wantP); camL.copy(wantL); camSet = true; } else { const k = 1 - Math.exp(-dt * 6); camP.lerp(wantP, k); camL.lerp(wantL, k); }
     camera.position.copy(camP); camera.lookAt(camL); if (camera.fov !== 55) { camera.fov = 55; camera.updateProjectionMatrix(); }
   }
@@ -72,7 +67,8 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
     height: () => S.y - groundAt(S.x, S.z),
     setInput(fn) { input = fn; }, freeze(v) { frozen = !!v; if (frozen) { S.vx = 0; S.vz = 0; S.vy = 0; } },
     setWind(x, z) { S.wind.x = x; S.wind.z = z; }, setFloor(fn) { floorAt = fn || ((x, z) => groundAt(x, z)); },
-    placeAt(x, z, y) { S.x = x; S.z = z; S.floor = floorAt(x, z); S.y = Math.max(S.floor, y ?? S.floor); S.vx = S.vy = S.vz = 0; place(); camSet = false; },
+    placeAt(x, z, y) { S.x = x; S.z = z; S.floor = floorAt(x, z); S.y = Math.max(S.floor, y ?? S.floor); S.airborne = S.y > S.floor + 0.08; S.vx = S.vy = S.vz = 0; place(); camSet = false; },
+    aim(y) { S.aimY = y; }, // look at this height (an inspection frame) rather than just below the drone
     still(p, l) { S.still = p ? { p: new THREE.Vector3(...p), l: new THREE.Vector3(...l) } : null; camSet = false; },
     onTick(f) { ticks.add(f); return () => ticks.delete(f); },
     add(obj) { root.add(obj); return obj; },
