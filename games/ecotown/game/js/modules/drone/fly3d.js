@@ -46,7 +46,7 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
   }
   function view(dt) {
     if (S.still) { wantP.copy(S.still.p); wantL.copy(S.still.l); }
-    else { const ly = S.aimY ?? (S.y - (cam.down ?? 1.5)); const far = (camera.aspect || 1.6) < 1 ? 1.45 : 1; wantP.set(S.x, Math.max(S.y, ly) + cam.up * far, S.z + cam.back * far); // an upright screen is narrow: stand further back wantL.set(S.x, ly, S.z - (cam.ahead ?? 3.5)); }
+    else { const ly = S.aimY ?? (S.y - (cam.down ?? 1.5)); const far = (camera.aspect || 1.6) < 1 ? 1.45 : 1; wantP.set(S.x, Math.max(S.y, ly) + cam.up * far, S.z + cam.back * far); /* an upright screen is narrow: stand further back */ wantL.set(S.x, ly, S.z - (cam.ahead ?? 3.5)); }
     if (!camSet || reduce) { camP.copy(wantP); camL.copy(wantL); camSet = true; } else { const k = 1 - Math.exp(-dt * 6); camP.lerp(wantP, k); camL.lerp(wantL, k); }
     camera.position.copy(camP); camera.lookAt(camL); if (camera.fov !== 55) { camera.fov = 55; camera.updateProjectionMatrix(); }
   }
