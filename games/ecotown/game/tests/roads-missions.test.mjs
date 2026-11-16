@@ -4,7 +4,7 @@ import test from 'node:test'; import assert from 'node:assert/strict';
 import { MISSIONS, cleanHub, openable, nextUp, allDone, streetResult, hourLines, hourPractised, hourTitle, hourPicture } from '../js/modules/roads/missions.js';
 import { SENSORS, ROUNDS, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
 import { EASY, HARD, CASES, TEST, test as carTest, reviewSay, LABELS } from '../js/modules/roads/labels.js';
-import { SCENES, resultSay, stopM } from '../js/modules/roads/rules.js';
+import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
 import { simulate as fleetSim, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
 import { cameraView, radarView, lidarView, boxOf } from '../js/modules/roads/art.js';
@@ -72,9 +72,11 @@ test('roads mission 2: the reviewer never points at a missed thing on the first 
 });
 
 test('roads mission 3: the safe choices are the Highway Code’s, and stopping distances are the code’s', () => {
-  assert.equal(stopM(20), 8); assert.equal(stopM(30), 16); assert.equal(stopM(40), 26);
+  assert.deepEqual([stopM(20), stopM(30), stopM(40)], [8, 17, 28], 'braking 6/14/24 m plus 0.2 s of reaction'); assert.deepEqual(HUMAN_M, { 20: 12, 30: 23, 40: 36 }, 'Highway Code typical stopping distances');
   const safe = Object.fromEntries(SCENES.map((s) => [s.id, s.opts.filter((o) => s.safe(o.v)).map((o) => o.v)]));
-  assert.deepEqual(safe, { zebra: ['stop'], school: [20], cyclist: [1.5, 2], narrow: ['wait'], rain: [4], turn: ['person'] });
+  assert.deepEqual(safe, { zebra: ['stop'], school: [20], cyclist: [1.5, 2], narrow: ['wait'], rain: [4], turn: ['person'], ambulance: ['pull'], ice: [20] });
+  assert.equal(scenesFor(true).length, 7); assert.equal(scenesFor(false).length, 8, 'ages 13–17 also get the icy road');
+  assert.ok(SCENES.some((sc) => sc.opts.some((o) => !sc.safe(o.v) && /stop/.test(o.v))), 'one scene where stopping dead is wrong: caution is not always safe');
   for (const s of SCENES) for (const o of s.opts) {
     for (const j of [true, false]) {
       const t1 = resultSay(s, o.v, 1, j); if (!s.safe(o.v)) assert.doesNotMatch(t1, /safe choice is|Safe setting/);
