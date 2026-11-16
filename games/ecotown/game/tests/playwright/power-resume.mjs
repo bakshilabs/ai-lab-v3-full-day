@@ -20,7 +20,7 @@ await p.click('[data-band="junior"]'); await p.click('[data-name]'); await p.cli
 { const sk = await p.waitForSelector('[data-introskip]', { timeout: LONG }).catch(() => null); if (sk) await sk.click().catch(() => {}); }
 await p.waitForFunction(() => window.__eco?.app?.G?.canMenu?.(), null, { timeout: LONG });
 const put = (done, rounds) => p.evaluate(({ done, rounds }) => { const G = window.__eco.app.G; G.modules = { ...(G.modules || {}), power: { at: Date.now(), state: { v: 2, done, res: {}, rounds, hand: '', rules: { list: [], school: false, turns: false } } } }; }, { done, rounds });
-const open = async () => { await p.evaluate(() => { window.__r = undefined; window.__eco.openModule('power').then((r) => { window.__r = r ?? null; }); }); await p.waitForSelector(M + '.pw-map'); };
+const open = async () => { await p.evaluate(() => { window.__r = undefined; window.__eco.openModule('power').then((r) => { window.__r = r ?? null; }); }); try { await p.waitForSelector(M + '.pw-map', { timeout: 120000 }); } catch (e) { await p.screenshot({ path: `${out}/00-stuck.png` }); console.log(JSON.stringify({ stuck: true, r: await p.evaluate(() => window.__r), errors })); throw e; } };
 const leave = async () => { await p.click('#module .modback'); await p.waitForFunction(() => window.__r !== undefined); await p.waitForTimeout(500); };
 const kept = () => p.evaluate(() => window.__eco.app.G.modules?.power?.state?.rounds);
 

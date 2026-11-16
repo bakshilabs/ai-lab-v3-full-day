@@ -43,7 +43,7 @@ export async function playDemand(d, rs = {}) {
       return true;
     };
     d.setTap((b) => {
-      if (b.dataset.job) { sel = b.dataset.job; drawJobs(); drawChart(`[data-slot="${plan[sel]}"]`); if ((window.innerWidth || 1280) <= 560) { try { d.screen.scrollIntoView({ block: 'start' }); } catch { /* old browser */ } } // on a phone the slots sit above the list: bring them back into view showSlot(plan[sel]); d.ctx.say(`${jobName(sel, j)}. ${jobNeed(sel, j)}`); }
+      if (b.dataset.job) { sel = b.dataset.job; drawJobs(); drawChart(`[data-slot="${plan[sel]}"]`); if ((window.innerWidth || 1280) <= 560) { try { d.screen.scrollIntoView({ block: 'start' }); } catch { /* old browser */ } } /* on a phone the slots sit above the list: bring them back into view */ showSlot(plan[sel]); d.ctx.say(`${jobName(sel, j)}. ${jobNeed(sel, j)}`); }
       else if (b.dataset.slot !== undefined) { const s = Number(b.dataset.slot); if (move(s)) all(`[data-slot="${plan[sel]}"]`); }
       else if ('reset' in b.dataset) { Object.assign(plan, habit); star = null; all(`[data-job="${sel}"]`); }
     });
