@@ -96,8 +96,7 @@ export function createMissionUi(ctx, ui, { junior, onPanel }) {
         const nx = p.querySelector('[data-fm-next]'); nx.hidden = false; nx.focus({ preventScroll: true }); measure();
       } else {
         misses++; off.add(id); mark(id, 'off', 'Not this one');
-        const left = item.opts.filter((x) => !off.has(x.id)).length;
-        if (misses >= limit && left > 1) {
+        if (misses >= limit) { // even if only the answer is left: tapping every tile must not win
           for (const x of p.querySelectorAll('[data-fm-opt]')) x.disabled = true;
           if (reveal) { // the second time round: show the answer, and why
             const r = item.opts.find((x) => isRight(x.id)); mark(r.id, 'right', 'This one'); chosen = r.id; outcome = { revealed: true };

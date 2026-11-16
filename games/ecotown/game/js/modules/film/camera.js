@@ -37,7 +37,7 @@ export const PAN_DEG = 70, TILT_DEG = 36;
 // where a close shot or a medium shot of someone aims: a face for a close-up, the middle of the body for a medium shot
 function whoLook(id, P, size) {
   if (id === 'florence') return [P[0], P[1] + (size === 'close' ? 2.1 : 0.7), P[2]];
-  if (id === 'family') return [P[0], P[1] + (size === 'close' ? 1.1 : 0.6), P[2]];
+  if (id === 'family') return [P[0], P[1] + (size === 'close' ? 0.45 : 0.15), P[2]];
   return [P[0], P[1] + 0.2, P[2]];
 }
 // A real camera's lens for this view: the focal length (mm) that gives the same picture height on a full-frame camera
