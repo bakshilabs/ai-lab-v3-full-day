@@ -89,9 +89,10 @@ export function practisedFor(st) {
   else if (d('ground')) out.push('checking a drone before flight and judging flights against the Drone Code');
   else if (d('hand')) out.push('flying a drone by hand in the wind and landing it gently');
   if (d('delivery')) out.push('turning a delivery route into steps a drone can follow by itself');
-  if (d('survey') && d('inspect')) out.push('planning an overlapping survey, reading a crop map and inspecting a turbine and a bridge from a safe distance');
+  const safe = d('inspect') && !(st.sum.inspect?.close > 0) ? ' from a safe distance' : '';
+  if (d('survey') && d('inspect')) out.push(`planning an overlapping survey, reading a crop map and inspecting a turbine and a bridge${safe}`);
   else if (d('survey')) out.push('planning an overlapping survey and reading a crop map');
-  else if (d('inspect')) out.push('inspecting a turbine and a bridge from a safe distance and finding the damage');
+  else if (d('inspect')) out.push(`inspecting a turbine and a bridge${safe} and finding the damage`);
   if (d('rescue')) out.push('searching with a heat camera in a pattern and guiding a rescue team on the ground');
   return out.slice(0, 4);
 }

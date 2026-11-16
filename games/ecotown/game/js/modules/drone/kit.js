@@ -123,7 +123,8 @@ ${M} .dk-steps li.now { background: #1f6fd0; color: #fff; }
 ${M} .dk-steps li.done { background: #2e9b5a; color: #fff; }
 @media (max-width: 900px), (orientation: portrait) {
   ${M} .dk-stops { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  ${M} .dk-panel { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1.1fr) minmax(0, 1fr); }
+  ${M} .dk-panel { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; }
+  ${M} .dk-side { max-height: 44vh; }
 }
 @media (max-width: 600px) {
   ${M} .dk-hub, ${M} .dk-card { top: 66px; }
