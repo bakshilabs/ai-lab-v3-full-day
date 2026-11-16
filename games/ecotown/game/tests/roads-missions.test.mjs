@@ -6,7 +6,7 @@ import { SENSORS, ROUNDS, roundsFor, m1Line, answer, check, missSay, cover, kitS
 import { EASY, HARD, CASES, TEST, test as carTest, testFor, hardFor, m2Line, reviewSay, LABELS } from '../js/modules/roads/labels.js';
 import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
-import { simulate as fleetSim, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
+import { simulate as fleetSim, fleetSay, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
 import { cameraView, radarView, lidarView, boxOf } from '../js/modules/roads/art.js';
 import { scenePic } from '../js/modules/roads/m3-rules.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
@@ -118,7 +118,8 @@ test('roads mission 5: more cars cut the wait, waiting near the homes cuts empty
   assert.ok(!meets(FLEET[2], fleetSim({ cars: 11, spots: ['homesW', 'homesN'], charger: 'depot' }, { charge: true })), 'a charger at the depot means too much empty driving');
   assert.equal(curve({ cars: 4, spots: ['depot'] }, false).length, 13);
   assert.deepEqual(cleanPlan({ cars: 99, spots: ['x', 'shops', 'station', 'homesN'] }), { cars: 14, spots: ['shops', 'station'], charger: 'depot' });
-  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'just under half'); assert.equal(shareWords(54), 'about half');
+  assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'half or a little less'); assert.equal(shareWords(52), 'just over half', '52% fails a no-more-than-half goal, and the words say so');
+  const at8 = fleetSim({ cars: 8, spots: ['homesW', 'homesN'] }); assert.doesNotMatch(fleetSay(FLEET[1], at8, null, { cars: 8, spots: ['homesW', 'homesN'] }, true), /Could fewer do/, 'no fewer-cars nudge at the smallest fleet that works');
 });
 
 test('roads missions: the hour’s record passes the contract and fits the save', () => {

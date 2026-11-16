@@ -188,7 +188,7 @@ const cars = async (d, times) => { for (let i = 0; i < times; i++) await p.click
 const runFleet = async () => { await p.click(tray('[data-act="run"]')); await p.waitForTimeout(400); };
 await runFleet(); checks.m5first = await topText(); must('m5-tooFewCarsSaysSo', /Too long a wait|Waits too long/.test(checks.m5first), checks.m5first);
 await shot('m5-first'); await layout('m5-first');
-await cars(1, 7); await runFleet(); await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
+await cars(1, 3); await runFleet(); await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
 await p.click(tray('[data-spot="homesW"]')); await p.click(tray('[data-spot="homesN"]')); await cars(-1, 3); await runFleet();
 await shot('m5-where'); await layout('m5-where');
 await p.waitForSelector(tray('[data-act="next"]'), { timeout: LONG }); await primary();
@@ -310,8 +310,8 @@ if (motion) {
   // every caption must stay up long enough to read
   const seen = []; let prev = null; const t0 = Date.now(); let shots = 0;
   while (!(await p.$(M + '[data-act="next"]')) && Date.now() - t0 < 180000) { const t = await topText(); if (t !== prev) { seen.push({ t, at: Date.now() }); prev = t; if (shots < 3 && seen.length > 1) { shots++; await shot(`ride-${shots}`, 700); } } await p.waitForTimeout(120); }
-  const holds = seen.slice(1).map((s, i) => (s.at - seen[i].at) / 1000); checks.rideCaptions = seen.length; checks.rideHolds = holds.map((h) => +h.toFixed(1));
-  must('captionsHold', seen.length >= 5 && holds.every((h) => h >= 2.4), checks.rideHolds);
+  const holds = seen.slice(2).map((s, i) => (s.at - seen[i + 1].at) / 1000);   // the first caption may be seen late (it shows while the test is still taking a screenshot), so its hold is not measured checks.rideCaptions = seen.length; checks.rideHolds = holds.map((h) => +h.toFixed(1));
+  must('captionsHold', seen.length >= 5 && holds.every((h) => h >= 2.6), checks.rideHolds);
   await p.waitForSelector(M + '[data-act="next"]', { timeout: LONG }); await focusOk('ride-end'); lastCaption = await topText(); await shot('ride-end'); await layout('ride-end'); await p.click(M + '[data-act="next"]');
 } else {
   let views = 0;

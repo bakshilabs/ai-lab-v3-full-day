@@ -185,7 +185,7 @@ export async function streetMission(K, saved, keep0, { skipIntro = false } = {})
     } else {
       swap(`<div class="rd-row"><p class="rd-cap">${j ? 'Riding along your street…' : 'Riding the street…'}</p><button type="button" data-primary data-act="end">Skip the ride</button></div>`);
       // each caption stays for at least HOLD seconds: the car waits at a stop, or slows before the next one
-      const HOLD = 2.8; let x = -6, hold = 0, held = 0, idx = 0, said = -99, at = null, prev = secs(), ended = false;
+      const HOLD = 3; let x = -6, hold = 0, held = 0, idx = 0, said = -99, at = null, prev = secs(), ended = false;
       set.setRide(x); setView(behind(x), true);
       await new Promise((done) => {
         tray.onclick = (e) => { if (e.target.closest('[data-act="end"]') && !tooSoon(e)) { K.anim = null; done(); } };

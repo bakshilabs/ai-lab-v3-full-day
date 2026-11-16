@@ -36,7 +36,7 @@ export const ROUNDS = [
   { id: 'charge', show: ['cars', 'spots', 'charger'], charge: true, goal: { wait: 10, empty: 55 } },
 ];
 export const CARS = { min: 2, max: 14 };
-export const START = { cars: 4, spots: ['depot'], charger: 'depot' };
+export const START = { cars: 8, spots: ['depot'], charger: 'depot' };
 export function cleanPlan(p) {
   const cars = Math.max(CARS.min, Math.min(CARS.max, Math.round(Number(p?.cars)) || START.cars));
   const spots = [...new Set((Array.isArray(p?.spots) ? p.spots : []).filter((s) => WAIT_SPOTS.includes(s)))].slice(0, 2);
@@ -72,14 +72,15 @@ export function meets(round, r) { return r.longest <= round.goal.wait && (round.
 // the trade-off, for ages 13–17: the longest wait for every fleet size, with the rest of the plan as it is
 export const curve = (plan, charge) => Array.from({ length: CARS.max - CARS.min + 1 }, (_, i) => ({ cars: CARS.min + i, longest: simulate({ ...plan, cars: CARS.min + i }, { charge }).longest }));
 // ages 8–12 read shares as words, not percentages
-export const shareWords = (pct) => (pct < 40 ? 'less than half' : pct < 50 ? 'just under half' : pct <= 55 ? 'about half' : pct < 70 ? 'more than half' : 'about three quarters');
+// the words line up with the goals: 'no more than half' (round 2) and 'not much more than half' (round 3)
+export const shareWords = (pct) => (pct < 45 ? 'less than half' : pct <= 50 ? 'half or a little less' : pct <= 55 ? 'just over half' : pct < 70 ? 'well over half' : 'about three quarters');
 export const idleWords = (busyPct) => (busyPct >= 80 ? 'hardly ever' : busyPct >= 60 ? 'sometimes' : 'often');
 
 const p = (o, j) => (j ? o.j : o.s);
 export const GOAL = {
   size: { j: 'Goal: nobody waits more than 15 minutes.', s: 'Goal: longest wait ≤ 15 min.' },
-  where: { j: 'Goal: nobody waits more than 8 minutes, and less than half the driving is empty.', s: 'Goal: longest wait ≤ 8 min and empty driving ≤ 50%.' },
-  charge: { j: 'Goal: nobody waits more than 10 minutes, even with charging, and no more than about half the driving is empty.', s: 'Goal: longest wait ≤ 10 min and empty driving ≤ 55%, with charging.' },
+  where: { j: 'Goal: nobody waits more than 8 minutes, and no more than half the driving is empty.', s: 'Goal: longest wait ≤ 8 min and empty driving ≤ 50%.' },
+  charge: { j: 'Goal: nobody waits more than 10 minutes, even with charging, and not much more than half the driving is empty.', s: 'Goal: longest wait ≤ 10 min and empty driving ≤ 55%, with charging.' },
 };
 export const M5 = {
   size: { j: 'The town’s shared cars all wait at the depot, at the edge of town. How many cars do we need? Choose a number and run the morning.', s: 'All cars start and wait at the depot on the edge of town. Choose the fleet size and run the morning.' },
@@ -90,7 +91,9 @@ export const M5 = {
 export function fleetSay(round, r, prev, plan, j) {
   const ok = meets(round, r); const lead = j ? `Longest wait: ${r.longest} minutes. Cars drove empty for ${shareWords(r.emptyPct)} of the time.` : `Longest wait ${r.longest} min, average ${r.average} min; ${r.emptyPct}% of driving empty; cars busy ${r.busyPct}% of the hour.`;
   const worst = r.worst && r.longest > 0 ? (j ? ` The longest wait was at the ${PLACES[r.worst.from].name.j.toLowerCase()}.` : ` Worst wait: ${PLACES[r.worst.from].name.s}.`) : '';
-  if (ok) return `${lead}${worst} ${j ? `Goal met with ${plan.cars} cars!` : `Goal met with ${plan.cars} cars.`}${r.busyPct < 55 ? (j ? ' Some cars stand idle a lot. Could fewer do?' : ' Utilisation is low: could fewer cars do it?') : ''}`;
+  // Florence asks whether fewer cars would do only when one car fewer really would still meet the goal
+  const fewer = plan.cars > CARS.min && meets(round, simulate({ ...plan, cars: plan.cars - 1 }, { charge: !!round.charge }));
+  if (ok) return `${lead}${worst} ${j ? `Goal met with ${plan.cars} cars!` : `Goal met with ${plan.cars} cars.`}${fewer ? (j ? ' Some cars stand idle a lot. Could fewer do?' : ' Utilisation is low: could fewer cars do it?') : (j ? ' One car fewer would not be enough.' : ' One car fewer would miss the goal: this is the smallest fleet that works.')}`;
   const why = r.longest > round.goal.wait ? (j ? ' Too long a wait.' : ' Waits too long.') : (j ? ' Too much empty driving.' : ' Too much empty driving.');
   const tip = r.longest > round.goal.wait && round.id === 'size' ? (j ? ' More cars means shorter waits.' : '') : r.longest > round.goal.wait ? (j ? ' Where do most people call from?' : '') : (j ? ' Are the cars waiting near where people call?' : '');
   return `${lead}${worst}${why}${tip}`;
