@@ -13,9 +13,9 @@ export const PARTS = [
   { id: 'robots', n: 3, icon: '🤖', title: 'Robots at work', query: '?module=robots',
     blurb: 'Six jobs robots do: sensing, a greenhouse arm, hospital deliveries, recycling, farm weeding and flood rescue. Program them, teach them and test them.',
     how: ['Pick a mission on the map. They open one after another.', 'Tap tiles to build a program or rules, then press Run to test it.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'roads', n: 4, icon: '🚗', title: 'Roads for self-driving cars', query: '?module=roads',
-    blurb: 'Redesign a street for shared self-driving cars. Then choose what to do with the car park the town no longer needs.',
-    how: ['Pick a piece, then tap a place on the street to put it there.', 'Press Run the morning to see the numbers for your street.', 'Choose what each empty plot becomes. There is no single right answer.'] },
+  { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', query: '?module=roads',
+    blurb: 'Six jobs behind a self-driving car: its sensors, labelling pictures, rules of the road, testing, a shared fleet and redesigning the street.',
+    how: ['Pick a mission on the map. They open one after another.', 'Choose, label or set things, then press Run or Test to see what the car does.', 'Every mission says the real job first, and what you can now do at the end.'] },
 ];
 export const EVERYWHERE = ['“Back to my town” at the top left always takes you back.', 'The speaker button reads the words aloud.', 'Stuck? Tell your leader your badge name.'];
 
@@ -26,7 +26,7 @@ export const SCENES = [
   { id: 'town', view: 'town', part: 'town', icon: '🏡', title: 'Part 1: Eco Town', say: 'First, build your own town. Florence makes plans. You check them with evidence before you trust them.' },
   { id: 'drone', view: 'low', part: 'drone', icon: '🚁', title: 'Part 2: Drone delivery', say: 'Next, fly a delivery drone across your town. Then write the steps so it can fly the route itself.' },
   { id: 'robots', view: 'street', part: 'robots', icon: '🤖', title: 'Part 3: Robots at work', say: 'Then put robots to work. Choose their sensors, program an arm, write safety rules, teach them, and design a rescue robot.' },
-  { id: 'roads', view: 'road', part: 'roads', icon: '🚗', title: 'Part 4: Roads for self-driving cars', say: 'Last, redesign a street for self-driving cars, and decide what the old car park becomes.' },
+  { id: 'roads', view: 'road', part: 'roads', icon: '🚗', title: 'Part 4: Self-driving cars', say: 'Then work on self-driving cars. Give them sensors, teach them, set their rules, test them, plan a fleet and redesign the street.' },
   { id: 'page', view: 'high', icon: '📄', title: 'Take it home', say: 'At the end you take home a page that shows what you made. Ready? Let us see how to get around.' },
 ];
 
@@ -54,8 +54,8 @@ export const TALK = {
     s: ['What did your steps have to make exact that you judged by eye when you flew?', 'How did you find and fix a mistake in the route?', 'Who should decide where delivery drones may fly, and why?'] },
   robots: { j: ['Which sensor would you give a robot that has to work in the dark, and why?', 'When your program or rules went wrong, how did you find the mistake?', 'Why should a farm robot be very sure before it pulls a plant?', 'What did testing teach you about your rescue robot?'],
     s: ['How did the order of your rules change what the hospital robot did?', 'Where did you set the weeding robot’s threshold, and what did you trade off?', 'What made the robot sorter get new things wrong, and how did you fix it?', 'Which design trade-off in the rescue robot was hardest, and why?'] },
-  roads: { j: ['What changed when the street had self-driving cars?', 'Who did your street work well for, and who did it not?', 'What would you build on the old car park, and why?'],
-    s: ['Which number did you give up some of to get more of another?', 'Who gains and who loses from your street?', 'Should a town plan for self-driving cars before it knows how people will use them?'] },
+  roads: { j: ['Which sensor would you trust in fog, and why does a car need more than one?', 'Which pictures were hardest to label, and why did they matter?', 'Which rule of the road did you set, and who does it keep safe?', 'Who did your street work well for, and who did it not?'],
+    s: ['What did the car get wrong before you labelled the hard cases?', 'In testing, why change only one setting at a time?', 'How many cars did your fleet need, and what did you trade off?', 'Should a town plan for self-driving cars before it knows how people will use them?'] },
   film: { j: ['How did your feedback change Florence’s film?', 'Which feedback worked best, and why?', 'What could Florence not do, and why?'],
     s: ['What made your feedback useful to Florence?', 'Who made the film: you, Florence, or both?', 'What should a person check before sharing something an AI helped to make?'] },
   power: { j: ['When did homes go dark, and why?', 'How did you change your rules to fix it?', 'What should people decide, and not the machine?'],
