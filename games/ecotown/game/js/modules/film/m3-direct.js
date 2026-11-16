@@ -6,6 +6,7 @@ import { placeOf, whoHere, MOODS, WHO, WHO_IDS, moodOf } from './kit.js';
 import { firstCut, applyFeedback, moveShot, watched, restore, townData, briefOk } from './cut.js';
 import { STEPS, placePicked, whoPicked, whoMissing, moodPicked, emptyTown, firstCutLine, welcomeBack, afterFirst, afterLater, watchNew, feedbackReply, movedReply, filmTitle, titleChoices, recordLines, practisedLines, cutName } from './words.js';
 import { storyboardSvg } from './picture.js';
+import { num } from './hour.js';
 
 // env: { ctx, ui, player, set, junior }. saved: mission 3's own progress (or null). keep(st): saves it.
 // Resolves { st, title, picture, town, lines, practised } when the child finishes with a film.
@@ -81,7 +82,7 @@ export function summary(st, set, junior) {
   const title = filmTitle(st, set); const fb = st.log.filter((l) => l.id !== 'moved').length;
   return {
     title, picture: storyboardSvg({ title, cut: st.cut, set }), town: townData(st, set, title),
-    line: `Directed “${title}”: ${st.cut.n} cut${st.cut.n === 1 ? '' : 's'}, ${fb} piece${fb === 1 ? '' : 's'} of feedback for Florence.`.slice(0, 120),
+    line: `Directed “${title}”: ${num(st.cut.n)} cut${st.cut.n === 1 ? '' : 's'}, ${num(fb)} piece${fb === 1 ? '' : 's'} of feedback for Florence.`.slice(0, 120),
     lines: recordLines(st, set), practised: practisedLines(st, junior),
   };
 }

@@ -71,7 +71,7 @@ checks.lightBack = await lightOk(); checks.sceneAfterLeaving = (await filmNames(
 // ---------- play the hour
 await open();
 let mission = '', missions = 0, asks = 0, wrongTried = 0, wrongGaveAway = 0; const seen = new Set(); const wrongLines = []; const story = {}; const m3 = { plays: 0, fed: false };
-let paceFastTried = false; let resumedChecked = false; const missionTimes = {}; let t0 = Date.now();
+let paceFastTried = false; const setAside = []; let cameBack = 0; const builds = []; let resumedChecked = false; const missionTimes = {}; let t0 = Date.now();
 const firstLook = async (key, wait) => { if (seen.has(key)) return; seen.add(key); await shot(key, wait); await checkLayout(key); };
 for (let guard = 0; guard < 900; guard++) {
   if (await p.evaluate(() => window.__filmDone)) break;
@@ -94,6 +94,16 @@ for (let guard = 0; guard < 900; guard++) {
   if (/^(part-|note|honest|pace-ok)/.test(st)) { await firstLook(`${mission}-${st}`, 600); await click('#module [data-fm-ok]'); continue; }
   if (st === 'ask') {
     asks++; await p.waitForSelector('#module [data-fm-ask]'); await firstLook(`${mission}-ask`, mission === 'crew' ? 1500 : 500);
+    // every ninth question with three or more choices: two wrong answers. The question is set aside (no answer shown)
+    // and comes back at the end of its part.
+    const nOpts = (await p.$$('#module [data-fm-opt]')).length; const kickNow = await p.textContent('#module .fm-qhead .fm-kick').catch(() => '');
+    if (asks % 9 === 4 && nOpts >= 3 && !/again/.test(kickNow)) {
+      const wrong = await p.$$eval('#module [data-fm-opt]:not([data-fm-right])', (els) => els.map((e) => e.dataset.fmOpt));
+      for (const w of wrong.slice(0, 2)) await click(`#module [data-fm-opt="${w}"]`);
+      setAside.push({ said: await said(), shown: !!(await p.$('#module .fm-opt.right')), next: !!(await p.$('#module [data-fm-next]:not([hidden])')) }); await firstLook(`${mission}-set-aside`, 300);
+      await click('#module [data-fm-next]'); continue;
+    }
+    if (/again/.test(kickNow)) cameBack++;
     // every other question: one wrong answer first. Florence says why, and the right one is still to find.
     if (asks % 2 === 0) { const wrong = await p.$('#module [data-fm-opt]:not([data-fm-right])'); if (wrong) { await wrong.click(); wrongTried++; await p.waitForTimeout(150); const line = await said(); wrongLines.push(line); if (await p.$('#module .fm-opt.right')) wrongGaveAway++; if (!seen.has(`${mission}-wrong`)) await firstLook(`${mission}-wrong`, 300); } }
     await click('#module [data-fm-right]'); if (mission === 'crew' && asks > 10 && !seen.has('crew-scene-filmed')) await firstLook('crew-scene-filmed', reduce ? 800 : 3500);
@@ -121,9 +131,18 @@ for (let guard = 0; guard < 900; guard++) {
     const id = await p.getAttribute('#module [data-fm-pace]', 'data-fm-pace');
     if (id === 'fast' && !paceFastTried) { paceFastTried = true; await firstLook('edit-pace', 400); await click('#module [data-fm-watch]'); continue; } // all medium: too slow for a trailer
     if (id === 'fast') checks.paceTooSlowLine = await said();
-    for (let i = 0; i < 5; i++) await click(`#module [data-fm-len="${id === 'fast' ? 'quick' : 'long'}"][data-i="${i}"]`);
+    // four quick and one medium (9 s, average 1.8 s), or four long and one medium (23 s, average 4.6 s): both routes pass
+    for (let i = 0; i < 5; i++) await click(`#module [data-fm-len="${i === 4 ? 'medium' : id === 'fast' ? 'quick' : 'long'}"][data-i="${i}"]`);
     if (id === 'slow') await firstLook('edit-pace-slow', 300);
     await click('#module [data-fm-watch]'); continue;
+  }
+  if (st === 'build') {
+    const id = await p.getAttribute('#module [data-fm-build]', 'data-fm-build'); await firstLook(`build-${id}`, 400);
+    const n = (await p.$$('#module [data-fm-good]')).length;
+    await click('#module [data-fm-good="0"]'); await click('#module [data-fm-check]'); const hint = await said(); // only who is speaking: Florence says what is missing
+    for (let k = 1; k < n; k++) await click(`#module [data-fm-good="${k}"]`);
+    await click('#module [data-fm-check]'); builds.push({ id, hint, done: await said(), caption: await p.textContent('#module .fm-capline') });
+    await firstLook(`build-${id}-done`, 300); await click('#module [data-fm-next]'); continue;
   }
   if (st === 'film') {
     await firstLook(`${mission}-film`, 600);
@@ -147,7 +166,7 @@ for (let guard = 0; guard < 900; guard++) {
   }
   await p.waitForTimeout(300);
 }
-checks.missionTimesSecs = missionTimes; checks.asks = asks; checks.wrongTried = wrongTried; checks.wrongGaveAway = wrongGaveAway; checks.wrongLines = wrongLines.slice(0, 6); checks.storyHints = Object.fromEntries(Object.entries(story).filter(([k]) => /Hint/.test(k)));
+checks.setAside = setAside; checks.cameBack = cameBack; checks.builds = builds; checks.missionTimesSecs = missionTimes; checks.asks = asks; checks.wrongTried = wrongTried; checks.wrongGaveAway = wrongGaveAway; checks.wrongLines = wrongLines.slice(0, 6); checks.storyHints = Object.fromEntries(Object.entries(story).filter(([k]) => /Hint/.test(k)));
 
 if (only >= 6) {
   // ---------- the record, "Talk it over" and the break
@@ -178,6 +197,7 @@ const endOk = only < 6 || (checks.finished === true && checks.lines?.length === 
   && checks.sceneAfter === 'film-screen' && checks.lightBackAtEnd && checks.moduleLayerGone && checks.againAllTicked === 6 && checks.saved.bytes < 8000);
 const ok = endOk && checks.mapFirst.done === 0 && checks.mapFirst.locked === 5 && /open in order/.test(checks.lockedLine) && checks.leftEarly === false && checks.lightBack && checks.sceneAfterLeaving === ''
   && (only < 3 || (checks.beforeLeaving === 2 && checks.afterComingBack === 2 && checks.replayOffered)) && wrongTried > 0 && wrongGaveAway === 0
+  && setAside.length > 0 && setAside.every((x) => !x.shown && x.next && /comes back/.test(x.said)) && cameBack >= setAside.length && (only < 5 || builds.length === (band === 'junior' ? 1 : 2))
   && !layoutBad.length && !errors.length && !outside.length;
 console.log(JSON.stringify({ ok, band, reduce, size: `${W}x${H}`, empty, full, large, checks, layoutBad, errors, outside, shots: shots.length }, null, 2));
 await b.close();
