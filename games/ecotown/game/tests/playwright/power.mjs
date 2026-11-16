@@ -238,6 +238,7 @@ await p.waitForSelector('#modal:not(.hide) [data-act="ok"]', { timeout: LONG });
 checks.cardText = await p.evaluate(() => document.querySelector('#modal').innerText.replace(/\s+/g, ' ').slice(0, 1200));
 await shot('record');
 await p.click('#modal [data-act="ok"]');
+await p.waitForSelector('#modal:not(.hide) .jobs', { timeout: LONG }); checks.jobs = true; await p.click('#modal [data-act="go"]'); await p.waitForSelector('#modal:not(.hide) .talkqs', { timeout: LONG });
 await p.waitForSelector('#modal:not(.hide) [data-act="go"]', { timeout: LONG }); checks.talk = (await p.evaluate(() => document.querySelector('#modal').innerText)).slice(0, 300); await shot('talk'); await p.click('#modal [data-act="go"]');
 await p.waitForSelector('#modal:not(.hide) [data-act="stay"]', { timeout: LONG }); await p.click('#modal [data-act="stay"]');
 await p.waitForFunction(() => window.__power !== undefined, null, { timeout: LONG });
