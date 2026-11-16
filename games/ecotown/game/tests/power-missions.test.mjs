@@ -7,7 +7,7 @@ import { STORE_ROUNDS, bestPlan, storeGoal, storeMet, storeHint, planLine, planS
 import { batteryWord } from '../js/modules/power/shell.js';
 import { DEMAND_ROUNDS, JOBS, SLOTS, startPlan, layout, solve, minGas, inWindow, runSay, refuseSay, jobSize, DEM } from '../js/modules/power/m5-demand.js';
 import { PREP, PREP_GOOD, prepCheck, prepSay, STORM, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SECTIONS, live, loadOf, indicators, r1Start, r1Flip, r1Done, r2Start, r2Flip, r2Done, r2Best, prioOn, crewSteps, crewShuffled, crewCheck, crewWord, crewSay, r3Start, r3Switch, r3Done } from '../js/modules/power/m6-storm.js';
-import { MISSIONS, cleanProgress, packProgress, nextMission, isOpen, allDone, recordLines, practisedLines, madeTitle, doneLines } from '../js/modules/power/missions.js';
+import { MISSIONS, cleanProgress, packProgress, nextMission, isOpen, allDone, recordLines, practisedLines, madeTitle, doneLines, keepRound, finishMission } from '../js/modules/power/missions.js';
 import { hourPicture } from '../js/modules/power/chart.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
 
@@ -176,8 +176,22 @@ test('round 2 review: nothing for ages 8-12 shows %, kW or £; done cards say "r
   for (const f of ['m1-balance', 'm2-forecast', 'm3-storage', 'm5-demand', 'm6-storm', 'missions']) { const m = await import(`../js/modules/power/${f}.js`); for (const v of Object.values(m)) all.push(...pickJ(v)); }
   for (const t of all) assert.doesNotMatch(t, bad, t);
   // a mission left part-way comes back at its next round
-  const left = cleanProgress(packProgress({ ...cleanProgress(null), cur: { id: 'demand', round: 2, part: { moved: 4, kwh: 40 } } }));
-  assert.deepEqual(left.cur, { id: 'demand', round: 2, part: { moved: 4, kwh: 40 } }); assert.equal(cleanProgress({ cur: { id: 'nope', round: 2 } }).cur, null);
+  const left = cleanProgress(packProgress({ ...cleanProgress(null), rounds: { demand: { round: 2, part: { moved: 4, kwh: 40 } } } }));
+  assert.deepEqual(left.rounds.demand, { round: 2, part: { moved: 4, kwh: 40 } }); assert.deepEqual(cleanProgress({ rounds: { nope: { round: 2 } } }).rounds, {});
+  assert.deepEqual(cleanProgress({ v: 2, cur: { id: 'storm', round: 3, part: { trips: 1 } } }).rounds, { storm: { round: 3, part: { trips: 1 } } }, 'an older save with one cur is kept');
+});
+
+test('round 3 review: each mission keeps its own saved round when another mission is played', () => {
+  // the same steps index.js takes: a round of mission 5 saved, then mission 1 left part-way, then mission 2 finished
+  const p = cleanProgress(null);
+  const saved1 = cleanProgress(packProgress(keepRound(p, 'demand', 2, { moved: 3, kwh: 30 })));
+  const saved2 = cleanProgress(packProgress(keepRound(saved1, 'balance', 1, { level: 7, of: 8 })));
+  const saved3 = cleanProgress(packProgress(finishMission(keepRound(saved2, 'forecast', 2, { tries: 0 }), 1, { tries: 0, kwh: false, spells: 4 })));
+  assert.deepEqual(saved3.rounds, { demand: { round: 2, part: { moved: 3, kwh: 30 } }, balance: { round: 1, part: { level: 7, of: 8 } } });
+  assert.ok(saved3.done[1]);
+  const saved4 = cleanProgress(packProgress(finishMission(saved3, 4, { moved: 9, kwh: 90 })));
+  assert.deepEqual(Object.keys(saved4.rounds), ['balance'], 'finishing a mission clears only its own round');
+  assert.ok(JSON.stringify(packProgress(saved2)).length < 8000);
 });
 
 test('round 2 review: the forecast reveal matches the marks, and the permit to work comes after the earths', () => {

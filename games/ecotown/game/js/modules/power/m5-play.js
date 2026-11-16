@@ -24,7 +24,7 @@ export async function playDemand(d, rs = {}) {
         const okHere = inWindow(sel, Math.min(slot.s, SLOTS - J.len));
         return `<button type="button" data-slot="${slot.s}" class="${okHere ? '' : 'out'} ${plan[sel] <= slot.s && slot.s < plan[sel] + J.len ? 'here' : ''}" aria-label="${esc(`${slotWord(slot.s, j)}: ${slot.spare} spare${slot.jobs.length ? `, ${slot.jobs.length} in use` : ''}${okHere ? '' : j ? ', not a time this job can run' : ', outside the window'}`)}"><span class="pw-col">${cells}</span>${star === slot.s ? '<em class="pw-star" aria-hidden="true">★</em>' : ''}<b>${esc(slotShort(slot.s, j))}</b></button>`;
       }).join('');
-      d.screen.innerHTML = `<h3>${j ? 'Spare clean power, and the jobs' : 'Surplus renewables by slot, and flexible demand'}<small>${j ? 'two hours a column' : `2 h per column · 1 square = ${BLOCK_KW} kW`}</small></h3><div class="pw-slots" role="group" aria-label="${j ? 'Times of day' : 'Time slots'}">${cols}</div>
+      d.screen.innerHTML = `<p class="pw-moving" aria-live="polite"><b class="pw-dayname">${esc(demDay(round.id, j))}</b><span>${j ? 'Moving:' : 'Selected:'} <i aria-hidden="true">${JOBS[sel].icon}</i> ${esc(jobName(sel, j))}</span></p><h3>${j ? 'Spare clean power, and the jobs' : 'Surplus renewables by slot, and flexible demand'}<small>${j ? 'two hours a column' : `2 h per column · 1 square = ${BLOCK_KW} kW`}</small></h3><div class="pw-slots" role="group" aria-label="${j ? 'Times of day' : 'Time slots'}">${cols}</div>
         <div class="pw-blocks"><span><i class="spare"></i>${j ? 'spare wind and sun' : 'unused surplus'}</span><span><i class="clean"></i>${j ? 'job on clean power' : 'met by renewables'}</span><span><i class="gas"></i>${j ? 'job on gas' : 'met by gas'}</span></div>`;
       if (f) d.focusFirst(f);
     };
@@ -43,7 +43,7 @@ export async function playDemand(d, rs = {}) {
       return true;
     };
     d.setTap((b) => {
-      if (b.dataset.job) { sel = b.dataset.job; drawJobs(); drawChart(`[data-slot="${plan[sel]}"]`); showSlot(plan[sel]); d.ctx.say(`${jobName(sel, j)}. ${jobNeed(sel, j)}`); }
+      if (b.dataset.job) { sel = b.dataset.job; drawJobs(); drawChart(`[data-slot="${plan[sel]}"]`); if ((window.innerWidth || 1280) <= 560) { try { d.screen.scrollIntoView({ block: 'start' }); } catch { /* old browser */ } } // on a phone the slots sit above the list: bring them back into view showSlot(plan[sel]); d.ctx.say(`${jobName(sel, j)}. ${jobNeed(sel, j)}`); }
       else if (b.dataset.slot !== undefined) { const s = Number(b.dataset.slot); if (move(s)) all(`[data-slot="${plan[sel]}"]`); }
       else if ('reset' in b.dataset) { Object.assign(plan, habit); star = null; all(`[data-job="${sel}"]`); }
     });
