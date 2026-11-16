@@ -1,5 +1,5 @@
 // Mission 4 on the page (the first version of this module, kept with its fixes): write rules from tiles → watch them
-// run a windy day, a still day and a winter night → find the hour homes went dark and why, change the rules → compare
+// run a windy day, a still day and a winter day → find the hour homes went dark and why, change the rules → compare
 // with the day run by hand in mission 3. The rules and their interpreter: rules.js.
 import { MODES, TEST_DAYS, HOURS, START_LEVEL, forecast, stepHour } from './model.js';
 import { cleanRules, whensFor, maxRules, testRules, explain, draftFromHand, compare, sameRules } from './rules.js';

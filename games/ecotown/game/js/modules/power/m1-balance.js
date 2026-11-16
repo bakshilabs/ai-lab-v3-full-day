@@ -1,12 +1,14 @@
 // Mission 1, the grid must balance: keep the power made level with the power used, ten minutes at a time, as the
 // town wakes up. Pure: no page, no 3D.
-// Power is counted in blocks (ages 13-17: one block is 10 kW). Each step the wind and the sun make what they make,
+// Power is counted in blocks (ages 13-17: one block is 5 kW, as in missions 2-4). Each step the wind and the sun make what they make,
 // the homes and the school use what they use, and the child sets the one thing a control room can steer here: the
 // town battery, which can give power (up to 6 blocks) or soak up spare power by charging (up to 3 blocks).
 // Real grids: supply and demand must match all the time. In Great Britain the grid runs at 50 Hz; when demand is more
 // than supply the frequency falls, and when supply is more it rises. Control rooms keep it close to 50 Hz (normally
-// between 49.8 and 50.2 Hz). Here every block out of balance moves the frequency by 0.1 Hz: a model, made simple.
-export const BLOCK_KW = 10;
+// between 49.8 and 50.2 Hz). Below that band reserve power is called in; only at 48.8 Hz are homes switched off
+// automatically. Here every block out of balance moves the frequency by 0.1 Hz: a model, made simple. Homes going
+// dark when the town is short is the game's warning sign, and the game says so.
+export const BLOCK_KW = 5;   // the same unit as missions 2-4 (one unit = 5 kW)
 export const FLEX_MIN = -3, FLEX_MAX = 6;
 export const HZ_PER_BLOCK = 0.1;
 export const ROUND_GOAL = 6; // steps of 8 that must be level
@@ -61,6 +63,7 @@ export const BAL = {
     restart: { j: 'The wind has calmed. The turbines are starting again.', s: 'Wind back in range: the turbines restart.' },
   },
   how: { j: 'Make the scale level. ▲ More: the battery gives power. ▼ Less: it gives less, or stores the spare.', s: 'Keep supply equal to demand. ▲ raises battery output; ▼ lowers it, below zero it charges.' },
+  warn: { j: 'In this game, homes go dark when you are short, so you can see it. A real grid calls in back-up power first.', s: 'In this game, homes go dark when supply is short, as a warning you can see. Real grids call reserve first; automatic disconnection starts only at 48.8 Hz.' },
   more: { j: '▲ More', s: '▲ More' }, less: { j: '▼ Less', s: '▼ Less' }, ready: { j: 'Ready ➜', s: 'Ready ➜' }, next: { j: 'Next ➜', s: 'Next ➜' },
   made: { j: 'Power made', s: 'Supply' }, used: { j: 'Power used', s: 'Demand' },
 };
@@ -76,8 +79,8 @@ export function stateWord(diff, j) {
 }
 export function stepSay(diff, j) {
   if (diff === 0) return j ? 'Level. Well balanced.' : 'Balanced at 50 Hz.';
-  if (diff < 0) return j ? 'Short of power. Some homes were switched off to keep the grid safe.' : `Short: frequency fell to ${hz(diff).toFixed(2)} Hz${hz(diff) < 49.8 ? ', and some homes were disconnected to protect the grid' : ''}.`;
-  return j ? 'Too much power. The turbines were told to slow down.' : `Surplus: frequency rose to ${hz(diff).toFixed(2)} Hz; generators were asked to cut back.`;
+  if (diff < 0) return j ? 'Short of power. Back-up power had to rush in.' : `Short: frequency fell to ${hz(diff).toFixed(2)} Hz${hz(diff) < 49.8 ? ', outside the normal 49.8–50.2 Hz band, so reserve power was called in' : ', still inside the normal band'}.`;
+  return j ? 'Too much power. The turbines were told to slow down.' : `Surplus: frequency rose to ${hz(diff).toFixed(2)} Hz${hz(diff) > 50.2 ? ', outside the normal band' : ''}; generators were asked to cut back.`;
 }
 export function roundSay(res, j) {
   return res.met

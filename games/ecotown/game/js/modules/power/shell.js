@@ -10,6 +10,8 @@ export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '
 export const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
 export const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export const SEED = 3; // the same days every time, so a hand-run day and a rule-run day can be compared fairly
+// ages 8-12: the battery in words, not percentages
+export const batteryWord = (k) => (k <= 0.05 ? 'Empty' : k < 0.35 ? 'Low' : k < 0.65 ? 'Half full' : k < 0.95 ? 'Nearly full' : 'Full');
 
 export function createDesk(ctx, kit) {
   const j = !!ctx.junior; const reduce = !!ctx.settings?.reduceMotion; const pick = (o) => (j ? o.j : o.s);
@@ -57,7 +59,7 @@ export function createDesk(ctx, kit) {
     needle('wind', h.wind / 1.25); needle('sun', h.sun); needle('battery', kit.cap ? h.levelBefore / kit.cap : 0); needle('homes', kit.homes.length ? h.litCount / kit.homes.length : 1);
     val('wind', j ? T.level.wind[h.wind >= WIND_STRONG ? 2 : h.wind < WIND_LOW ? 0 : 1] : units(kit.wind * h.wind, j));
     val('sun', j ? T.level.sun[h.sun >= SUN_BRIGHT ? 2 : h.sun > 0.08 ? 1 : 0] : units(kit.solar * h.sun, j));
-    val('battery', `${Math.round((kit.cap ? h.levelBefore / kit.cap : 0) * 100)}%${h.toBattery > 0.01 ? ' ▲' : h.fromBattery > 0.01 ? ' ▼' : ''}`);
+    const lv = kit.cap ? h.levelBefore / kit.cap : 0; val('battery', `${j ? batteryWord(lv) : `${Math.round(lv * 100)}%`}${h.toBattery > 0.01 ? ' ▲' : h.fromBattery > 0.01 ? ' ▼' : ''}`);
     val('homes', `${h.litCount} of ${kit.homes.length}`); wrap.querySelector('[data-d="homes"]').classList.toggle('alert', h.dark > 0);
     for (const [id, v] of [['made', h.made], ['need', h.need]]) { wrap.querySelector(`[data-bar="${id}"]`).style.width = `${Math.min(100, (v / barMax) * 100).toFixed(1)}%`; wrap.querySelector(`[data-n="${id}"]`).textContent = j ? '' : `${Math.round(v * KW)} kW`; }
     const sp = wrap.querySelector('[data-spare]'); const spare = h.made - h.need;

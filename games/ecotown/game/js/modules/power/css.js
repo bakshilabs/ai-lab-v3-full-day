@@ -94,7 +94,7 @@ ${P} .pw-cmp em { font-style: normal; text-align: right; font-variant-numeric: t
   ${P} .pw-dials { grid-template-columns: repeat(4, 1fr); } ${P} .pw-modes { flex-direction: row; } ${P} .pw-modes button { flex: 1 1 0; grid-template-columns: 1.6em 1fr; } ${P} .pw-modes button u { display: none; }
   ${P} .pw-screen { overflow: visible; }
 }
-@media (max-width: 560px) { ${P} .pw-dials { grid-template-columns: 1fr 1fr; } ${P} ol.pw-rules li { grid-template-columns: 1.7em 1fr; } ${P} .pw-arrow { display: none; } ${P} .pw-modes button small { display: none; } }
+@media (max-width: 560px) { ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-dials { grid-template-columns: 1fr 1fr; } ${P} ol.pw-rules li { grid-template-columns: 1.7em 1fr; } ${P} .pw-arrow { display: none; } ${P} .pw-modes button small { display: none; } }
 @media (max-height: 640px) { ${P} .pw-dial svg { width: 54px; } ${P} .pw-modes button { min-height: 48px; } ${P} .pw-desk { padding: 6px 8px 8px; } }
 
 ${P} .pw-desk[data-mode="full"] { display: block; overflow: auto; } ${P} .pw-desk[data-mode="full"] > :not(.pw-full) { display: none; } ${P} .pw-desk[data-mode="desk"] > .pw-full { display: none; }
@@ -157,6 +157,8 @@ ${P} .pw-switches, ${P} .pw-cards { display: grid; gap: 5px; } ${P} .pw-switches
 ${P} .pw-switches button i { font-style: normal; } ${P} .pw-switches button small { font-size: .78em; color: #8a3a2a; } ${P} .pw-switches button em { font-style: normal; padding: 2px 8px; border-radius: 9px; background: #d2c4ac; }
 ${P} .pw-switches button[aria-pressed="true"] em { background: #2e9b5a; color: #fff; }
 ${P} .pw-cards button { text-align: left; line-height: 1.25; font-size: .92em; } ${P} ol.pw-order { margin: 0; padding-left: 1.6em; display: grid; gap: 4px; font-weight: 700; } ${P} ol.pw-order span { color: #8a7a6a; }
+${P} .pw-prep { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } ${P} .pw-prep button { display: grid; grid-template-columns: 1.4em 1fr; gap: 6px; align-items: center; text-align: left; line-height: 1.25; font-size: .92em; }
+${P} .pw-prep button i { font-style: normal; display: grid; place-items: center; width: 1.3em; height: 1.3em; border-radius: 5px; box-shadow: inset 0 0 0 2px #b08a55; background: #fff; } ${P} .pw-prep button[aria-pressed="true"] { background: #e4f4e8; box-shadow: inset 0 0 0 3px #2e9b5a, 0 3px 0 #1a5a34; } ${P} .pw-prep button[aria-pressed="true"] i { background: #2e9b5a; color: #fff; box-shadow: none; }
 ${P} .pw-meter { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-weight: 800; margin-top: 4px; } ${P} .pw-meter i { display: block; height: 16px; border-radius: 8px; background: #e6d3b0; overflow: hidden; } ${P} .pw-meter u { display: block; height: 100%; background: #8e5cd9; }
 @media (max-width: 900px) {
   ${P} ol.pw-map { grid-template-columns: repeat(2, minmax(0, 1fr)); } ${P} .pw-brief > i { font-size: 2.4em; }
@@ -165,5 +167,5 @@ ${P} .pw-meter { display: grid; grid-template-columns: 1fr auto; gap: 8px; align
   ${P} .pw-switches { grid-template-columns: 1fr 1fr; } ${P} .pw-jobs { grid-template-columns: 1fr 1fr; } ${P} .pw-slots button { min-height: 120px; }
   ${P} .pw-side.scale { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; } ${P} .pw-side.scale .pw-scale { grid-row: span 3; }
 }
-@media (max-width: 560px) { ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { ${P} .pw-prep { grid-template-columns: 1fr; } ${P} .pw-hours { grid-template-columns: repeat(6, minmax(0, 1fr)); } ${P} ol.pw-map { grid-template-columns: 1fr; } ${P} .pw-switches, ${P} .pw-jobs { grid-template-columns: 1fr; } }
 `;

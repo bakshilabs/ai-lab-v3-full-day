@@ -63,7 +63,7 @@ export async function playStorage(d, st, save) {
       if (r === 0) { st.hand = modes; save(); } // the first day is the one mission 4 compares the rules with
       const lines = handSummary(kit, day, j); const at = day.worst >= 0 ? day.hours[day.worst] : day.hours[15]; d.showHour(at, round.day);
       tries = met ? tries : tries + 1;
-      const verdict = met ? (j ? `Goal met: ${day.darkHours} dark hours.` : `Goal met: ${day.darkHours} home-hours unsupplied.`) : storeHint(tries, day, round.goal, j);
+      const verdict = met ? (j ? (day.darkHours ? `Goal met: the dark squares add up to ${day.darkHours}.` : 'Goal met: every home stayed lit.') : `Goal met: ${day.darkHours} home-hours unsupplied.`) : storeHint(tries, day, round.goal, j);
       d.screen.innerHTML = `<h3>${esc(pick(T.day[round.day]))}: ${esc(pick(T.byHand).toLowerCase())}<small>${esc(dayScore(day, j))}</small></h3>${d.chart(round.day, { hours: day.hours, cursor: at.i, mark: day.worst })}
         <ul class="pw-lines">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}<li class="note">${esc(storeGoalLine(round.goal, j))}</li><li class="${met ? 'ok' : 'fix'}">${met ? '✓ ' : ''}${esc(verdict)}</li></ul>`;
       d.say(met ? (j ? 'You met the goal for this day.' : 'Goal met for this day.') : (j ? 'Not the goal yet.' : 'Goal not met yet.'), verdict);
