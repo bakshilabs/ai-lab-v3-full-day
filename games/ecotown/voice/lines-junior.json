@@ -10677,624 +10677,2347 @@
  {
   "s": "You flew 11 tiles in 154 seconds, through 3 of 3 hoops.",
   "voice": "helper",
+  "key": "f73f49c4",
   "said": 1,
-  "mod": 1,
-  "key": "f73f49c4"
+  "mod": 1
  },
  {
   "s": "By hand you flew 11 tiles in 154 seconds.",
   "voice": "helper",
+  "key": "23fef497",
   "said": 1,
-  "mod": 1,
-  "key": "23fef497"
+  "mod": 1
  },
  {
   "s": "The market square.",
   "voice": "helper",
+  "key": "429527c9",
   "said": 1,
-  "mod": 1,
-  "key": "429527c9"
+  "mod": 1
  },
  {
   "s": "I am pointing the camera at it now.",
   "voice": "helper",
+  "key": "5fd98b3c",
   "said": 1,
-  "mod": 1,
-  "key": "5fd98b3c"
+  "mod": 1
  },
  {
   "s": "Press Next, or pick another place.",
   "voice": "helper",
+  "key": "22e06bdf",
   "said": 1,
-  "mod": 1,
-  "key": "22e06bdf"
+  "mod": 1
  },
  {
   "s": "There are no otters in your town.",
   "voice": "helper",
+  "key": "d80022af",
   "said": 1,
-  "mod": 1,
-  "key": "d80022af"
+  "mod": 1
  },
  {
   "s": "Otters come when the wetland is left wild.",
   "voice": "helper",
+  "key": "9e0d7769",
   "said": 1,
-  "mod": 1,
-  "key": "9e0d7769"
+  "mod": 1
  },
  {
   "s": "I can only film what is there.",
   "voice": "helper",
+  "key": "2c3e0ba2",
   "said": 1,
-  "mod": 1,
-  "key": "2c3e0ba2"
+  "mod": 1
  },
  {
   "s": "I can film a family or me instead.",
   "voice": "helper",
+  "key": "19c1f22a",
   "said": 1,
-  "mod": 1,
-  "key": "19c1f22a"
+  "mod": 1
  },
  {
   "s": "A family.",
   "voice": "helper",
+  "key": "7763da58",
   "said": 1,
-  "mod": 1,
-  "key": "7763da58"
+  "mod": 1
  },
  {
   "s": "I can see them by their home.",
   "voice": "helper",
+  "key": "2aef1933",
   "said": 1,
-  "mod": 1,
-  "key": "2aef1933"
+  "mod": 1
  },
  {
   "s": "Press Next, or pick again.",
   "voice": "helper",
+  "key": "1a732307",
   "said": 1,
-  "mod": 1,
-  "key": "1a732307"
+  "mod": 1
  },
  {
   "s": "Calm: slow evening music and golden evening light.",
   "voice": "helper",
+  "key": "b0b59884",
   "said": 1,
-  "mod": 1,
-  "key": "b0b59884"
+  "mod": 1
  },
  {
   "s": "Here is my first cut: four shots of the market square, with a family.",
   "voice": "helper",
+  "key": "3cc8c5f6",
   "said": 1,
-  "mod": 1,
-  "key": "3cc8c5f6"
+  "mod": 1
  },
  {
   "s": "Press Watch to see it.",
   "voice": "helper",
+  "key": "e8205ba0",
   "said": 1,
-  "mod": 1,
-  "key": "e8205ba0"
+  "mod": 1
  },
  {
   "s": "An evening at the market square",
   "voice": "helper",
+  "key": "82de2405",
   "said": 1,
-  "mod": 1,
-  "key": "82de2405"
+  "mod": 1
  },
  {
   "s": "Shorter.",
   "voice": "helper",
+  "key": "90a97f3a",
   "said": 1,
-  "mod": 1,
-  "key": "90a97f3a"
+  "mod": 1
  },
  {
   "s": "I cut “Circle round · the market square”.",
   "voice": "helper",
+  "key": "e83cba5d",
   "said": 1,
-  "mod": 1,
-  "key": "e83cba5d"
+  "mod": 1
  },
  {
   "s": "The film is now three shots.",
   "voice": "helper",
+  "key": "a481e3f1",
   "said": 1,
-  "mod": 1,
-  "key": "a481e3f1"
+  "mod": 1
  },
  {
   "s": "Now the film starts at the town school: a new first shot.",
   "voice": "helper",
+  "key": "5886e97c",
   "said": 1,
-  "mod": 1,
-  "key": "5886e97c"
+  "mod": 1
  },
  {
   "s": "Now the film ends by pulling back to show the whole town.",
   "voice": "helper",
+  "key": "2679ea75",
   "said": 1,
-  "mod": 1,
-  "key": "2679ea75"
+  "mod": 1
  },
  {
   "s": "Livelier: now it has thoughtful music and soft morning light.",
   "voice": "helper",
+  "key": "492d370e",
   "said": 1,
-  "mod": 1,
-  "key": "492d370e"
+  "mod": 1
  },
  {
   "s": "Welcome back.",
   "voice": "helper",
+  "key": "5195c566",
   "said": 1,
-  "mod": 1,
-  "key": "5195c566"
+  "mod": 1
  },
  {
   "s": "Here is your film so far: cut 2, five shots.",
   "voice": "helper",
+  "key": "8b23aace",
   "said": 1,
-  "mod": 1,
-  "key": "8b23aace"
+  "mod": 1
  },
  {
   "s": "A morning at the market square",
   "voice": "helper",
+  "key": "b287c467",
   "said": 1,
-  "mod": 1,
-  "key": "b287c467"
+  "mod": 1
  },
  {
   "s": "That was cut 2.",
   "voice": "helper",
+  "key": "51966085",
   "said": 1,
-  "mod": 1,
-  "key": "51966085"
+  "mod": 1
  },
  {
   "s": "You practised: briefing a creative partner: a place, who is in it and a mood. improving a draft with four pieces of feedback, over two cuts. changing the plan when the town did not have what you asked for. watching each new cut to see what your feedback changed",
   "voice": "narrator",
+  "key": "de0664d0",
   "said": 1,
-  "mod": 1,
-  "key": "de0664d0"
+  "mod": 1
  },
  {
   "s": "Welcome to the control room.",
   "voice": "helper",
+  "key": "119426f3",
   "said": 1,
-  "mod": 1,
-  "key": "119426f3"
+  "mod": 1
  },
  {
   "s": "From here you keep the lights on in your town.",
   "voice": "helper",
+  "key": "92c47910",
   "said": 1,
-  "mod": 1,
-  "key": "92c47910"
+  "mod": 1
  },
  {
   "s": "Your town has no homes or power yet.",
   "voice": "helper",
+  "key": "edd5a62b",
   "said": 1,
-  "mod": 1,
-  "key": "edd5a62b"
+  "mod": 1
  },
  {
   "s": "First, run one day by hand.",
   "voice": "helper",
+  "key": "009c095a",
   "said": 1,
-  "mod": 1,
-  "key": "009c095a"
+  "mod": 1
  },
  {
   "s": "Charge the battery when there is power to spare.",
   "voice": "helper",
+  "key": "1929579a",
   "said": 1,
-  "mod": 1,
-  "key": "1929579a"
+  "mod": 1
  },
  {
   "s": "Use it when the town is short.",
   "voice": "helper",
+  "key": "11598f96",
   "said": 1,
-  "mod": 1,
-  "key": "11598f96"
+  "mod": 1
  },
  {
   "s": "Your homes had 144 lit hours out of 144.",
   "voice": "helper",
+  "key": "77938d18",
   "said": 1,
-  "mod": 1,
-  "key": "77938d18"
+  "mod": 1
  },
  {
   "s": "The school too.",
   "voice": "helper",
+  "key": "511de272",
   "said": 1,
-  "mod": 1,
-  "key": "511de272"
+  "mod": 1
  },
  {
   "s": "I watched you.",
   "voice": "helper",
+  "key": "5a9025b7",
   "said": 1,
-  "mod": 1,
-  "key": "5a9025b7"
+  "mod": 1
  },
  {
   "s": "I wrote the first two rules from what you did.",
   "voice": "helper",
+  "key": "527490bb",
   "said": 1,
-  "mod": 1,
-  "key": "527490bb"
+  "mod": 1
  },
  {
   "s": "Add more, or change them.",
   "voice": "helper",
+  "key": "c2b10d7e",
   "said": 1,
-  "mod": 1,
-  "key": "c2b10d7e"
+  "mod": 1
  },
  {
   "s": "A windy day.",
   "voice": "helper",
+  "key": "45ffe875",
   "said": 1,
-  "mod": 1,
-  "key": "45ffe875"
+  "mod": 1
  },
  {
   "s": "A still day.",
   "voice": "helper",
+  "key": "708ae840",
   "said": 1,
-  "mod": 1,
-  "key": "708ae840"
+  "mod": 1
  },
  {
   "s": "A winter night.",
   "voice": "helper",
+  "key": "418f193d",
   "said": 1,
-  "mod": 1,
-  "key": "418f193d"
+  "mod": 1
  },
  {
   "s": "The system did exactly what your rules said.",
   "voice": "helper",
+  "key": "55f7ebd1",
   "said": 1,
-  "mod": 1,
-  "key": "55f7ebd1"
+  "mod": 1
  },
  {
   "s": "On 2 days some homes went dark.",
   "voice": "helper",
+  "key": "fffe3c4b",
   "said": 1,
-  "mod": 1,
-  "key": "fffe3c4b"
+  "mod": 1
  },
  {
   "s": "Tap a day to see when.",
   "voice": "helper",
+  "key": "5c2f1583",
   "said": 1,
-  "mod": 1,
-  "key": "5c2f1583"
+  "mod": 1
  },
  {
   "s": "At 7 pm, 5 practice homes went dark.",
   "voice": "helper",
+  "key": "5e78ad5e",
   "said": 1,
-  "mod": 1,
-  "key": "5e78ad5e"
+  "mod": 1
  },
  {
   "s": "No rule fitted 7 pm, so the battery waited.",
   "voice": "helper",
+  "key": "20d9e310",
   "said": 1,
-  "mod": 1,
-  "key": "20d9e310"
+  "mod": 1
  },
  {
   "s": "It still had power in it.",
   "voice": "helper",
+  "key": "b284cbae",
   "said": 1,
-  "mod": 1,
-  "key": "b284cbae"
+  "mod": 1
  },
  {
   "s": "Try: add a rule for that time.",
   "voice": "helper",
+  "key": "d5476019",
   "said": 1,
-  "mod": 1,
-  "key": "d5476019"
+  "mod": 1
  },
  {
   "s": "At 8 pm, 4 practice homes and the school went dark.",
   "voice": "helper",
+  "key": "f383f48a",
   "said": 1,
-  "mod": 1,
-  "key": "f383f48a"
+  "mod": 1
  },
  {
   "s": "No rule fitted 8 pm, so the battery waited.",
   "voice": "helper",
+  "key": "ca8ae81f",
   "said": 1,
-  "mod": 1,
-  "key": "ca8ae81f"
+  "mod": 1
  },
  {
   "s": "At 9 pm, 4 practice homes and the school went dark.",
   "voice": "helper",
+  "key": "f1c9d2fb",
   "said": 1,
-  "mod": 1,
-  "key": "f1c9d2fb"
+  "mod": 1
  },
  {
   "s": "No rule fitted 9 pm, so the battery waited.",
   "voice": "helper",
+  "key": "095de19e",
   "said": 1,
-  "mod": 1,
-  "key": "095de19e"
+  "mod": 1
  },
  {
   "s": "At 6 pm, 4 practice homes and the school went dark.",
   "voice": "helper",
+  "key": "3da6de68",
   "said": 1,
-  "mod": 1,
-  "key": "3da6de68"
+  "mod": 1
  },
  {
   "s": "No rule fitted 6 pm, so the battery waited.",
   "voice": "helper",
+  "key": "03b5add9",
   "said": 1,
-  "mod": 1,
-  "key": "03b5add9"
+  "mod": 1
  },
  {
   "s": "Change a rule, add one, or move one up.",
   "voice": "helper",
+  "key": "00f633ec",
   "said": 1,
-  "mod": 1,
-  "key": "00f633ec"
+  "mod": 1
  },
  {
   "s": "Choose when",
   "voice": "helper",
+  "key": "dd1fecfa",
   "said": 1,
-  "mod": 1,
-  "key": "dd1fecfa"
+  "mod": 1
  },
  {
   "s": "Choose what to do",
   "voice": "helper",
+  "key": "7081970e",
   "said": 1,
-  "mod": 1,
-  "key": "7081970e"
+  "mod": 1
  },
  {
   "s": "Rule 1.",
   "voice": "helper",
+  "key": "9ab7c524",
   "said": 1,
-  "mod": 1,
-  "key": "9ab7c524"
+  "mod": 1
  },
  {
   "s": "If the wind drops, use the battery.",
   "voice": "helper",
+  "key": "ef23fe50",
   "said": 1,
-  "mod": 1,
-  "key": "ef23fe50"
+  "mod": 1
  },
  {
   "s": "Rule 2.",
   "voice": "helper",
+  "key": "9cb589b3",
   "said": 1,
-  "mod": 1,
-  "key": "9cb589b3"
+  "mod": 1
  },
  {
   "s": "At midday, charge the battery.",
   "voice": "helper",
+  "key": "e5fc39ba",
   "said": 1,
-  "mod": 1,
-  "key": "e5fc39ba"
+  "mod": 1
  },
  {
   "s": "Rule 3.",
   "voice": "helper",
+  "key": "3ab2b0d6",
   "said": 1,
-  "mod": 1,
-  "key": "3ab2b0d6"
+  "mod": 1
  },
  {
   "s": "If the wind is strong, charge the battery.",
   "voice": "helper",
+  "key": "82523848",
   "said": 1,
-  "mod": 1,
-  "key": "82523848"
+  "mod": 1
  },
  {
   "s": "Rule 4.",
   "voice": "helper",
+  "key": "1cb04305",
   "said": 1,
-  "mod": 1,
-  "key": "1cb04305"
+  "mod": 1
  },
  {
   "s": "In the morning, let the battery wait.",
   "voice": "helper",
+  "key": "9bb5b267",
   "said": 1,
-  "mod": 1,
-  "key": "9bb5b267"
+  "mod": 1
  },
  {
   "s": "If the sun is bright, charge the battery.",
   "voice": "helper",
+  "key": "ee6d91cf",
   "said": 1,
-  "mod": 1,
-  "key": "ee6d91cf"
+  "mod": 1
  },
  {
   "s": "After dark, light the school first: On.",
   "voice": "helper",
+  "key": "0d43d711",
   "said": 1,
-  "mod": 1,
-  "key": "0d43d711"
+  "mod": 1
  },
  {
   "s": "On one day some homes went dark.",
   "voice": "helper",
+  "key": "eebd2934",
   "said": 1,
-  "mod": 1,
-  "key": "eebd2934"
+  "mod": 1
  },
  {
   "s": "That is 36 more lit hours than last time.",
   "voice": "helper",
+  "key": "b0aa7eda",
   "said": 1,
-  "mod": 1,
-  "key": "b0aa7eda"
+  "mod": 1
  },
  {
   "s": "At 10 pm, 3 practice homes went dark.",
   "voice": "helper",
+  "key": "aad4cfb0",
   "said": 1,
-  "mod": 1,
-  "key": "aad4cfb0"
+  "mod": 1
  },
  {
   "s": "Rule 2 said use the battery, but it was empty.",
   "voice": "helper",
+  "key": "f583e229",
   "said": 1,
-  "mod": 1,
-  "key": "f583e229"
+  "mod": 1
  },
  {
   "s": "At 6 am there was power to spare, and no rule said charge.",
   "voice": "helper",
+  "key": "de890b1f",
   "said": 1,
-  "mod": 1,
-  "key": "de890b1f"
+  "mod": 1
  },
  {
   "s": "Try: a rule that charges at that time.",
   "voice": "helper",
+  "key": "c0df294c",
   "said": 1,
-  "mod": 1,
-  "key": "c0df294c"
+  "mod": 1
  },
  {
   "s": "Your rules did as well as you did by hand.",
   "voice": "helper",
+  "key": "a69d297c",
   "said": 1,
-  "mod": 1,
-  "key": "a69d297c"
+  "mod": 1
  },
  {
   "s": "From tonight the town’s lights follow your rules.",
   "voice": "helper",
+  "key": "ecc0b505",
   "said": 1,
-  "mod": 1,
-  "key": "ecc0b505"
+  "mod": 1
  },
  {
   "s": "By hand, today: 144 lit hours out of 144.",
   "voice": "helper",
+  "key": "05852f63",
   "said": 1,
-  "mod": 1,
-  "key": "05852f63"
+  "mod": 1
  },
  {
   "s": "Your rules, on the same day: 144 out of 144.",
   "voice": "helper",
+  "key": "f80bb364",
   "said": 1,
-  "mod": 1,
-  "key": "f80bb364"
+  "mod": 1
  },
  {
   "s": "The same.",
   "voice": "helper",
+  "key": "f7f76886",
   "said": 1,
-  "mod": 1,
-  "key": "f7f76886"
+  "mod": 1
  },
  {
   "s": "For the others, nothing it had been shown for the right bin was close enough.",
   "voice": "helper",
+  "key": "19dbaf1a",
   "said": 1,
-  "mod": 1,
-  "key": "19dbaf1a"
+  "mod": 1
  },
  {
   "s": "Read why, then add examples. teabag.",
   "voice": "helper",
+  "key": "600de818",
   "said": 1,
-  "mod": 1,
-  "key": "600de818"
+  "mod": 1
  },
  {
   "s": "It went into Paper and card: most like the cardboard box (same colour).",
   "voice": "helper",
+  "key": "50e195c8",
   "said": 1,
-  "mod": 1,
-  "key": "50e195c8"
+  "mod": 1
  },
  {
   "s": "Nothing it was shown for Food scraps has the same colour, shape or feel.",
   "voice": "helper",
+  "key": "ed8ba9b5",
   "said": 1,
-  "mod": 1,
-  "key": "ed8ba9b5"
+  "mod": 1
  },
  {
   "s": "Show it something for Food scraps with the same shape and feel.",
   "voice": "helper",
+  "key": "883e0937",
   "said": 1,
-  "mod": 1,
-  "key": "883e0937"
+  "mod": 1
  },
  {
   "s": "Look for a star.",
   "voice": "helper",
+  "key": "9e346dae",
   "said": 1,
-  "mod": 1,
-  "key": "9e346dae"
+  "mod": 1
  },
  {
   "s": "Here are more things to show it.",
   "voice": "helper",
+  "key": "388591f6",
   "said": 1,
-  "mod": 1,
-  "key": "388591f6"
+  "mod": 1
  },
  {
   "s": "There is room for 4.",
   "voice": "helper",
+  "key": "269ebd4b",
   "said": 1,
-  "mod": 1,
-  "key": "269ebd4b"
+  "mod": 1
  },
  {
   "s": "The ones with a star are like the things it got wrong.",
   "voice": "helper",
+  "key": "763b0105",
   "said": 1,
-  "mod": 1,
-  "key": "763b0105"
+  "mod": 1
  },
  {
   "s": "This looks as much like the cardboard box (same shape) as the herbal teabag (same colour).",
   "voice": "helper",
+  "key": "3e070beb",
   "said": 1,
-  "mod": 1,
-  "key": "3e070beb"
+  "mod": 1
  },
  {
   "s": "Now: 7 of 8.",
   "voice": "helper",
+  "key": "eb81f105",
   "said": 1,
+  "mod": 1
+ },
+ {
+  "s": "Then put robots to work.",
+  "voice": "narrator",
+  "key": "72c46da9"
+ },
+ {
+  "s": "Choose their sensors, program an arm, write safety rules, teach them, and design a rescue robot.",
+  "voice": "narrator",
+  "key": "4497f981"
+ },
+ {
+  "s": "Then work on self-driving cars.",
+  "voice": "narrator",
+  "key": "d31da718"
+ },
+ {
+  "s": "Give them sensors, teach them, set their rules, test them, plan a fleet and redesign the street.",
+  "voice": "narrator",
+  "key": "88a0b70c"
+ },
+ {
+  "s": "Next: part 3, Robots at work.",
+  "voice": "narrator",
+  "key": "8f3fec8a"
+ },
+ {
+  "s": "Which sensor would you give a robot that has to work in the dark, and why?",
+  "voice": "narrator",
+  "key": "e8aef6b6"
+ },
+ {
+  "s": "When your program or rules went wrong, how did you find the mistake?",
+  "voice": "narrator",
+  "key": "c496b0bb"
+ },
+ {
+  "s": "Why should a farm robot be very sure before it pulls a plant?",
+  "voice": "narrator",
+  "key": "e71f1645"
+ },
+ {
+  "s": "What did testing teach you about your rescue robot?",
+  "voice": "narrator",
+  "key": "23bf5321"
+ },
+ {
+  "s": "Next: part 4, Self-driving cars.",
+  "voice": "narrator",
+  "key": "c56b7375"
+ },
+ {
+  "s": "Which sensor would you trust in fog, and why does a car need more than one?",
+  "voice": "narrator",
+  "key": "d6c292f0"
+ },
+ {
+  "s": "Which pictures were hardest to label, and why did they matter?",
+  "voice": "narrator",
+  "key": "b7c5032f"
+ },
+ {
+  "s": "Which rule of the road did you set, and who does it keep safe?",
+  "voice": "narrator",
+  "key": "13f7b295"
+ },
+ {
+  "s": "Why must the power made always match the power used?",
+  "voice": "narrator",
+  "key": "f7a35b3e"
+ },
+ {
+  "s": "How did the forecast help you plan for a short spell?",
+  "voice": "narrator",
+  "key": "8a00d0cf"
+ },
+ {
+  "s": "Which jobs did you move to a windy or sunny time, and did people still get what they needed?",
+  "voice": "narrator",
+  "key": "604cfa79"
+ },
+ {
+  "s": "On storm night, who got power first, and why?",
+  "voice": "narrator",
+  "key": "866d3d37"
+ },
+ {
+  "s": "No family lives in your town yet.",
+  "voice": "helper",
   "mod": 1,
-  "key": "eb81f105"
+  "key": "c58cb619"
+ },
+ {
+  "s": "Families move in when there are homes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3fc69705"
+ },
+ {
+  "s": "Kettles, showers, breakfast.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ae6f7065"
+ },
+ {
+  "s": "More power is used every ten minutes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4b1dbe2b"
+ },
+ {
+  "s": "The school opens, then the sun climbs.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c410d8c1"
+ },
+ {
+  "s": "Watch both sides.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3544c439"
+ },
+ {
+  "s": "Gusts of wind, and clouds over the sun.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "856e9bd6"
+ },
+ {
+  "s": "Things change fast.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7dea2c42"
+ },
+ {
+  "s": "Kettles are on all over town.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0401b3a5"
+ },
+ {
+  "s": "Showers and hairdryers: more power used.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fc0bc791"
+ },
+ {
+  "s": "The school opens its doors: lights, computers, the kitchen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d0d6bc4c"
+ },
+ {
+  "s": "The sun is high now.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2aeb0212"
+ },
+ {
+  "s": "Lots of solar power.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b60e7726"
+ },
+ {
+  "s": "A gust!",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7fe6ca58"
+ },
+ {
+  "s": "The turbines spin faster.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e73cef27"
+ },
+ {
+  "s": "The wind is too strong.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "109ed0ed"
+ },
+ {
+  "s": "The turbines have stopped themselves to stay safe.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4ccd93a4"
+ },
+ {
+  "s": "The wind has calmed.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "48f7cfdc"
+ },
+ {
+  "s": "The turbines are starting again.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "35c6b2a6"
+ },
+ {
+  "s": "Make the scale level. ▲ More: the battery gives power. ▼ Less: it gives less, or stores the spare.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0984ec24"
+ },
+ {
+  "s": "The wind drops in the evening.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f5596a04"
+ },
+ {
+  "s": "No wind at breakfast.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "59709c28"
+ },
+ {
+  "s": "Cloudy.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1f04e8a7"
+ },
+ {
+  "s": "A breeze until teatime.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "87d06d7c"
+ },
+ {
+  "s": "Windy at night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6ab23497"
+ },
+ {
+  "s": "Cold, so more power is used.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "67cfb4c6"
+ },
+ {
+  "s": "The wind dies after lunch.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f24108e5"
+ },
+ {
+  "s": "It comes back in the night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a1971f52"
+ },
+ {
+  "s": "Tap each hour when the bars will be lower than the red line.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d4caa76d"
+ },
+ {
+  "s": "Those hours will be short.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "42ffd99a"
+ },
+ {
+  "s": "Day 1 of 3: today.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0defcacb"
+ },
+ {
+  "s": "The battery starts a quarter full.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c8731192"
+ },
+ {
+  "s": "Day 2 of 3: a still day.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "eed6e4f2"
+ },
+ {
+  "s": "The battery starts empty.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f3e6a1fd"
+ },
+ {
+  "s": "Day 3 of 3: a winter night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "96738958"
+ },
+ {
+  "s": "The battery starts empty, and it is dark at 4 pm.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "479adf87"
+ },
+ {
+  "s": "Round 2 of 3: who gets power first?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "239c42b6"
+ },
+ {
+  "s": "A tree fell on a line.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "198347ab"
+ },
+ {
+  "s": "The red flags show where the fault is: past the last red flag.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7bbac783"
+ },
+ {
+  "s": "Open the switch just before it, then switch the rest back on.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "eb6ccbd0"
+ },
+ {
+  "s": "The big power line to the town is down too.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c1be0b9d"
+ },
+ {
+  "s": "The town battery can give 7 blocks.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "092887a7"
+ },
+ {
+  "s": "Switch places on, most important first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f90a67d1"
+ },
+ {
+  "s": "Too much and it all trips off.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e29e2a26"
+ },
+ {
+  "s": "Put the crew’s jobs in a safe order.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5d7531a3"
+ },
+ {
+  "s": "Then bring the last homes back.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "37f3b77e"
+ },
+ {
+  "s": "The wind dies after lunch and comes back in the night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "62041d1c"
+ },
+ {
+  "s": "Goal: nobody waits more than 15 minutes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2897ba20"
+ },
+ {
+  "s": "Goal: nobody waits more than 8 minutes, and less than half the driving is empty.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cd651581"
+ },
+ {
+  "s": "The town’s shared cars all wait at the depot, at the edge of town.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3ae48b46"
+ },
+ {
+  "s": "How many cars do we need?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c1992387"
+ },
+ {
+  "s": "Choose a number and run the morning.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "41c22055"
+ },
+ {
+  "s": "Cars driving back to the depot spend a lot of time empty.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aa71288d"
+ },
+ {
+  "s": "Choose up to two places in town where they wait instead.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b52c2005"
+ },
+ {
+  "s": "Electric cars need charging.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "87be005a"
+ },
+ {
+  "s": "Each car charges once in the morning for 15 minutes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "857aad56"
+ },
+ {
+  "s": "Choose where the chargers go.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8346ab75"
+ },
+ {
+  "s": "Tap each thing the car must know about.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0ab609e1"
+ },
+ {
+  "s": "A box goes round it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "488bc3ca"
+ },
+ {
+  "s": "Then choose its label below.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "78ee429e"
+ },
+ {
+  "s": "Two pictures labelled.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d73fbdfd"
+ },
+ {
+  "s": "Let’s teach the car with them, then test it on pictures it has never seen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d2724bc2"
+ },
+ {
+  "s": "Now label pictures with the hard ones in them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d5bc06f2"
+ },
+ {
+  "s": "These are the edge cases.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2e541f25"
+ },
+ {
+  "s": "Self-driving cars see with cameras, radar and lidar.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6210130c"
+ },
+ {
+  "s": "Engineers must know what each one misses, or the car could miss a person.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6ea5b7b9"
+ },
+ {
+  "s": "Switch between the three views of the same street, in sun, rain, fog and dark.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "28e1e179"
+ },
+ {
+  "s": "Tick every sensor that can answer.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "88049ff0"
+ },
+ {
+  "s": "Say what a camera, radar and lidar can each see, and why cars use more than one.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1af58cf8"
+ },
+ {
+  "s": "People label thousands of street pictures so the car learns what a person, a cyclist or a dog looks like.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d4e03eb5"
+ },
+ {
+  "s": "Tap each thing in a picture to box it, then choose its label.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aa14d882"
+ },
+ {
+  "s": "Then test the car.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0d16798d"
+ },
+ {
+  "s": "Label pictures for a machine to learn from, and look for the hard ones it will get wrong.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "10b46e54"
+ },
+ {
+  "s": "Engineers turn the Highway Code into rules the car follows: how fast, how much room, who goes first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "533e7109"
+ },
+ {
+  "s": "Choose what the car does in six places, then test it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2105a869"
+ },
+ {
+  "s": "Choose safe speeds and gaps, and say who goes first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "128ff4ab"
+ },
+ {
+  "s": "Test engineers drive the car millions of times in a computer before it goes on a real road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cb6a3ca7"
+ },
+ {
+  "s": "Run the tests, watch the replay of a failure, change one setting, run again.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cdbb0502"
+ },
+ {
+  "s": "Test something, find where it fails, and change one thing at a time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "432a5aad"
+ },
+ {
+  "s": "Transport planners decide how many shared cars a town needs, and where they wait and charge.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fc5650c2"
+ },
+ {
+  "s": "Choose the number of cars, where they wait and where they charge.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "af4dcc18"
+ },
+ {
+  "s": "Run the morning and read the numbers.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dc4fa13b"
+ },
+ {
+  "s": "Plan a fleet of shared cars and read waiting times.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bdfb8aac"
+ },
+ {
+  "s": "This is Maple Street.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "480cf4fb"
+ },
+ {
+  "s": "Soon shared self-driving cars will run here, and they stop only where the street is marked.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aa62cc37"
+ },
+ {
+  "s": "Street designers plan those markings, so the street works for everyone.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2cefd26c"
+ },
+ {
+  "s": "Tap the 3D street to put in drop-off points, waiting bays and crossings.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c6212fb4"
+ },
+ {
+  "s": "Run the morning, then choose what the old car park becomes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "82c5df55"
+ },
+ {
+  "s": "Design a street for everyone who uses it, and test it with real numbers.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "54808a52"
+ },
+ {
+  "s": "These are your car’s rules.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ced22f8e"
+ },
+ {
+  "s": "The car will follow every one, every time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "72f510bc"
+ },
+ {
+  "s": "Someone is waiting to cross at the zebra crossing.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4fdc64bb"
+ },
+ {
+  "s": "What does the car do?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "375b4a8d"
+ },
+ {
+  "s": "The car drove on.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d4d158bf"
+ },
+ {
+  "s": "The person had to jump back onto the kerb.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5d137f69"
+ },
+ {
+  "s": "The car slowed, stopped, and the person crossed safely.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5a01cbd3"
+ },
+ {
+  "s": "Who should go first at a zebra crossing?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e082d073"
+ },
+ {
+  "s": "The Highway Code says drivers must be ready to stop for people waiting.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5fd20be6"
+ },
+ {
+  "s": "At a zebra crossing: if someone is waiting, slow down and stop.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8e94c653"
+ },
+ {
+  "s": "It is home time at the school.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "04cff01a"
+ },
+ {
+  "s": "How fast does the car go?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "75b17c36"
+ },
+ {
+  "s": "A child might step out between parked cars.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b80af11f"
+ },
+ {
+  "s": "A child stepped out.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e112009b"
+ },
+ {
+  "s": "At 20 mph the car stopped in time, with room to spare.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "06ad3562"
+ },
+ {
+  "s": "At 30 mph the car could not stop in time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aaf3aed9"
+ },
+ {
+  "s": "A near miss.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6f09795e"
+ },
+ {
+  "s": "At 40 mph the car could not stop in time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7cb68cfe"
+ },
+ {
+  "s": "The faster a car goes, the further it needs to stop.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e24bed82"
+ },
+ {
+  "s": "Many school streets in the UK have a 20 mph limit.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e3181b9d"
+ },
+ {
+  "s": "Near the school: 20 mph.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5546a1dd"
+ },
+ {
+  "s": "A cyclist is ahead.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "85ae7326"
+ },
+ {
+  "s": "How much space does the car leave when it goes past?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a1a6eac7"
+ },
+ {
+  "s": "Still too close.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "490a900d"
+ },
+ {
+  "s": "The cyclist had to swerve.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d72796c9"
+ },
+ {
+  "s": "Lots of room.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "263b95e7"
+ },
+ {
+  "s": "A very safe pass.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3ce2063a"
+ },
+ {
+  "s": "Too close!",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d1824dd2"
+ },
+ {
+  "s": "The cyclist wobbled and nearly fell.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c14dfb03"
+ },
+ {
+  "s": "The car passed with plenty of room.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4763f9c2"
+ },
+ {
+  "s": "The cyclist rode on calmly.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "11a72084"
+ },
+ {
+  "s": "A cyclist can wobble, or swerve round a pothole.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a3e22a53"
+ },
+ {
+  "s": "The Highway Code asks for more than one metre.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9b3ac4d2"
+ },
+ {
+  "s": "Passing a cyclist: leave at least 1.5 metres.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "042d619f"
+ },
+ {
+  "s": "Now a car is coming the other way.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6dcc2b91"
+ },
+ {
+  "s": "There is not room to leave 1.5 metres.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1565e17b"
+ },
+ {
+  "s": "What does our car do?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4f79ba2c"
+ },
+ {
+  "s": "The car squeezed past, far too close to the cyclist.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "36d16c28"
+ },
+ {
+  "s": "The car waited a few seconds, then passed with lots of room.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "eb7657cd"
+ },
+ {
+  "s": "Is a few seconds’ wait worth it?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "abe12d3b"
+ },
+ {
+  "s": "If there is not room, the rule says wait.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "19f883a6"
+ },
+ {
+  "s": "No room to pass a cyclist safely?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "967a9680"
+ },
+ {
+  "s": "Wait behind.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6db37474"
+ },
+ {
+  "s": "It is raining.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "13b2421a"
+ },
+ {
+  "s": "How far back does the car stay behind the car in front?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "70b710cc"
+ },
+ {
+  "s": "The car in front braked.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "700a0d25"
+ },
+ {
+  "s": "On the wet road our car slid much too close.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "14f23856"
+ },
+ {
+  "s": "Our car only just stopped.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a8403996"
+ },
+ {
+  "s": "Fine when dry, too close in rain.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "45af2c91"
+ },
+ {
+  "s": "Our car had plenty of room to stop.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e05ab51b"
+ },
+ {
+  "s": "Do cars stop as quickly on a wet road?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ec5f0bae"
+ },
+ {
+  "s": "On a wet road, stopping takes about twice as far.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ed616495"
+ },
+ {
+  "s": "In the rain: stay 4 seconds behind.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "976f383b"
+ },
+ {
+  "s": "The car turns into a side road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ce1f0c8c"
+ },
+ {
+  "s": "Someone is crossing that side road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4496b1a9"
+ },
+ {
+  "s": "Who goes first?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d1a2deb4"
+ },
+ {
+  "s": "The car turned in front of the person.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6a6fc20d"
+ },
+ {
+  "s": "They had to stop in the road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e6dd05d9"
+ },
+ {
+  "s": "The car waited at the corner.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d80dcde7"
+ },
+ {
+  "s": "The person crossed, then the car turned.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "34c3748c"
+ },
+ {
+  "s": "The person is already crossing.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "afca6ab3"
+ },
+ {
+  "s": "Turning into a side road: give way to people crossing.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e01fb25c"
+ },
+ {
+  "s": "Let’s see the street the way the car does.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "17eec101"
+ },
+ {
+  "s": "Tap Camera, Radar and Lidar to switch views.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "677cc147"
+ },
+ {
+  "s": "Then tick every sensor that can answer the question.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "29c3fa32"
+ },
+ {
+  "s": "Last job: choose the sensors for our car.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bf1f23de"
+ },
+ {
+  "s": "Tick them, and look at the table.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "cbc398a0"
+ },
+ {
+  "s": "The traffic light ahead: is it red or green?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4e0c0c25"
+ },
+ {
+  "s": "Which sensors can tell?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8897ff5d"
+ },
+ {
+  "s": "Only the camera sees colours.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bf3270e8"
+ },
+ {
+  "s": "Radar and lidar show the light’s shape, but not which lamp is on.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "aa88b175"
+ },
+ {
+  "s": "Look at each view.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "35e0d1ef"
+ },
+ {
+  "s": "Which one shows any colours at all?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "61e6aa52"
+ },
+ {
+  "s": "Radar and lidar draw shapes and blobs, never colours.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "829ab8e4"
+ },
+ {
+  "s": "Night.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "96b52e9f"
+ },
+ {
+  "s": "Someone in a dark coat is crossing, past the headlights.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5c50ee84"
+ },
+ {
+  "s": "Which sensors can see them?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "39eac361"
+ },
+ {
+  "s": "Radar and lidar make their own waves and light, so the dark does not stop them.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6f903762"
+ },
+ {
+  "s": "The camera needs light.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "75111912"
+ },
+ {
+  "s": "Look at the camera view first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8182980e"
+ },
+ {
+  "s": "Can you see the person?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7e0980d2"
+ },
+ {
+  "s": "Two sensors send out their own light or waves.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5913a941"
+ },
+ {
+  "s": "Thick fog.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4fc65f2a"
+ },
+ {
+  "s": "A car has stopped further up the road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bde6be57"
+ },
+ {
+  "s": "Which sensors can see it?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bde0ce80"
+ },
+ {
+  "s": "Radar waves go through fog.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "969ad29c"
+ },
+ {
+  "s": "The fog hides the car from the camera and scatters the lidar’s laser.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "09ef5056"
+ },
+ {
+  "s": "Look at the far end of the road in each view.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3f51de97"
+ },
+ {
+  "s": "Only one view still shows something far away.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ad667483"
+ },
+ {
+  "s": "Rain.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c3b0a325"
+ },
+ {
+  "s": "How fast is the cyclist going?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4dc62a4a"
+ },
+ {
+  "s": "Which sensor can measure it?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ff56a202"
+ },
+ {
+  "s": "Radar measures speed straight away, from how its waves bounce back.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "241e605e"
+ },
+ {
+  "s": "The others only show where things are.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "664dd4ba"
+ },
+ {
+  "s": "Which view has arrows that show movement?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1ed5358d"
+ },
+ {
+  "s": "It is the sensor that also works in any weather.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f14839ca"
+ },
+ {
+  "s": "Something small is by the kerb.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1f7e8fd2"
+ },
+ {
+  "s": "Is it a child or a post?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d5ba63f2"
+ },
+ {
+  "s": "The camera and the lidar both show shapes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "59106a15"
+ },
+ {
+  "s": "Radar only shows a blob, so it cannot tell a child from a post.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "dd206214"
+ },
+ {
+  "s": "In which views do the child and the post look different?",
+  "voice": "helper",
+  "mod": 1,
+  "key": "59d12bcc"
+ },
+ {
+  "s": "More than one sensor can tell.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "27b88948"
+ },
+ {
+  "s": "Radar just shows two blobs.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1f7e9e71"
+ },
+ {
+  "s": "Sees colours and details, like your eyes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4baa6709"
+ },
+ {
+  "s": "Radio waves.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "326cbbfa"
+ },
+ {
+  "s": "Finds things and how fast they move, in any weather.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0fbb430b"
+ },
+ {
+  "s": "Laser light.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "00d93d18"
+ },
+ {
+  "s": "Makes a 3D picture of shapes, even in the dark.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "72bac52b"
+ },
+ {
+  "s": "This is the car as it came from the factory.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c2442e80"
+ },
+ {
+  "s": "Let’s test it on two days: a sunny morning and a rainy one.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "296f2604"
+ },
+ {
+  "s": "Each test is 100 drives in the computer.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8479411f"
+ },
+ {
+  "s": "Change one thing at a time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5f0bb422"
+ },
+ {
+  "s": "Then you know what made the difference.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b47432a1"
+ },
+ {
+  "s": "One change at a time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d4bf3d72"
+ },
+ {
+  "s": "To change something else, put this one back first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a80f813d"
+ },
+ {
+  "s": "The car passes every test day!",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bfe2447f"
+ },
+ {
+  "s": "Real cars drive millions of miles in simulation like this before a real road.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9e5aaf99"
+ },
+ {
+  "s": "Replay: the car in front braked.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2b89df64"
+ },
+ {
+  "s": "On the wet road our car needed more room.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8c7d12f8"
+ },
+ {
+  "s": "Replay: spray from the car in front hid it from the camera.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5d2c23a2"
+ },
+ {
+  "s": "Replay: a child stepped out between parked cars.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2b6d0b2a"
+ },
+ {
+  "s": "The car was too fast to stop.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5bda709a"
+ },
+ {
+  "s": "Replay: the car saw a shape it was not sure about, and did not brake.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2464b793"
+ },
+ {
+  "s": "It was a child.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fca549a0"
+ },
+ {
+  "s": "Replay: in the low light, the car could not make out a person in dark clothes.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e5c556c4"
+ },
+ {
+  "s": "Replay: the car braked hard for paper bags and shadows.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "88a84b33"
+ },
+ {
+  "s": "The car behind nearly hit it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "4fc8826d"
+ },
+ {
+  "s": "Open the greenhouse window when the air gets too hot.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e55c6750"
+ },
+ {
+  "s": "Pick only the red tomatoes, not the green ones.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ba126abe"
+ },
+ {
+  "s": "Slow down before it reaches a wall.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "000d1a7c"
+ },
+ {
+  "s": "A robot vacuum must know it has bumped into a chair leg.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c4bdb3d1"
+ },
+ {
+  "s": "Find a box in the way in a dark storeroom.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f5ef5727"
+ },
+ {
+  "s": "Wait until a cup of tea has cooled before handing it over.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5c09a575"
+ },
+ {
+  "s": "Read the room number on a door.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "28f91350"
+ },
+ {
+  "s": "A robot lawnmower must notice it has hit a fence post.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "68b9f061"
+ },
+ {
+  "s": "If something is right in front, turn right.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5c1e0643"
+ },
+ {
+  "s": "If not, go forward.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "3e59f4a8"
+ },
+ {
+  "s": "If something is near (one square away or less), turn right.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "956869bb"
+ },
+ {
+  "s": "Never turn.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "5a263eec"
+ },
+ {
+  "s": "Always go forward.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "ad259f7d"
+ },
+ {
+  "s": "It cannot see in the dark, and it cannot tell how hot something is.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "c6c38e61"
+ },
+ {
+  "s": "It sends out a sound and times the echo.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a2911a24"
+ },
+ {
+  "s": "It cannot tell colours or read writing.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0f6f8984"
+ },
+ {
+  "s": "It only knows after it has touched.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "59f88931"
+ },
+ {
+  "s": "It cannot warn before.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "19a92b64"
+ },
+ {
+  "s": "It cannot tell where things are or what they look like.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "27617a91"
+ },
+ {
+  "s": "Its leaves are chewed by slugs, so it looks ragged, like a weed.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b326507e"
+ },
+ {
+  "s": "It is half hidden under leaves, so the camera sees only part of it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bdcec7d6"
+ },
+ {
+  "s": "It is tiny, so the camera sees few leaves.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8458b400"
+ },
+ {
+  "s": "Its feathery leaves look a lot like cow parsley, a weed.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "fcd7d908"
+ },
+ {
+  "s": "Every robot does three things, over and over: it senses, it thinks, and it acts.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "467014cc"
+ },
+ {
+  "s": "Robot engineers choose its sensors first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "394cbe23"
+ },
+ {
+  "s": "Match each job to the sensor that can do it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8908704f"
+ },
+ {
+  "s": "Then watch a robot sense, think and act, and say what it will do next.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6bdfe5a8"
+ },
+ {
+  "s": "You can now choose a sensor for a job, and follow a robot’s sense, think, act loop.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "bfe9e882"
+ },
+ {
+  "s": "In factories and greenhouses, robot arms pick and pack all day.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "392990c8"
+ },
+ {
+  "s": "A person writes the steps they follow.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "509d4aa8"
+ },
+ {
+  "s": "Tap the step tiles to write the arm’s program.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2c917b5f"
+ },
+ {
+  "s": "Press Run to watch it.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "1e635b72"
+ },
+ {
+  "s": "Press Step to go one step at a time.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "6b9e99e0"
+ },
+ {
+  "s": "You can now write steps in order, find a wrong step, and use a repeat.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "29da3b0a"
+ },
+ {
+  "s": "Some hospitals have robots that carry medicine along the corridors.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "d6ea223a"
+ },
+ {
+  "s": "They follow rules that keep people safe.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "2d50badf"
+ },
+ {
+  "s": "Choose what the robot does in each case: “If this happens, then do that.”",
+  "voice": "helper",
+  "mod": 1,
+  "key": "60a15abd"
+ },
+ {
+  "s": "Press Test run and watch the trip.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "73b7df21"
+ },
+ {
+  "s": "You can now write “if … then” rules for a robot, and put safety first.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "9b44637a"
+ },
+ {
+  "s": "Recycling centres use robots with cameras to sort rubbish.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "7bdb1faf"
+ },
+ {
+  "s": "People teach them by showing them examples.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "270fa246"
+ },
+ {
+  "s": "Tap a thing, then tap its bin, to show the robot an example.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b8a451da"
+ },
+ {
+  "s": "Test it on things it has not seen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e8829ab5"
+ },
+ {
+  "s": "Then show it more.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "340820a7"
+ },
+ {
+  "s": "You can now teach a robot with examples, and test it on things it has not seen.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "00b956dc"
+ },
+ {
+  "s": "Some farm robots find weeds and pull them out, so farmers need less weedkiller.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "8d6ee432"
+ },
+ {
+  "s": "They must not pull up the crops.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b1223b87"
+ },
+ {
+  "s": "Look at how sure the robot is about each plant.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "b94279e6"
+ },
+ {
+  "s": "Then set how sure it must be before it pulls a plant.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "806915ca"
+ },
+ {
+  "s": "Press Weed the row.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "52326c8e"
+ },
+ {
+  "s": "You can now set how sure a robot must be before it acts, when some mistakes are worse than others.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a75c0798"
+ },
+ {
+  "s": "After a flood, rescue teams send robots where it is not safe for people.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "0826fdbe"
+ },
+ {
+  "s": "Engineers design them, test them and make them better.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "f265011a"
+ },
+ {
+  "s": "Choose the robot’s body, sensors and battery.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "a16aa842"
+ },
+ {
+  "s": "Press Test to try it in the flooded street.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "55d23ecb"
+ },
+ {
+  "s": "Then make it better.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "83c9c59f"
+ },
+ {
+  "s": "You can now design a robot for a job, test it, and make it better.",
+  "voice": "helper",
+  "mod": 1,
+  "key": "e5c9d7e7"
  }
 ]

@@ -5,7 +5,9 @@
 // The lines files keep their old order and new sentences are added at the end, so render.py rewrites only the last
 // chunk or two of each pack (a new order renames every chunk: megabytes of churn in git). --fresh starts the lists anew.
 // The afternoon modules: every js/modules/<id>/words.js (and drone/route.js) is read for built-in sentences, spoken in
-// Florence's voice; put a new module's spoken lines in its words.js, or add its file to WORD_FILES.
+// Florence's voice. Every other file of a module that needs no page or 3D (no three.js, document or window) is read for
+// its fixed sentences too, without calling its functions; words.js, missions.js and drone/route.js also have their
+// functions called with the age alone, so lines built from the age are found.
 import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
@@ -15,7 +17,10 @@ const here = path.dirname(new URL(import.meta.url).pathname);
 const argv = process.argv.slice(2); const fresh = argv.includes('--fresh');
 const [base = 'http://localhost:8765/', ...saidFiles] = argv.filter((a) => a !== '--fresh');
 const modDir = path.join(here, '..', 'game', 'js', 'modules');
-const WORD_FILES = [...fs.readdirSync(modDir).filter((d) => fs.existsSync(path.join(modDir, d, 'words.js'))).map((d) => `./js/modules/${d}/words.js`), './js/modules/drone/route.js'];
+const CALL = ['words.js', 'missions.js', 'route.js'];
+const WORD_FILES = fs.readdirSync(modDir).filter((d) => fs.statSync(path.join(modDir, d)).isDirectory()).flatMap((d) => fs.readdirSync(path.join(modDir, d))
+  .filter((f) => f.endsWith('.js') && f !== 'index.js' && !/from 'three'|\bdocument\.|\bwindow\.|requestAnimationFrame/.test(fs.readFileSync(path.join(modDir, d, f), 'utf8')))
+  .map((f) => ({ f: `./js/modules/${d}/${f}`, call: CALL.includes(f) })));
 
 const b = await chromium.launch(); const p = await b.newPage(); p.setDefaultTimeout(600000); // a busy machine is slow
 await p.goto(base + 'index.html?film=none', { waitUntil: 'domcontentloaded' });
@@ -109,14 +114,14 @@ const out = await p.evaluate(async (WORD_FILES) => {
         const nx = nextPart?.(id); add(band, nx ? `Break time. Next: part ${nx.n}, ${nx.title}.` : 'That is the end of today’s parts.', 'narrator'); } } }
     // the afternoon modules: every built-in sentence in their word files (strings, { j, s } pairs, and what functions
     // return when given only the age). A sentence with a missing value in it (undefined, NaN) is left out.
-    for (const f of WORD_FILES) {
+    for (const { f, call } of WORD_FILES) {
       let M; try { M = await import(f); } catch { continue; }
       const seen = new Set(); const bad = /undefined|NaN|\[object|\bnull\b|\btrue\b|\bfalse\b/;
       const say = (t) => { if (/\s/.test(t) && /[.!?:]['’”)]?$/.test(t.trim())) for (const s of V.sentences(t)) if (!bad.test(s)) res[band].push({ s, voice: 'helper', mod: 1 }); };
       const walk = (v, d) => {
         if (v == null || d > 4) return;
         if (typeof v === 'string') return say(v);
-        if (typeof v === 'function') { if (d > 2 || v.length > 2) return; for (const a of [[j], []]) { try { walk(v(...a), d + 1); } catch { /* needs more than the age */ } } return; }
+        if (typeof v === 'function') { if (!call || d > 2 || v.length > 2) return; for (const a of [[j], []]) { try { walk(v(...a), d + 1); } catch { /* needs more than the age */ } } return; }
         if (typeof v !== 'object' || seen.has(v) || v instanceof Promise) return; seen.add(v);
         if ('j' in v && 's' in v) return walk(j ? v.j : v.s, d + 1);
         for (const x of Object.values(v)) walk(x, d + 1);
