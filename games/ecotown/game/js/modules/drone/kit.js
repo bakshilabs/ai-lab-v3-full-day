@@ -105,6 +105,9 @@ ${M} .dk-panel > .dr-say { grid-column: 1 / -1; margin-left: calc(var(--dr-back)
 ${M} .dk-main, ${M} .dk-side { background: #fffaf0; border-radius: 16px; padding: 10px; box-shadow: inset 0 0 0 2px #b08a55; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 ${M} .dk-main { display: flex; flex-direction: column; gap: 6px; }
 ${M} .dk-main svg { display: block; width: 100%; height: auto; max-height: 100%; }
+${M} .dk-main > svg, ${M} .dk-main > .dk-team, ${M} .dk-main > .dk-farm { flex: 1 1 0; min-height: 120px; }
+${M} .dk-main > svg, ${M} .dk-main > .dk-team > svg, ${M} .dk-main > .dk-farm > svg { height: 100%; }
+${M} .dk-main > .dk-team, ${M} .dk-main > .dk-farm { display: flex; }
 ${M} .dk-side { display: flex; flex-direction: column; gap: 8px; }
 ${M} .dk-side h2 { margin: 0; font-size: 1.15em; font-weight: 800; }
 ${M} .dk-side p { margin: 0; line-height: 1.35; font-weight: 600; }

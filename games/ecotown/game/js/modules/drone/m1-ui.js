@@ -70,7 +70,7 @@ function mapSvg(plan, { junior, done = [] }) {
 }
 function sideSvg(plan, junior) {
   const H = 120, top = 16, groundY = 104; const scale = (groundY - top - 8) / 220; const y = (m) => groundY - m * scale; const hy = y(plan.height);
-  const o = [`<svg viewBox="0 0 600 ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Side view: how high the drone would fly, and the height limit">`];
+  const o = [`<svg class="dk-sideview" viewBox="0 0 600 ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Side view: how high the drone would fly, and the height limit">`];
   o.push(`<rect width="600" height="${H}" fill="#e8f4fb"/><rect y="${groundY}" width="600" height="${H - groundY}" fill="#a5dd84"/>`);
   o.push(`<path d="M0 ${y(HEIGHT_LIMIT)} H600" stroke="#d2452d" stroke-width="3" stroke-dasharray="10 6"/><text x="8" y="${y(HEIGHT_LIMIT) - 6}" font-family="Inter, sans-serif" font-weight="800" font-size="13" fill="#8a3d12">${junior ? 'Height limit: no drones above this line' : 'Height limit: 120 m (about 400 ft)'}</text>`);
   o.push(`<path d="M520 ${groundY} v-14 h10 v14" fill="#7a5a33"/><g transform="translate(140 ${groundY - 10})"><circle r="7" fill="#1f6fd0"/></g>`);
@@ -165,6 +165,7 @@ export const M1_CSS = `
 ${M} .dk-hot { cursor: pointer; }
 ${M} .dk-pic > svg { margin: auto 0; }
 ${M} .dk-pic svg { border-radius: 12px; }
+${M} .dk-main > svg.dk-sideview { flex: 0 0 auto; height: auto; min-height: 0; }
 ${M} .dk-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 ${M} .dk-check { display: grid; gap: 2px; text-align: left; min-height: 58px; }
 ${M} .dk-check span { font-size: .88em; font-weight: 700; color: #5e4936; }
