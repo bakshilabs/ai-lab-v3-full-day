@@ -20,13 +20,13 @@ const fingers = (open) => (open ? `<path d="M-16 0v18M16 0v18" stroke="${INK}" s
 const armLabel = (arm) => `The robot arm is ${arm.down ? 'down' : 'up'} at ${arm.at === 'box' ? 'the box' : arm.at === 'home' ? 'its start' : arm.at === 'air' ? `x = ${arm.x}` : `seedling ${arm.at + 1}`}, grip ${arm.open ? 'open' : 'closed'}${arm.hold !== null ? ', holding a seedling' : ''}. ${arm.box} in the box.`;
 // The arm, the tray and the box, side on. senior: the ruler in centimetres.
 export function armSvg(arm, senior = false) {
-  return `<svg class="rb-armsvg" viewBox="0 10 480 230" role="img" aria-label="${armLabel(arm)}">
+  return `<svg class="rb-armsvg" viewBox="0 10 480 232" role="img" aria-label="${armLabel(arm)}">
     <rect x="0" y="214" width="480" height="26" fill="#d6a469"/><rect x="20" y="20" width="440" height="14" rx="5" fill="#8d98a3" stroke="${INK}" stroke-width="2.6"/>
     ${senior ? Array.from({ length: 11 }, (_, i) => `<path d="M${px(i * 10)} 34v6" stroke="${INK}" stroke-width="1.5"/>`).join('') : ''}
     <g class="rb-scenery">${scenery(arm, senior)}</g>
     <g class="rb-armg" style="transform: translateX(${px(arm.x)}px)">
       <g class="rb-grip" style="transform: translateY(${arm.down ? DROP : 0}px)"><g transform="translate(0 92)"><rect x="-5" y="-112" width="10" height="106" fill="#b9c2cb" stroke="${INK}" stroke-width="2.2"/><rect x="-20" y="-6" width="40" height="10" rx="3" fill="#f4b73b" stroke="${INK}" stroke-width="2.4"/><g class="rb-fing">${fingers(arm.open)}</g><g class="rb-held">${arm.hold !== null ? seed(0, 28) : ''}</g></g></g>
-      <rect x="-22" y="8" width="44" height="32" rx="6" fill="#16c79a" stroke="${INK}" stroke-width="2.6"/></g></svg>`;
+      <rect x="-22" y="13" width="44" height="27" rx="6" fill="#16c79a" stroke="${INK}" stroke-width="2.6"/></g></svg>`;
 }
 // Move the drawn arm to a new state without redrawing it (so a CSS transition can play).
 export function updateArm(svg, arm, senior) {

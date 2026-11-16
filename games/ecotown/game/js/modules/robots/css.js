@@ -45,7 +45,7 @@ export const css = `
 § .rb-sensor.yes { background: #e3f4e9; box-shadow: inset 0 0 0 4px #1f7a44, 0 4px 0 #17603a; cursor: default; } § .rb-sensor.yes em { color: #1f7a44; }
 § .rb-m1b { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
 § .rb-roombox { display: grid; place-items: center; } § .rb-room { width: 100%; height: auto; max-height: min(52vh, 400px); display: block; }
-§ .rb:not(.still) .rb-bot { transition: transform .35s ease; } § .rb-bot .rb-bumpfx { display: none; } § .rb-bot.bump .rb-bumpfx { display: inline; } § .rb-two2 { grid-template-columns: 1fr 1fr; } § .rb-cm { justify-content: center; }
+§ .rb:not(.still) .rb-bot { transition: transform .35s ease; } § .rb-bot .rb-bumpfx { display: none; } § .rb-bot.bump .rb-bumpfx { display: inline; } § .rb-two2 { grid-template-columns: 1fr 1fr; } § .rb-loop .rb-panel h3:not(:first-child) { margin-top: 12px; } § .rb-cm { justify-content: center; }
 § .rb-loop { display: grid; gap: 10px; }
 § .rb-rule { display: grid; gap: 2px; background: #243447; color: #fff; box-shadow: none; } § .rb-rule small { color: #bfeaff; font-weight: 800; } § .rb-rule b { font-size: 1.08em; }
 § .rb-sta { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

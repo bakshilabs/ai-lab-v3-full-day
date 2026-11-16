@@ -123,7 +123,7 @@ await waitStage('^m1-watch$'); await layout('m1-watch');
 { let asks = 0; let loops = 0; let skipped = false;
   while ((await stage()) === 'm1-watch' && loops++ < 30) {
     if (await p.locator('#module .rb-foot [data-act="forward"]').count()) { asks++; await goFoot(asks % 2 ? 'forward' : 'turn'); if (asks === 1) await shot('m1-predict'); }
-    if (asks === 2 && !skipped && await p.locator('#module .rb-foot [data-act="skip"]').count()) { skipped = true; await goFoot('skip'); await p.waitForTimeout(300); continue; }
+    if (asks >= 2 && !skipped && await p.locator('#module .rb-foot [data-act="skip"]').count()) { skipped = true; await goFoot('skip'); await p.waitForTimeout(300); continue; }
     await goFoot('next'); await p.waitForTimeout(150);
   }
   checks.m1Predictions = asks >= 3; checks.m1SkipOffered = skipped; }
