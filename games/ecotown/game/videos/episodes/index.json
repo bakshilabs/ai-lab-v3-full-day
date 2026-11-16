@@ -119,7 +119,7 @@
    "poster": "move-open.jpg",
    "vtt": "move-open.vtt",
    "duration": 29.37,
-   "bytes": 1462463,
+   "bytes": 6147474,
    "cues": [
     {
      "t0": 1.3,
@@ -174,7 +174,7 @@
    "poster": "move-close.jpg",
    "vtt": "move-close.vtt",
    "duration": 30.74,
-   "bytes": 1469924,
+   "bytes": 6534745,
    "cues": [
     {
      "t0": 1.3,
@@ -339,7 +339,7 @@
    "poster": "food-open.jpg",
    "vtt": "food-open.vtt",
    "duration": 27.42,
-   "bytes": 1455700,
+   "bytes": 5764751,
    "cues": [
     {
      "t0": 1.3,
@@ -504,7 +504,7 @@
    "poster": "power-close.jpg",
    "vtt": "power-close.vtt",
    "duration": 33.61,
-   "bytes": 1468841,
+   "bytes": 7059357,
    "cues": [
     {
      "t0": 1.3,
@@ -565,7 +565,7 @@
    "poster": "heart-open.jpg",
    "vtt": "heart-open.vtt",
    "duration": 25.46,
-   "bytes": 1458393,
+   "bytes": 5340685,
    "cues": [
     {
      "t0": 1.3,

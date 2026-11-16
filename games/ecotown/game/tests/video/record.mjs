@@ -26,6 +26,7 @@ for (const id of items) {
   await p.addInitScript(() => localStorage.setItem('ecotown.prefs', JSON.stringify({ quality: 'high', reduce: false, readAloud: false })));
   p.on('pageerror', (e) => console.log('[pageerror]', id, e.message));
   await p.goto(`${base}index.html?shoot=${id}&tier=${TIER}`); await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
+  await p.evaluate(() => document.getElementById('boot')?.remove()); // the loading card is only removed by the game's start()
   const dur = await p.evaluate(() => window.__duration); const n = Math.round(dur * FPS); const t0 = Date.now();
   const raw = WORK && path.join(WORK, `${id}.video.mp4`); const poster = path.join(WORK || out, `${id}.poster.${PNG ? 'png' : 'jpg'}`);
   const encArgs = raw ? ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', raw] : ['-c:v', 'libx264', '-preset', 'slow', '-crf', CRF, '-tune', 'animation', '-profile:v', 'main', '-movflags', '+faststart', mp4];
