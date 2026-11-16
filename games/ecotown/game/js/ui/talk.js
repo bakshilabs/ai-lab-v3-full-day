@@ -1,9 +1,16 @@
 // The end of every part (docs/full-day-plan.md): a discussion section led by the teacher, then a break screen.
 // Nothing is typed and nothing is sent. Used by the module loader and by Eco Town's session finish.
 import { esc } from './ui.js';
-import { TALK, nextPart } from '../series.js';
+import { TALK, JOBS, nextPart } from '../series.js';
 import { HUB } from '../version.js';
 
+// "Jobs that use this": real jobs that use what the part taught, one line each. The last screen before the talk.
+export async function jobsThatUseThis(ui, id, junior) {
+  const jobs = JOBS[id]; if (!jobs) return;
+  await ui.modal(`<div class="ribbon">💼 Jobs that use this</div><h2>${junior ? 'People do this as their job' : 'Real jobs that use what you just did'}</h2>
+    <ul class="jobs" style="list-style:none;padding:0;margin:10px auto;max-width:36em;text-align:left">${jobs.map(([ic, t, j, s]) => `<li style="display:flex;gap:12px;align-items:flex-start;margin:10px 0;font-size:1.1em;line-height:1.35"><span aria-hidden="true" style="font-size:1.6em;line-height:1">${ic}</span><span><b>${esc(t)}</b><br>${esc(junior ? j : s)}</span></li>`).join('')}</ul>
+    <div class="row" style="justify-content:center"><button class="btn go" data-act="go">Next: talk it over ➜</button></div>`, { say: `Jobs that use this. ${jobs.map(([, t, j, s]) => `${t}. ${junior ? j : s}`).join(' ')}` });
+}
 // "Talk it over": the part's questions, large, for the teacher to read out with screens down.
 export async function talkItOver(ui, id, junior) {
   const qs = TALK[id]?.[junior ? 'j' : 's']; if (!qs) return;
@@ -20,9 +27,9 @@ export async function breakTime(ui, id, junior) {
     <div class="row" style="justify-content:center"><button class="btn alt" data-act="stay">Stay here</button><button class="btn go" data-act="hub">🏠 AI Lab start page</button></div>`, { say: next ? `Break time. Next: part ${next.n}, ${next.title}.` : 'That is the end of today’s parts.' });
   return a;
 }
-// Both, in order. Returns 'hub' when the child chose the start page (the caller saves first, then goes there).
+// All three, in order. Returns 'hub' when the child chose the start page (the caller saves first, then goes there).
 export async function endOfPart(app, id, junior) {
-  await talkItOver(app.ui, id, junior); const a = await breakTime(app.ui, id, junior);
+  await jobsThatUseThis(app.ui, id, junior); await talkItOver(app.ui, id, junior); const a = await breakTime(app.ui, id, junior);
   if (a === 'hub') { app.G?.flush?.(); location.href = HUB; }
   return a;
 }

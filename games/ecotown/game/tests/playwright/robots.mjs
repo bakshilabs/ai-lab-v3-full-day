@@ -249,7 +249,7 @@ await goFoot('finish');
 await p.waitForSelector('#modal:not(.hide) .practised', { timeout: 60000 }); await shot('record');
 checks.recordCard = await p.evaluate(() => /You practised/.test(document.querySelector('#modal').textContent));
 await tap('#modal:not(.hide) [data-act="ok"]');
-for (const a of ['go', 'stay']) { const s = await p.waitForSelector(`#modal:not(.hide) [data-act="${a}"]`, { timeout: 60000 }).catch(() => null); if (s) { if (a === 'go') await shot('talk'); await p.waitForTimeout(400); await s.click(); checks[`end-${a}`] = true; } else checks[`end-${a}`] = false; }
+for (const a of ['go', 'go', 'stay']) { const s = await p.waitForSelector(`#modal:not(.hide) [data-act="${a}"]`, { timeout: 60000 }).catch(() => null); if (s) { if (a === 'go') await shot('talk'); await p.waitForTimeout(400); await s.click(); checks[`end-${a}`] = true; } else checks[`end-${a}`] = false; }
 await p.waitForFunction(() => window.__robots && window.__robots !== 'open', null, { timeout: 60000 });
 const result = await p.evaluate(() => window.__robots);
 checks.finished = result?.finished === true;
