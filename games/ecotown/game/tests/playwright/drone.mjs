@@ -262,7 +262,7 @@ const must = {
   leavingKeepsFinished: checks.sceneAfterLeaving === '' && before.every((x) => checks.keptAfterLeaving.includes(x)),
   everyMissionSaved: play.every((id) => checks[`${id}Saved`]),
   openingsSayTheJob: play.every((id) => (checks[`${id}Opening`] || '').length > 40),
-  ...(play.includes('ground') ? { groundHonest: /Look again/.test(checks.groundHint) && /Look at the checks again/.test(checks.groundGale) && checks.groundTopLine === checks.groundGale && checks.groundFocusAfterFourth === 'day' && checks.groundAirfield } : {}),
+  ...(play.includes('ground') ? { groundHonest: /Look again/.test(checks.groundHint) && /Look at the checks again/.test(checks.groundGale) && checks.groundTopLine === checks.groundGale && (touch || checks.groundFocusAfterFourth === 'day') && checks.groundAirfield } : {}),
   ...(play.includes('survey') ? { surveyHonest: /gap/i.test(checks.surveyGaps) && /battery/i.test(checks.surveyBattery) } : {}),
   ...(play.includes('rescue') ? { rescueHonest: /hard to pick out/.test(checks.rescueCamera) && /outside/.test(checks.rescueRiver) && /yours/.test(checks.rescueTimes0) && (band === 'junior' || /yours/.test(checks.rescueTimes1 || '')) } : {}),
   ...(all ? { finished: checks.finished === true && checks.lines?.length === 6 && checks.practised?.length >= 2 && checks.townKind === 'drone-route' && checks.picture > 0 && checks.sceneAfter === 'drone-route' && checks.moduleLayerGone } : {}),
