@@ -14,7 +14,7 @@ function handDay(d, round, guide) {
   d.say(reduce ? handAskStep(j) : handAsk(j), storeDayLine(round, j));
   const btns = () => MODES.map((m, n) => `<button type="button" data-mode="${m}" aria-pressed="${m === mode}" aria-keyshortcuts="${n + 1}"><i aria-hidden="true">${T.modeIcon[m]}</i><span>${esc(pick(T.mode[m]))}</span><u aria-hidden="true">✓</u><small>${esc(pick(T.modeHint[m]))}</small>${guide ? `<em class="pw-guide" hidden>★ ${j ? 'Florence' : 'Plan'}</em>` : ''}</button>`).join('');
   ctl.innerHTML = `<div class="pw-modes" role="group" aria-label="Battery">${btns()}</div>
-    <div class="pw-row">${reduce ? `<button class="go" type="button" data-hour>${pick(T.nextHour)}</button>` : `<button type="button" data-pause>${T.pause}</button>`}</div>`;
+    <div class="pw-row">${reduce ? `<button class="go" type="button" data-hour>${pick(T.nextHour)}</button><button type="button" data-skipto>${j ? 'Keep this until the next part of the day ➜' : 'Keep this to the next block ➜'}</button>` :`<button type="button" data-pause>${T.pause}</button>`}</div>`;
   prog.hidden = reduce;
   const head = () => `<h3>${esc(pick(T.day[dayId]))}<small>${esc(pick(T.dayNote[dayId]))}</small></h3>`;
   const draw = () => { d.screen.innerHTML = `${head()}${d.chart(dayId, { hours, cursor: i })}${d.keyRow()}<p class="pw-goal">${esc(storeGoalLine(round.goal, j))}</p>`; };
@@ -42,6 +42,7 @@ function handDay(d, round, guide) {
     d.setTap((b) => {
       if (b.dataset.mode) setMode(b.dataset.mode);
       else if ('hour' in b.dataset) commit();
+      else if ('skipto' in b.dataset) { const block = fc[i].block; do commit(); while (i > 0 && i < HOURS && fc[i].block === block); }
       else if ('pause' in b.dataset) { paused = !paused; b.textContent = paused ? T.resume : T.pause; b.classList.toggle('go', paused); }
     });
     d.setKey((e) => { const n = ['1', '2', '3'].indexOf(e.key); if (n < 0) return false; setMode(MODES[n]); return true; });

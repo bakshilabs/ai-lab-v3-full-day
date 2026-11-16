@@ -1,11 +1,12 @@
 // The "power" module's six missions (js/modules/power): the pure models, goals, hints, saved progress and record.
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { kitFrom, forecast, runModes, DAY_IDS, isWinter, HOURS } from '../js/modules/power/model.js';
-import { BALANCE_ROUNDS, STEPS, FLEX_MIN, FLEX_MAX, ROUND_GOAL, needFlex, gap, hz, judge, reachable, darkFor, balanceHint, stateWord, clockText } from '../js/modules/power/m1-balance.js';
+import { stepSay, BAL, BALANCE_ROUNDS, STEPS, FLEX_MIN, FLEX_MAX, ROUND_GOAL, needFlex, gap, hz, judge, reachable, darkFor, balanceHint, stateWord, clockText } from '../js/modules/power/m1-balance.js';
 import { FORECAST_ROUNDS, hoursOf, checkMarks, spells, shortKwh, peakGapKw, energyChoices, checkSay, energySay } from '../js/modules/power/m2-forecast.js';
-import { STORE_ROUNDS, bestPlan, storeGoal, storeMet, storeHint, planLine, planSpans } from '../js/modules/power/m3-storage.js';
-import { DEMAND_ROUNDS, JOBS, SLOTS, startPlan, layout, solve, inWindow, runSay, refuseSay, jobSize } from '../js/modules/power/m5-demand.js';
-import { IDS, FAULT, BATTERY_ONLY, GRID_BACK, SECTIONS, live, loadOf, indicators, r1Start, r1Flip, r1Done, r2Start, r2Flip, r2Done, r2Best, prioOn, crewSteps, crewShuffled, crewCheck, r3Start, r3Switch, r3Done } from '../js/modules/power/m6-storm.js';
+import { STORE_ROUNDS, bestPlan, storeGoal, storeMet, storeHint, planLine, planSpans, storeGoalLine } from '../js/modules/power/m3-storage.js';
+import { batteryWord } from '../js/modules/power/shell.js';
+import { DEMAND_ROUNDS, JOBS, SLOTS, startPlan, layout, solve, minGas, inWindow, runSay, refuseSay, jobSize, DEM } from '../js/modules/power/m5-demand.js';
+import { PREP, PREP_GOOD, prepCheck, prepSay, STORM, IDS, FAULT, BATTERY_ONLY, GRID_BACK, SECTIONS, live, loadOf, indicators, r1Start, r1Flip, r1Done, r2Start, r2Flip, r2Done, r2Best, prioOn, crewSteps, crewShuffled, crewCheck, r3Start, r3Switch, r3Done } from '../js/modules/power/m6-storm.js';
 import { MISSIONS, cleanProgress, packProgress, nextMission, isOpen, allDone, recordLines, practisedLines, madeTitle } from '../js/modules/power/missions.js';
 import { hourPicture } from '../js/modules/power/chart.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
@@ -57,6 +58,8 @@ test('mission 1: every step can be made level, the rounds get harder, and the fr
   assert.ok(FLEX_MIN < 0 && FLEX_MAX > 0);
   assert.notEqual(balanceHint(1, judge(r, Array(8).fill(0)), true), balanceHint(2, judge(r, Array(8).fill(0)), true));
   assert.ok(/kW/.test(stateWord(-1, false)) && !/Hz|kW/.test(stateWord(-1, true)));
+  assert.ok(!/switched off|disconnected/.test(stepSay(-3, false) + stepSay(-1, true)), 'a small shortfall calls in reserve, it does not cut homes off');
+  assert.ok(/48\.8/.test(BAL.warn.s) && /In this game/.test(BAL.warn.j));
   assert.equal(clockText(r, 0, true), '6:00 am'); assert.equal(clockText(BALANCE_ROUNDS[1], 3, false), '08:00');
 });
 
@@ -91,6 +94,8 @@ test('mission 3: every day has an honest goal the best plan meets, and "midday c
   }
   const g = storeGoal(KITS[0], STORE_ROUNDS[2], 3); const spans = planSpans(g.plan); assert.equal(spans.reduce((a, s) => a + s.n, 0), 24);
   assert.ok(/Charge from/.test(planLine(g.plan, true)));
+  assert.ok(/Lights row/.test(storeGoalLine(g, true)) || /yellow/.test(storeGoalLine(g, true)), 'ages 8-12: the goal is said in what the chart shows');
+  assert.deepEqual([0, 0.2, 0.5, 0.8, 1].map(batteryWord), ['Empty', 'Low', 'Half full', 'Nearly full', 'Full']);
   const day = runModes(KITS[0], 'winter', Array(24).fill('hold'), { seed: 3, startLevel: 0 });
   assert.ok(!/Charge from/.test(storeHint(1, day, g, true)) && !/Charge from/.test(storeHint(2, day, g, true)), 'the plan is not given after one or two misses');
   assert.ok(/Charge from/.test(storeHint(3, day, g, true)));
@@ -100,17 +105,24 @@ test('mission 3: every day has an honest goal the best plan meets, and "midday c
 test('mission 5: each day starts at the usual times (on gas), has a clean answer inside every window, and refuses times people cannot use', () => {
   for (const r of DEMAND_ROUNDS) {
     const start = layout(r, startPlan(r)); assert.ok(start.gas > 0 && !start.done, `${r.id}: the usual times burn gas`); assert.equal(start.outside.length, 0, 'the usual times are allowed times');
-    const s = solve(r); assert.ok(s, `${r.id}: solvable`); const l = layout(r, s); assert.ok(l.done && l.gas === 0); for (const id of Object.keys(s)) assert.ok(inWindow(id, s[id]));
+    const s = solve(r); assert.ok(s, `${r.id}: solvable`); const l = layout(r, s); assert.ok(l.done && l.gas === minGas(r)); for (const id of Object.keys(s)) assert.ok(inWindow(id, s[id]));
+    assert.equal(minGas(r), r.id === 'shift' ? 1 : 0, `${r.id}: only the night shift needs gas`);
     assert.equal(r.spare.length, SLOTS);
   }
   const scarce = DEMAND_ROUNDS[2]; const spare = scarce.spare.reduce((a, b) => a + b, 0); const need = scarce.jobs.reduce((a, [id]) => a + JOBS[id].p * JOBS[id].len, 0);
   assert.ok(need >= spare - 1, 'day 3 is tight: almost every spare square is needed');
   assert.ok(!inWindow('carA', 2) && inWindow('carA', 8) && !inWindow('wash', 6) && !inWindow('heat', 6));
   assert.ok(/6 pm/.test(refuseSay('carA', true))); assert.ok(/kWh/.test(jobSize('carA', false)) && jobSize('carA', true) === '');
+  assert.equal(DEMAND_ROUNDS.length, 4); assert.equal(DEMAND_ROUNDS[0].jobs.length, 4, 'day 1 has four jobs, one needing two squares');
+  const shift = DEMAND_ROUNDS[3]; const sl = layout(shift, solve(shift)); assert.ok(sl.done && sl.perJob.nurse.gas === 1 && /nurse/i.test(runSay(sl, 1, true)));
+  assert.ok(!inWindow('nurse', 8) && inWindow('nurse', 7));
   const l = layout(DEMAND_ROUNDS[0], startPlan(DEMAND_ROUNDS[0])); assert.notEqual(runSay(l, 1, true), runSay(l, 2, true)); assert.ok(!/kWh/.test(runSay(l, 1, true)));
 });
 
 test('mission 6: the fault is found from the flags, priority comes first within the battery, and the crew order is the safe one', () => {
+  assert.equal(PREP.length, 8); assert.equal(PREP_GOOD.size, 4); assert.ok(prepCheck([...PREP_GOOD]).done); assert.ok(!prepCheck(PREP).done);
+  const r = prepCheck(['charge', 'crewsout']); assert.equal(r.bad.length, 1); assert.equal(r.missing, 3); assert.ok(/storm|safe/i.test(prepSay(r, 2, [], true)), 'the second miss says why the unsafe one is unsafe');
+  assert.ok(/early calls|phone them early/.test(STORM.psr.s + STORM.psr.j), 'the register is explained as calls and help, not a switch');
   assert.equal(FAULT, '3B'); const flags = indicators(); assert.ok(flags['3A'] && flags['3B'] && !flags['1A'] && !flags['2B']);
   let sw = r1Start(); assert.ok(!live(sw)['3A'] && !live(sw)['3B'] && live(sw)['1B']);
   let o = r1Flip(sw, '3A'); assert.equal(o.event, 'tripped'); assert.ok(!o.sw['3A'], 'reclosing onto the fault trips again');
