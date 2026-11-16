@@ -39,7 +39,7 @@ export function createFly3d(ctx, { origin, radius = 40, cam = { up: 17, back: 19
     S.x += S.vx * dt; S.z += S.vz * dt;
     const dx = S.x - origin.x, dz = S.z - origin.z, d = Math.hypot(dx, dz); if (d > radius) { S.x = origin.x + dx / d * radius; S.z = origin.z + dz / d * radius; S.vx *= 0.5; S.vz *= 0.5; }
     S.floor = floorAt(S.x, S.z); const vyWas = S.vy; S.y += S.vy * dt;
-    let touched = null; if (S.y <= S.floor) { if (vyWas < -0.05 && !onGround) touched = -vyWas; S.y = S.floor; S.vy = Math.max(0, S.vy); }
+    let touched = null; if (S.y <= S.floor) { if (!onGround) touched = Math.max(0, -vyWas); S.y = S.floor; S.vy = Math.max(0, S.vy); } // touching down, also when the ground rises under it (the edge of a pad)
     S.y = Math.min(S.y, S.floor + 60);
     return touched; // the speed it came down at, on the frame it touched down
   }
