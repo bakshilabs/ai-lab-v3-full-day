@@ -16,7 +16,7 @@ export async function talkItOver(ui, id, junior) {
   const qs = TALK[id]?.[junior ? 'j' : 's']; if (!qs) return;
   await ui.modal(`<div class="ribbon">💬 Talk it over</div><h2>${junior ? 'Screens down. Talk with your teacher.' : 'Screens down: talk it over with your teacher.'}</h2>
     <ol class="talkqs" style="text-align:left;font-size:1.25em;line-height:1.4;margin:10px auto;max-width:34em;padding-left:1.4em">${qs.map((q) => `<li style="margin:8px 0">${esc(q)}</li>`).join('')}</ol>
-    <p style="color:#6f5f53">${junior ? 'There are no wrong answers. Say what you think, and why.' : 'There is no single right answer. Give a reason for yours.'}</p>
+    <p style="color:#6f5f53">${junior ? 'Say what you think, and why. Listen to each other’s reasons too.' : 'There is no single right answer. Give a reason for yours.'}</p>
     <div class="row" style="justify-content:center"><button class="btn go" data-act="go">We have talked it over ➜</button></div>`, { say: `Talk it over with your teacher. ${qs.join(' ')}` });
 }
 // "Break time": names what comes next and offers the way to the start page. It never starts the next part by itself.

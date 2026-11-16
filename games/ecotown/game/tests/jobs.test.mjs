@@ -16,3 +16,7 @@ test('the break screen names the next part for every part but the last of the da
   assert.equal(nextPart('film')?.title, 'Power control room');
   assert.equal(nextPart('power'), null);
 });
+
+test('every part has three or four talk-it-over questions for each age (docs/full-day-plan.md)', () => {
+  for (const [id, t] of Object.entries(TALK)) for (const k of ['j', 's']) assert.ok(t[k].length >= 3 && t[k].length <= 4, `${id}.${k} has ${t[k].length}`);
+});
