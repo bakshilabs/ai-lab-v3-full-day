@@ -7,7 +7,7 @@ export const PARTS = [
   { id: 'town', n: 1, icon: '🏡', title: 'Eco Town', time: 'about an hour', query: '?part=town',
     blurb: 'Build your own town with Florence, your AI helper. She is clever, and sometimes wrong. Check her plans before you trust them.',
     how: ['Pick a build at the bottom, then tap a tile on the island.', 'The line at the top left always says your next step.', 'The AI Lab button opens a mission when its number shows.'] },
-  { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', query: '?module=drone',
+  { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', time: 'about an hour', query: '?module=drone',
     blurb: 'Six jobs drones do: safety checks, flying by hand, deliveries, farm maps, inspecting a turbine and a bridge, and search and rescue.',
     how: ['Pick a mission on the map. They open one after another.', 'Hold the arrow keys, or the arrows on the screen, to fly.', 'Every mission says the real job first, and what you can now do at the end.'] },
   { id: 'robots', n: 3, icon: '🤖', title: 'Robots at work', time: 'about an hour', query: '?module=robots',
