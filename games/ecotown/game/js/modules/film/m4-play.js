@@ -82,7 +82,7 @@ export async function playEdit(env) {
   // ---- part 4: the music. Where the story turns, then which music plays in each part.
   await mui.note({ kick, title: PARTS[3].title, lines: [PARTS[3].line], btn: 'Start ➜', stage: 'part-music' });
   const turns = turnItems((art) => shotPic(art));
-  for (let i = 0; i < turns.length; i++) { ctx.report({ stage: 'Editing: where the music changes' }); await mui.ask({ head: { kick: 'Music', step: [i + 1, 5] }, item: turns[i] }); }
+  await mui.askList(turns, (item, i, again) => { ctx.report({ stage: 'Editing: where the music changes' }); return mui.ask({ head: { kick: again ? 'Music · again' : 'Music', step: [i + 1, 5] }, item, limit: mui.LIMIT, reveal: again }); });
   const music = {}; const items = musicItems();
   await mui.askList(items, async (item, i, again) => {
     ctx.report({ stage: `Editing: music for the ${item.part}` });
