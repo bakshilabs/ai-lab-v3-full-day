@@ -3,10 +3,10 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import { MISSIONS, cleanHub, openable, nextUp, allDone, streetResult, hourLines, hourPractised, hourTitle, hourPicture } from '../js/modules/roads/missions.js';
 import { SENSORS, ROUNDS, roundsFor, m1Line, answer, check, missSay, cover, kitSay, sees } from '../js/modules/roads/sensors.js';
-import { EASY, HARD, CASES, TEST, test as carTest, testFor, hardFor, m2Line, reviewSay, LABELS } from '../js/modules/roads/labels.js';
+import { EASY, HARD, CASES, TEST, test as carTest, testFor, hardFor, freshPick, m2Line, reviewSay, LABELS } from '../js/modules/roads/labels.js';
 import { SCENES, scenesFor, resultSay, stopM, HUMAN_M } from '../js/modules/roads/rules.js';
 import { START, STAGES, runAll, day, changed, cleanCfg, runSay as simSay } from '../js/modules/roads/simtest.js';
-import { simulate as fleetSim, fleetSay, ROUNDS as FLEET, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
+import { simulate as fleetSim, fleetSay, ROUNDS as FLEET, roundsFor as fleetRounds, meets, cleanPlan, curve, travel, CALLS, shareWords } from '../js/modules/roads/fleet.js';
 import { cameraView, radarView, lidarView, boxOf } from '../js/modules/roads/art.js';
 import { scenePic } from '../js/modules/roads/m3-rules.js';
 import { cleanResult, cleanState } from '../js/modules/contract.js';
@@ -68,6 +68,14 @@ test('roads mission 2: training on everyday pictures misses the hard cases; labe
   }
   assert.equal(carTest(lab(EASY), testFor(false, 1)).falseAlarms, 2, 'reflection and poster are false alarms'); assert.equal(testFor(false, 1).length, 10);
   assert.match(reviewSay(EASY[0], new Set(), {}, 1, true).text, /There are 3 more things/);
+  // the half-hidden person really is half hidden: at least 35% of their box shows beside the van, which stands nearer
+  { const pic = HARD.find((h) => h.things.some((t) => t.case === 'hidden')); const who = pic.things.find((t) => t.case === 'hidden'), vt = pic.things.find((t) => t.kind === 'van');
+    const per = boxOf(who), van = boxOf(vt);
+    const shows = Math.max(0, per.x + per.w - Math.max(per.x, van.x + van.w)) + Math.max(0, Math.min(per.x + per.w, van.x) - per.x);
+    assert.ok(shows / per.w >= 0.35, `only ${Math.round((100 * shows) / per.w)}% of the person shows`); assert.ok(who.z > vt.z, 'the person is behind the van'); }
+  // the new cases vary from play to play: the second result is not always the same
+  const seen = new Set([0.1, 0.5, 0.9].map((r) => carTest(lab([...EASY, ...hardFor(true)]), testFor(true, 2, freshPick(r))).right)); assert.ok(seen.size > 1, 'different plays can end differently');
+  assert.doesNotMatch(m2Line({ labels: 18, pics: 7, hard: 6, a: 4, aOf: 10, b: 10, bOf: 12 }, false), /\d\/\d|%/, 'no test scores on the record');
   // a wrong label teaches nothing about that case
   assert.equal(carTest([{ case: 'mirror', label: 'person' }]).rows.find((r) => r.case === 'mirror').ok, false);
   for (const pic of [...EASY, ...HARD]) for (const t of pic.things) { assert.ok(LABELS.includes(CASES[t.case].label)); const bx = boxOf(t); assert.ok(bx.w > 10 && bx.h > 10 && bx.x > -20 && bx.x + bx.w < 840, `${t.kind} box on the picture`); }
@@ -121,6 +129,9 @@ test('roads mission 5: more cars cut the wait, waiting near the homes cuts empty
   assert.ok(!meets(FLEET[3], peak({ cars: 11, spots: ['homesW', 'homesN'], charger: 'shops' })), 'the peak round needs a re-plan');
   assert.ok(meets(FLEET[3], peak({ cars: 11, spots: ['homesN', 'station'], charger: 'station' })), 'cars waiting at the station meet it');
   assert.equal(FLEET[3].only, 's');
+  // the charging round's tips are about charging, and point somewhere a charger can go
+  const ch = fleetRounds(true)[2]; const plan = { cars: 9, spots: ['homesW', 'homesN'], charger: 'depot' }; const bad = fleetSim(plan, { charge: true }); assert.ok(!meets(ch, bad));
+  const tip = fleetSay(ch, bad, null, plan, true); assert.match(tip, /charger/); assert.doesNotMatch(tip, /Where do most people call from/);
   assert.deepEqual(cleanPlan({ cars: 99, spots: ['x', 'shops', 'station', 'homesN'] }), { cars: 14, spots: ['shops', 'station'], charger: 'depot' });
   assert.equal(travel('homesW', 'depot'), 9); assert.ok(CALLS.length >= 25); assert.equal(shareWords(48), 'half or a little less'); assert.equal(shareWords(52), 'just over half', '52% fails a no-more-than-half goal, and the words say so');
   const at8 = fleetSim({ cars: 8, spots: ['homesW', 'homesN'] }); assert.doesNotMatch(fleetSay(FLEET[1], at8, null, { cars: 8, spots: ['homesW', 'homesN'] }, true), /Could fewer do/, 'no fewer-cars nudge at the smallest fleet that works');
