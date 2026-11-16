@@ -57,7 +57,7 @@ export function planLine(modes, j) {
 export function storeHint(tries, day, goal, j) {
   const spell = [...day.spells].sort((a, b) => b.to - b.from - (a.to - a.from))[0];
   const when = spell ? clockWord(day.hours[spell.from].clock, j) : '';
-  if (tries <= 1) return j ? 'Not yet. Look at the chart: when is there power to spare, and when is the town short? Store the spare for the short hours.' : 'Not yet. Find the surplus hours and the shortfall hours on the chart, and move energy from one to the other.';
+  if (tries <= 1) return j ? 'Look at the chart: when is there power to spare, and when is the town short? Store the spare for the short hours.' : 'Find the surplus hours and the shortfall hours on the chart, and move energy from one to the other.';
   if (tries === 2) return spell ? (j ? `The longest dark spell started at ${when}. Was the battery full before then? Did charging take power the homes needed?` : `The longest outage began at ${when}. Was the store full by then, and did charging ever take supply the homes needed?`) : (j ? 'So close. Try charging a little later, when there is lots to spare.' : 'Close. Charge only on a clear surplus.');
   return `${j ? 'Here is a plan that works. ' : 'A plan that meets the goal: '}${planLine(goal.plan, j)}`;
 }

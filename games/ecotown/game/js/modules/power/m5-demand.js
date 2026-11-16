@@ -112,7 +112,8 @@ export function runSay(res, tries, j) {
   if (res.done && res.gas > 0) return j ? 'Every job that could wait ran on spare wind and sun. The nurse’s car had to use gas power, because she cannot wait. That is the least gas possible.' : `Minimum gas: ${res.gas * 2 * BLOCK_KW} kWh, only for the load that could not move. Everything else ran on surplus renewables.`;
   if (res.done) return j ? 'Every job ran on spare wind and sun. No gas was burned for them.' : `All ${res.total * 2 * BLOCK_KW} kWh of flexible demand met from surplus renewables; no gas needed.`;
   const g = res.gas - res.least;
-  if (tries <= 1) return j ? `${g === 1 ? 'One square more than needed comes' : `${g} squares more than needed come`} from the gas power station. Look for green spare power that is not used yet.` : `${g * 2 * BLOCK_KW} kWh more than necessary comes from gas. Some surplus is unused.`;
+  const more = res.least ? (j ? ' more than needed' : ' more than necessary') : '';
+  if (tries <= 1) return j ? `${g === 1 ? `One square${more} comes` : `${g} squares${more} come`} from the gas power station. Look for green spare power that is not used yet.` : `${g * 2 * BLOCK_KW} kWh${more} comes from gas. Some surplus is unused.`;
   const bad = Object.entries(res.perJob).filter(([id, x]) => x.gas > 0 && id !== 'nurse').map(([id]) => jobName(id, j));
   if (tries === 2) return j ? `Still on gas: ${bad.join(', ')}. Can ${bad.length === 1 ? 'it' : 'they'} go somewhere greener, at a time people can use?` : `Still drawing on gas: ${bad.join(', ')}. Find surplus inside each window.`;
   return j ? 'I have marked a good time for one job with a star. Try it there.' : 'A starred slot shows one job’s best position.';
