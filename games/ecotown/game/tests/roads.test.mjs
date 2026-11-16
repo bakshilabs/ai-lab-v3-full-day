@@ -106,7 +106,7 @@ test('roads: each number knows where on the street it happened', () => {
   assert.ok(m.slice(0, 3).every((x) => x.text === 'No safe crossing' && x.tone === 'warn'));
   const g = marks(simulate(GOOD, { families: 24 }), false); assert.ok(g.slice(0, 3).every((x) => x.text === 'Safe to cross' && x.tone === 'good')); assert.deepEqual(g.slice(0, 3).map((x) => x.slot), [0, 6, 8]);
   for (const j of [true, false]) for (const id of ['wait', 'walk', 'queue', 'safe', 'avg', 'use']) { const line = whereSay(id, r, j); assert.ok(line.length > 20 && line.length < 200, line); assert.doesNotMatch(line, /undefined|NaN|null/); }
-  assert.match(whereSay('walk', r, true), /The home by the school is furthest from a car: 175 m to the drop-off point by the car park/);
+  assert.match(whereSay('walk', r, true), /The home opposite the school is furthest from a car: 175 m to the drop-off point by the homes opposite the car park/);
   assert.match(whereSay('queue', simulate(L('d.d.d..d.d'), { families: 24 }), true), /No car had to queue|longest queue/);
 });
 
@@ -182,7 +182,7 @@ test('roads: with reduced motion the morning is two or three still pictures', ()
   assert.ok(s[2].t >= bad.where.wait.ready && s[2].t < bad.where.wait.board, 'the family is still waiting in the picture');
   const good = stills(simulate(L('dbdbd.cdwb'), { families: 24 })); assert.ok(good.length >= 1 && good.length <= 3); assert.equal(good[0].kind, 'first');
   for (const j of [true, false]) for (const x of s) { const line = stillSay(x, bad, j); assert.match(line, /^\d:\d\d\. /); assert.doesNotMatch(line, /undefined|NaN|null/); assert.ok(line.length < 200); }
-  assert.match(stillSay(s[1], bad, true), /The longest queue: 2 cars at the drop-off point by the car park/);
+  assert.match(stillSay(s[1], bad, true), /The longest queue: 2 cars at the drop-off point by the homes opposite the car park/);
   assert.match(stillSay(s[2], bad, true), /waited 10 minutes/);
 });
 
@@ -227,7 +227,7 @@ test('roads: every word is short, built in and spoken; ages 8–12 see no money'
     assert.equal(measures(res, j).every((m) => m.was === null), true, 'a first run has nothing to compare with');
     assert.ok(intro(j).split(/\s+/).length <= 45, 'one short screen before the child starts');
   }
-  assert.equal(wait(25, true), 'under 1 minute'); assert.equal(wait(60, true), '1 minute'); assert.equal(wait(185, true), '3 minutes'); assert.equal(wait(185, false), '3 min 05 s'); assert.equal(wait(40, false), '40 s');
+  assert.equal(wait(25, true), 'under 1 minute'); assert.equal(wait(60, true), '1 minute'); assert.equal(wait(185, true), '3 minutes'); assert.equal(wait(185, false), '3\u00a0min 05\u00a0s', 'non-breaking spaces keep a duration on one line'); assert.equal(wait(40, false), '40\u00a0s');
   assert.match(comment(simulate(L('..d....d..'), { families: 24 }), true), /by the shop, on the cycle track and by the school/);
   assert.match(comment(simulate(GOOD, { families: 24, junior: true }), true), /works well/);
   assert.deepEqual(landGain(['homes', 'homes', 'parking']), ['homes for 8 families', '10 visitor spaces']);

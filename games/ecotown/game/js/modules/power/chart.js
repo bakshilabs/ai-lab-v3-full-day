@@ -4,7 +4,7 @@
 //   bars       power made each hour (blue: wind, yellow: sun), with a line for the power needed
 //   purple     how full the battery is
 //   bottom row each hour that has happened: warm = every home lit, dark with a number = that many homes dark
-import { forecast, homeNeed, schoolNeed, HOURS, WIND_STRONG, WIND_LOW, SUN_BRIGHT, KW, BLOCKS, TEST_DAYS } from './model.js';
+import { forecast, homeNeed, schoolNeed, isWinter, HOURS, WIND_STRONG, WIND_LOW, SUN_BRIGHT, KW, BLOCKS, TEST_DAYS } from './model.js';
 import { T, clockShort } from './words.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -13,14 +13,16 @@ export const C = { wind: '#5b9bd5', windPale: '#cfe0f1', sun: '#f2b632', sunPale
 const FONT = 'Inter, system-ui, sans-serif';
 
 // what the town needs each hour of a kind of day (every home and the school)
-export function needLine(kit, dayId) {
-  const winter = dayId === 'winter';
-  return forecast(dayId).map((f) => kit.homes.reduce((n, h) => n + homeNeed(f.clock, h.base, winter), 0) + schoolNeed(f.clock, winter));
+export function needLine(kit, dayId, seed = 1) {
+  const winter = isWinter(dayId);
+  return forecast(dayId, seed).map((f) => kit.homes.reduce((n, h) => n + homeNeed(f.clock, h.base, winter), 0) + schoolNeed(f.clock, winter));
 }
 
 // One day as a group of shapes, w wide and h tall, at (x, y).
 // hours: the hours that have happened (from model.runDay), or fewer, or none. cursor: the step to ring, or -1.
-export function dayPanel(kit, dayId, { x = 0, y = 0, w = 440, h = 150, hours = [], cursor = -1, junior = true, seed = 1, labels = true, mark = -1 } = {}) {
+// marks: (forecasting) one true/false per hour, the hours the child marked short, drawn in the bottom row instead.
+// rings: hours to look at again, ringed in orange.
+export function dayPanel(kit, dayId, { x = 0, y = 0, w = 440, h = 150, hours = [], cursor = -1, junior = true, seed = 1, labels = true, mark = -1, marks = null, rings = [] } = {}) {
   const fc = forecast(dayId, seed); const need = needLine(kit, dayId); const left = 34, right = 6; const cw = (w - left - right) / HOURS;
   const rowH = Math.max(6, Math.round(h * 0.062)); const top = labels ? 13 : 2; const yWind = top, ySun = top + rowH + 2; const y0 = ySun + rowH + 5; const yLit = h - (labels ? 26 : 12), litH = 11; const y1 = yLit - 5;
   const made = fc.map((f) => [kit.wind * f.wind, kit.solar * f.sun]); const max = Math.max(1, ...made.map((m) => m[0] + m[1]), ...need) * 1.08;
@@ -52,8 +54,10 @@ export function dayPanel(kit, dayId, { x = 0, y = 0, w = 440, h = 150, hours = [
     s += `<path d="${b}" fill="none" stroke="${C.paper}" stroke-width="4" stroke-linejoin="round"/><path d="${b}" fill="none" stroke="${C.battery}" stroke-width="2" stroke-dasharray="5 2" stroke-linejoin="round"/>`;
   }
   // what happened: lit or dark, hour by hour
-  s += `<text x="${left - 4}" y="${yLit + 9}" font-size="8.5" font-weight="700" fill="${C.ink2}" text-anchor="end">${junior ? 'Lights' : 'Lit'}</text>`;
-  for (let i = 0; i < HOURS; i++) {
+  s += `<text x="${left - 4}" y="${yLit + 9}" font-size="8.5" font-weight="700" fill="${C.ink2}" text-anchor="end">${marks ? 'Short?' : junior ? 'Lights' : 'Lit'}</text>`;
+  for (let i = 0; i < HOURS && marks; i++) s += `<rect x="${f1(X(i) + 1)}" y="${yLit}" width="${f1(cw - 2)}" height="${litH}" rx="2" fill="${marks[i] ? C.dark : C.paper}" stroke="${marks[i] ? 'none' : C.line}" stroke-width="0.6"/>`;
+  for (const i of rings || []) s += `<rect x="${f1(X(i) + 0.5)}" y="${top - 1}" width="${f1(cw - 1)}" height="${f1(yLit + litH - top + 2)}" rx="3" fill="none" stroke="#e8772e" stroke-width="2" stroke-dasharray="3 2"/>`;
+  for (let i = 0; i < HOURS && !marks; i++) {
     const hr = hours[i];
     if (!hr) { s += `<rect x="${f1(X(i) + 1)}" y="${yLit}" width="${f1(cw - 2)}" height="${litH}" rx="2" fill="${C.paper}" stroke="${C.line}" stroke-width="0.6"/>`; continue; }
     const bad = hr.dark > 0 || !hr.schoolLit;
@@ -92,3 +96,29 @@ export function dialSvg(id, color) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 62" aria-hidden="true"><path d="M10 54A40 40 0 0 1 90 54" fill="none" stroke="#e6d3b0" stroke-width="11" stroke-linecap="round"/><path class="pw-arc" data-arc="${id}" d="M10 54A40 40 0 0 1 90 54" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" stroke-dasharray="125.7" stroke-dashoffset="125.7"/><g class="pw-needle" data-needle="${id}" transform="rotate(-90 50 54)"><path d="M50 54L50 20" stroke="${C.ink}" stroke-width="3.5" stroke-linecap="round"/></g><circle cx="50" cy="54" r="5.5" fill="${C.ink}"/></svg>`;
 }
 export { TEST_DAYS };
+
+// The take-home picture for the whole hour: the six missions, each with a bar for how it went (steps level, homes
+// lit, and so on). p: the progress (missions.js).
+export function hourPicture(p, junior = true) {
+  const r = p.res || {}; const W = 440, row = 34, H = 34 + 6 * row;
+  const share = [
+    r.balance ? r.balance.level / Math.max(1, r.balance.of) : 1, 1,
+    r.storage ? 1 - r.storage.dark.reduce((a, b) => a + b, 0) / Math.max(1, 3 * r.storage.total) : 1,
+    r.rules ? r.rules.share / 100 : 1, 1, 1,
+  ];
+  const stat = [
+    r.balance ? `${r.balance.level} of ${r.balance.of} level` : 'done', junior ? 'short hours found' : 'shortfalls found',
+    junior ? 'goal met each day' : `${Math.round(share[2] * 100)}% supplied`, junior ? 'tested on 3 days' : `${Math.round(share[3] * 100)}% supplied`, junior ? 'all on clean power' : 'all on renewables', junior ? 'everyone back' : 'all restored',
+  ];
+  const names = [junior ? 'Balance the grid' : 'Grid balance', 'Forecasting', 'Storage', 'Automation rules', 'Smart demand', 'Storm night'];
+  const icons = ['⚖️', '🌦️', '🔋', '📋', '🔌', '⛈️'];
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Six control-room missions"><rect width="${W}" height="${H}" rx="10" fill="${C.paper}"/>`;
+  s += `<text x="16" y="22" font-family="${FONT}" font-size="13" font-weight="800" fill="${C.ink}">⚡ Power control room: six missions</text>`;
+  for (let i = 0; i < 6; i++) {
+    const y = 30 + i * row; const done = !!p.done?.[i]; const k = Math.max(0, Math.min(1, share[i]));
+    s += `<text x="14" y="${y + 21}" font-size="16">${icons[i]}</text><text x="40" y="${y + 20}" font-family="${FONT}" font-size="11.5" font-weight="800" fill="${C.ink}">${i + 1}. ${esc(names[i])}</text>`;
+    s += `<rect x="178" y="${y + 9}" width="130" height="14" rx="7" fill="${C.dark}"/><rect x="178" y="${y + 9}" width="${f1(done ? 130 * k : 0)}" height="14" rx="7" fill="${C.lit}"/>`;
+    s += `<text x="${W - 10}" y="${y + 20}" font-family="${FONT}" font-size="10.5" font-weight="700" fill="${C.ink2}" text-anchor="end">${done ? `✓ ${esc(stat[i])}` : '–'}</text>`;
+  }
+  return s + '</svg>';
+}
