@@ -40,7 +40,7 @@ export function createUi(ctx, { reduce }) {
   addEventListener('keydown', onKey, true); addEventListener('keyup', onKey, true); addEventListener('blur', clearKeys);
   offs.push(() => { removeEventListener('keydown', onKey, true); removeEventListener('keyup', onKey, true); removeEventListener('blur', clearKeys); });
   const on = (k) => (held.has(k) || padHeld.has(k) ? 1 : 0);
-  const input = () => (reduce ? { x: on('right') - on('left'), z: on('down') - on('up') } : { f: on('up') - on('down'), t: on('right') - on('left') });
+  const input = () => ({ x: on('right') - on('left'), z: on('down') - on('up') }); // north, south, east, west: as in missions 2 and 5
 
   // ---- Florence's line. With a button it waits for the tap. Every line is spoken as well as written.
   function talk(text, { button, quiet, focus = true } = {}) {
@@ -57,7 +57,7 @@ export function createUi(ctx, { reduce }) {
   function showHand() {
     setStage('hand');
     hud = el('<div class="dr-hud" data-dr-hud><span class="dr-arrow" aria-hidden="true">↑</span><span class="dr-hudtxt"></span></div>'); root.appendChild(hud);
-    const lab = reduce ? ['Fly north', 'Fly west', 'Fly south', 'Fly east'] : ['Fly forward', 'Turn left', 'Fly backward', 'Turn right'];
+    const lab = ['Fly north', 'Fly west', 'Fly south', 'Fly east'];
     pad = el(`<div class="dr-pad" role="group" aria-label="Flying buttons"><button type="button" data-dr-pad="up" aria-label="${lab[0]}">▲</button><button type="button" data-dr-pad="left" aria-label="${lab[1]}">◀</button><button type="button" data-dr-pad="down" aria-label="${lab[2]}">▼</button><button type="button" data-dr-pad="right" aria-label="${lab[3]}">▶</button></div>`);
     for (const b of pad.querySelectorAll('button')) {
       const k = b.dataset.drPad; const down = (e) => { e.preventDefault(); padHeld.add(k); b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch { /* no capture: pointerleave still lets go */ } }; const up = () => { padHeld.delete(k); b.classList.remove('on'); };

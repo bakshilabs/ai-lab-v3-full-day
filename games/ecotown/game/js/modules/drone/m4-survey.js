@@ -8,6 +8,9 @@ export const FOOT = 5;             // how wide one line of photos is on the grou
 export const NEED = 60;            // the overlap the mapping software needs between neighbouring lines, in percent
 export const TURN = 3;             // squares of battery each turn at the end of a line costs
 export const SQUARE_M = 10;
+export const FOOT_ALONG = 4;       // how long one photo is along the line, in squares
+export const NEED_ALONG = 75;      // the overlap mapping teams aim for between photos along a line (about 75 to 80%)
+export const frontOf = (gap) => Math.round(Math.max(0, (FOOT_ALONG - gap) / FOOT_ALONG) * 100);
 export const FIELDS = [
   { id: 'meadow', name: 'The hay meadow', w: 12, h: 8, battery: null, dirs: ['ns'], start: { dir: 'ns', spacing: 6 } },
   { id: 'farm', name: 'Hilltop Farm', w: 16, h: 9, battery: 70, dirs: ['ns', 'ew'], start: { dir: 'ns', spacing: 2 } },
@@ -18,7 +21,8 @@ export const overlapOf = (spacing) => Math.round(Math.max(0, (FOOT - spacing) / 
 // The lines for a field: dir 'ns' (lines run north to south, stepping east) or 'ew'; spacing in squares.
 // Returns { lines: [[x0, z0, x1, z1]], count, overlap, gaps (squares no photo covers), length (squares of flying),
 //           fits (inside the battery), joined (enough overlap and no gaps) }.
-export function plan(field, { dir = 'ns', spacing = 2 } = {}) {
+// along (ages 13-17 on the farm): how far apart the photos are along each line, in squares (1 = 75% overlap).
+export function plan(field, { dir = 'ns', spacing = 2, along: gapAlong = null } = {}) {
   const across = dir === 'ns' ? field.w : field.h, along = dir === 'ns' ? field.h : field.w;
   const count = across <= FOOT ? 1 : Math.ceil((across - FOOT) / spacing) + 1;
   const pos = []; for (let i = 0; i < count; i++) pos.push(Math.min(FOOT / 2 + i * spacing, across - FOOT / 2));
@@ -28,14 +32,16 @@ export function plan(field, { dir = 'ns', spacing = 2 } = {}) {
   const steps = pos.slice(1).reduce((n, p, i) => n + (p - pos[i]), 0);
   const length = Math.round(count * along + steps + (count - 1) * TURN);
   const overlap = count > 1 ? overlapOf(spacing) : 100; const fits = !field.battery || length <= field.battery;
-  return { dir, spacing, lines, count, overlap, gaps: gaps * along, length, fits, joined: !gaps && overlap >= NEED };
+  const front = gapAlong ? frontOf(gapAlong) : null;
+  return { dir, spacing, lines, count, overlap, front, gaps: gaps * along, length, fits, joined: !gaps && overlap >= NEED && (front === null || front >= NEED_ALONG) };
 }
 // What happened when the survey was flown, in plain words. Never a mark: what the map shows and why.
 export function result(field, p, junior = true) {
   if (!p.fits) return { ok: false, kind: 'battery', text: junior ? 'The battery ran out before the last line, so part of the field has no photos. Try lines that need less flying.' : `That plan needs ${p.length * SQUARE_M} m of flying, but the battery holds ${field.battery * SQUARE_M} m. Fewer turns or fewer lines would help.` };
   if (p.gaps) return { ok: false, kind: 'gaps', text: junior ? 'There are gaps between the lines of photos, so the map has holes in it. Bring the lines closer together.' : `Gaps: ${p.gaps} squares have no photo at all, so the map has holes. Bring the lines closer together.` };
   if (p.overlap < NEED) return { ok: false, kind: 'overlap', text: junior ? 'The photos only just meet. The computer needs each line to cover more than half of the next one, or it cannot join them. Bring the lines closer.' : `The lines overlap by ${p.overlap}%. The software needs about ${NEED}% to match the photos, so the map came out patchy. Bring the lines closer.` };
-  return { ok: true, kind: 'joined', text: junior ? `The photos overlap well, so the computer joined them into one map. ${p.count} lines, and the battery lasted.` : `${p.overlap}% overlap and ${p.length * SQUARE_M} m of flying${field.battery ? ` out of ${field.battery * SQUARE_M} m` : ''}: the photos joined into one map.` };
+  if (p.front !== null && p.front < NEED_ALONG) return { ok: false, kind: 'front', text: `Along each line the photos overlap by only ${p.front}%. The software needs about ${NEED_ALONG}% along the line as well, to match each photo with the next. Take the photos closer together.` };
+  return { ok: true, kind: 'joined', text: junior ? `The photos overlap well, so the computer joined them into one map. ${p.count} lines, and the battery lasted.` : `${p.overlap}% overlap between lines${p.front !== null ? `, ${p.front}% along them,` : ''} and ${p.length * SQUARE_M} m of flying${field.battery ? ` out of ${field.battery * SQUARE_M} m` : ''}: the photos joined into one map.` };
 }
 
 // ---------------------------------------------------------------- reading the map of Hilltop Farm (16 x 9 squares)
@@ -51,9 +57,12 @@ export const plotAt = (x, z) => PLOTS.find((p) => x >= p.x && x < p.x + p.w && z
 export const inSick = (x, z) => x >= SICK.x && x < SICK.x + SICK.w && z >= SICK.z && z < SICK.z + SICK.h;
 // Plant health from 0 to 1 for one square (what the health view shows). A few small differences, so it looks real.
 export function health(x, z) {
-  if (inSick(x, z)) return 0.28 + ((x * 7 + z * 3) % 3) * 0.04;
-  const p = plotAt(x, z); const n = ((x * 13 + z * 7) % 5) * 0.02;
-  return p?.id === DRY ? 0.5 + n : 0.82 + n;
+  const n = ((x * 13 + z * 7) % 5) * 0.02;
+  if (inSick(x, z)) { const c = (x === SICK.x + 1 && z === SICK.z + 1) ? 0 : 1; return 0.22 + c * 0.12 + n / 2; }
+  const p = plotAt(x, z);
+  if (p?.id === 'barley' && Math.max(Math.abs(x - (SICK.x + 1)), Math.abs(z - (SICK.z + 1))) === 2) return 0.62 + n; // round the patch: a little stressed
+  if (p?.id === 'wheat' && x <= 1 && z >= 7) return 0.66 + n; // a trodden corner by the gate: a little stressed, not sick
+  return p?.id === DRY ? 0.5 + n : 0.8 + n;
 }
 export const sickShare = () => Math.round(SICK.w * SICK.h / (PLOTS.find((p) => p.id === 'barley').w * PLOTS.find((p) => p.id === 'barley').h) * 100);
 // A tap on the map while looking for something. what: 'dry' or 'sick'. tries: earlier misses for this question.

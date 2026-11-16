@@ -3,7 +3,7 @@
 // an inspection; the pilot flies a set route of photo points, holds steady at each, keeps a safe distance from the
 // structure, and an inspector then looks through the photos and reports damage, with how big it is. One unit is
 // about one metre.
-export const SAFE = 4;        // keep at least this far from the structure (metres)
+export const SAFE = 5;        // this (made-up) inspection company's rule: keep at least this far from the structure (metres)
 export const STOP = 2;        // closer than this the drone's own sensors stop it and back it off
 export const SPOT_R = 2.2;    // the photo is taken from within this distance of the frame's middle
 export const HOLD = 1.2;      // seconds of holding still for a sharp photo
@@ -27,13 +27,13 @@ export function turbineParts(base) {
   return [{ a: { ...base }, b: { x: base.x, y: base.y + TOWER, z: base.z }, r: 1.1 }, { a: { x: base.x, y: base.y + TOWER + 1, z: base.z - 2.5 }, b: hub, r: 1.5 },
     ...BLADE_ANGLES.map((d) => ({ a: hub, b: bladeTip(base, d), r: 0.8 }))];
 }
-// Three photo points, each about seven metres in front of the part it looks at. photo: what the photo shows.
+// Three photo points, each about eight or nine metres in front of the part it looks at. photo: what the photo shows.
 export function turbineSpots(base) {
-  const front = (p, d = 7) => ({ x: p.x, y: p.y, z: p.z + d });
+  const front = (p, d = 8.5) => ({ x: p.x, y: p.y, z: p.z + d });
   return [
     { id: 't1', name: 'the top blade', at: front(bladeTip(base, 0, 0.55)), photo: 'blade-clean' },
     { id: 't2', name: 'the tip of the right blade', at: front(bladeTip(base, 120, 0.85)), photo: 'blade-crack' },
-    { id: 't3', name: 'the hub', at: front({ x: base.x, y: base.y + TOWER + 1, z: base.z + HUB_Z }, 8.5), photo: 'hub-bird' },
+    { id: 't3', name: 'the hub', at: front({ x: base.x, y: base.y + TOWER + 1, z: base.z + HUB_Z }, 9.5), photo: 'hub-bird' },
   ];
 }
 // ---------------------------------------------------------------- the footbridge to the village (from the game's own bridge)
@@ -48,9 +48,9 @@ export function bridgeShape(land) {
 export function bridgeSpots(b) {
   const mid = (b.xe + b.xf) / 2;
   return [
-    { id: 'b1', name: 'the town tower', at: { x: b.xe - 0.5, y: b.deck(b.xe) + 5, z: b.z + 9 }, photo: 'wood-moss' },
-    { id: 'b2', name: 'the middle of the deck, from below', at: { x: mid, y: b.deck(mid) - 3.5, z: b.z + 8 }, photo: 'wood-clean' },
-    { id: 'b3', name: 'the village tower', at: { x: b.xf + 0.5, y: b.deck(b.xf) + 2, z: b.z + 9 }, photo: 'wood-crack' },
+    { id: 'b1', name: 'the town tower', at: { x: b.xe - 0.5, y: b.deck(b.xe) + 5, z: b.z + 10.5 }, photo: 'wood-moss' },
+    { id: 'b2', name: 'the middle of the deck, from below', at: { x: mid, y: b.deck(mid) - 3.5, z: b.z + 9 }, photo: 'wood-clean' },
+    { id: 'b3', name: 'the village tower', at: { x: b.xf + 0.5, y: b.deck(b.xf) + 2, z: b.z + 10.5 }, photo: 'wood-crack' },
   ];
 }
 
@@ -66,11 +66,12 @@ export function photoReply(photo, tries, damaged) {
   return { right: false, told: tries > 0, text: tries ? `${ABOUT[photo]} The damage is in the photo of ${damaged}: look for a thin dark line.` : `${ABOUT[photo]} Look for a thin dark line in the other photos.` };
 }
 // Ages 13-17: how big is it, and what goes in the report.
-export const ACTIONS = [{ id: 'now', label: `Repair before it is used again (over ${REPAIR_CM} cm)` }, { id: 'watch', label: `Report it and check again soon (under ${REPAIR_CM} cm)` }];
+export const ACTIONS = [{ id: 'now', label: `Repair before it is used again (over ${REPAIR_CM} cm)` }, { id: 'watch', label: `Report it and check again soon (${REPAIR_CM} cm or under)` }];
+export const COMPANY_RULE = `Your company's rule: cracks over ${REPAIR_CM} cm are repaired before the structure is used again. Real limits come from the maker's or owner's manual.`;
 export const actionFor = (photo) => (DAMAGE[photo].cm > REPAIR_CM ? 'now' : 'watch');
 export function actionReply(photo, id) {
   const cm = DAMAGE[photo].cm; const right = id === actionFor(photo);
-  return { right, text: right ? `Right: the crack is about ${cm} cm, ${cm > REPAIR_CM ? 'over' : 'under'} the ${REPAIR_CM} cm limit. A clear report with the size lets the engineers decide quickly.` : `Measure it against the scale in the photo: about ${cm} cm. Compare that with the ${REPAIR_CM} cm limit.` };
+  return { right, text: right ? `Right: the crack is about ${cm} cm, ${cm > REPAIR_CM ? 'over' : 'under'} your company's ${REPAIR_CM} cm limit. A clear report with the size lets the engineers decide quickly.` : `Measure it against the scale in the photo: about ${cm} cm. Compare that with your company's ${REPAIR_CM} cm limit.` };
 }
 
 // A photo as a small SVG (240 x 160). scale: draw a ruler (ages 13-17). ring: circle the damage (after it is found).

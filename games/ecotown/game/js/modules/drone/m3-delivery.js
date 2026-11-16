@@ -40,7 +40,7 @@ export async function runDelivery(ctx, ui, scope, { saved, keep: store }) {
       await ui.talk(two ? `Two parcels are waiting on the drone's landing pad at ${from}. One is for ${places.drops[0].label} and one is for ${places.drops[1].label}. Fly them there yourself first.`
         : `A parcel is waiting on the drone's landing pad at ${from}. It is for ${places.drops[0].label}. Fly it there yourself first.`, { button: 'Start flying ➜' });
       ui.showHand();
-      const how = reduce ? (ui.touch ? 'Hold an arrow button to fly that way.' : 'Hold an arrow key to fly that way.') : (ui.touch ? 'Hold the up button to fly forward. The left and right buttons turn.' : 'Hold the up arrow to fly forward. Left and right turn.');
+      const how = ui.touch ? 'Hold an arrow button to fly that way, just as in hand flying.' : 'Hold an arrow key to fly that way, just as in hand flying.';
       ui.talk(`${how} Fly through the gold hoops, then on to the tall red marker at ${places.drops[0].label}. The drone cannot crash.`);
       const hand = await flight.hand(ui.input, { onTick: ui.tickHand, onCheer: cheer, onDrop: (i) => ui.talk(`One parcel is down. Now fly through the hoops to the red marker at ${places.drops[i].label}.`) });
       st.hand = cleanHand(hand); did.hand = true; keep();

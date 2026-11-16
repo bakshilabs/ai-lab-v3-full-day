@@ -14,7 +14,9 @@ const lam = (c, e = 0) => new THREE.MeshLambertMaterial({ color: c, emissive: c,
 export async function runHand(ctx, ui, scope, { touch }) {
   const junior = !!ctx.junior; const tiles = tileList(ctx.town.terrain); const cells = ctx.town.cells || [];
   const spot = pickOpen(cells, tiles) || { x: 0, z: 0 };
-  const C = course(spot); const fly = createFly3d(ctx, { origin: { x: C.pad.x, z: C.pad.z }, radius: 34 });
+  const cellOf0 = new Map(cells); const tileOf = ctx.town.terrain?.tiles instanceof Map ? ctx.town.terrain.tiles : new Map();
+  const open = (x, z) => { const [fx, fz] = toGrid(x, z); const k = key(Math.round(fx), Math.round(fz)); const t = tileOf.get(k); const it = cellOf0.get(k)?.item; return !!t && t.zone !== 'river' && !t.fixed && !(it && ITEMS[it]?.kind === 'build'); };
+  const C = course(spot, open); const fly = createFly3d(ctx, { origin: { x: C.pad.x, z: C.pad.z }, radius: 34 });
   const pad = createFlyPad(ctx, { touch }); fly.setInput(pad.input);
   scope.onEnd(() => { fly.dispose(); pad.off(); ui.hush(); });
   const sound = (n) => { try { ctx.engine.audio?.[n]?.(); } catch { /* no sound */ } };
@@ -90,12 +92,15 @@ export async function runHand(ctx, ui, scope, { touch }) {
   // ---- land gently on the orange pad
   ctx.report({ stage: 'Hand flying: landing' }); ui.setStage('m2-land'); fly.freeze(true); landPad.group.visible = true; for (const h of hoops) h.mesh.group.visible = false; fly.setWind(0, 0);
   await ui.talk(`Last, the landing. Fly over the orange pad and come down slowly. Let go of Down just before the pad, so the drone touches down gently.`, { button: 'Go and land ➜' });
-  ui.hush(); fly.freeze(false); let msg = ''; let landed = null;
+  ui.hush(); fly.freeze(false); let msg = ''; let landed = null; let resting = 0;
   await fly.until((dt, info) => {
     const off = Math.hypot(fly.S.x - C.land.x, fly.S.z - C.land.z); const h = fly.height(); const vy = -fly.S.vy;
+    // resting on the ground without a landing that counts (it should not happen): say what to do
+    resting = !fly.S.airborne && !landed ? resting + dt : 0;
+    if (resting > 3 && !/Go up a little/.test(msg)) { msg = 'The drone is sitting on the ground. Go up a little, move over the orange pad and come down again.'; ctx.say(msg); }
     if (info.touched !== null && info.touched !== undefined) {
       sum.tries++; const r = landing(info.touched, off); msg = r.text; ctx.say(r.text);
-      if (r.ok) { landed = r; sum.landing = Math.round(info.touched * 10) / 10; return true; }
+      if (r.ok) { landed = r; sum.kind = r.kind; sum.landing = Math.round(info.touched * 10) / 10; return true; }
       fly.S.vy = 2.2; // a bump: back up a little to try again
     }
     const speedTxt = junior ? (vy > 3 ? 'Too fast!' : vy > 1.8 ? 'A bit fast' : vy > 0.2 ? 'Nice and slow' : '') : (vy > 0.2 ? `${vy.toFixed(1)} m/s down (land under 1.8)` : '');

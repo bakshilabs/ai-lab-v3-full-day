@@ -1,7 +1,7 @@
 // Mission 5, inspection: photograph a wind turbine and the footbridge from a safe distance, then find the damage in the
 // photos. Rules and photos are in m5-inspect.js; the flying in fly3d.js. Loaded only in the browser.
 import * as THREE from 'three';
-import { SAFE, STOP, SPOT_R, HOLD, STILL, clearance, TOWER, BLADE, HUB_Z, BLADE_ANGLES, turbineParts, turbineSpots, bridgeShape, bridgeSpots, isDamage, photoReply, ACTIONS, actionReply, photoSvg, DAMAGE } from './m5-inspect.js';
+import { SAFE, STOP, SPOT_R, HOLD, STILL, clearance, TOWER, BLADE, HUB_Z, BLADE_ANGLES, turbineParts, turbineSpots, bridgeShape, bridgeSpots, isDamage, photoReply, ACTIONS, actionReply, photoSvg, DAMAGE, COMPANY_RULE } from './m5-inspect.js';
 import { windAt, pickOpen } from './m2-hand.js';
 import { createFly3d, createFlyPad } from './fly3d.js';
 import { arrowFor, bearing } from './geo.js';
@@ -51,9 +51,9 @@ async function flyPhotos(ctx, ui, fly, pad, { parts, spots, what, junior }) {
     hold = inFrame && steady && !tooClose ? hold + dt : 0;
     if (hold >= HOLD) { near.taken = true; near.f.done(); hold = 0; sound('good'); ui.cheer(`Photo of ${near.name}`); if (frames.every((f) => f.taken)) return true; }
     const dy = near.at.y - p.y; const up = dy > 1.5 ? 'Climb ⤒' : dy < -1.5 ? 'Come down ⤓' : 'Height is right';
-    pad.task(`Photo ${frames.filter((f) => f.taken).length + 1} of ${frames.length}: ${near.name}`);
+    fly.aim(near.at.y); pad.task(`Next photo: ${near.name} (${frames.filter((f) => f.taken).length} of ${frames.length} done)`);
     pad.read(`<div class="df-wind"><b aria-hidden="true">${inFrame ? '◎' : arrowFor(bearing(p.x, p.z, near.at.x, near.at.z))}</b><span>${inFrame ? (steady ? 'Hold still…' : 'In the frame: hold still') : `${junior ? 'To the blue frame' : `${Math.round(d)} m to the frame`} · ${up}`}</span></div>`
-      + `<div class="df-meter"><span>${junior ? 'Distance' : 'Clearance'}</span><span class="df-bar ${tooClose ? 'bad' : 'good'}"><i style="width:${Math.round(Math.min(1, c / 12) * 100)}%"></i><span class="mark" style="left:${SAFE / 12 * 100}%"></span></span><b>${junior ? (tooClose ? 'Too close!' : 'Safe') : `${Math.max(0, c).toFixed(1)} m (keep over ${SAFE} m)`}</b></div>`
+      + `<div class="df-meter"><span>${junior ? 'Distance' : 'Clearance'}</span><span class="df-bar ${tooClose ? 'bad' : 'good'}"><i style="width:${Math.round(Math.min(1, c / 12) * 100)}%"></i><span class="mark" style="left:${SAFE / 12 * 100}%"></span></span><b>${junior ? (tooClose ? 'Too close!' : 'Safe') : `${Math.max(0, c).toFixed(1)} m (company rule: over ${SAFE} m)`}</b></div>`
       + (inFrame && !tooClose ? `<div class="df-meter"><span>Photo</span><span class="df-bar good"><i style="width:${Math.round(hold / HOLD * 100)}%"></i></span><b></b></div>` : '')
       + (stopped > 0 ? `<div class="df-warn">The drone's sensors stopped it: too close to ${what}.</div>` : tooClose ? `<div class="df-warn">Too close to ${what}: back away.</div>` : ''));
     set({ dfPhase: 'inspect', dx: ((near.at.x - p.x) / 3).toFixed(2), dz: ((near.at.z - p.z) / 3).toFixed(2), dy: dy.toFixed(2), clear: c.toFixed(2), taken: frames.filter((f) => f.taken).length });
@@ -70,7 +70,7 @@ async function review(ctx, kit, spots, { title, junior }) {
   P.say(`Here are your ${spots.length} photos of ${title}. An inspector looks at each one closely. Which photo shows damage?`);
   const draw = () => {
     P.main.innerHTML = `<div class="dk-photos" role="group" aria-label="Your photos">${spots.map((s, i) => `<button type="button" class="dk-photo${chosen === s.id ? (isDamage(s.photo) ? ' right' : ' nope') : ''}" data-photo="${s.id}" aria-label="Photo ${i + 1}: ${esc(s.name)}">${photoSvg(s.photo, { scale: !junior && found && isDamage(s.photo), ring: found && isDamage(s.photo) })}<span>Photo ${i + 1}: ${esc(s.name)}</span></button>`).join('')}</div>`;
-    P.side.innerHTML = `<h2>${esc(title.charAt(0).toUpperCase() + title.slice(1))}: the photos</h2><p class="dk-ask">${found ? (acted ? 'Damage found and reported.' : 'What goes in the report? Measure the crack with the scale in the photo.') : 'Tap the photo that shows damage.'}</p>
+    P.side.innerHTML = `<h2>${esc(title.charAt(0).toUpperCase() + title.slice(1))}: the photos</h2><p class="dk-ask">${found ? (acted ? 'Damage found and reported.' : `What goes in the report? Measure the crack with the scale in the photo. ${COMPANY_RULE}`) : 'Tap the photo that shows damage.'}</p>
       ${found && !acted ? `<div class="dk-choices">${ACTIONS.map((a) => `<button type="button" class="dr-btn" data-act="${a.id}">${esc(a.label)}</button>`).join('')}</div>` : ''}
       ${reply ? `<div class="dk-note ${reply.right ? 'good' : 'warn'}" role="status" data-dk-reply>${esc(reply.text)}</div>` : ''}
       ${found && acted ? '<div class="dr-row"><button type="button" class="dr-btn go" data-k="next">Next ➜</button></div>' : ''}`;
@@ -97,11 +97,11 @@ export async function runInspect(ctx, ui, kit, scope, { touch }) {
   const sum = { photos: 0, close: 0, found: 0 };
   // ---- the wind turbine
   ctx.report({ stage: 'Inspection: the wind turbine' }); ui.setStage('m5-turbine');
-  fly = createFly3d(ctx, { origin: { x: spot.x, z: spot.z + 6 }, radius: 30, cam: { up: 5, back: 14, down: -1, ahead: 8 } }); fly.setInput(pad.input);
+  fly = createFly3d(ctx, { origin: { x: spot.x, z: spot.z + 6 }, radius: 30, cam: { up: 9, back: 24, ahead: 6 } }); fly.setInput(pad.input);
   const g = fly.groundAt(spot.x, spot.z); const base = { x: spot.x, y: g, z: spot.z };
   const tb = makeTurbine(); tb.position.set(base.x, base.y, base.z); fly.add(tb);
-  const sx = spot.x, sz = spot.z + 15; fly.placeAt(sx, sz, fly.groundAt(sx, sz) + 14); // already in the air, south of the turbine, facing it
-  await ui.talk(`This wind turbine has been stopped and locked, so it is safe to inspect. Fly to each blue frame and hold the drone still there to take a photo. ${junior ? 'Do not go too close to the turbine.' : `Keep at least ${SAFE} m from the turbine.`} ${pad.how}`, { button: 'Start the inspection ➜' });
+  const sx = spot.x, sz = spot.z + 15; fly.placeAt(sx, sz, base.y + TOWER - 2); // already in the air, level with the hub, south of the turbine, facing it
+  await ui.talk(`This wind turbine has been stopped and locked, so it is safe to inspect. Fly to each blue frame and hold the drone still there to take a photo. ${junior ? 'This company\'s safety rule: stay well away from the turbine.' : `This company\'s safety rule: stay at least ${SAFE} m from the turbine.`} ${pad.how}`, { button: 'Start the inspection ➜' });
   ui.hush();
   const t1 = await flyPhotos(ctx, ui, fly, pad, { parts: turbineParts(base), spots: turbineSpots(base), what: 'the turbine', junior });
   sum.close += t1.close; sum.photos += 3;
@@ -114,10 +114,10 @@ export async function runInspect(ctx, ui, kit, scope, { touch }) {
   const land = ctx.engine.world?.bridgeLanding;
   if (land) {
     ctx.report({ stage: 'Inspection: the footbridge' }); ui.setStage('m5-bridge');
-    const b = bridgeShape(land); fly = createFly3d(ctx, { origin: { x: (b.xe + b.xf) / 2 - 2, z: b.z + 4 }, radius: 18, cam: { up: 4, back: 13, down: -1, ahead: 6 } }); fly.setInput(pad.input);
+    const b = bridgeShape(land); fly = createFly3d(ctx, { origin: { x: (b.xe + b.xf) / 2 - 2, z: b.z + 4 }, radius: 18, cam: { up: 5, back: 18, ahead: 6 } }); fly.setInput(pad.input);
     fly.setFloor((x, z) => (x > b.xe - 1 && Math.abs(z - b.z) < 1.6 ? b.deck(x) + 0.2 : x > b.xe - 1 ? b.deck(b.xf) - 9 : fly.groundAt(x, z)));
     fly.placeAt((b.xe + b.xf) / 2, b.z + 12, land.y + 1); // in the air beside the bridge, looking at it
-    await ui.talk(`Next, the footbridge to the village. Bridges are checked from every side, even from below. ${junior ? 'Fly to the three blue frames. Keep a safe distance.' : `Three frames again; keep over ${SAFE} m from the bridge.`}`, { button: 'Start ➜' });
+    await ui.talk(`Next, the footbridge to the village. Bridges are checked from every side, even from below. ${junior ? 'Fly to the three blue frames. Keep a safe distance.' : `Three frames again; the same company rule: over ${SAFE} m from the bridge.`}`, { button: 'Start ➜' });
     ui.hush();
     const t2 = await flyPhotos(ctx, ui, fly, pad, { parts: b.parts, spots: bridgeSpots(b), what: 'the bridge', junior });
     sum.close += t2.close; sum.photos += 3;
