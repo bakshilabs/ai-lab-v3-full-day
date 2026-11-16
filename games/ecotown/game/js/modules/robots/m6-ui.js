@@ -70,7 +70,7 @@ export async function playM6(ctx, sh, cur, keep) {
       const fresh = sh.guard();
       function go() {
         if (running || !ready(dz) || !fresh()) return; const r = simulate(street, dz, j); d.tests[part]++; running = true; if (part === 0) sh.step(1); res = null; let k = 0;
-        const end = () => { running = false; res = r; shown = { ...r, upto: r.parts.length }; ok = r.found; if (ok) { if (part === 0) d.d1 = { ...dz }; else d.d2 = { ...dz }; } save(); draw(); foot(); ctx.say(testLine(r, j)); sh.focusSoon(ok ? '[data-next]' : '.rb-opt'); };
+        const end = () => { running = false; res = r; shown = { ...r, upto: r.parts.length }; ok = r.found; if (ok) { if (part === 0) d.d1 = { ...dz }; else d.d2 = { ...dz }; } save(); draw(); foot(); ctx.say(testLine(r, j)); sh.main.querySelector('.rb-simbox .rb-verdict')?.scrollIntoView({ block: 'nearest' }); sh.focusSoon(ok ? '[data-next]' : '.rb-opt'); };
         if (sh.still) { end(); return; }
         const tick = () => { if (ctx.signal.aborted) return; k++; shown = { ...r, upto: k, used: Math.round(r.parts.slice(0, k).reduce((s, p) => s + (p.ok ? p.mins * r.kg * WH_PER_KG_MIN : 0), 0)), mins: r.parts.slice(0, k).reduce((s, p) => s + p.mins, 0) }; draw(); if (k < r.parts.length) sh.later(tick, 700); else sh.later(end, 500); };
         foot(); tick();

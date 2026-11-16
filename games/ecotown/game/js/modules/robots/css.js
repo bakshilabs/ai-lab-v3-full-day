@@ -45,7 +45,7 @@ export const css = `
 § .rb-sensor.yes { background: #e3f4e9; box-shadow: inset 0 0 0 4px #1f7a44, 0 4px 0 #17603a; cursor: default; } § .rb-sensor.yes em { color: #1f7a44; }
 § .rb-m1b { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
 § .rb-roombox { display: grid; place-items: center; } § .rb-room { width: 100%; height: auto; max-height: min(52vh, 400px); display: block; }
-§ .rb:not(.still) .rb-bot { transition: transform .35s ease; }
+§ .rb:not(.still) .rb-bot { transition: transform .35s ease; } § .rb-bot .rb-bumpfx { display: none; } § .rb-bot.bump .rb-bumpfx { display: inline; } § .rb-two2 { grid-template-columns: 1fr 1fr; } § .rb-cm { justify-content: center; }
 § .rb-loop { display: grid; gap: 10px; }
 § .rb-rule { display: grid; gap: 2px; background: #243447; color: #fff; box-shadow: none; } § .rb-rule small { color: #bfeaff; font-weight: 800; } § .rb-rule b { font-size: 1.08em; }
 § .rb-sta { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -59,7 +59,7 @@ export const css = `
 /* mission 2 */
 § .rb-m2 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; align-items: start; }
 § .rb-task { margin: 0 0 6px; font-weight: 800; } § .rb-armsvg { display: block; width: 100%; height: auto; max-height: min(42vh, 320px); }
-§ .rb:not(.still) .rb-armg { transition: transform .3s ease; }
+§ .rb:not(.still) .rb-armg, § .rb:not(.still) .rb-grip { transition: transform .3s ease; }
 § .rb-armbox .rb-verdict { margin-top: 8px; }
 § .rb-prog { list-style: none; margin: 0 0 6px; padding: 2px; display: grid; gap: 4px; max-height: max(150px, calc(100vh - 470px)); overflow-y: auto; overscroll-behavior: contain; }
 § .rb-prog li { display: grid; grid-template-columns: 1fr auto; gap: 4px; }
@@ -68,7 +68,7 @@ export const css = `
 § .rb-prog li.sel .rb-pstep { box-shadow: inset 0 0 0 3px #1f6fd0; } § .rb-prog li.run .rb-pstep { background: #fff7dc; box-shadow: inset 0 0 0 3px #e0a21c; } § .rb-prog li.bad .rb-pstep { background: #fde6cf; box-shadow: inset 0 0 0 3px #b3501f; }
 § .rb-pdel { min-width: 44px; min-height: 44px; border: 0; border-radius: 10px; background: #f3e9d2; font-weight: 800; box-shadow: inset 0 0 0 2px #d7bf95; }
 § .rb-pempty { padding: 10px; border-radius: 10px; background: #f6edd8; color: #5e4936; }
-§ .rb-repeat { display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 6px 10px; border-radius: 12px; background: #243447; color: #fff; } § .rb-repeat span { font-weight: 800; min-width: 5.5em; text-align: center; }
+§ .rb-repeat { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 4px 8px; border-radius: 12px; background: #243447; color: #fff; } § .rb-proghead { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; margin: 2px 0 6px; } § .rb-proghead h3 { margin: 0; } § .rb-xtile { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 12px; background: #243447; color: #fff; font-weight: 800; } § .rb-xtile b { min-width: 2.4em; text-align: center; font-size: 1.15em; } § .rb-xtile .rb-tile { flex: 1; } § .rb-armbox .rb-verdict[hidden] { display: none; } § .rb-repeat span { font-weight: 800; min-width: 5.5em; text-align: center; }
 § .rb-rep { min-width: 44px; min-height: 44px; border: 0; border-radius: 10px; background: #fff; color: #3b2a1e !important; font-weight: 800 !important; font-size: 1.3em !important; } § .rb-rep:disabled { opacity: .5; cursor: default; }
 § .rb-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0 0 10px; }
 § .rb-tile { min-height: 48px; padding: 6px 10px; border: 0; border-radius: 12px; background: #16c79a; color: #10322a !important; font-weight: 800 !important; box-shadow: inset 0 -3px 0 #0f9c78, 0 3px 0 #0b6e55; }
@@ -118,6 +118,7 @@ export const css = `
 § .rb-street2 { display: block; width: 100%; height: auto; max-height: min(34vh, 260px); }
 § .rb-simbox { display: grid; gap: 8px; }
 § .rb-batt { display: block; height: 14px; border-radius: 999px; background: #efe3c8; box-shadow: inset 0 0 0 1px #b49562; overflow: hidden; } § .rb-batt i { display: block; height: 100%; background: #7be0a3; }
+@media (min-width: 821px) { § .rb-prog.cols { grid-auto-flow: column; grid-template-rows: repeat(var(--rows), auto); grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8px; } }
 @media (max-width: 1100px) { § .rb-mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } § .rb-sensors { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 820px) {
   § .rb-m1b, § .rb-m2, § .rb-m3, § .rb-m5, § .rb-m5a, § .rb-m6 { grid-template-columns: minmax(0, 1fr); }

@@ -42,19 +42,19 @@ export default {
         n = pickd.go;
       }
       const m = mission(n); if (!m || !open(prog.done, n)) continue;
-      const again = !!prog.done[n - 1]; const resume = prog.cur?.n === n ? prog.cur : null;
+      const again = !!prog.done[n - 1]; const half = prog.parts?.[n]; const resume = half ? { n, ...half } : null; // each mission keeps its own half-done progress
       if (!resume) { ctx.report({ stage: stageOf(n, 'reading the job') }); const a = await showBrief(ctx, sh, m, again); if (a === 'map' || ctx.signal.aborted) continue; }
       if (n === 4 && !(resume && prog.m4)) { prog.m4 = null; prog.r4 = (prog.r4 || 0) + 1; }
-      prog.cur = resume || { n, part: 0, d: {} }; keep();
+      prog.cur = resume || { n, part: 0, d: {} }; if (n === 4 && !resume) prog.parts = { ...(prog.parts || {}), 4: { part: 0, d: {} } }; keep();
       let sum = null;
       if (n === 4) {
         const out = await playM4(ctx, sh, prog.m4, (s) => { prog.m4 = s; keep(); }, prog.plays * 5 + (prog.r4 || 0));
         if (out) { sum = out.sum; townData = out.town; prog.town = out.town; prog.m4 = null; }
       } else {
-        sum = await PLAY[n](ctx, sh, prog.cur, (part, d) => { prog.cur = { n, part, d }; keep(); });
+        sum = await PLAY[n](ctx, sh, prog.cur, (part, d) => { prog.cur = { n, part, d }; prog.parts = { ...(prog.parts || {}), [n]: { part, d } }; keep(); });
       }
       if (!sum || ctx.signal.aborted) break;
-      prog.done[n - 1] = 1; prog.sum[n] = sum; prog.cur = null; keep();
+      prog.done[n - 1] = 1; prog.sum[n] = sum; prog.cur = null; if (prog.parts) delete prog.parts[n]; const other = Object.keys(prog.parts || {}).map(Number).find((k) => !prog.done[k - 1]); if (other) prog.cur = { n: other, ...prog.parts[other] }; keep();
       ctx.report({ stage: stageOf(n, 'done') });
       const a = await showDone(ctx, sh, m, sum, prog);
       if (a === 'next') { const nx = prog.done.findIndex((x) => !x) + 1; if (nx > 0) direct = nx; }

@@ -45,7 +45,7 @@ export const pick = (o, junior) => (junior ? o.j : o.s);
 
 // ---------- progress kept between visits. { v: 3, j, plays, done: [six 0/1], sum: { n: summary }, cur: { n, part, d } | null, m4: sorter state }
 export const VERSION = 3;
-export function fresh(junior, plays = 0) { return { v: VERSION, j: !!junior, plays, done: [0, 0, 0, 0, 0, 0], sum: {}, cur: null, m4: null, r4: 0, town: null }; }
+export function fresh(junior, plays = 0) { return { v: VERSION, j: !!junior, plays, done: [0, 0, 0, 0, 0, 0], sum: {}, cur: null, parts: {}, m4: null, r4: 0, town: null }; }
 // What a save holds, checked. A save from another age route, or from the first version, starts again (keeping the play count).
 export function cleanProgress(s, junior) {
   const plays = Number.isInteger(s?.plays) && s.plays >= 0 ? Math.min(s.plays, 999) : 0;
@@ -58,7 +58,9 @@ export function cleanProgress(s, junior) {
   for (let i = 1; i < 6; i++) if (done[i] && !done[i - 1]) done[i] = 0;
   let cur = null; const c = s.cur;
   if (c && Number.isInteger(c.n) && c.n >= 1 && c.n <= 6 && open(done, c.n)) cur = { n: c.n, part: Number.isInteger(c.part) && c.part >= 0 && c.part < 10 ? c.part : 0, d: c.d && typeof c.d === 'object' ? c.d : {} };
-  return { v: VERSION, j: !!junior, plays, done, sum, cur, m4: s.m4 && typeof s.m4 === 'object' ? s.m4 : null, r4: Number.isInteger(s.r4) && s.r4 >= 0 ? Math.min(s.r4, 999) : 0, town: s.town && typeof s.town === 'object' ? s.town : null };
+  const parts = {}; for (const m of MISSIONS) { const x = s.parts?.[m.n]; if (x && typeof x === 'object' && open(done, m.n) && Number.isInteger(x.part) && x.part >= 0 && x.part < 10) parts[m.n] = { part: x.part, d: x.d && typeof x.d === 'object' ? x.d : {} }; }
+  if (cur && !parts[cur.n]) parts[cur.n] = { part: cur.part, d: cur.d };
+  return { v: VERSION, j: !!junior, plays, done, sum, cur, parts, m4: s.m4 && typeof s.m4 === 'object' ? s.m4 : null, r4: Number.isInteger(s.r4) && s.r4 >= 0 ? Math.min(s.r4, 999) : 0, town: s.town && typeof s.town === 'object' ? s.town : null };
 }
 // May mission n be played? The first is always open; each later one once the one before is done. Finished ones replay.
 export const open = (done, n) => n === 1 || !!done[n - 2] || !!done[n - 1];

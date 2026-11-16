@@ -33,6 +33,9 @@ test('progress: missions open in order, finished ones replay, a bad or foreign s
   assert.equal(cleanProgress(s, false).done.join(), '0,0,0,0,0,0', 'the other age route starts again');
   const all = { v: 3, j: false, plays: 0, done: [1, 1, 1, 1, 1, 1], sum: { 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {} }, cur: { n: 2, part: 1, d: { prog: [] } } };
   const a = cleanProgress(all, false); assert.ok(allDone(a.done)); assert.equal(a.cur.n, 2, 'a finished mission being replayed resumes');
+  // each mission keeps its own half-done progress: replaying mission 1 does not lose mission 4's place
+  const half = cleanProgress({ v: 3, j: true, plays: 0, done: [1, 1, 1, 0, 0, 0], sum: { 1: {}, 2: {}, 3: {} }, cur: { n: 1, part: 1, d: {} }, parts: { 1: { part: 1, d: {} }, 3: { part: 2, d: { x: 1 } }, 5: { part: 1, d: {} } } }, true);
+  assert.deepEqual(Object.keys(half.parts).sort(), ['1', '3'], 'a mission that is not open keeps nothing'); assert.equal(half.parts[3].part, 2);
 });
 
 test('mission 1: every job has one right sensor, a miss never names the answer at first, and the rule decides the trip', () => {
@@ -48,6 +51,10 @@ test('mission 1: every job has one right sensor, a miss never names the answer a
   assert.ok(asks.length >= 3); assert.ok(asks.some((i) => trip.steps[i].think === 'turn') && asks.some((i) => trip.steps[i].think === 'forward'));
   for (const s of trip.steps) assert.equal(s.think === 'turn', s.sense < 1, 'the rule: turn when something is right in front');
   assert.equal(M1.reading(1, false), 75); assert.match(M1.endLine('bump', 0, true), /bump switch/);
+  // room 2: the rule shown in room 1 fails; turning left when something is right in front gets it home
+  assert.notEqual(M1.drive(M1.ROOM2, 1, 40, 'right').end, 'home'); assert.equal(M1.drive(M1.ROOM2, 1, 40, 'left').end, 'home');
+  for (const dir of ['left', 'right']) for (const t of [0, 2, 3]) assert.notEqual(M1.drive(M1.ROOM2, t, 40, dir).end, 'home', `${dir} ${t}`);
+  assert.deepEqual(M1.CM.map(M1.cmToT), [0, 1, 1, 2, 2, 3]); assert.equal(M1.ruleText('left', 1, false, 50), 'If the distance is under 50 cm, turn left. Otherwise go forward.');
 });
 
 test('mission 2: the arm does what each step really does, the bug is real, and only a repeat of 4 packs the tray', () => {
@@ -58,7 +65,7 @@ test('mission 2: the arm does what each step really does, the bug is real, and o
   const fixed = [...debug.start]; fixed[2] = { op: 'close' }; const fixed2 = fixed.map((c) => (c.op === 'move' && c.to === 0 ? { op: 'move', to: 1 } : c));
   assert.equal(M2.judge(debug, fixed2).done, true);
   // the tiles of each task are enough to solve it
-  for (const t of M2.TASKS) for (const c of t.tiles) assert.ok(M2.isCmd(c));
+  for (const t of M2.TASKS) for (const c of t.tiles) assert.ok(M2.isCmd(c.x === null ? { ...c, x: 10 } : c));
   const body = [{ op: 'move', to: 'next' }, ...good.slice(1)];
   for (const r of [1, 2, 3]) assert.equal(M2.judge(tray, body, r).done, false); assert.equal(M2.judge(tray, body, 4).done, true);
   // faults are what the arm would do
@@ -67,39 +74,60 @@ test('mission 2: the arm does what each step really does, the bug is real, and o
   assert.match(M2.step(M2.startArm(), { op: 'close' }, true).text, /thin air/);
   assert.equal(M2.label({ op: 'move', to: 2 }, false), 'Move to x = 30'); assert.equal(M2.label({ op: 'move', to: 'next' }, true), 'Move to the next seedling');
   assert.deepEqual(M2.cleanProgram([{ op: 'down' }, { op: 'fly' }, null, { op: 'move', to: 9 }, { op: 'move', to: 'box' }]), [{ op: 'down' }, { op: 'move', to: 'box' }]);
+  // ages 13–17: an order by coordinates. Only the ordered seedlings, and only by the right x.
+  assert.equal(M2.tasksFor(true).length, 3); assert.equal(M2.tasksFor(false).length, 4); const order = M2.tasksFor(false)[3];
+  const pick = (x) => [{ op: 'move', x }, { op: 'down' }, { op: 'close' }, { op: 'up' }, { op: 'move', x: 70 }, { op: 'down' }, { op: 'open' }, { op: 'up' }];
+  assert.equal(M2.judge(order, [...pick(20), ...pick(40)], 1, false).done, true); assert.ok([...pick(20), ...pick(40)].length <= M2.maxFor(order));
+  assert.match(M2.judge(order, [...pick(20), ...pick(30)], 1, false).text, /did not ask for/); assert.equal(M2.judge(order, pick(25), 1, false).done, false);
+  assert.match(M2.step({ ...M2.startArm(), down: true, x: 25, at: 'air' }, { op: 'close' }, false).text, /no seedling at x = 25/);
+  assert.deepEqual(M2.cleanProgram([{ op: 'move', x: 35 }, { op: 'move', x: 33 }, { op: 'move', x: 200 }], 18), [{ op: 'move', x: 35 }]);
 });
 
-test('mission 3: the first rule that fits is used, safety beats arriving, and every round can be passed', () => {
-  const best = { person: 'slow', block: 'wait', lift: 'call', step: 'stop' };
-  for (const [i, r] of M3.ROUNDS.entries()) {
-    for (const j of [true, false]) {
-      const order = i === 2 ? ['step', 'person', 'block', 'lift'] : r.conds; const rules = order.map((c) => ({ cond: c, act: best[c] }));
-      const t = M3.trip(r, rules, j); assert.ok(M3.passed(t), `round ${i + 1}`); assert.doesNotMatch(M3.tripLine(t, r, j), /not safe|unsafe|did not reach/);
-    }
+test('mission 3: the first rule that fits is used, every rule must be safe on its own, and stopping for everyone is too late', () => {
+  const best = { person: 'slow', block: 'wait', lift: 'call', step: 'stop' }; const mk = (o, order) => order.map((c) => ({ cond: c, act: o[c] }));
+  for (const [i, r] of M3.ROUNDS.entries()) for (const j of [true, false]) {
+    const order = i === 2 ? ['step', 'person', 'block', 'lift'] : r.conds; const t = M3.trip(r, mk(best, order), j);
+    assert.ok(M3.passed(t), `round ${i + 1}`); assert.doesNotMatch(M3.tripLine(t, r, j), /not safe|unsafe|did not reach|too late/);
     for (const c of r.conds) for (const a of M3.CONDS[c].acts) assert.ok(M3.ACTS[a]);
   }
-  const r3 = M3.ROUNDS[2]; const wrongOrder = ['person', 'block', 'lift', 'step'].map((c) => ({ cond: c, act: best[c] }));
-  const t = M3.trip(r3, wrongOrder, true); assert.equal(t.safe, false, 'slowing is used when someone steps in front, so it is unsafe');
+  assert.equal(new Set(M3.ROUNDS[0].events.map((e) => e.kind)).size, 2, 'trip 1 has two kinds of event');
+  // trip 3: the safe rules in the wrong order are not safe (slowing is used when someone steps in front)
+  const r3 = M3.ROUNDS[2]; const wrongOrder = mk(best, ['person', 'block', 'lift', 'step']);
+  const t = M3.trip(r3, wrongOrder, true); assert.equal(M3.passed(t), false);
   const e = t.events.find((x) => x.kind === 'step'); assert.equal(e.cond, 'person'); assert.match(M3.orderNote(e, wrongOrder, true), /first one in its list/);
-  const fast = M3.trip(M3.ROUNDS[0], [{ cond: 'person', act: 'full' }], true); assert.equal(fast.arrived, true); assert.equal(fast.safe, false); assert.match(M3.tripLine(fast, M3.ROUNDS[0], true), /Arriving is not enough/);
-  const stops = M3.trip(M3.ROUNDS[0], [{ cond: 'person', act: 'stop' }], false); assert.ok(M3.passed(stops)); assert.ok(stops.seconds > M3.trip(M3.ROUNDS[0], [{ cond: 'person', act: 'slow' }], false).seconds - 30);
-  assert.equal(M3.trip(M3.ROUNDS[1], [{ cond: 'person', act: 'slow' }, { cond: 'block', act: 'wait' }, { cond: 'lift', act: 'stairs' }], true).arrived, false);
+  // the review's shortcut: stop for people, beep for someone in front (never used). It does not pass, and the beep rule is named.
+  const beep = mk({ ...best, person: 'stop', step: 'beep' }, ['person', 'block', 'lift', 'step']); const tb = M3.trip(r3, beep, true);
+  assert.equal(M3.passed(tb), false); assert.ok(tb.late, 'stopping for every person is too late'); assert.deepEqual(tb.bad, [3]); assert.match(M3.unusedLine(beep, 3, true), /Rule 4 was not used/);
+  const beepSlow = mk({ ...best, step: 'beep' }, ['step', 'person', 'block', 'lift']); assert.equal(M3.passed(M3.trip(r3, beepSlow, false)), false);
+  // from trip 2, stopping for every nurse misses the time limit; in trip 1 it is allowed but noted
+  for (const i of [1, 2]) { const order = i === 2 ? ['step', 'person', 'block', 'lift'] : M3.ROUNDS[i].conds; const tt = M3.trip(M3.ROUNDS[i], mk({ ...best, person: 'stop' }, order), false); assert.ok(tt.late && !M3.passed(tt), `trip ${i + 1}`); assert.match(M3.tripLine(tt, M3.ROUNDS[i], false), /limit/); }
+  const t1 = M3.trip(M3.ROUNDS[0], mk({ ...best, person: 'stop' }, ['person', 'block']), true); assert.ok(M3.passed(t1)); assert.match(M3.tripLine(t1, M3.ROUNDS[0], true), /safe but slow/);
+  const fast = M3.trip(M3.ROUNDS[0], mk({ ...best, person: 'full' }, ['person', 'block']), true); assert.equal(fast.arrived, true); assert.equal(M3.passed(fast), false); assert.match(M3.tripLine(fast, M3.ROUNDS[0], true), /Arriving is not enough/);
+  assert.equal(M3.trip(M3.ROUNDS[1], mk({ ...best, lift: 'stairs' }, ['person', 'block', 'lift']), true).arrived, false);
   assert.deepEqual(M3.cleanRules([{ cond: 'lift', act: 'call' }, { cond: 'person', act: 'zoom' }], ['person', 'block', 'lift']).map((r) => [r.cond, r.act]), [['lift', 'call'], ['person', null], ['block', null]]);
+  // the record counts only safe rules
+  assert.match(missionLine(3, { rules: [['step', 'beep'], ['person', 'slow'], ['block', 'wait'], ['lift', 'call']], secs: 150 }, true), /^Wrote 3 rules/);
 });
 
-test('mission 5: pulling a crop is never a pass, the best setting differs by field, and every line is true', () => {
+test('mission 5: only the best setting (or one weed off it after three tries) passes, the words rise, and every line is true', () => {
   const [lettuce, carrot] = M5.FIELDS;
   assert.equal(M5.best(lettuce).pull, 70); assert.equal(M5.best(carrot).pull, 80, 'the best setting depends on the field');
+  assert.deepEqual(M5.SETTINGS.map((t) => M5.SURE[t]), ['A little sure', 'Fairly sure', 'Quite sure', 'Very sure', 'Extremely sure']);
+  for (const t of M5.SETTINGS) assert.match(M5.sureWords(t), new RegExp(M5.SURE[t].toLowerCase()), 'the row uses the same words as the setting');
   for (const f of M5.FIELDS) for (const t of M5.SETTINGS) for (const j of [true, false]) {
-    const r = M5.weed(f, t); const l = M5.resultLine(f, r, j);
-    assert.equal(M5.okRow(r), r.cropsPulled === 0); if (r.cropsPulled) assert.match(l, /lost/); else assert.doesNotMatch(l, /lost for good|lost crop/);
-    if (!r.cropsPulled && r.weedsLeft === M5.best(f).weedsLeft) assert.match(l, /best/); assert.equal(r.weedsPulled + r.weedsLeft, r.weeds);
+    const r = M5.weed(f, t); const g = M5.grade(f, r, false, 0); const l = M5.resultLine(f, r, j, false, 0);
+    if (r.cropsPulled) { assert.equal(g, 'lost'); assert.match(l, /lost/); } else assert.doesNotMatch(l, /lost for good|lost crop/);
+    if (g === 'weedy') assert.match(l, /water and light/); if (g === 'best') assert.match(l, /best/);
+    assert.equal(M5.passes(g), t === M5.best(f).pull, `${f.id} ${t}`); assert.equal(r.weedsPulled + r.weedsLeft, r.weeds);
   }
+  // the most cautious setting never passes straight away (the review's shortcut)
+  for (const f of M5.FIELDS) assert.equal(M5.passes(M5.grade(f, M5.weed(f, 90), false, 1)), false);
+  // one weed more than the best is accepted after three tries, with a hint
+  assert.equal(M5.grade(lettuce, M5.weed(lettuce, 80), false, 3), 'near'); assert.equal(M5.grade(lettuce, M5.weed(lettuce, 80), false, 2), 'weedy');
   // ages 13–17: flags for the farmer, who has time for three
-  const r = M5.weed(carrot, 80, 50); assert.equal(r.flags, 4); assert.equal(r.unchecked, 1); assert.equal(r.cropsPulled, 0); assert.equal(M5.best(carrot, true).weedsLeft, r.weedsLeft);
+  const r = M5.weed(carrot, 80, 50); assert.equal(r.flags, 4); assert.equal(r.unchecked, 1); assert.equal(r.cropsPulled, 0); assert.equal(M5.best(carrot, true).weedsLeft, r.weedsLeft); assert.equal(M5.grade(carrot, r, true), 'best');
   const tb = M5.table(r); assert.equal(tb.weed.reduce((a, b) => a + b, 0), r.weeds); assert.equal(tb.crop.reduce((a, b) => a + b, 0), r.crops);
   for (const p of [...lettuce.plants, ...carrot.plants]) { assert.ok(M5.NAMES[p.pic]); if (p.hid) assert.ok(M5.whyUnsure[p.hid]); }
-  // the plants the robot is least sure about are the ones with a reason
   for (const f of M5.FIELDS) for (const p of f.plants) if (p.p >= 40 && p.p <= 74) assert.ok(p.hid || p.pic === 'cowparsley' || p.pic === 'chickweed', p.id);
 });
 

@@ -9,7 +9,7 @@ export const BODIES = {
   legs: { j: 'Legs', s: 'Legs', kg: 12, icon: '🦿', go: { road: 2, rubble: 2, mud: 3, shallow: 3, deep: null }, floats: false },
   boat: { j: 'Boat hull', s: 'Boat hull', kg: 8, icon: '🚤', go: { road: null, rubble: null, mud: null, shallow: 2, deep: 1 }, floats: false },
 };
-export const SENSORS6 = { camera: { j: 'Camera', s: 'Camera', kg: 1, icon: '📷' }, heat: { j: 'Heat camera', s: 'Heat camera', kg: 2, icon: '🌡️' } };
+export const SENSORS6 = { camera: { j: 'Camera', s: 'Camera', kg: 1, icon: '📷' }, heat: { j: 'Heat camera', s: 'Heat camera', kg: 2, icon: '♨️' } };
 export const BATTERIES = { small: { j: 'Small battery', s: 'Small battery (300 Wh)', kg: 2, wh: 300 }, big: { j: 'Big battery', s: 'Big battery (600 Wh)', kg: 6, wh: 600 } };
 export const FLOATS = { kg: 3, holds: 25 };
 export const WH_PER_KG_MIN = 1.5; // energy used: 1.5 Wh for every kilogram, every minute
@@ -33,7 +33,7 @@ export function simulate(street, d, junior) {
   for (const part of street.parts) {
     if (part === 'house') {
       const found = d.sensors.includes('heat');
-      out.push({ part, ok: found, mins: 0, why: found ? say('Inside it is dark. The heat camera saw someone warm upstairs. Found!', 'Dark inside: the heat camera picked up a warm body upstairs. Person found.')
+      out.push({ part, ok: found, mins: 0, why: found ? say('Inside it is dark. The heat camera saw someone warm in the back room. Found!', 'Dark inside: the heat camera picked up a warm body in the back room. Person found.')
         : say('It reached the house, but it is dark inside. A camera needs light, so it could not see anyone.', 'Arrived, but a normal camera sees nothing in the dark: no one found.') });
       return { parts: out, reached: true, found, used: Math.round(used), wh, kg, mins, end: found ? 'found' : 'dark' };
     }
