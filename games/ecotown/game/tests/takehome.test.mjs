@@ -11,7 +11,7 @@ test('a full day: the town, each module made, and one question about the last th
   assert.equal(p.town.name, 'Otter Bend'); assert.ok(p.town.practised.length >= 1); assert.match(p.town.made.join('|'), /24 families/);
   assert.deepEqual(p.modules.map((m) => m.id), ['drone', 'roads'], 'in the day’s order of modules, not the order played');
   assert.equal(p.modules[0].title, 'My drone route'); assert.equal(p.modules[0].practised.length, 2); assert.equal(p.modules[0].heading, 'Drone delivery');
-  assert.match(p.ask, /car park/, 'the question is about the module made last');
+  assert.match(p.ask, /self-driving car/, 'the question is about the module made last');
   assert.equal(p.count, 2);
 });
 

@@ -3,6 +3,7 @@
 // writes the save itself and never edits the game's shared files.
 import * as THREE from 'three';
 import { h, esc } from '../ui/ui.js';
+import { endOfPart } from '../ui/talk.js';
 import { MODULE_IDS, ON_BOARD, CONTRACT, checkModule, cleanResult, cleanReport, cleanState, storedModule } from './contract.js';
 
 // One line per module. Each folder's index.js is that module (a placeholder until its builder replaces it).
@@ -77,7 +78,9 @@ export async function openModule(app, id) {
         ${picHtml ? `<div class="modpic" style="max-width:420px;margin:6px auto;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 0 2px #e6d3b0">${picHtml}</div>` : ''}
         ${result.record.made.lines.length ? `<div class="practised plain"><small>${j ? 'You made' : 'You made'}</small><ul>${result.record.made.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>` : ''}
         <div class="practised"><small>You practised</small><ul>${result.record.practised.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>
-        <div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${j ? 'Back to my town' : 'Back to the town'} ➜</button></div>`, { say: `You practised: ${result.record.practised.join('. ')}` });
+        <div class="row" style="justify-content:center"><button class="btn go" data-act="ok">${j ? 'Back to my town' : 'Back to the town'} ➜</button></div>`, { say: ['You practised.', ...result.record.practised.map((l) => { const t = String(l).trim().replace(/[.!?]+$/, ''); return t.charAt(0).toUpperCase() + t.slice(1) + '.'; })].join(' ') });
+      // every part ends with a discussion led by the teacher, then a break (docs/full-day-plan.md)
+      if (result.finished) await endOfPart(app, id, j);
     }
     return result;
   }).then(async (r) => { await showInTown(app); return r; });

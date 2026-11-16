@@ -1,77 +1,79 @@
-// Robot training (docs/MODULES.md, module "robots"). At a workshop bench the child shows a recycling robot examples,
-// tests it on a tray kept apart, reads what its examples lacked, adds those and tests again. Then the robot works in
-// their own town. The learning is real and small: learn.js (nearest example by shared features). Nothing is typed.
-import { binsFor, featuresFor, makeTray, makeStreet, runTest, examplesOf, cleanSaved, shelf, seedFrom, kind, MAX_TESTS } from './learn.js';
-import { record, stageLine } from './words.js';
-import { chartSvg } from './pictures.js';
+// Robots at work (docs/MODULES.md, module "robots"; docs/curriculum.md, section 3). One hour, six missions, each a
+// different real job robots do and a different real skill: sensors and the sense–think–act loop, a robot arm program,
+// hospital safety rules, a recycling sorter trained by example, a weeding robot's confidence threshold, and a flood
+// rescue robot designed, tested and improved. Progress is saved after every mission (and inside missions); run()
+// resolves finished only when all six are done. Nothing is typed; Florence's lines are built from fixed words.
+import { binsFor, kind } from './learn.js';
 import { spot } from './spot.js';
-import { createBench, css } from './bench.js';
-import { buildScene, townScene, hideTownShows } from './street.js';
+import { townScene } from './street.js';
+import { css as benchCss } from './bench.js';
+import { css as hourCss } from './css.js';
+import { createShell } from './shell.js';
+import { MISSIONS, mission, cleanProgress, open, allDone, stageOf } from './missions.js';
+import { showMap, showBrief, showDone } from './hour.js';
+import { hourRecord, hourPicture } from './record.js';
+import { playM1 } from './m1-ui.js';
+import { playM2 } from './m2-ui.js';
+import { playM3 } from './m3-ui.js';
+import { playM4, rememberCamera } from './m4-sorter.js';
+import { playM5 } from './m5-ui.js';
+import { playM6 } from './m6-ui.js';
 
-const seedOf = (town, plays) => (seedFrom((town?.cells || []).map(([k, c]) => `${k}:${c?.item || c?.mark || ''}`).join('|') || 'empty') + plays * 7919) >>> 0;
+const PLAY = { 1: playM1, 2: playM2, 3: playM3, 5: playM5, 6: playM6 };
 
 export default {
   id: 'robots', icon: '🤖',
-  title: { j: 'Robot training', s: 'Robot training' },
-  blurb: { j: 'Teach a robot by showing it examples, then test it.', s: 'Train a sorting robot by example, test it and fill the gaps.' },
-  css,
+  title: { j: 'Robots at work', s: 'Robots at work' },
+  blurb: { j: 'Six robot jobs: sensors, arms, rules, sorting, weeding and rescue.', s: 'Sense, think, act: six real robot jobs and the skills behind them.' },
+  css: benchCss + hourCss,
   async run(ctx) {
-    const junior = !!ctx.junior; const feats = featuresFor(junior); const bins = binsFor(junior); const plays = Number.isInteger(ctx.saved?.plays) ? ctx.saved.plays : 0;
-    const st = cleanSaved(ctx.saved, junior) || { v: 1, j: junior, seed: seedOf(ctx.town, plays), rounds: [[]], tests: 0, stage: 'teach' };
-    const tray = makeTray(st.seed, junior);
-    const testAt = (n) => runTest(tray, examplesOf(st.rounds, n), feats);             // test n used the examples of rounds 1 to n
-    const allTests = () => Array.from({ length: st.tests }, (_, i) => testAt(i + 1));
-    const shownBy = () => Array.from({ length: st.tests }, (_, i) => examplesOf(st.rounds, i + 1).length);
-    const keep = () => ctx.save({ ...st, plays, rounds: st.rounds.map((r) => [...r]) });
-    const ui = createBench(ctx, { junior, feats, bins });
-    let sum = null; let sp = null;
+    const j = !!ctx.junior; const prog = cleanProgress(ctx.saved, j);
+    const keep = () => ctx.save(prog);
+    const sh = createShell(ctx); rememberCamera(ctx);
+    let townData = prog.town || null; // the recycling robot left in the town (from mission 4)
+    let direct = null; // "Next mission" on a closing card goes straight to the next mission's opening card
     while (!ctx.signal.aborted) {
-      if (st.stage === 'teach') {
-        const round = st.rounds.length - 1; ctx.report({ stage: stageLine('teach', { round }) });
-        const shown = new Set(examplesOf(st.rounds).map((e) => e.kind));
-        const starred = round > 0 ? testAt(st.tests).results.filter((r) => !r.ok && !shown.has(r.kind)).map((r) => r.kind) : [];
-        await ui.teach(st, { starred, onChange: keep }); st.stage = 'test'; keep();
-      } else if (st.stage === 'test') {
-        const n = st.tests + 1; ctx.report({ stage: stageLine('test', { test: n }) });
-        await ui.test(testAt(n), n, n > 1 ? testAt(n - 1) : null); st.tests = n; st.stage = n === 1 ? 'review' : 'result'; keep();
-      } else if (st.stage === 'review') {
-        const t = testAt(1); ctx.report({ stage: stageLine('review', t) });
-        await ui.review(t, examplesOf(st.rounds, 1)); st.rounds.push([]); st.stage = 'teach'; keep();
-      } else if (st.stage === 'result') {
-        const all = allTests(); const last = all[all.length - 1]; ctx.report({ stage: stageLine('result', { first: all[0].right, right: last.right, of: last.of }) });
-        const canMore = st.tests < MAX_TESTS && last.right < last.of && shelf(examplesOf(st.rounds), 1, junior).length > 0;
-        const choice = await ui.result(all, shownBy(), examplesOf(st.rounds), canMore);
-        if (choice === 'more' && canMore) { st.rounds.push([]); st.stage = 'teach'; } else st.stage = 'street';
-        keep();
-      } else {
-        ctx.report({ stage: stageLine('street') });
-        sp = spot(ctx.town.cells, ctx.town.terrain); const still = !!ctx.settings.reduceMotion;
-        const scene = sp ? buildScene(ctx.engine, sp, bins.map((b) => b.id), { still }) : null;
-        hideTownShows(true); ctx.onLeave(() => { scene?.remove(); hideTownShows(false); });
-        if (scene) ctx.engine.onFrame((dt, t) => { scene.update(dt); scene.view(ctx.engine.camera, t); });
-        const res = runTest(makeStreet(st.seed, junior), examplesOf(st.rounds), feats);
-        await ui.street(res.results, (r, done) => { // the caption's button waits for the robot; never for more than a few seconds
-          let called = false; const once = () => { if (!called) { called = true; done(); } };
-          if (scene) scene.sortOne(r.kind, r.got, once); setTimeout(once, scene && !still ? 7000 : 300);
-        });
-        sum = { right: res.right, asked: res.asked, wrong: res.of - res.right - res.asked, of: res.of };
-        break;
+      let n = direct; direct = null;
+      if (!n) {
+        ctx.report({ stage: 'Choosing a mission' });
+        const pickd = await showMap(ctx, sh, prog);
+        if (ctx.signal.aborted) break;
+        if (pickd.finish && allDone(prog.done)) break;
+        n = pickd.go;
       }
+      const m = mission(n); if (!m || !open(prog.done, n)) continue;
+      const again = !!prog.done[n - 1]; const half = prog.parts?.[n]; const resume = half ? { n, ...half } : null; // each mission keeps its own half-done progress
+      if (!resume) { ctx.report({ stage: stageOf(n, 'reading the job') }); const a = await showBrief(ctx, sh, m, again); if (a === 'map' || ctx.signal.aborted) continue; }
+      if (n === 4 && !(resume && prog.m4)) { prog.m4 = null; prog.r4 = (prog.r4 || 0) + 1; }
+      prog.cur = resume || { n, part: 0, d: {} }; if (n === 4 && !resume) prog.parts = { ...(prog.parts || {}), 4: { part: 0, d: {} } }; keep();
+      let sum = null;
+      if (n === 4) {
+        const out = await playM4(ctx, sh, prog.m4, (s) => { prog.m4 = s; keep(); }, prog.plays * 5 + (prog.r4 || 0));
+        if (out) { sum = out.sum; townData = out.town; prog.town = out.town; prog.m4 = null; }
+      } else {
+        sum = await PLAY[n](ctx, sh, prog.cur, (part, d) => { prog.cur = { n, part, d }; prog.parts = { ...(prog.parts || {}), [n]: { part, d } }; keep(); });
+      }
+      if (!sum || ctx.signal.aborted) break;
+      prog.done[n - 1] = 1; prog.sum[n] = sum; prog.cur = null; if (prog.parts) delete prog.parts[n]; const other = Object.keys(prog.parts || {}).map(Number).find((k) => !prog.done[k - 1]); if (other) prog.cur = { n: other, ...prog.parts[other] }; keep();
+      ctx.report({ stage: stageOf(n, 'done') });
+      const a = await showDone(ctx, sh, m, sum, prog);
+      if (a === 'next') { const nx = prog.done.findIndex((x) => !x) + 1; if (nx > 0) direct = nx; }
     }
-    if (!sum) return { finished: false };
-    const all = allTests(); const last = all[all.length - 1]; const rec = record({ rounds: st.rounds, tests: all, street: sum, bins: bins.length, beside: sp?.beside });
-    ctx.report({ stage: `Robot trained: ${all[0].right} of ${last.of}, then ${last.right} of ${last.of}`, state: 'finished', finished: true });
-    ctx.save({ v: 1, plays: plays + 1 }); // the next visit starts a new robot, with a different tray
+    if (ctx.signal.aborted || !allDone(prog.done)) return { finished: false };
+    const rec = hourRecord(prog, j);
+    ctx.report({ stage: 'All six missions done', state: 'finished', finished: true });
+    prog.plays += 1; keep(); // the next sorter visit starts a new robot with a different tray; the six ticks stay
     return {
       finished: true,
-      record: { made: { title: rec.title, lines: rec.lines, picture: chartSvg({ tests: all, shown: shownBy(), street: sum }) }, practised: rec.practised },
-      town: { kind: 'recycling-robot', data: { key: sp?.key || null, bins: bins.map((b) => b.id), things: st.rounds.flat().slice(0, 16), right: last.right, of: last.of } },
+      record: { made: { title: rec.title, lines: rec.lines, picture: hourPicture(prog.done) }, practised: rec.practised },
+      town: townData ? { kind: 'recycling-robot', data: townData } : undefined,
     };
   },
-  // The trained robot at work in the town: scenery only. If the island has nowhere for it to stand, nothing is drawn.
+  // The trained recycling robot at work in the town: scenery only. If the island has nowhere for it to stand, nothing is drawn.
   show(townCtx, data) {
     const ids = (Array.isArray(data?.bins) ? data.bins : []).filter((b) => binsFor(false).some((x) => x.id === b)); if (!ids.length) return () => {};
     const sp = spot(townCtx.town.cells, townCtx.town.terrain, typeof data.key === 'string' ? data.key : null); if (!sp) return () => {};
     return townScene(townCtx.engine, sp, ids, (Array.isArray(data.things) ? data.things : []).filter((id) => kind(id)), !!townCtx.reduceMotion);
   },
 };
+export { MISSIONS };

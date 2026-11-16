@@ -12,7 +12,7 @@ const PIC = { town: '<img src="img/thumbs/timber.png" alt="">', drone: '🚁', r
 document.querySelector('[data-part="welcome"]').href = `${GAME}?welcome=1`;
 document.querySelector('[data-parts]').innerHTML = PARTS.map((p) => `<a class="card part${P.next === p.id ? ' next' : ''}" data-part="${p.id}" href="${GAME}${p.query}">
   <span class="num">${p.n}</span><span class="nexttag">Next</span><div class="pic" aria-hidden="true">${PIC[p.id]}</div>
-  <h3>${esc(p.title)}</h3><span class="time">${esc(p.time)}</span><p>${esc(p.blurb)}</p>
+  <h3>${esc(p.title)}</h3>${p.time ? `<span class="time">${esc(p.time)}</span>` : ''}<p>${esc(p.blurb)}</p>
   <span class="state ${P[p.id]}" data-state="${p.id}">${esc(p.id === 'town' && P.town === 'started' && P.townNote ? `▶ ${P.townNote}` : p.id === 'town' && P.town === 'started' ? '▶ Carry on building' : LABEL[P[p.id]])}</span></a>`).join('');
 const w = document.querySelector('[data-state="welcome"]'); if (P.welcome === 'done') { w.textContent = '✓ Watched'; w.classList.add('done'); }
 if (P.next === 'welcome') document.querySelector('[data-part="welcome"]').classList.add('next');
