@@ -344,7 +344,7 @@ await p.waitForFunction(() => window.__roads !== undefined, null, { timeout: LON
 const result = await p.evaluate(() => window.__roads);
 must('finished', result?.finished === true); checks.title = result?.record?.made?.title; checks.lines = result?.record?.made?.lines; checks.practised = result?.record?.practised;
 must('practised', checks.practised?.length >= 3 && checks.practised.every((l) => !/\byou\b|\byour\b/i.test(l)), checks.practised);
-must('recordSixLines', checks.lines?.length === 6 && /Sensor/.test(checks.lines[0]) && /abel/.test(checks.lines[1]) && /street|drop-off/i.test(checks.lines[5]), checks.lines);
+must('recordSixLines', checks.lines?.length === 6 && /camera, radar and lidar/.test(checks.lines[0]) && !checks.lines.some((l) => /first time|100%/.test(l)) && /abel/.test(checks.lines[1]) && /street|drop-off/i.test(checks.lines[5]), checks.lines);
 must('picture', /^<svg/.test(result?.record?.made?.picture || '')); checks.town = result?.town;
 await p.waitForTimeout(1500);
 const town = () => p.evaluate(() => {
