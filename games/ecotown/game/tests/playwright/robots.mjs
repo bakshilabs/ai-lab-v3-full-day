@@ -120,16 +120,18 @@ for (let k = 0; k < 8; k++) {
   await goFoot('next');
 }
 await waitStage('^m1-watch$'); await layout('m1-watch');
-{ let asks = 0; let loops = 0;
+{ let asks = 0; let loops = 0; let skipped = false;
   while ((await stage()) === 'm1-watch' && loops++ < 30) {
     if (await p.locator('#module .rb-foot [data-act="forward"]').count()) { asks++; await goFoot(asks % 2 ? 'forward' : 'turn'); if (asks === 1) await shot('m1-predict'); }
+    if (asks === 2 && !skipped && await p.locator('#module .rb-foot [data-act="skip"]').count()) { skipped = true; await goFoot('skip'); await p.waitForTimeout(300); continue; }
     await goFoot('next'); await p.waitForTimeout(150);
   }
-  checks.m1Predictions = asks >= 3; }
-await waitStage('^m1-rule$'); await tap('#module .rb-rulebtn[data-t="0"]'); await tap('#module [data-run]');
-await p.waitForFunction(() => !document.querySelector('#module [data-run]')?.disabled && /bump/i.test(document.querySelector('#module .rb-verdict')?.textContent || ''), null, { timeout: 60000 });
-checks.m1BumpExplained = true; await shot('m1-bump');
-await tap('#module .rb-rulebtn[data-t="1"]'); await tap('#module [data-run]'); await p.waitForSelector('#module [data-fin]', { timeout: 60000 });
+  checks.m1Predictions = asks >= 3; checks.m1SkipOffered = skipped; }
+// room 2: the rule from room 1 (turn right when something is right in front) goes round in circles here
+await waitStage('^m1-rule$'); await tap('#module [data-g="dir"][data-v="right"]'); if (J) await tap('#module [data-g="when"][data-v="1"]'); else { await tap('#module [data-cm="-25"]'); await tap('#module [data-cm="-25"]'); }
+const m1run = async (re) => { await tap('#module [data-run]'); await p.waitForFunction((r) => !document.querySelector('#module [data-run]')?.disabled && new RegExp(r, 'i').test(document.querySelector('#module .rb-loop .rb-verdict')?.textContent || ''), re, { timeout: 60000 }); };
+await m1run('circles|looped'); checks.m1Room1RuleFails = true; await shot('m1-room2-fails'); await layout('m1-rule');
+await tap('#module [data-g="dir"][data-v="left"]'); await m1run('charger'); await p.waitForSelector('#module [data-fin]', { timeout: 60000 }); await shot('m1-room2-home');
 await layout('m1-rule'); await tap('#module [data-fin]');
 await finishCard(1);
 
@@ -158,6 +160,16 @@ await p.waitForFunction(() => /2 of 4 in the box/.test(document.querySelector('#
 await tap('#module .rb-rep[data-rep="1"]'); await tap('#module .rb-rep[data-rep="1"]'); await tap('#module [data-run]'); await p.waitForSelector('#module [data-next]', { timeout: 90000 });
 checks.m2Repeat = /All 4 seedlings/.test(await p.evaluate(() => document.querySelector('#module .rb-armbox .rb-verdict')?.textContent || ''));
 await shot('m2-tray'); await layout('m2-tray'); await tap('#module [data-next]');
+if (!J) { // the order by coordinates: x = 20 and x = 40 into the box at x = 70
+  await waitStage('^m2-order$'); let x = 10;
+  const setX = async (to) => { while (x < to) { await tap('#module [data-x="5"]'); x += 5; } while (x > to) { await tap('#module [data-x="-5"]'); x -= 5; } };
+  const addMove = async (to) => { await setX(to); await tile(0); };
+  for (const at of [20, 40]) { await addMove(at); for (const k of [1, 2, 3]) await tile(k); await addMove(70); for (const k of [1, 4, 3]) await tile(k); }
+  await layout('m2-order'); await shot('m2-order');
+  await tap('#module [data-run]'); await p.waitForSelector('#module [data-next]', { timeout: 90000 });
+  checks.m2Order = /x = 20 and x = 40 are in the box/.test(await p.evaluate(() => document.querySelector('#module .rb-armbox .rb-verdict')?.textContent || ''));
+  await tap('#module [data-next]');
+}
 await finishCard(2);
 
 }
@@ -167,7 +179,7 @@ await startMission(3);
 const act = (cond, a) => p.evaluate(([c, x]) => { const li = [...document.querySelectorAll('#module .rb-rlist > li')].find((l) => l.querySelector(`.rb-act[data-a="${x}"]`) && l.textContent.includes(c)); return li ? [...li.querySelectorAll('.rb-act')].findIndex((b) => b.dataset.a === x) : -1; }, [cond, a]);
 async function setAct(i, a) { await tap(`#module .rb-act[data-r="${i}"][data-a="${a}"]`); }
 const testRun = async () => { await tap('#module [data-run]'); await p.waitForFunction(() => { const r = document.querySelector('#module [data-run]'); return r && !r.disabled; }, null, { timeout: 90000 }); };
-await waitStage('^m3-r1$'); await setAct(0, 'full'); await testRun();
+await waitStage('^m3-r1$'); await setAct(0, 'full'); await setAct(1, 'wait'); await testRun();
 checks.m3UnsafeSaid = /not safe|unsafe/i.test(await p.evaluate(() => document.querySelector('#module .rb-verdict')?.textContent || '')); await shot('m3-unsafe');
 await setAct(0, 'slow'); await testRun(); await layout('m3-r1'); await shot('m3-r1'); await tap('#module [data-next]');
 await waitStage('^m3-r2$');
@@ -177,8 +189,12 @@ checks.leaveMidKeepsDone = (await saved())?.done?.slice(0, 2).join() === '1,1' &
 await openRobots('__robots');
 checks.resumeSaysCarryOn = /Carry on: mission 3/.test(await p.evaluate(() => document.querySelector('#module .rb-foot').textContent));
 await goFoot('go'); await waitStage('^m3-r2$'); checks.resumedAtTrip2 = true;
-await setAct(1, 'wait'); await setAct(2, 'call'); await testRun(); await layout('m3-r2'); await shot('m3-r2'); await tap('#module [data-next]');
-await waitStage('^m3-r3$'); await setAct(3, 'stop'); await testRun();
+await setAct(0, 'stop'); await setAct(2, 'call'); await testRun();
+checks.m3StopForAllIsLate = /too late|limit/.test(await p.evaluate(() => document.querySelector('#module .rb-planbox .rb-verdict')?.textContent || '')) && !(await p.locator('#module [data-next]').count()); await shot('m3-late');
+await setAct(0, 'slow'); await testRun(); await layout('m3-r2'); await shot('m3-r2'); await tap('#module [data-next]');
+await waitStage('^m3-r3$'); await setAct(3, 'beep'); await testRun();
+checks.m3UnsafeRuleNeverPasses = !(await p.locator('#module [data-next]').count());
+await setAct(3, 'stop'); await testRun();
 checks.m3OrderMatters = /first one in its list|first match/.test(await p.evaluate(() => document.querySelector('#module .rb-log').textContent)); await shot('m3-order');
 for (const i of [3, 2, 1]) await tap(`#module .rb-mv[data-mv="${i}"][data-dir="-1"]`);
 await testRun(); await p.waitForSelector('#module [data-next]', { timeout: 30000 }); await layout('m3-r3'); await shot('m3-r3'); await tap('#module [data-next]');
@@ -218,6 +234,8 @@ for (let k = 0; k < 4; k++) { await goFoot(k % 2 ? 'crop' : 'weed'); if (k === 3
 await waitStage('^m5-1$'); await tap('#module .rb-set[data-t="50"]'); await tap('#module [data-run]');
 checks.m5CropLostSaid = /lost for good|lost crop/.test(await p.evaluate(() => document.querySelector('#module .rb-setbox .rb-verdict')?.textContent || '')); checks.m5NoPassOnLoss = !(await p.locator('#module [data-next]').count());
 await shot('m5-lost');
+await tap('#module .rb-set[data-t="90"]'); await tap('#module [data-run]');
+checks.m5CautiousIsAmber = (await p.evaluate(() => document.querySelector('#module .rb-setbox .rb-verdict')?.className || '')).includes('ask') && !(await p.locator('#module [data-next]').count()); await shot('m5-cautious');
 await tap('#module .rb-set[data-t="70"]'); await tap('#module [data-run]'); await p.waitForSelector('#module [data-next]'); await layout('m5-row'); await shot('m5-row'); await tap('#module [data-next]');
 await waitStage('^m5-2$'); await tap('#module .rb-set[data-t="80"]'); if (!J) await tap('#module .rb-ask[data-a="50"]'); await tap('#module [data-run]'); await p.waitForSelector('#module [data-next]');
 if (!J) checks.m5SeniorTable = (await p.locator('#module .rb-conf tbody tr').count()) === 2;
