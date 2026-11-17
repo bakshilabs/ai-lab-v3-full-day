@@ -213,7 +213,7 @@ function visit(node, anc, fn) {
 }
 
 // context of a literal: { skip: reason | null, keypath, version, litStart, litEnd }
-function contextOf(node, anc, src) {
+function contextOf(node, anc, src, aliases = {}) {
   const parent = anc[anc.length - 1];
   let skip = null;
   if (parent) {
@@ -239,6 +239,11 @@ function contextOf(node, anc, src) {
     else if (a.type === 'FunctionDeclaration' && a.id) names.push(`${a.id.name}()`);
     else if ((a.type === 'Property' || a.type === 'MethodDefinition' || a.type === 'PropertyDefinition') && a.value === c) { const k = keyName(a); if (k != null && !/^\d+$/.test(k)) names.push(k); if (k === 'j' || k === 'junior') version = 'j'; else if (k === 's' || k === 'senior') version = 's'; }
     else if ((a.type === 'ArrowFunctionExpression' || a.type === 'FunctionExpression') && names.length && !names[names.length - 1].endsWith('()')) names[names.length - 1] += '()';
+    else if (a.type === 'CallExpression' && a.arguments.indexOf(c) >= 1 && src.slice(a.callee.start, a.callee.end) === 'Object.assign') {
+      // Object.assign(J, { … }) with const J = SANDBOX.junior: the keys belong to SANDBOX.junior (and to that age band)
+      let t = src.slice(a.arguments[0].start, a.arguments[0].end).replace(/\s+/g, ''); const head = t.split('.')[0]; if (aliases[head]) t = aliases[head] + t.slice(head.length);
+      names.push(t); const parts = t.split('.'); if (parts.includes('junior') || parts.includes('j')) version = 'j'; else if (parts.includes('senior') || parts.includes('s')) version = 's';
+    }
     else if (a.type === 'AssignmentExpression' && a.right === c) names.push(src.slice(a.left.start, a.left.end).replace(/\s+/g, '').slice(0, 40));
     else if (a.type === 'ConditionalExpression' && (a.consequent === c || a.alternate === c)) { const v = JUNIOR_TEST(src.slice(a.test.start, a.test.end)); if (v) version = a.consequent === c ? v : (v === 'j' ? 's' : 'j'); }
     else if (a.type === 'LogicalExpression' && a.right === c && a.operator === '&&') { const v = JUNIOR_TEST(src.slice(a.left.start, a.left.end)); if (v) version = v; }
@@ -255,6 +260,9 @@ export function lineAt(src, pos) { let n = 1; for (let i = 0; i < pos; i++) if (
 export function jsSegments(code, base = 0, fileSrc = code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module', allowHashBang: true, allowReturnOutsideFunction: true });
   const segs = []; const regexWords = [];
+  // const J = SANDBOX.junior: names that stand for an object path (used to name Object.assign targets)
+  const aliases = {};
+  visit(ast, [], (node) => { if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init?.type === 'MemberExpression' && !node.init.computed) aliases[node.id.name] = code.slice(node.init.start, node.init.end).replace(/\s+/g, ''); });
   visit(ast, [], (node, anc) => {
     if (node.type === 'Literal' && node.regex) { if (/^[A-Za-z’' ,]+$/.test(node.regex.pattern) && / /.test(node.regex.pattern)) regexWords.push(new RegExp(node.regex.pattern, node.regex.flags.replace('g', ''))); return; }
     const isStr = node.type === 'Literal' && typeof node.value === 'string';
@@ -263,7 +271,7 @@ export function jsSegments(code, base = 0, fileSrc = code) {
     const toks = [];
     if (isStr) cookChars(code, node.start + 1, node.end - 1, toks);
     else node.quasis.forEach((q, i) => { cookChars(code, q.start, q.end, toks); if (i < node.expressions.length) toks.push({ x: true, s: q.end, e: node.quasis[i + 1].start }); });
-    const ctx = contextOf(node, anc, code);
+    const ctx = contextOf(node, anc, code, aliases);
     const js = isStr ? (code[node.start] === '"' ? 'dq' : 'sq') : 'tpl';
     const html = looksHtml(toks);
     for (const run of splitRuns(toks, html)) {

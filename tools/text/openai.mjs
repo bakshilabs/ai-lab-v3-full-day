@@ -9,7 +9,14 @@ import { spawnSync } from 'node:child_process';
 
 // Node's fetch ignores HTTPS_PROXY unless NODE_USE_ENV_PROXY=1, and then the request would miss the proxy that adds
 // the key: start the script again with the proxy switched on (and the proxy's CA bundle, when there is one).
-if (process.env.HTTPS_PROXY && process.env.NODE_USE_ENV_PROXY !== '1') {
+// TEXT_STUB=1: a dry run. Nothing is sent: a request already in the cache is answered from it (free, and real); any
+// other is answered by the caller's stand-in (opts.stub), not cached, and its tokens are estimated (see estimate()).
+export const STUB = process.env.TEXT_STUB === '1';
+// price per million tokens (GPT-5.5): input, cached input, output (reasoning is billed as output)
+export const PRICE = { in: +(process.env.PRICE_IN || 5), cached: +(process.env.PRICE_CACHED || 0.5), out: +(process.env.PRICE_OUT || 30) };
+export const dollars = (t) => ((t.prompt - t.cachedPrompt) * PRICE.in + t.cachedPrompt * PRICE.cached + t.completion * PRICE.out) / 1e6;
+
+if (!STUB && process.env.HTTPS_PROXY && process.env.NODE_USE_ENV_PROXY !== '1') {
   const ca = process.env.NODE_EXTRA_CA_CERTS || (fs.existsSync('/root/.ccr/ca-bundle.crt') ? '/root/.ccr/ca-bundle.crt' : undefined);
   const r = spawnSync(process.execPath, ['--no-warnings', ...process.execArgv, ...process.argv.slice(1)], { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1', ...(ca ? { NODE_EXTRA_CA_CERTS: ca } : {}) } });
   process.exit(r.status ?? 1);
@@ -22,11 +29,34 @@ const LOG = path.join(CACHE, 'tokens.jsonl');
 export const usage = { requests: 0, cached: 0, prompt: 0, promptCached: 0, completion: 0, reasoning: 0 };
 
 // chat(label, messages, schema, opts) -> parsed JSON object
-export async function chat(label, messages, schema, { effort = 'medium', retries = 4 } = {}) {
+// a stubbed call's likely tokens: text at about 3.7 characters a token, a 1366 × 768 screenshot at detail "high"
+// (6 tiles of 512 px) 1,105; the system message is cached after the first call that sends it (when 1,024 tokens or
+// more); output from opts.estOut (measured on the pilot's real calls).
+export const estimate = { calls: 0, prompt: 0, cachedPrompt: 0, completion: 0, byKind: {} };
+const seenPrefix = new Set();
+function estimateCall(label, messages, estOut) {
+  let prompt = 0, cached = 0;
+  for (const m of messages) {
+    const parts = typeof m.content === 'string' ? [{ type: 'text', text: m.content }] : m.content;
+    let t = 0; for (const p of parts) t += p.type === 'text' ? Math.ceil(p.text.length / 3.7) : 1105;
+    if (m.role === 'system') { const k = crypto.createHash('sha1').update(String(m.content)).digest('hex'); if (t >= 1024 && seenPrefix.has(k)) cached += t; seenPrefix.add(k); }
+    prompt += t;
+  }
+  const kind = label.split(':')[0];
+  const e = (estimate.byKind[kind] ||= { calls: 0, prompt: 0, cachedPrompt: 0, completion: 0 });
+  for (const x of [estimate, e]) { x.calls++; x.prompt += prompt; x.cachedPrompt += cached; x.completion += estOut || 0; }
+}
+
+export async function chat(label, messages, schema, { effort = 'medium', retries = 4, stub = null, estOut = 0 } = {}) {
   const body = { model: MODEL, messages, reasoning_effort: effort, response_format: { type: 'json_schema', json_schema: { name: schema.name, strict: true, schema: schema.schema } } };
   const hash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
   const file = path.join(CACHE, `${hash}.json`);
   if (fs.existsSync(file)) { usage.cached++; return JSON.parse(fs.readFileSync(file, 'utf8')).parsed; }
+  if (STUB) {
+    if (!stub) throw new Error(`${label}: dry run, and no stand-in for this request`);
+    if (process.env.TEXT_STUB_DUMP) { fs.mkdirSync(process.env.TEXT_STUB_DUMP, { recursive: true }); fs.writeFileSync(path.join(process.env.TEXT_STUB_DUMP, `${label.replace(/[^\w.-]+/g, '_')}.json`), JSON.stringify(body)); }
+    estimateCall(label, messages, estOut); return stub();
+  }
   let lastErr;
   for (let a = 0; a <= retries; a++) {
     try {

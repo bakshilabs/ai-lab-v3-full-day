@@ -1,5 +1,6 @@
 // Pilot capture: the first 15 minutes of Eco Town for ages 8–12 (the welcome, the start screen, the intro, mission 1
-// "Land" in Florence's town, the "your turn" step and Florence's invitation to the Travel mission), step by step.
+// "Land" in Florence's town, the split screen and its toggle, the "your turn" step and Florence's invitation to the Travel
+// mission), step by step.
 // At each step it saves a screenshot, the text visible on screen, text that appeared (and maybe went) since the last
 // step, and every line spoken or floated. Facts for the intent pass; it writes no wording.
 // Usage: node tools/text/pilot/capture.cjs <baseUrl> <outDir> [width height]
@@ -23,15 +24,17 @@ fs.mkdirSync(out, { recursive: true });
   const shot = async (name, note = '') => {
     await p.waitForTimeout(600);
     const file = `${String(++n).padStart(2, '0')}-${name}.png`;
-    await p.screenshot({ path: `${out}/${file}` });
+    // the text is read just before the picture: a screenshot in software 3D takes a second or two, and a short caption
+    // (2.6 s) would be gone if it were read afterwards
     const st = await p.evaluate(([s0, k0]) => {
       const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
       const labels = [...document.querySelectorAll('[aria-label],[title]')].filter(vis).map((el) => ({ tag: el.tagName.toLowerCase(), id: el.id || el.closest('[id]')?.id || '', aria: el.getAttribute('aria-label') || '', title: el.getAttribute('title') || '' }));
-      // visible text by its panel (#florence, #modal, #dock, #strip, #build, #alert, #toast …)
-      const panels = [...document.querySelectorAll('body [id]')].filter((el) => el.id && vis(el) && el.innerText && !el.parentElement.closest('[id]:not(body)')).map((el) => ({ id: el.id, text: el.innerText.trim() })).filter((x) => x.text);
+      // visible text by element with an id (#florence, #modal, #dock, #card, #build, #alert, #toast …), innermost first
+      const panels = [...document.querySelectorAll('body [id]')].filter((el) => el.id && el.id !== 'app' && vis(el) && el.innerText?.trim()).map((el) => ({ id: el.id, text: el.innerText.trim().slice(0, 3000) })).sort((a, b) => a.text.length - b.text.length);
       return { visible: (document.body.innerText || '').split('\n').map((x) => x.trim()).filter(Boolean), panels, labels,
         appeared: window.__seen.slice(s0).map((x) => x.l), said: window.__sayLog.slice(k0), seenLen: window.__seen.length, saidLen: window.__sayLog.length };
     }, [seenAt, saidAt]);
+    await p.screenshot({ path: `${out}/${file}` });
     seenAt = st.seenLen; saidAt = st.saidLen; delete st.seenLen; delete st.saidLen;
     steps.push({ n, name, file, note, url: p.url(), ...st });
     fs.writeFileSync(`${out}/steps.json`, JSON.stringify(steps, null, 1));
@@ -42,7 +45,14 @@ fs.mkdirSync(out, { recursive: true });
   // story films: a picture of the film, then Skip (their script is the films' own and is not rewritten in this pilot)
   await p.addLocatorHandler(p.locator('#episode [data-skip]'), async (skip) => { await p.waitForTimeout(6000); await shot('story-film', 'a story film (episodes.js), skipped after 6 s'); await skip.click(); });
 
-  // 1. the welcome (start page → "Start the day")
+  // 1. the welcome (start page → "Start the day"). WELCOME_FROM=<earlier capture dir> reuses its welcome screens (the
+  //    welcome's code is unchanged), so the intent requests for them are byte-identical and come from the cache.
+  const from = process.env.WELCOME_FROM;
+  if (from) {
+    for (const st of JSON.parse(fs.readFileSync(`${from}/steps.json`, 'utf8')).filter((x) => /^welcome/.test(x.name))) { fs.copyFileSync(`${from}/${st.file}`, `${out}/${st.file}`); steps.push(st); n = st.n; }
+    fs.writeFileSync(`${out}/steps.json`, JSON.stringify(steps, null, 1)); console.log(`reused ${steps.length} welcome screens from ${from}`);
+    await p.goto(base + 'index.html?part=town'); await p.evaluate(() => { try { localStorage.setItem('ecotown.welcome', '1'); } catch { /* */ } }); await p.goto(base + 'index.html?part=town');
+  } else {
   await p.goto(base + 'index.html?welcome=1');
   await p.waitForSelector('[data-play]', { timeout: 120000 }); await shot('welcome-card', 'the welcome, before the film');
   await p.click('[data-play]');
@@ -55,6 +65,7 @@ fs.mkdirSync(out, { recursive: true });
   }
   await p.waitForSelector('[data-start]', { timeout: 30000 }); await shot('welcome-guide', 'how to get around each part');
   await p.click('[data-start]');
+  }
 
   // 2. the game's start screen: age, then the town's name
   await p.waitForSelector('[data-band="junior"]', { timeout: 120000 }); await shot('start', 'the game’s start screen');
@@ -70,7 +81,8 @@ fs.mkdirSync(out, { recursive: true });
   }
 
   // 4. mission 1, Land, in Florence's town
-  await click('#modal:not(.hide) [data-act="go"]', 150000).catch(async () => { await shot('no-brief-card'); throw new Error('no brief card'); });
+  await p.waitForSelector('#modal:not(.hide) [data-act="go"]', { state: 'visible', timeout: 150000 }).catch(async () => { await shot('no-brief-card'); throw new Error('no brief card'); });
+  await shot('mission-brief', 'the mission’s brief card'); await click('#modal:not(.hide) [data-act="go"]');
   await p.waitForTimeout(800); await p.waitForSelector('#dock:not(.hide) [data-actions] h3', { timeout: 60000 });
   await shot('mission-instruct', 'the instruction tray, as it opens');
   await click(A + '[data-m="cards"]'); await shot('mission-cards', 'the instruction cards');
@@ -92,9 +104,19 @@ fs.mkdirSync(out, { recursive: true });
 
   // 5. back in the child's town: both towns, Florence's advice, the "your turn" step
   await p.waitForSelector('#build [data-cat]', { timeout: 90000 });
-  await p.waitForTimeout(1500); await shot('both-towns', 'both towns after the mission (to be a split screen)');
-  await p.waitForSelector('#towns [data-tv="mine"][aria-pressed="true"]', { timeout: 15000 }).catch(() => {});
-  await p.waitForTimeout(1500); await shot('your-turn', 'Land is open in the child’s town');
+  // the split screen opens by itself about a second after the mission, with a caption (the compare moment)
+  await p.waitForSelector('#towns[aria-pressed="true"]', { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(1200); await shot('compare-split', 'the split screen opens by itself after the mission: Florence’s town and the child’s');
+  // a tap on Florence's pane (building happens only in the child's own town)
+  const herPane = await p.evaluate(() => { const c = document.querySelector('#app canvas, canvas'); const r = c.getBoundingClientRect(); const pts = [[0.22, 0.45], [0.3, 0.55], [0.18, 0.6], [0.35, 0.4]]; for (const [fx, fy] of pts) { const x = r.left + fx * r.width, y = r.top + fy * r.height; if (document.elementFromPoint(x, y) === c) return { x, y }; } return null; });
+  if (herPane) { await p.mouse.click(herPane.x, herPane.y); await p.waitForTimeout(500); await shot('tap-florences-pane', 'the child taps Florence’s half of the screen'); }
+  // the toggle: hide Florence's town, then show it again, then hide it to build (as a child who has looked would)
+  if (await p.$('#towns:not(.hide)')) {
+    await p.click('#towns'); await p.waitForTimeout(1500); await shot('toggle-hidden', 'the child presses the toggle: Florence’s town is hidden');
+    await p.click('#towns'); await p.waitForTimeout(1500); await shot('toggle-shown', 'the child presses the toggle again: Florence’s town shows beside theirs');
+    await p.click('#towns'); await p.waitForTimeout(1200);
+  }
+  await p.waitForTimeout(1000); await shot('your-turn', 'Land is open in the child’s town');
   const town = () => p.evaluate(() => JSON.stringify([...window.__eco.app.G.cells].filter(([, c]) => c.item || c.mark).sort()));
   const tapPoint = (k) => p.evaluate((key) => { const { app } = window.__eco; const v = app.world.tileTop(key).project(app.stage.camera); const r = app.stage.renderer.domElement.getBoundingClientRect(); const x = r.left + ((v.x + 1) / 2) * r.width, y = r.top + ((1 - v.y) / 2) * r.height; return document.elementFromPoint(x, y) === app.stage.renderer.domElement ? { x, y } : null; }, k);
   for (let i = 0, taps = 0; i < 30; i++) {

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, csvLine, rel, tokensOf, VERSION_LABEL } from '../lib.mjs';
 import { checkLine } from '../rewrite.mjs';
-import { chat, pool, usage, tokenTotals } from '../openai.mjs';
+import { chat, pool, usage, tokenTotals, STUB, estimate, dollars, PRICE } from '../openai.mjs';
 import { buildMoments } from './moments.mjs';
 
 const [capDir, outCsv = 'docs/text/pilot-intent-junior-first15.csv', reviewHtml = path.join(capDir, '..', 'pilot-review.html')] = process.argv.slice(2);
@@ -27,6 +27,17 @@ const placeholders = (m) => tokensOf(m.row.text).filter((t) => t.startsWith('{')
 const kindOf = (m) => { const l = m.row.text.replace(/\{[^{}]*\}/g, 'x').replace(/<[^>]+>/g, ''); return l.length <= 32 && !/[.!?]$/.test(l.trim()) ? 'a short label or button' : 'a sentence or more'; };
 const limitOf = (m) => { const lo = m.row.text.replace(/\{[^{}]*\}/g, '').replace(/<\/?[a-z]+(#\d+)?>/g, '').length; return kindOf(m) === 'a short label or button' ? Math.max(lo + 8, Math.round(lo * 1.35)) : Math.round(lo * 1.6) + 15; };
 const seenAs = (m) => [m.onScreen ? `on screen${m.panel ? ` (in the element #${m.panel})` : ''}` : '', m.spokenBy ? `spoken aloud (voice: ${m.spokenBy})` : '', m.asLabel ? 'a screen-reader label or tooltip' : ''].filter(Boolean).join(', ');
+
+// ---- dry run (TEXT_STUB=1): stand-ins for OpenAI's answers, to prove the chain end to end. They are not wording: an
+// intent is "[dry run]"; a written message is "[dry run]" first (it fails the checks, which tests the send-back), then
+// the line's current text (it passes, which tests the rest); the judge makes up a mismatch for every third message in
+// round 1 (which tests the rewrite with the child's misunderstanding). Nothing from a dry run is cached.
+const D = '[dry run]';
+function stubIntent(ms, st) {
+  return { screen: D, flow_issues: st.n % 5 === 0 ? [`${D} a made-up flow issue, to test the page`] : [], messages: ms.map((m, k) => ({ id: m.id, trigger: D, where: D, who: m.spokenBy === 'helper' ? 'Florence' : 'interface', spoken: !!m.spokenBy, child_just_did: D, screen_shows: D,
+    purpose: D, understand: D, do_next: D, risk: D, needed: k % 9 === 8 ? 'drop' : k % 7 === 6 ? 'merge' : 'keep', merge_with: k % 7 === 6 ? ms[0].id : '', facts: [] })) };
+}
+function stubText(ms, item) { const m = ms.find((x) => x.id === item.id); return item.problems_with_it || item.a_child_read_it_as ? m.row.text : D; }
 
 let stopped = null; // set when OpenAI refuses a request (the cache keeps everything done so far)
 
@@ -50,7 +61,7 @@ async function intents() {
     const prev = steps[st.n - 2];
     if (!ms.length) { journey.push(`${st.file}: ${st.note} (no new message)`); continue; }
     const items = ms.map((m) => ({ id: m.id, age: AGE[m.row.version], seen_as: seenAs(m), also_on_later_screens: m.also.map((n) => steps[n - 1].file), placeholders: placeholders(m),
-      current_wording_facts_only: m.row.text, defined_in: `${rel(m.definition.file)} line ${m.definition.line} (${m.definition.keypath})`, definition_code: m.definition.code, shown_by_code: m.usedAt.map((u) => ({ at: `${rel(u.file)} line ${u.line}`, code: u.code })) }));
+      current_wording_facts_only: m.row.text, defined_in: `${rel(m.definition.file)} line ${m.definition.line} (${m.definition.keypath})`, definition_code: m.definition.code, shown_by_code: m.usedAt.map((u) => ({ at: `${rel(u.file)} line ${u.line}`, code: u.code })), ...(m.twinCode.length ? { same_words_also_defined_at: m.twinCode } : {}), ...(m.forced ? { note: 'not found in the screen text at capture time; the capture triggered it at this moment (it may be a short caption)' } : {}) }));
     const content = [
       { type: 'text', text: `TASK: understand one moment of the child’s journey and the messages in it.\n\nThe journey so far (screens in order):\n${journey.join('\n') || '(this is the first screen)'}\n\nNow: screenshot ${st.file} (${st.note}). ${prev ? `The screenshot before it, ${prev.file}, shows the previous moment.` : ''}` },
       ...(prev ? [img(prev.file)] : []), img(st.file),
@@ -58,7 +69,7 @@ async function intents() {
       { type: 'text', text: `Messages that first appear at this moment (an 8–12 child is playing):\n${JSON.stringify(items, null, 1)}\n\nFor each message, read its code and the screenshots, and work out its moment and intent in your own words. Then list any flow issues on this screen.` },
     ];
     let r;
-    try { r = await chat(`pilot-intent:${st.file}`, [{ role: 'system', content: SYSTEM }, { role: 'user', content }], INTENT_SCHEMA, { effort: 'medium' }); }
+    try { r = await chat(`pilot-intent:${st.file}`, [{ role: 'system', content: SYSTEM }, { role: 'user', content }], INTENT_SCHEMA, { effort: 'medium', estOut: 150 + 425 * ms.length, stub: () => stubIntent(ms, st) }); }
     catch (e) { stopped = `${st.file}: ${e.message}`; console.log(`STOPPED at ${stopped}`); break; } // e.g. no API credit: keep what is done (cached; a re-run continues)
     for (const x of r.messages) out.set(x.id, x);
     for (const f of r.flow_issues) flow.push({ step: st.file, issue: f });
@@ -75,7 +86,7 @@ const brief = (m, it) => ({ id: m.id, age: AGE[m.row.version], kind: kindOf(m), 
   must_also: [kindOf(m) === 'a short label or button' ? 'it is a short label or button: no full stop' : null, /^[a-z]/.test(m.row.text) ? 'the game joins it into a longer sentence: start with a lower-case letter' : null].filter(Boolean) });
 async function write(ms, intent, feedback, label) {
   const items = ms.map((m) => ({ ...brief(m, intent.get(m.id)), ...(feedback.get(m.id) || {}) }));
-  const r = await chat(label, [{ role: 'system', content: SYSTEM }, { role: 'user', content: `TASK: write these messages for the game, each from its intent. You have not been given the old wording on purpose: write what this child needs at this moment, not a version of an old line. Say it in the fewest clear words. Every placeholder listed must appear exactly once as given (more than once only if needed). Stay within max_characters (not counting placeholders).\n\n${JSON.stringify(items, null, 1)}` }], WRITE_SCHEMA, { effort: 'medium' });
+  const r = await chat(label, [{ role: 'system', content: SYSTEM }, { role: 'user', content: `TASK: write these messages for the game, each from its intent. You have not been given the old wording on purpose: write what this child needs at this moment, not a version of an old line. Say it in the fewest clear words. Every placeholder listed must appear exactly once as given (more than once only if needed). Stay within max_characters (not counting placeholders).\n\n${JSON.stringify(items, null, 1)}` }], WRITE_SCHEMA, { effort: 'medium', estOut: 520 + 60 * ms.length, stub: () => ({ messages: items.map((i) => ({ id: i.id, text: stubText(ms, i) })) }) });
   return new Map(r.messages.map((x) => [x.id, x.text]));
 }
 
@@ -87,13 +98,13 @@ async function childTest(m, it, text, label) {
   const where = it.spoken && !m.onScreen ? 'You hear this said out loud' : `On the screen (${it.where}) it now says`;
   const r = await chat(label, [{ role: 'system', content: CHILD_SYSTEM }, { role: 'user', content: [
     { type: 'text', text: `You are ${age}. You have just: ${it.child_just_did}\n\nThis is your screen. (The words of the message below have just changed; if the picture shows different words in that spot, ignore them and read the new ones.)` }, img(steps[m.step - 1].file),
-    { type: 'text', text: `${where}:\n“${text.replace(/\{[^{}]+\}/g, (t) => (/\d|n\b|count/.test(t) ? '3' : '…'))}”${it.spoken && m.onScreen ? '\n(A voice also reads it out.)' : ''}\n\nWhat is this telling you? What will you do next?` }] }], CHILD_SCHEMA, { effort: 'low' });
+    { type: 'text', text: `${where}:\n“${text.replace(/\{[^{}]+\}/g, (t) => (/\d|n\b|count/.test(t) ? '3' : '…'))}”${it.spoken && m.onScreen ? '\n(A voice also reads it out.)' : ''}\n\nWhat is this telling you? What will you do next?` }] }], CHILD_SCHEMA, { effort: 'low', estOut: 220, stub: () => ({ telling_me: '[dry run: no child answer]', i_will: '[dry run]' }) });
   return r;
 }
 const JUDGE_SCHEMA = { name: 'judge', schema: { type: 'object', additionalProperties: false, required: ['results'], properties: { results: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'match', 'misunderstood'], properties: { id: STR, match: { type: 'boolean' }, misunderstood: { type: 'string', description: 'What the child got wrong or missed; empty when it matches' } } } } } } };
 async function judge(list, intent, label) {
   const items = list.map(({ m, text, child }) => ({ id: m.id, message: text, intent_understand: intent.get(m.id).understand, intent_do_next: intent.get(m.id).do_next, child_says_it_tells_me: child.telling_me, child_says_i_will: child.i_will }));
-  const r = await chat(label, [{ role: 'system', content: SYSTEM }, { role: 'user', content: `TASK: a child (a separate test, given only the screen and the new message) said what each message tells them and what they will do next. Compare that with the intent. It matches when the child understood the point and would do the intended next thing (or rightly does nothing, for a message that only informs). Be strict about the next action and the button or place; be relaxed about the child’s own wording.\n\n${JSON.stringify(items, null, 1)}` }], JUDGE_SCHEMA, { effort: 'low' });
+  const r = await chat(label, [{ role: 'system', content: SYSTEM }, { role: 'user', content: `TASK: a child (a separate test, given only the screen and the new message) said what each message tells them and what they will do next. Compare that with the intent. It matches when the child understood the point and would do the intended next thing (or rightly does nothing, for a message that only informs). Be strict about the next action and the button or place; be relaxed about the child’s own wording.\n\n${JSON.stringify(items, null, 1)}` }], JUDGE_SCHEMA, { effort: 'low', estOut: 120 + 60 * list.length, stub: () => ({ results: list.map((x, k) => ({ id: x.m.id, match: !(/:r1$/.test(label) && k % 3 === 0), misunderstood: /:r1$/.test(label) && k % 3 === 0 ? '[dry run: a made-up mismatch, to test the rewrite loop]' : '' })) }) });
   return new Map(r.results.map((x) => [x.id, x]));
 }
 
@@ -134,8 +145,8 @@ const COLS = ['ID', 'Step', 'Screenshot', 'Area', 'Version', 'File', 'Line', 'Wh
 const rows = moments.filter((m) => intent.has(m.id)).map((m) => { const it = intent.get(m.id); const r = results.get(m.id);
   return [m.id, m.step, steps[m.step - 1].file, m.row.area, VERSION_LABEL[m.row.version], m.row.file, m.row.line, m.row.keypath, it.trigger, it.where, it.who, it.spoken ? 'yes' : 'no', it.child_just_did, it.screen_shows, it.purpose, it.understand, it.do_next, it.risk, it.needed, it.merge_with, it.facts.join(' · '), m.row.text,
     r?.text ?? '', r ? (r.problems.length ? `FAILED: ${r.problems.join('; ')}` : 'pass') : it.needed === 'drop' ? 'not written: OpenAI says drop it' : '', r?.child.telling_me ?? '', r?.child.i_will ?? '', r ? (r.match ? 'yes' : 'no') : '', r?.misunderstood ?? '', r?.rounds ?? '', m.twins.join(' ')]; });
-fs.mkdirSync(path.dirname(path.join(ROOT, outCsv)), { recursive: true });
-fs.writeFileSync(path.join(ROOT, outCsv), [csvLine(COLS), ...rows.map(csvLine)].join('\n') + '\n');
+fs.mkdirSync(path.dirname(path.resolve(ROOT, outCsv)), { recursive: true }); fs.mkdirSync(path.dirname(path.resolve(reviewHtml)), { recursive: true });
+fs.writeFileSync(path.resolve(ROOT, outCsv), [csvLine(COLS), ...rows.map(csvLine)].join('\n') + '\n');
 fs.writeFileSync(path.join(capDir, 'pilot-results.json'), JSON.stringify({ intent: Object.fromEntries(intent), results: Object.fromEntries(results), flow, unmatched }, null, 1));
 
 const h = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -172,8 +183,15 @@ dl{display:grid;grid-template-columns:8.5em 1fr;gap:2px 10px;margin:8px 0;font-s
 @media (max-width:900px){.grid,.txt{grid-template-columns:1fr}figure{position:static}dl{grid-template-columns:1fr}}
 </style></head><body><main><h1>Pilot: the first 15 minutes of Eco Town, ages 8–12</h1>
 <p class="sum">Every message the child meets, in order: OpenAI’s intent, the old message, the new message written from the intent, and a separate OpenAI “child” (age 9) saying what it understood and what it would do next. ${results.size} messages written, ${nOk} matched the intent; ${[...intent.values()].filter((x) => x.needed === 'drop').length} OpenAI would drop; ${flow.length} flow issues flagged. Nothing has been applied to the game. Screenshots show the old floating-islands layout and the old wording.</p>
+${STUB ? `<p class="flow"><b>DRY RUN: no OpenAI call was made.</b> Intents and child answers marked “[dry run]” are stand-ins, and each “new” message is the line’s current text standing in for OpenAI’s, to test the pipeline end to end. Real intents shown here came from the cache of earlier calls.</p>` : ''}
 ${stopped ? `<p class="flow"><b>This run stopped early.</b> OpenAI refused a request (${h(stopped)}). Steps after that have no intent or new message yet; re-running the same command continues from the cache.</p>` : ''}
 ${sections}</main></body></html>`);
 console.log(`messages: ${moments.length}; intents: ${intent.size}; written: ${results.size}; matched: ${nOk}; drop: ${[...intent.values()].filter((x) => x.needed === 'drop').length}; flow issues: ${flow.length}`);
-console.log('this run:', usage, '\nall runs:', tokenTotals());
+console.log('this run (real calls):', usage, '\nall runs:', tokenTotals());
+if (STUB) {
+  const t = { prompt: estimate.prompt, cachedPrompt: estimate.cachedPrompt, completion: estimate.completion };
+  console.log(`DRY RUN: ${usage.cached} requests answered from the cache (free); ${estimate.calls} stubbed. Estimated cost of the stubbed calls at $${PRICE.in}/$${PRICE.cached}/$${PRICE.out} per million (in/cached/out): $${dollars(t).toFixed(2)}`);
+  for (const [k, e] of Object.entries(estimate.byKind)) console.log(`  ${k}: ${e.calls} calls, ~${e.prompt} prompt (${e.cachedPrompt} cached), ~${e.completion} out: $${dollars(e).toFixed(2)}`);
+  fs.writeFileSync(path.join(capDir, 'dry-run-estimate.json'), JSON.stringify({ price: PRICE, cacheHits: usage.cached, ...estimate, dollars: dollars(t) }, null, 1));
+}
 console.log(`wrote ${outCsv} and ${reviewHtml}${stopped ? ` (STOPPED EARLY: ${stopped})` : ''}`);
