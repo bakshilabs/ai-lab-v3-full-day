@@ -40,12 +40,13 @@ export function createTwoTowns(app, T) {
     }
     w.setLights(lit);
   };
-  // the two labels over the islands ("Florence's town", "Your town"), at the far edge so they never sit on a build
-  const top = (v) => v.clone().add(CENTRE).add(new THREE.Vector3(Math.sin(HOME_YAW) * -38, 24, Math.cos(HOME_YAW) * -38));
+  // the two labels ("Florence's town", "Your town"), under each island's near edge, so they never sit on a build or under
+  // the good-spot and "yours" pins over the tiles
+  const top = (v) => v.clone().add(CENTRE).add(new THREE.Vector3(Math.sin(HOME_YAW) * 34, -30, Math.cos(HOME_YAW) * 34));
   tt.labels = (on = true) => {
     ui.labels.clear('townlbl'); if (!on || !copy) return;
     const mainIs = tt.role === 'florence' ? 'mine' : 'florence'; const copyIs = tt.role;
-    const lbl = (who, v) => ({ at: top(v), html: `<b>${who === 'florence' ? '🤖' : '🏡'}</b> ${esc(tt.names[who === 'florence' ? 'florence' : 'mine'])}`, cls: who === 'florence' ? 'hers' : 'mine' });
+    const lbl = (who, v) => ({ at: top(v), html: `<b>${who === 'florence' ? '🤖' : '🏡'}</b> ${esc(tt.names[who === 'florence' ? 'florence' : 'mine'])}`, cls: who === 'florence' ? 'tl-hers' : 'tl-mine' }) // (not 'mine': that class is the "yours is here" pin, cleared with the build highlight);
     ui.labels.pins('townlbl', [lbl(mainIs, new THREE.Vector3()), lbl(copyIs === 'florence' ? 'florence' : 'mine', at())]);
   };
   // the camera: 'mine' (the player's island), 'florence' (hers), 'both'. Only while building (role 'florence').
@@ -62,7 +63,7 @@ export function createTwoTowns(app, T) {
     rig.pan = { x: [lo(LEFT_AT.x) - 45, hi(LEFT_AT.x) + 45], z: [lo(LEFT_AT.z) - 36, hi(LEFT_AT.z) + 32] }; rig.wide = 2.8;
     if (portrait) {
       const { fh } = rig.freeAspect(); const ty = Math.tan(11 * DEG) * fh;
-      return rig.toSky({ target: mid, dist: ((GAP + 120) / 2) / ty * 0.86, pitch: 52 * DEG, yaw: 50 * DEG }, d);
+      return rig.toSky({ target: mid, dist: ((GAP + 120) / 2) / ty * 1.15, pitch: 52 * DEG, yaw: 50 * DEG }, d);
     }
     return rig.toSky({ target: mid, dist: rig.frameDist(GAP + 112), pitch: 34 * DEG, yaw: HOME_YAW }, d);
   };

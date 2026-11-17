@@ -90,7 +90,14 @@ build in mine, then you build yours"; then the AI Lab door, with a button that s
 - Challenges stay hidden (`CHALLENGES_ON = false`). The passport ranks are rescaled for the points a child can earn
   without challenges (35), so a child who finishes Eco Town well can reach Chief Planner.
 
-## 6. Decisions the owner should check
+## 6. Wording
+
+Every new or changed line the player sees is a plain working version, listed in `docs/two-towns-new-text.md` for the
+OpenAI wording pass (owner's rule, 17 Nov 2026). Quoted lines in this note describe what a line is for, not its final
+words. The leader guide (`games/ecotown/LAB-GUIDE.md`) still describes the old flow; what it must now say is in the same
+list.
+
+## 7. Decisions the owner should check
 
 - The size of the "your turn" steps (table above). Larger steps make each level longer; smaller ones risk children
   rushing from mission to mission.
