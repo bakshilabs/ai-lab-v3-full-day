@@ -79,7 +79,7 @@ test('every episode is recorded: video, poster and captions listed in the index,
     assert.equal(info.mission, ep.mission); assert.equal(info.kind, ep.kind); assert.equal(info.title, ep.title);
     for (const f of [info.mp4, info.poster, info.vtt]) assert.ok(fs.existsSync(path.join(dir, f)), `${ep.id}: ${f} exists`);
     assert.ok(info.duration >= 25 && info.duration <= 46, `${ep.id}: ${info.duration} s`);
-    assert.ok(info.bytes === fs.statSync(path.join(dir, info.mp4)).size && info.bytes <= 1.6e6, `${ep.id}: ${info.bytes} bytes`);
+    assert.ok(info.bytes === fs.statSync(path.join(dir, info.mp4)).size && info.bytes <= 8.5e6, `${ep.id}: ${info.bytes} bytes`); // 1080p at about 1.6 Mbit/s (was 1.6 MB at 960 × 540)
     // captions: every spoken line, in order, in the index (the viewer) and in the WebVTT file, timed from the recorded voices
     const ls = lines(ep); assert.deepEqual(info.cues.map((c) => c.text), ls.map((b) => b.say), `${ep.id}: captions match the script`);
     const file = fs.readFileSync(path.join(dir, info.vtt), 'utf8'); assert.ok(file.startsWith('WEBVTT')); for (const b of ls) assert.ok(file.includes(b.say), `${ep.id}: caption file has "${b.say}"`);

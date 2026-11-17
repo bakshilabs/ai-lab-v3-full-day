@@ -1,6 +1,12 @@
 // Records the story episodes (js/game/episodes.js): voices, pictures, music and sound, captions, poster and index.
 // Usage: node tests/video/episodes.mjs <baseUrl> [episode ids…] --work <scratch dir> --kokoro <dir>
-//          [--force] [--stills 2,8,14|shots] [--remix] [--tier high] [--w 960 --h 540] [--kb 1450]
+//          [--force] [--stills 2,8,14|shots] [--remix] [--tier high] [--w 960 --h 540] [--kb 1450 | --vk 3000] [--ss 2] [--png]
+//   --w/--h     the film's size. The page is always laid out at 960 × 540 (so labels and cards keep their size in the
+//               picture) and drawn at w/960 times that (tests/video/hires.mjs)
+//   --ss        supersampling: draw at ss × the film's size and scale down (smoother voxel edges; ss² slower)
+//   --kb        target file size in KB (sets the video bitrate); --vk sets the video bitrate in kbit/s instead
+//   --png       capture frames as PNG instead of JPEG (quality 95)
+//   --reencode  only encode the final file again (another --vk/--kb) from the pictures and sound kept in --work
 //   <baseUrl>   a static server for games/ecotown/game, e.g. http://localhost:8771/
 //   --work      a scratch folder OUTSIDE the repository (voice clips, intermediate video, audio stems)
 //   --kokoro    folder with Kokoro's model.onnx and voices file (see voice/README.md); without it the voices
@@ -12,13 +18,14 @@
 // One episode is about 35 s of film: in software 3D that is roughly 12 to 20 minutes of rendering.
 import { createRequire } from 'module'; import fs from 'fs'; import path from 'path'; import { spawn, spawnSync } from 'child_process';
 import { EPISODES, CAST, schedule, vtt, sayText } from '../../js/game/episodes.js';
+import { hiresPage } from './hires.mjs';
 const require = createRequire(import.meta.url);
 let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
 const args = process.argv.slice(2); const flag = (k) => args.includes('--' + k); const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
-const VAL = new Set(['work', 'kokoro', 'stills', 'tier', 'w', 'h', 'kb', 'fps']);
+const VAL = new Set(['work', 'kokoro', 'stills', 'tier', 'w', 'h', 'kb', 'vk', 'ss', 'fps']);
 const pos = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1].startsWith('--') && VAL.has(args[i - 1].slice(2))));
 const base = pos[0] || 'http://localhost:8771/'; const ids = pos.slice(1).length ? pos.slice(1) : EPISODES.map((e) => e.id);
-const FPS = +opt('fps', 24), W = +opt('w', 960), H = +opt('h', 540), TIER = opt('tier', 'high'), KB = +opt('kb', 1450);
+const FPS = +opt('fps', 24), W = +opt('w', 960), H = +opt('h', 540), TIER = opt('tier', 'high'), KB = +opt('kb', 1450), SS = +opt('ss', 1), PNG = flag('png');
 const here = path.dirname(new URL(import.meta.url).pathname); const game = path.join(here, '..', '..');
 const out = path.join(game, 'videos', 'episodes'); fs.mkdirSync(out, { recursive: true });
 const work = opt('work'); if (!work) { console.error('Give a scratch folder: --work <dir>'); process.exit(1); }
@@ -47,27 +54,34 @@ for (const id of ids) {
   const cues = schedule(ep, durs).cues;
   if (!stills) { const missing = cues.filter((c) => !fs.existsSync(path.join(work, 'voice', c.key + '.wav'))); if (missing.length) { console.error(`${id}: ${missing.length} lines have no recorded voice (run with --kokoro). Not rendered.`); continue; } }
   if (flag('remix')) { remix(id, ep, cues); continue; }
-  const p = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  if (flag('reencode')) { reencode(id); continue; }
+  const p = await hiresPage(b, { w: W, ss: SS });
   await p.addInitScript(() => localStorage.setItem('ecotown.prefs', JSON.stringify({ quality: 'high', reduce: false, readAloud: false })));
   p.on('pageerror', (e) => console.log('[pageerror]', id, e.message)); p.on('console', (m) => m.type() === 'error' && !/404/.test(m.text()) && console.log('[console]', id, m.text()));
   await p.goto(`${base}index.html?episode=${id}&tier=${TIER}`); await p.waitForFunction(() => window.__ready === true || window.__error, null, { timeout: 240000 });
   const dur = await p.evaluate(() => window.__duration); const t0 = Date.now();
-  const frame = async (t) => { await p.evaluate((t) => { window.__render(t); return new Promise((r) => requestAnimationFrame(() => r())); }, t); return p.screenshot({ type: 'jpeg', quality: 93 }); };
+  const frame = async (t) => { await p.evaluate((t) => { window.__render(t); return new Promise((r) => requestAnimationFrame(() => r())); }, t); return PNG ? p.screenshot({ type: 'png' }) : p.screenshot({ type: 'jpeg', quality: 95 }); };
   if (stills) {
     const ts = stills === 'shots' ? (await p.evaluate(() => window.__timeline())).shots.flatMap(([a, z]) => [a + Math.min(1.2, (z - a) * 0.4), z - 0.25]) : stills.split(',').map(Number);
-    for (const t of ts) { fs.writeFileSync(path.join(work, 'stills', `${id}-${String(t.toFixed(1)).padStart(5, '0')}.jpg`), await frame(Math.min(t, dur - 0.05))); }
+    for (const t of ts) { fs.writeFileSync(path.join(work, 'stills', `${id}-${String(t.toFixed(1)).padStart(5, '0')}.${PNG ? 'png' : 'jpg'}`), await frame(Math.min(t, dur - 0.05))); }
     console.log('stills', id, ts.map((t) => t.toFixed(1)).join(' '), `(${dur.toFixed(1)} s film, ${((Date.now() - t0) / 1000).toFixed(0)} s)`); await p.close(); continue;
   }
-  // ---------- 2. pictures: every frame, piped to a near-lossless intermediate file
-  const n = Math.round(dur * FPS); const raw = path.join(work, `${id}.video.mp4`); const posterAt = Math.round(2.2 * FPS);
-  const enc = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-vf', `scale=${W}:${H}:flags=lanczos,format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', raw], { stdio: ['pipe', 'inherit', 'inherit'] });
-  for (let i = 0; i < n; i++) {
-    const buf = await frame(i / FPS);
-    if (!enc.stdin.write(buf)) await new Promise((r) => enc.stdin.once('drain', r));
-    if (i === posterAt) fs.writeFileSync(path.join(work, `${id}.poster.jpg`), buf);
+  // ---------- 2. pictures: every frame saved into <work>/frames/<id>/ (so a stopped render carries on where it
+  // stopped), then made into a near-lossless intermediate file, which is checked by decoding it in full
+  const n = Math.round(dur * FPS); const raw = path.join(work, `${id}.video.mp4`); const posterAt = Math.round(2.2 * FPS); const ext = PNG ? 'png' : 'jpg';
+  const posterRaw = path.join(work, `${id}.poster.${ext}`); const fdir = path.join(work, 'frames', id); fs.mkdirSync(fdir, { recursive: true });
+  const fname = (i) => path.join(fdir, `${String(i).padStart(5, '0')}.${ext}`);
+  let first = 0; while (first < n && fs.existsSync(fname(first))) first++;
+  if (first) { console.log(id, `carrying on from frame ${first}/${n}`); if (first < n) await frame((first - 1) / FPS); } // the frame before, so any running state is warm
+  for (let i = first; i < n; i++) {
+    const buf = await frame(i / FPS); fs.writeFileSync(fname(i) + '.tmp', buf); fs.renameSync(fname(i) + '.tmp', fname(i));
     if (i % 120 === 0) console.log(id, `frame ${i}/${n}`, `${((Date.now() - t0) / 1000).toFixed(0)} s`);
   }
-  enc.stdin.end(); await new Promise((r) => enc.on('close', r));
+  fs.copyFileSync(fname(Math.min(posterAt, n - 1)), posterRaw);
+  ff(['-framerate', String(FPS), '-i', path.join(fdir, `%05d.${ext}`), '-vf', `scale=${W}:${H}:flags=lanczos,format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', raw + '.tmp.mp4']);
+  const bad = spawnSync('ffmpeg', ['-v', 'error', '-i', raw + '.tmp.mp4', '-f', 'null', '-']).stderr.toString().trim();
+  if (bad || Math.abs(probe(raw + '.tmp.mp4') - n / FPS) > 0.1) { console.error(`${id}: the intermediate file did not decode cleanly; frames kept, not finished`); await p.close(); continue; }
+  fs.renameSync(raw + '.tmp.mp4', raw);
   const tl = await p.evaluate(() => window.__timeline());
   // ---------- 3. music and sound effects, rendered offline with the game's own chip engine (original tunes only)
   const b64 = await p.evaluate(async ({ dur, cues, sfx, music }) => {
@@ -100,20 +114,33 @@ for (const id of ids) {
   const wav = path.join(work, `${id}.audio.wav`);
   ff([...inputs, '-filter_complex', `${chains.join(';')};${names.join('')}amix=inputs=${names.length}:normalize=0:duration=longest,alimiter=limit=0.89,volume=0.62,apad=whole_dur=${dur.toFixed(3)}[m]`, '-map', '[m]', '-t', dur.toFixed(3), '-ar', '44100', '-ac', '1', wav]);
   // ---------- 5. final file: two-pass H.264 sized for slow networks, AAC, faststart
-  const AK = 64; const vk = Math.max(120, Math.floor((KB * 8) / dur - AK - 6)); const log = path.join(work, `${id}.2pass`);
+  const AK = 64; const vk = opt('vk') ? +opt('vk') : Math.max(120, Math.floor((KB * 8) / dur - AK - 6)); const log = path.join(work, `${id}.2pass`);
   const vf = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-profile:v', 'main', '-pix_fmt', 'yuv420p', '-b:v', `${vk}k`, '-maxrate', `${Math.round(vk * 1.8)}k`, '-bufsize', `${vk * 3}k`, '-g', String(FPS * 4), '-passlogfile', log];
   ff(['-i', raw, ...vf, '-pass', '1', '-an', '-f', 'mp4', '/dev/null']);
   ff(['-i', raw, '-i', wav, ...vf, '-pass', '2', '-c:a', 'aac', '-b:a', `${AK}k`, '-ac', '1', '-movflags', '+faststart', '-shortest', mp4]);
-  ff(['-i', path.join(work, `${id}.poster.jpg`), '-q:v', '5', path.join(out, `${id}.jpg`)]);
+  ff(['-i', posterRaw, '-vf', `scale=${W}:${H}:flags=lanczos`, '-q:v', '5', path.join(out, `${id}.jpg`)]);
   fs.writeFileSync(path.join(out, `${id}.vtt`), vtt(ep, durs));
   if (fs.existsSync(path.join(out, 'index.json'))) Object.assign(index.episodes, JSON.parse(fs.readFileSync(path.join(out, 'index.json'))).episodes); // another recorder may have added films meanwhile
   index.episodes[id] = { mission: ep.mission, kind: ep.kind, n: ep.n, title: ep.title, mp4: `${id}.mp4`, poster: `${id}.jpg`, vtt: `${id}.vtt`, duration: +probe(mp4).toFixed(2), bytes: fs.statSync(mp4).size,
     cues: tl.cues.map((c) => ({ t0: +c.t0.toFixed(2), t1: +(c.t1 + 0.25).toFixed(2), who: CAST[c.who].name, text: c.text })) };
   fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify({ episodes: Object.fromEntries(EPISODES.filter((e) => index.episodes[e.id]).map((e) => [e.id, index.episodes[e.id]])) }, null, 1));
+  if (spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-f', 'null', '-']).stderr.toString().trim()) console.error(`${id}: WARNING the finished film has decode errors`);
+  else fs.rmSync(fdir, { recursive: true, force: true });
   console.log('recorded', id, `${n} frames in ${((Date.now() - t0) / 1000).toFixed(0)} s`, `${dur.toFixed(1)} s`, `${(fs.statSync(mp4).size / 1024).toFixed(0)} KB`);
 }
 await b.close();
 
+// --reencode: the final two-pass encode again, from <work>/<id>.video.mp4 and <id>.audio.wav
+function reencode(id) {
+  const raw = path.join(work, `${id}.video.mp4`), wav = path.join(work, `${id}.audio.wav`), mp4 = path.join(out, `${id}.mp4`);
+  if (!fs.existsSync(raw) || !fs.existsSync(wav)) { console.log('reencode: nothing kept in --work for', id); return; }
+  const dur = probe(raw); const AK = 64; const vk = opt('vk') ? +opt('vk') : Math.max(120, Math.floor((KB * 8) / dur - AK - 6)); const log = path.join(work, `${id}.2pass`);
+  const vf = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-profile:v', 'main', '-pix_fmt', 'yuv420p', '-b:v', `${vk}k`, '-maxrate', `${Math.round(vk * 1.8)}k`, '-bufsize', `${vk * 3}k`, '-g', String(FPS * 4), '-passlogfile', log];
+  ff(['-i', raw, ...vf, '-pass', '1', '-an', '-f', 'mp4', '/dev/null']);
+  ff(['-i', raw, '-i', wav, ...vf, '-pass', '2', '-c:a', 'aac', '-b:a', `${AK}k`, '-ac', '1', '-movflags', '+faststart', '-shortest', mp4]);
+  const idx = JSON.parse(fs.readFileSync(path.join(out, 'index.json'))); idx.episodes[id].bytes = fs.statSync(mp4).size; idx.episodes[id].duration = +probe(mp4).toFixed(2); fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify(idx, null, 1));
+  console.log('re-encoded', id, `${vk} kbit/s`, `${(fs.statSync(mp4).size / 1024).toFixed(0)} KB`);
+}
 // --remix: mix the sound again from the stems in the work folder and put it under the finished pictures
 function remix(id, ep, cues) {
   const bedRaw = path.join(work, `${id}.bed.s16`), mp4 = path.join(out, `${id}.mp4`), wav = path.join(work, `${id}.audio.wav`), tmp = path.join(work, `${id}.remix.mp4`);
