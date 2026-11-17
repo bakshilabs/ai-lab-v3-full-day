@@ -38,3 +38,13 @@ test('the start page has a place for the welcome and the parts, and no inline sc
   assert.equal((html.match(/<script/g) || []).length, 1, 'one script tag, a file: the site forbids inline scripts');
   assert.doesNotMatch(html, /https?:\/\//, 'nothing loaded from outside');
 });
+
+test('the start page keeps its ways in, and its motion respects reduced motion', () => {
+  const html = readFileSync(new URL('../start.html', import.meta.url), 'utf8');
+  for (const href of ['index.html?welcome=1', 'trailer.html', 'leader.html']) assert.ok(html.includes(`href="${href}"`), href);
+  assert.match(html, /@media \(prefers-reduced-motion: reduce\)/); assert.match(html, /data-state="welcome"/);
+  assert.doesNotMatch(html, /\b(coins?|budget|money|price)\b/i, 'no money words');
+  const hub = readFileSync(new URL('../js/hub.js', import.meta.url), 'utf8'); const motion = readFileSync(new URL('../js/landing.js', import.meta.url), 'utf8');
+  assert.match(hub, /\$\{GAME\}\$\{p\.query\}/, 'each part links to its own query'); assert.match(motion, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(hub + motion, /https?:\/\//, 'nothing loaded from outside');
+});
