@@ -41,7 +41,7 @@ export function createTwoTowns(app, T) {
     w.setLights(lit);
   };
   // the two labels over the islands ("Florence's town", "Your town"), at the far edge so they never sit on a build
-  const top = (v) => v.clone().add(CENTRE).add(new THREE.Vector3(Math.sin(HOME_YAW) * -34, 15, Math.cos(HOME_YAW) * -34));
+  const top = (v) => v.clone().add(CENTRE).add(new THREE.Vector3(Math.sin(HOME_YAW) * -38, 24, Math.cos(HOME_YAW) * -38));
   tt.labels = (on = true) => {
     ui.labels.clear('townlbl'); if (!on || !copy) return;
     const mainIs = tt.role === 'florence' ? 'mine' : 'florence'; const copyIs = tt.role;
