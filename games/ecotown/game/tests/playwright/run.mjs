@@ -18,7 +18,7 @@ const LEVELS = [
   ['move', 'street', 'Make it easy for everyone to get to school.', 'Safe walking and cycling. Cars stay at the edge.'],
   ['homes', 'carbon', 'Build strong homes that will last for years.', 'Warm, low-carbon homes from timber and straw.'],
   ['food', 'nature', 'Grow as much food as we possibly can.', 'Enough food, and keep the hedges for the bees.'],
-  ['power', 'winter', 'Make enough clean, green power for every home.', 'Winter-night power with batteries, rain gardens and compost.'],
+  ['power', 'winter', 'Make enough clean, green power for every home.', 'Keep the lights on through a still winter night with batteries. Add rain gardens and compost.'],
   ['heart', 'walk', 'Put the new school right in the middle.', 'School within a 15-minute walk of every home.'],
 ];
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

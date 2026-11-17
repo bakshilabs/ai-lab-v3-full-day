@@ -37,7 +37,7 @@ export function checkTargets(targets, s) {
 }
 
 // one plain sentence per target, junior or senior wording
-const UNIT = { j: { food: 'baskets of food', power: 'units of power on a still winter night', families: 'families', carbon: 'tonnes of carbon' }, s: { food: 'food units', power: 'power units (still winter night)', families: 'households', carbon: 't embodied carbon' } };
+const UNIT = { j: { food: 'baskets of food', power: 'units of power on a dark winter night with no wind or sun', families: 'families', carbon: 'tonnes of carbon' }, s: { food: 'food units', power: 'power units (still winter night)', families: 'households', carbon: 't embodied carbon' } };
 export function targetLine(t, j) {
   const u = UNIT[j ? 'j' : 's'][t.id]; const want = t.dir === 'min' ? (j ? 'at least' : '≥') : t.strict ? (j ? 'under' : '<') : (j ? 'at most' : '≤');
   const need = t.need != null && t.need !== t.asked ? (j ? ` (the town needs ${t.need})` : `; the town needs ${t.need}`) : '';

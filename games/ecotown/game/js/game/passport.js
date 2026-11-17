@@ -2,7 +2,7 @@
 // whole club day has one goal. Pure (tests/passport.test.mjs). It reads the device record (localStorage
 // 'ecotown.best.v1'): dev[band] = best town { score, medal }, dev.me[band] = { stars, complete, catches },
 // dev.ch[band][id] = { medal, score }.
-import { CHALLENGES } from './challenges.js';
+import { CHALLENGES as ALL_CHALLENGES, CHALLENGES_ON } from './challenges.js';
 
 export const RANKS = [
   { at: 0, name: 'Helper', icon: '🌱' }, { at: 8, name: 'Builder', icon: '🧱' }, { at: 20, name: 'Planner', icon: '📐' },
@@ -12,14 +12,17 @@ export const MISSION_STARS = 19; // six missions × three stars, and the bias ch
 const TOWN_MEDAL = { bronze: 2, silver: 4, gold: 6 }; const CH_MEDAL = { bronze: 3, silver: 5, gold: 8 };
 const clamp = (v, hi) => Math.max(0, Math.min(hi, Number(v) || 0));
 
-export function passport(dev = {}, band = 'junior') {
+// opts.challenges: count the challenge towns (off while they are hidden, challenges.js CHALLENGES_ON): no points, medals,
+// list or tip for them
+export function passport(dev = {}, band = 'junior', { challenges = CHALLENGES_ON } = {}) {
+  const CHALLENGES = challenges ? ALL_CHALLENGES : [];
   const me = dev.me?.[band] || {}; const town = dev[band] || {}; const ch = dev.ch?.[band] || {};
   const won = CHALLENGES.filter((c) => ch[c.id]);
   const parts = [
     { id: 'stars', got: clamp(me.stars, MISSION_STARS), max: MISSION_STARS },
     { id: 'complete', got: me.complete ? 5 : 0, max: 5 },
     { id: 'town', got: TOWN_MEDAL[town.medal] || 0, max: 6 },
-    { id: 'challenges', got: won.reduce((a, c) => a + (CH_MEDAL[ch[c.id].medal] || 0), 0), max: CHALLENGES.length * 8 },
+    ...(challenges ? [{ id: 'challenges', got: won.reduce((a, c) => a + (CH_MEDAL[ch[c.id].medal] || 0), 0), max: CHALLENGES.length * 8 }] : []),
     { id: 'catches', got: clamp(me.catches, 5), max: 5 },
   ];
   const points = parts.reduce((a, p) => a + p.got, 0); const max = parts.reduce((a, p) => a + p.max, 0);
@@ -28,15 +31,15 @@ export function passport(dev = {}, band = 'junior') {
     medals: { gold: won.filter((c) => ch[c.id].medal === 'gold').length, silver: won.filter((c) => ch[c.id].medal === 'silver').length, bronze: won.filter((c) => ch[c.id].medal === 'bronze').length },
     challenges: CHALLENGES.map((c) => ({ id: c.id, name: c.name, icon: c.icon, medal: ch[c.id]?.medal || null, score: ch[c.id]?.score || 0 })),
     town: { medal: town.medal || null, score: town.score || 0, name: town.town || '' }, stars: clamp(me.stars, MISSION_STARS), complete: !!me.complete, catches: clamp(me.catches, 999),
-    tip: tip({ me, town, ch, won }) };
+    tip: tip({ me, town, ch, won, CHALLENGES }) };
 }
 // what would earn points soonest: the missions first (they open the challenges), then the town, then challenges
-function tip({ me, town, ch, won }) {
+function tip({ me, town, ch, won, CHALLENGES }) {
   if ((me.stars || 0) < 6) return { id: 'missions', text: 'Do the AI Lab missions: each one gives up to 3 stars.' };
   if (!me.complete) return { id: 'complete', text: 'Finish your town: all eight goals and all six missions give 5 points.' };
   const fresh = CHALLENGES.find((c) => !ch[c.id]); if (fresh) return { id: 'challenge', text: `Try a challenge town you have not passed yet, such as ${fresh.name}: a medal is worth 3 to 8 points.` };
   const low = won.find((c) => ch[c.id].medal !== 'gold'); if (low) return { id: 'higher', text: `Go for a higher medal in ${low.name}.` };
   if (town.medal !== 'gold') return { id: 'town', text: 'Raise your own town’s score to gold (90 out of 100).' };
   if ((me.catches || 0) < 5) return { id: 'catches', text: 'Catch Florence’s wrong ideas with a lens: each catch is a point, up to 5.' };
-  return { id: 'done', text: 'Everything is done. You are a Chief Planner!' };
+  return { id: 'done', text: CHALLENGES.length ? 'Everything is done. You are a Chief Planner!' : 'Everything is done. Brilliant planning!' };
 }
