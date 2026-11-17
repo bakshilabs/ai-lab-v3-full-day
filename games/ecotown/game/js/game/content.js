@@ -363,7 +363,7 @@ export const SANDBOX = {
   const WHAT = { j: { land: 'the town land', move: 'the paths', homes: 'the homes', food: 'the farms', power: 'the power', heart: 'the school' }, s: { land: 'site selection', move: 'movement routes', homes: 'housing', food: 'food production', power: 'power and water', heart: 'the school' } };
   const J = SANDBOX.junior, S = SANDBOX.senior; const wj = WHAT.j, ws = WHAT.s;
   Object.assign(J, {
-    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to look at', notHere: 'That’s Florence’s town. You build in your own town: tap “Your town”.' },
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to look at', toggle: 'Florence’s town', notHere: 'That is Florence’s town. You build in your town.' }, // toggle, notHere: working text for the split screen (docs/two-towns-new-text.md)
     missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Go to the AI Lab',
     invite: Object.fromEntries(Object.entries(wj).map(([id, w]) => [id, `My turn first! Come to the AI Lab and tell me how to build ${w} in my town. Then you build yours.`])),
     opensAfter: (t) => `Opens after Florence’s mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First, in your town:',
@@ -385,7 +385,7 @@ export const SANDBOX = {
     lab: 'This is my AI Lab. I’m clever… but sometimes I’m confidently wrong. Can you catch me?', overToYou: 'Let’s start with the land!', go: 'Go to the AI Lab',
   });
   Object.assign(S, {
-    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to view', notHere: 'That is Florence’s town. You build in your own: select “Your town”.' },
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to view', toggle: 'Florence’s town', notHere: 'That is Florence’s town. You build in your town.' }, // toggle, notHere: working text for the split screen (docs/two-towns-new-text.md)
     missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Open the AI Lab',
     invite: Object.fromEntries(Object.entries(ws).map(([id, w]) => [id, `Next: brief me in the AI Lab on ${w} for my town. Then build your own version.`])),
     opensAfter: (t) => `Opens after the AI Lab mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First:',

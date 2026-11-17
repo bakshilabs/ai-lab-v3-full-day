@@ -36,38 +36,57 @@ mission is done, `missionReady()` and `nextMission()` replace the old growth unl
    "Opens after Florence's mission: Homes".
 2. **The mission, on Florence's island.** The opening story film (first time), the brief card, then as now: the child
    instructs her (word tiles, cards or typing), she plans in *her* town, the child checks with the lenses, names her
-   habit, writes a clearer instruction, and the build film plays in her town. The child's own town stays visible on the
-   island beside hers.
+   habit, writes a clearer instruction, and the build film plays in her town. Her town has the whole screen (no
+   split during a mission); the child's town is not shown and not changed.
 3. **The reward card** has the stars and the outcome as before. The old "Use Florence's plan / Keep my town" choice is
    gone. One button: "Your turn: build Homes your way".
 4. **The closing story film** (first time).
-5. **Back outside, both towns side by side** for a moment, labelled "Florence's town" and "Your town", then the camera
-   settles on the child's town.
+5. **Back outside, the split screen opens**: Florence's town and the child's in two labelled panes, until the child
+   builds something or hides it (section 3).
 6. **Advice before building:** the level opens with an alert, and Florence's tip for that level (warm, low-carbon homes;
    keep the hedges; wind and batteries for a winter night; the school in the middle) with "Watch it being built" where a
    build film exists. Nothing is said as a correction after building (`AFTER_TIPS = false` stays).
 7. **Your turn.** The child builds the level their way. The next-step line shows the small step that opens the next
    mission, with a progress bar. Florence's tips and her "is this right?" ideas (catch her with a lens) carry on.
 
-The intro is now four short beats: hello; "this is my town, and this is yours" (both islands); "first you tell me what to
+The intro is now four short beats: hello; "this is my town, and this is yours" (the split screen opens); "first you tell me what to
 build in mine, then you build yours"; then the AI Lab door, with a button that starts mission 1.
 
-## 3. Two towns on screen
+## 3. Two towns on screen: a split screen (changed 17 Nov 2026)
 
-- **Two islands.** The full island (picking, lenses, residents, Florence) shows the town being worked on: the child's town
-  while building, Florence's town in a mission. A second, display-only copy of the island stands beside it and shows the
-  other town. Florence's town is always on the left of the child's at the starting view (the copy moves to the other side
-  when the roles swap, behind the fade into the Lab, so neither town seems to jump).
-- **The cheap copy** shares the main island's ground and river meshes (no second voxel build), and has no clouds,
-  floating rocks, waterfalls, bridge, windmill sails, dust or confetti. Only its tiles' builds and trees are drawn, and
-  when the camera frames one town the other is mostly outside the view and culled. Residents and animals live only on
-  the town being worked on.
-- **A switch** in the camera row: "Florence's town", "Both", "Your town". Labels float over each island. Building only
-  happens on the child's own island; a tap on Florence's says so.
-- **Tablet and projector (landscape):** the build bar at the bottom, the islands framed in the space above; "Both"
-  shows the two islands next to each other across the screen.
-- **Phone (portrait):** one town at a time fills the width; "Both" is a wider shot (the towns are small, but the
-  difference in what is built reads). The switch is in the camera row like the other camera buttons.
+The first version stood Florence's town on a second floating island beside the child's. The owner asked for a **split
+screen that can be shown or hidden** instead (`js/game/twotowns.js`; pure rules in `js/game/split.js`, tests
+`tests/split.test.mjs`).
+
+- **Two panes, one scene.** Florence's town is on the left (landscape screens) or on top (upright phones and tablets), the
+  child's town on the right or below. The line between them runs through the middle of the free area (the screen less
+  the town card and build bar), so both towns get the same room. Each pane has a label beside the line ("Florence's town"
+  with 🤖, "Your town" with 🏡). Both panes are drawn by the one renderer from the one scene (`stage.split`: viewport and
+  scissor, two cameras); no second WebGL context.
+- **Show and hide.** One toggle button (`#towns`, `aria-pressed`, a knob for the state) in the top row (laptops) or beside
+  the Camera button (phones). Hidden, the child's town fills the screen exactly as before the two-towns work. The child's
+  choice lasts the browser session (`sessionStorage` `ecotown.split.v1`), also across a reload.
+- **When it opens by itself.** (1) The compare moment after each first mission: the split opens about a second after the
+  child is back outside and **stays until the child builds something or hides it** (it used to close after 5 seconds).
+  (2) Intro beats 2 and 3 ("this is my town, and this is yours"; how a level goes), closing when Florence walks to the AI
+  Lab. Nowhere else: a game that keeps opening half the screen would take room from building, and the child can open it
+  any time. A split the game opened closes at the first build; a split the child opened stays until they hide it.
+- **Where it never shows:** missions and the AI Lab (Florence's town is the main view, on the full island, as before),
+  street view and inside a house (one camera has the whole screen; the split comes back afterwards if it was on), the
+  build and episode films (`?shoot=`, `?episode=` never start the building game), challenge towns and the other islands.
+- **Interaction.** Building, hover previews, the ★ pins, the lenses and their highlights are all in the child's pane (the
+  world labels are clipped to it). Pointers that start in Florence's pane never pan, zoom or build (`rig.paneBlock`); a
+  tap there shows the "That is Florence's town" caption (`rig.onPaneTap`). Her pane has a **fixed overview that turns with
+  the child's camera** (same compass direction, so the same corner of each town faces the same way) and does not pan or
+  zoom by itself: nothing for a second finger to grab on a tablet, and no gesture has to be routed between panes.
+- **The cheap copy** of the island (no clouds, rocks, waterfalls, bridge, sails, residents, dust or confetti) now stands far
+  off (`COPY_AT`, 6000 units away: beyond the main camera's far plane and the sun's shadow area), so each camera sees only
+  its own town. It is hidden when the split is closed.
+- **Performance.** Florence's pane is drawn without post-processing (no colour grade or SMAA), without shadows and without
+  redrawing the shadow map; the main pane's effects run at the pane's size, not the screen's. "auto" graphics still step
+  down on a slow device. Numbers below in the hand-over.
+- **Phones.** Upright: Florence's pane on top, the child's below, each about a third of the screen between the card and
+  the tray. Landscape phones split left and right.
 
 ## 4. Saved games from the old flow
 

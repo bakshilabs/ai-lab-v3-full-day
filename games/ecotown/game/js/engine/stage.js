@@ -128,6 +128,15 @@ export function createStage(canvas, skyEl) {
     renderer, scene, camera, sun, hemi, fill, moon, dome, tier: 'mid', q: TIERS.mid, hour: 15.5, winter: 0, night: 0, updaters: [], skyColors: ['#5d9fe0', '#f5dcc2'],
     tilt: { focus: 0.5, amount: 0 }, // no tilt-shift blur: the whole view stays sharp
     onFrame(fn) { this.updaters.push(fn); return fn; },
+    // Split screen (js/game/twotowns.js): { main, other, cam, hide } or null. main and other are panes ({ x, y, w, h } in CSS
+    // pixels from the top left). The main camera draws the main pane with the usual effects; cam draws the other pane straight
+    // to the canvas, with no post-processing and without redrawing the shadow map (Florence's town stands outside the
+    // shadow area, so it gets none). hide: an object shown only in the other pane. One renderer, one WebGL context.
+    split: null,
+    setSplit(s) {
+      const a = this.split?.main, b = s?.main; this.split = s;
+      if (!!a !== !!b || (a && (a.w !== b.w || a.h !== b.h))) this.resize(); // the composer is sized to the main pane
+    },
     setTier(name) {
       const q = TIERS[name]; this.tier = name; this.q = q;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.ratio));
@@ -139,7 +148,7 @@ export function createStage(canvas, skyEl) {
     resize() {
       const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
       renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-      if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h); }
+      const m = this.split?.main; if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(m ? m.w : w, m ? m.h : h); }
     },
     setTilt(focus = 0.55, amount = 2.6) { this.tilt.focus = focus; this.tilt.amount = amount; },
     setTime(hour, winter = this.winter) {
@@ -163,16 +172,38 @@ export function createStage(canvas, skyEl) {
     },
     render(dt, t) {
       for (const fn of this.updaters) fn(dt, t);
-      dome.position.copy(camera.position);
-      if (composer) {
-        const w = renderer.domElement.width, h = renderer.domElement.height;
-        fx.tiltH.uniforms.h.value = this.tilt.amount / w; fx.tiltV.uniforms.v.value = this.tilt.amount / h;
-        fx.tiltH.uniforms.r.value = fx.tiltV.uniforms.r.value = this.tilt.focus;
-        fx.tiltH.enabled = fx.tiltV.enabled = this.tilt.amount > 0.05;
-        composer.render(dt);
-      } else renderer.render(scene, camera);
+      frameDt = dt; const sp = this.split;
+      if (!sp) { dome.position.copy(camera.position); draw(); return; }
+      const W = canvas.clientWidth || window.innerWidth, H = canvas.clientHeight || window.innerHeight;
+      renderer.setScissorTest(true);
+      if (sp.hide) sp.hide.visible = false;
+      inPane(sp.main, camera, W, H, () => { dome.position.copy(camera.position); draw(sp.main.w * renderer.getPixelRatio(), sp.main.h * renderer.getPixelRatio()); });
+      if (sp.hide) sp.hide.visible = true;
+      const au = renderer.shadowMap.autoUpdate; renderer.shadowMap.autoUpdate = false;
+      inPane(sp.other, sp.cam, W, H, () => { dome.position.copy(sp.cam.position); renderer.render(scene, sp.cam); });
+      renderer.shadowMap.autoUpdate = au;
+      renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H); dome.position.copy(camera.position);
     },
   };
+  // one pane: the camera keeps its full-screen projection (so picking and labels are unchanged) and draws only the pane's
+  // part of it, through a view offset, into the pane's viewport
+  function inPane(r, cam, W, H, fn) {
+    renderer.setViewport(r.x, H - r.y - r.h, r.w, r.h); renderer.setScissor(r.x, H - r.y - r.h, r.w, r.h);
+    const v = cam.view?.enabled ? { ...cam.view } : null;
+    const sx = v ? v.width / v.fullWidth : 1, sy = v ? v.height / v.fullHeight : 1;
+    cam.setViewOffset(v ? v.fullWidth : W, v ? v.fullHeight : H, (v ? v.offsetX : 0) + r.x * sx, (v ? v.offsetY : 0) + r.y * sy, r.w * sx, r.h * sy);
+    try { fn(); } finally { if (v) cam.setViewOffset(v.fullWidth, v.fullHeight, v.offsetX, v.offsetY, v.width, v.height); else cam.clearViewOffset(); }
+  }
+  let frameDt = 0;
+  // the main camera's picture: through the composer (sized to the main pane while split), or straight to the canvas
+  function draw(w = renderer.domElement.width, h = renderer.domElement.height) {
+    if (composer) {
+      fx.tiltH.uniforms.h.value = stage.tilt.amount / w; fx.tiltV.uniforms.v.value = stage.tilt.amount / h;
+      fx.tiltH.uniforms.r.value = fx.tiltV.uniforms.r.value = stage.tilt.focus;
+      fx.tiltH.enabled = fx.tiltV.enabled = stage.tilt.amount > 0.05;
+      composer.render(frameDt);
+    } else renderer.render(scene, camera);
+  }
   window.addEventListener('resize', () => stage.resize());
   stage.setTier('mid'); stage.setTime(12.5);
   return stage;

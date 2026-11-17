@@ -26,6 +26,7 @@ import { RULES, newAdvisor, nextTip, tipText, fitsGoal, SUGGEST_GOALS, ideaKey }
 import { aheadIn } from './ahead.js'; // (a town saved before Florence first can be ahead of the missions)
 import { florenceStart, florenceTownFor } from './seed.js';
 import { createTwoTowns } from './twotowns.js';
+import { centreOffset } from './split.js';
 import { runIntro } from './intro.js';
 import { planPlace } from './replace.js';
 import { goodSpots } from './spots.js';
@@ -962,7 +963,7 @@ export function createGame(app) {
     const html = d.map(chipHtml).join('') + (spent ? `<span class="chip ${spent > 0 ? 'good' : 'bad'}" style="--c:${CHIP.credits.col}">${spent > 0 ? '+' : '−'}${Math.abs(spent)} 💰</span>` : '');
     if (html) ui.labels.float({ at: world.tileTop(k).add(new THREE.Vector3(0, 5, 0)), html, text: chipsText(d) });
     sb.stamp = tool; showAllowed(sb.tool); changed(); if (d.some((c) => c.good)) flower(d.filter((c) => c.good).map((c) => c.key)); florenceTo(k, 'peer');
-    react(k, tool, d, before);
+    react(k, tool, d, before); TT?.built(); // the split the game opened (compare, intro) closes once the player builds
     return true;
   }
   // the island reacts first (js/game/reactions.js): the nearest family says something about the build within a
@@ -985,7 +986,7 @@ export function createGame(app) {
     const canvas = stage.renderer.domElement;
     rig.onTap = (ndc) => {
       if (!sb.running || G.busy || sb.lens) return;
-      const k = world.pick(ndc, stage.camera); if (!k) { if (TT && TT.view !== 'mine') ui.caption(G.S.towns.notHere, 2600); else if (sb.tool) ui.caption(G.S.tapTile, 1800); return; }
+      const k = world.pick(ndc, stage.camera); if (!k) { if (sb.tool) ui.caption(G.S.tapTile, 1800); return; }
       tapKey(k);
     };
     const tapKey = (k) => {
@@ -1004,7 +1005,9 @@ export function createGame(app) {
     // right-click (not drag) removes, whatever tool is selected
     sb.tapKey = (k) => { if (sb.running && !G.busy && !sb.lens) tapKey(k); }; // a tap on a ★ pin builds on its tile
     rig.onAltTap = (ndc) => { if (!sb.running || G.busy || sb.lens) return; const k = world.pick(ndc, stage.camera); if (k && k !== terrain.lab) act(k, 'erase'); };
-    rig.onHover = (ndc) => { if (sb.kc) return; hoverKey(world.pick(ndc, stage.camera)); };
+    rig.onHover = (ndc) => { if (sb.kc) return; hoverKey(ndc ? world.pick(ndc, stage.camera) : null); }; // null: over Florence's pane
+    // a tap on Florence's pane of the split screen builds nothing (rig.js keeps it from the build code): say so
+    rig.onPaneTap = () => { if (sb.running && !G.busy) { audio.tap(); ui.caption(G.S.towns.notHere, 2600); } };
     const hoverKey = (k) => {
       if (!sb.running || G.busy || sb.lens || sb.tool === 'erase' || !isOpen(sb.cat)) return;
       if (k === app._hk) return; app._hk = k;
@@ -1071,10 +1074,16 @@ export function createGame(app) {
     // mission rail in the AI Lab. The camera's view offset centres it there, and the rig fits it to that area.
     const cam = stage.camera; const W = innerWidth, H = innerHeight; const b = ui.P.build; const d = ui.P.dock;
     const panel = sb.running && !b.classList.contains('hide') ? b : app.inLab && !d.classList.contains('hide') && (d.getBoundingClientRect().left < W * 0.2 || d.getBoundingClientRect().top > H * 0.5) ? d : null;
-    if (!panel) { if (cam.view?.enabled) cam.clearViewOffset(); rig.inset = { left: 0, right: 0, top: 0, bottom: 0 }; return; }
-    const r = panel.getBoundingClientRect();
-    if (r.top > H * 0.5) { const top = ui.P.card.classList.contains('hide') ? 70 : Math.max(70, ui.P.card.getBoundingClientRect().bottom + 8); cam.setViewOffset(W, H, 0, Math.round((H - r.top - top) / 2), W, H); rig.inset = { left: 0, right: 0, top, bottom: H - r.top }; } // the bottom hotbar: centre the island between the top strip and the bar
-    else { const right = ui.P.camctl.classList.contains('hide') ? 0 : W - ui.P.camctl.getBoundingClientRect().left + 8; cam.setViewOffset(W, H, -Math.round((r.right - right) / 2), 0, W, H); rig.inset = { left: r.right, right, top: 0, bottom: 0 }; }
+    let ins = { left: 0, right: 0, top: 0, bottom: 0 };
+    if (panel) {
+      const r = panel.getBoundingClientRect();
+      if (r.top > H * 0.5) { const top = ui.P.card.classList.contains('hide') ? 70 : Math.max(70, ui.P.card.getBoundingClientRect().bottom + 8); ins = { left: 0, right: 0, top, bottom: H - r.top }; } // the bottom hotbar: centre the island between the top strip and the bar
+      else { const right = ui.P.camctl.classList.contains('hide') ? 0 : W - ui.P.camctl.getBoundingClientRect().left + 8; ins = { left: r.right, right, top: 0, bottom: 0 }; }
+    }
+    // the split screen (js/game/twotowns.js): the player's town is framed in its own pane, Florence's in hers
+    if (TT) ins = TT.frame(ins);
+    rig.inset = ins; const o = centreOffset(W, H, ins);
+    if (!o.x && !o.y) { if (cam.view?.enabled) cam.clearViewOffset(); } else cam.setViewOffset(W, H, o.x, o.y, W, H);
   }
   // the mission-complete card: on wide screens the card sits on the right and the island is framed in the space to its left
   // (the camera used to stay framed for the mission dock, so testers saw empty sky with the island half behind the card);
@@ -1096,10 +1105,11 @@ export function createGame(app) {
     sb.running = true; rig.building = true; app.levelId = null; app.inLab = false; app.briefMinutes = null; app.briefTargets = [];
     ui.only([]); ui.views('sky'); ui.facil(null); ui.show('card'); ui.show('strip');
     showCells(G.cells); clearOverlay(); if (isOpen(sb.cat)) showAllowed(sb.tool);
-    if (TT) { TT.place('florence'); TT.show(G.fcells); TT.labels(); TT.showSwitch(true); }
+    if (TT) { TT.place('florence'); TT.show(G.fcells); TT.showSwitch(true); }
     changed(); renderLenses(); setMusic(app.hour >= 18.5 || app.hour < 6.5 ? 'night' : 'day'); app.bot?.show(true); requestAnimationFrame(() => { frameView(); lastFrame = rig.frameDist(); if (!sb.framed) { sb.framed = true; rig.overview(app.reduce ? 0.01 : 1.0).then?.(() => { if (innerWidth <= 760 && !rig.portrait()) rig.zoomBy(0.6); }); } }); // landscape phones: closer, so a tile is big enough to tap (upright phones already frame the tiles across the width)
-    // just back from a first mission: both towns side by side for a moment, then the player's own (they can switch any time)
-    if (sb.compare && TT) { sb.compare = null; setTimeout(async () => { if (!sb.running || G.busy) return; await TT.look('both', 1.4); ui.caption(G.S.compare, 5200); await sleep(app.reduce ? 3500 : 5000); if (sb.running && !G.busy && TT.view === 'both') TT.look('mine', 1.4); }, 900); }
+    // just back from a first mission: the split screen opens, Florence's town beside the player's, and stays until the
+    // player hides it or builds something (TT.built in act)
+    if (sb.compare && TT) { sb.compare = null; setTimeout(() => { if (!sb.running || G.busy) return; TT.auto(true); ui.caption(G.S.compare, 6000); }, 900); }
     if (sb.afterLab) { const msg = sb.afterLab; sb.afterLab = null; setTimeout(() => ui.caption(msg, msg.length > 90 ? 9000 : 5000), 2800); } // after any unlock alert
   }
   function stopBuilding() { sb.introAbort?.(); TT?.showSwitch(false); ui.labels.clear('spot'); sb.running = false; ui.setDay(null); ui.setCredits(''); ui.florence(null); frameView(); rig.building = false; clearTimeout(sb.tipT); world.clearGhost(); clearOverlay(); ui.labels.clear(); ui.tray(''); ui.buildPanel(''); hideTip(); }
@@ -1201,7 +1211,7 @@ export function createGame(app) {
     if (sb.prep) return; const real = G.cells; const first = !G.labs[id];
     const start = florenceStart(terrain, id, G.fcells, { first });
     sb.prep = { id, real, first, from: start.from }; sb.realCells = real; G.cells = start.cells; showCells(G.cells);
-    if (TT) { TT.place('player'); TT.show(real); TT.labels(); }
+    if (TT) TT.place('player'); // the split closes; her town is played on the full island
   }
   // one mission, in Florence's town
   async function runLab(id) {
@@ -1415,7 +1425,7 @@ export function createGame(app) {
     sb.realCells = null; try { localStorage.removeItem(SLOT + '.mission'); } catch { /* storage off */ }
     app.inLab = false; app.levelId = null; app.briefMinutes = null; app.briefTargets = []; delete document.documentElement.dataset.lab; run = null;
     stage.setTime(app.hour = sb.hourWas ?? 12.5, 0); sb.hourWas = null; // (every mission used to reset the day to 12:30, so a whole game fitted inside Day 1)
-    const swap = () => { G.cells = real; showCells(G.cells); if (TT) { TT.place('florence'); TT.show(G.fcells); TT.labels(); } };
+    const swap = () => { G.cells = real; showCells(G.cells); if (TT) { TT.place('florence'); TT.show(G.fcells); } };
     if (rig.fade) await rig.fade(swap); else swap();
     renderCard(); await rig.overview(1.0, true); save();
   }
@@ -1654,7 +1664,7 @@ export function createGame(app) {
     if (sb.intro) return; sb.intro = true; hideTip(); renderCard(); let r = null;
     try {
       r = await runIntro({ app, G, home: townView, T: G.S.intro, setAbort: (f) => (sb.introAbort = f),
-        both: TT ? () => TT.look('both', 1.4) : null, mine: TT ? () => TT.look('mine', 1.0) : null,
+        both: TT ? () => TT.auto(true) : null, mine: TT ? () => TT.auto(false) : null, // the split screen, opened for beats 2–3
         highlight: (sel, on) => document.querySelector(sel)?.classList.toggle('pulse', on) });
     } finally { sb.intro = false; renderCard(); G.introDone = true; save(); sb.adv.last = performance.now(); }
     // the intro ends at the AI Lab door: Florence's first mission starts at once (Florence first)
