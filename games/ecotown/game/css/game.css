@@ -2213,3 +2213,24 @@ html[data-visit="on"] #card .goal .gt { font-weight: 800; }
   html[data-print="takehome"] #takehome section.thask { padding: 2mm 4mm; margin-top: 2mm; } html[data-print="takehome"] #takehome .thfoot { margin-top: 2mm; font-size: 7pt; }
   @page { size: A4; margin: 10mm; }
 }
+
+/* ---- Florence first: two towns side by side (js/game/twotowns.js, docs/ecotown-florence-first.md). START OF BLOCK */
+#towns { position: fixed; z-index: 6; top: 12px; right: calc(var(--stripw, 220px) + 26px); display: flex; gap: 0; padding: 3px; background: #f3e3c3; border: 2px solid #5e4936; border-radius: 14px; box-shadow: 0 3px 0 #5e4936; }
+#towns.hide { display: none; }
+#towns button { display: flex; align-items: center; gap: 5px; min-height: 40px; padding: 4px 11px; border: 0; border-radius: 10px; background: transparent; color: #3b2a17; font: 800 .86rem Inter, system-ui, sans-serif; cursor: pointer; white-space: nowrap; }
+#towns button .ico { font-size: 1.05rem; line-height: 1; }
+#towns button[aria-pressed="true"] { background: #fffaf0; box-shadow: inset 0 0 0 2px #5e4936; }
+#towns button:focus-visible { outline: 3px solid #1e6fff; outline-offset: 1px; }
+#towns.pulse { animation: townspulse 1s ease-in-out infinite; }
+@keyframes townspulse { 50% { box-shadow: 0 3px 0 #5e4936, 0 0 0 6px #ffb23f; } }
+html[data-motion="reduce"] #towns.pulse { animation: none; box-shadow: 0 3px 0 #5e4936, 0 0 0 5px #ffb23f; }
+#labels .townlbl { position: absolute; transform: translate(-50%, -100%); padding: 3px 11px; border-radius: 12px; font: 900 .92rem Inter, system-ui, sans-serif; white-space: nowrap; pointer-events: none; border: 2px solid; }
+#labels .townlbl.tl-hers { background: #e9dcff; color: #2f1d52; border-color: #4a2f7a; box-shadow: 0 3px 0 #4a2f7a; }
+#labels .townlbl.tl-mine { background: #fff1c9; color: #3b2a17; border-color: #5e4936; box-shadow: 0 3px 0 #5e4936; }
+html[data-street=on] #labels .townlbl { display: none; }
+#build .lockbar .btn { margin-top: 4px; }
+/* narrower screens: the town card and the icon strip fill the top row, so the switch sits just under the strip */
+@media (max-width: 1199px) { #towns { top: 90px; right: 14px; } }
+@media (max-width: 560px) { #towns { top: 148px; bottom: auto; right: auto; left: 8px; } #towns button { min-height: 34px; padding: 3px 8px; font-size: .78rem; } }
+@media (max-height: 560px) and (orientation: landscape) { #towns { top: 54px; right: 10px; } #towns button { min-height: 32px; padding: 2px 8px; font-size: .76rem; } }
+/* ---- Florence first (END OF BLOCK) */

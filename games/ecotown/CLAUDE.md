@@ -4,6 +4,8 @@
 
 > **15 Nov 2026:** much of what follows is out of date for this repository. Passcode batches were replaced by organisations, groups and learners (`worker/codes.js`, `router.js`, `leader.html`); the pass/fail rules now live in `game/js/game/criteria.js`; saving and the server copy are in `game/js/net.js`. See the root `CLAUDE.md` and `docs/RELEASES.md`.
 
+> **17 Nov 2026: Florence first, then your own town.** The flow below ("free building first, the AI Lab when you like") was replaced at the owner's request. Read `docs/ecotown-florence-first.md` (repo root). In short: each level's build tab opens in the player's own town only after Florence's AI Lab mission for it; missions go in order, each after a small "your turn" step (`progress.js` `TIERS`, `missionReady`, `nextUnlock`); missions are played in Florence's own town (`G.fcells`, saved as `fcells`, start chosen by `seed.js` `florenceStart`), shown on a second, display-only island beside the player's (`js/game/twotowns.js`, `createWorld(..., { share })`); her plan is never copied into the player's town; the switch "Florence's town · Both · Your town" moves the camera. Saves without `flow: 2` keep their town and open tabs, and get Florence's town from her clear plans (`florenceTownFor`). Passport ranks without challenges: `RANKS_TOWN` in `passport.js`.
+
 Eco Town is a browser game (three.js voxel) with two versions, for ages 8–12 and 13–17. Players build a sustainable town with **Florence**, an AI planner that is sometimes confidently wrong, and learn to catch its mistakes.
 
 | For | See |

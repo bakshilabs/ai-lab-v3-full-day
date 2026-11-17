@@ -10,7 +10,7 @@ import { simulate } from '../js/sim/sim.js';
 import { LEVELS } from '../js/game/levels.js';
 import { seedTo } from '../js/game/seed.js';
 import { answer } from '../js/game/qa.js';
-import { labReady } from '../js/game/progress.js';
+import { missionReady } from '../js/game/progress.js';
 import { DILEMMAS, meetingEffect, cleanTownName } from '../js/game/content.js';
 
 setModelForTests(await loadPlotter({ json: JSON.parse(readFileSync(new URL('../models/plotter.json', import.meta.url), 'utf8')), bin: readFileSync(new URL('../models/plotter.bin', import.meta.url)) }));
@@ -47,11 +47,11 @@ test('classroom: off-topic questions get an honest on-topic answer, never an unr
   assert.equal(answer('Is nuclear power low carbon?', false).topic, 'otherpower');
   const f = answer('what is the capital of France', true); assert.equal(f.topic, null); assert.match(f.text, /only answer/);
 });
-test('class mode: a finished mission can be replayed; the next one is open; later ones wait', () => {
-  const open = ['land', 'move', 'homes'];
-  assert.equal(labReady('land', open, { land: { stars: 3 } }, true), true);
-  assert.equal(labReady('move', open, { land: { stars: 3 } }, true), true);
-  assert.equal(labReady('homes', open, { land: { stars: 3 } }, true), false);
+test('missions in order: a finished mission can be replayed; the next one waits for its step; later ones wait', () => {
+  const town = simulate(terrain, new Map()); const done = { land: { stars: 3 } };
+  assert.equal(missionReady('land', done, town, {}), true);
+  assert.equal(missionReady('move', done, town, {}), false, 'move waits for six tiles of the player’s own town land');
+  assert.equal(missionReady('homes', done, town, { moveTiles: 5 }), false, 'homes waits for the move mission');
 });
 test('every town-meeting choice that is not a plain "no" changes a real number', () => {
   for (const d of Object.values(DILEMMAS)) for (const o of d.options) if (o.label !== 'Decline') assert.doesNotMatch(meetingEffect(o.effect), /no change/, o.label);

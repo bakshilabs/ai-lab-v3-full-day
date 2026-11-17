@@ -36,10 +36,19 @@ const TOPS = {
 const LIME = ['#e8874c', '#d9733f', '#c4622f', '#f09a5a']; // terracotta mesa (rover palette)
 const tint = (hex, k) => { const n = parseInt(hex.slice(1), 16); const f = (v) => Math.max(0, Math.min(255, Math.round(v * k))); return '#' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => f(v).toString(16).padStart(2, '0')).join(''); };
 
-export function createWorld(stage, terrain) {
-  const { scene } = stage;
-  const root = new THREE.Group(); scene.add(root);
+// opts.share: another world on the same terrain. This one is then a cheap, display-only copy of the island (Florence's
+// town beside the player's, js/game/twotowns.js): it reuses that world's ground and river meshes and has no clouds, rocks,
+// waterfalls, bridge, sails, dust or confetti. opts.offset: where its island stands (a THREE.Vector3).
+export function createWorld(stage, terrain, opts = {}) {
+  const { scene } = stage; const share = opts.share || null; const lite = !!share;
+  const root = new THREE.Group(); scene.add(root); if (opts.offset) root.position.copy(opts.offset);
   const tileH = (gx, gz) => terrain.tiles.get(gx + ',' + gz)?.h ?? 0;
+  const uTime = { value: 0 }; const uIce = { value: 0 };
+  const S = lite ? (() => {
+    const ground = new THREE.Mesh(share.ground.geometry, share.ground.material); ground.receiveShadow = true; root.add(ground);
+    const waterMesh = new THREE.Mesh(share.waterMesh.geometry, share.waterMesh.material); waterMesh.position.y = -0.35; root.add(waterMesh);
+    return { ground, waterMesh, bridge: null, sails: null, islets: () => {}, falls: [], cloudUpd: () => {}, cloudSea: () => {} };
+  })() : (() => {
 
   // ---------------- terrain mesh: buildable tile area + a dramatic rim (limestone massif, terraced hills, tiered pines,
   //                  big oaks, a spring waterfall) and a deep brown underside with streaks and hanging roots
@@ -219,7 +228,6 @@ export function createWorld(stage, terrain) {
     sails.position.set(millAt[0] + 0.5, millY + 6.5, millAt[1] + 2.4); sails.traverse((o) => { if (o.isMesh) o.castShadow = true; }); root.add(sails); }
   const islets = floatingRocks(scene, { groups: 5, center: [0, -6, 0], radius: 100, seed: 8 });
   const waterMesh = water.mesh({ castShadow: false });
-  const uTime = { value: 0 }; const uIce = { value: 0 };
   waterMesh.material = new THREE.MeshLambertMaterial({ vertexColors: true }); // solid water: colour and moving ripples, not see-through
   waterMesh.material.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = uTime; sh.uniforms.uClay = WORLD.clay; sh.uniforms.uIce = uIce;
@@ -239,6 +247,9 @@ export function createWorld(stage, terrain) {
     waterfall(scene, { x: 14.5, y: TARN.h + 0.4, z: -32.2, dir: [0, 1], width: 2, length: TARN.h - 0.5 })];
   const cloudUpd = () => {};
   const cloudSea = makeCloudSea(scene, { n: 26, seed: 5, night: () => stage.night, dim: () => WORLD.clay.value });
+  return { ground, waterMesh, bridge, sails, islets, falls, cloudUpd, cloudSea };
+  })();
+  const { ground, waterMesh, bridge, sails, islets, falls, cloudUpd, cloudSea } = S;
 
   // ---------------- per-tile layers
   const layers = new Map();
@@ -301,6 +312,7 @@ export function createWorld(stage, terrain) {
   const confP = Array.from({ length: CONF }, (_, i) => { conf.setColorAt(i, new THREE.Color(['#ffd23f', '#16c79a', '#ff7eb6', '#3a6fc9', '#ff8a5c', '#ffffff'][i % 6])); return { life: 0 }; });
   function confetti(at, n = 120) { for (let i = 0; i < n; i++) { const p = confP[(confI = (confI + 1) % CONF)]; const a = Math.random() * 6.28, sp = 4 + Math.random() * 8; Object.assign(p, { x: at.x, y: at.y, z: at.z, vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, vy: 8 + Math.random() * 10, life: 1.6 + Math.random(), r: Math.random() * 6 }); } }
   let confI = 0;
+  if (lite) { dust.count = 0; conf.count = 0; dust.visible = conf.visible = false; } // (never stepped on the copy, so never drawn)
   function pop(obj, delay = 0, { reduce = false } = {}) {
     if (reduce) { obj.scale.set(1, 1, 1); return; }
     obj.scale.set(1, 0.001, 1); anims.push({ obj, t: -delay, dur: 0.42 });
@@ -408,7 +420,7 @@ export function createWorld(stage, terrain) {
   const rotorDrops = [];
 
   const world = {
-    root, layers, ground, terrain, builds,
+    root, layers, ground, waterMesh, terrain, builds, lite,
     // progress of a tile's build: { k (0..1), level (current world y or x of the sweep), top, dir }
     buildState(k) { const B = builds.get(k); if (!B) return null; const p = Math.max(0, Math.min(1, B.t / B.dur)); return { k: p, level: B.plane.constant, top: B.top, dir: B.dir || 'up', kind: B.kind, stage: B.stages[B.cur]?.label }; },
     finishBuilds() { for (const B of [...builds.values()]) endBuild(B); for (const r of rotorDrops) r.t = 9; },
@@ -491,9 +503,9 @@ export function createWorld(stage, terrain) {
     confetti(at, n) { confetti(at, n); },
     // Florence's route cost for a tile: buildings and the fixed lab/school/dock block her, the river is a long way round
     walkCost(k) { const L = layers.get(k); if (!L) return Infinity; if (L.fixed) return Infinity; if (L.cellItem && !FLAT.has(L.cellItem)) return Infinity; if (L.t.zone === 'river') return L.cellItem === 'bridge' || L.cellItem === 'greenbridge' ? 1 : 6; return 1; },
-    tileTop(k) { const L = layers.get(k); const [cx, cz] = tileCenter(L.t.gx, L.t.gz); return new THREE.Vector3(cx, L.oy + 1, cz); },
+    tileTop(k) { const L = layers.get(k); const [cx, cz] = tileCenter(L.t.gx, L.t.gz); return new THREE.Vector3(cx, L.oy + 1, cz).add(root.position); }, // (root.position: zero for the main island, the copy's place for the other town)
     // the cycle bridge to the village island lands beside this buildable edge tile, at bridgeLanding
-    bridgeTile: BRIDGE_TILE, bridgeLanding: bridge.landing.clone(), bridge,
+    bridgeTile: BRIDGE_TILE, bridgeLanding: bridge ? bridge.landing.clone() : null, bridge,
     pick(ndc, camera) {
       const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, camera);
       let y = 1; let hit = null;
@@ -505,6 +517,7 @@ export function createWorld(stage, terrain) {
       return hit;
     },
     update(dt, t, { windStill = false } = {}) {
+      if (lite) { for (const L of layers.values()) if (L.rotor) L.rotor.rotation.z += dt * (windStill ? 0.25 : 2.2); for (const B of [...builds.values()]) stepBuild(B, dt); lightMesh.visible = stage.night > 0.45; poolMesh.visible = poolCore.visible = stage.night > 0.55; return; } // the copy: turbines turn, nothing else moves
       uTime.value = t; uIce.value += ((stage.winter > 0.6 ? 1 : 0) - uIce.value) * Math.min(1, dt * 1.5); sails.rotation.z = -t * 0.6; cloudUpd(t); cloudSea(t); islets(t); falls.forEach((f) => f(t)); bridge.update(dt, t);
       // clay fade
       this.clay += (this.clayTarget - this.clay) * Math.min(1, dt * 7); WORLD.clay.value = this.clay;

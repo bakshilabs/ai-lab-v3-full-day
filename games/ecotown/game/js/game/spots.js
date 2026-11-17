@@ -28,21 +28,23 @@ export function goodSpots(tool, { tiles, cells, items, ok, bridge = null, max = 
 
   // paths, cycle lanes and trams: a route from the homes to somewhere people go
   if (LINK.has(tool)) {
-    if (!homes.length) return { keys: [], why: { type: 'needHomes' } };
+    // (Florence first: paths open before homes, so with no homes yet the route starts from the player's town land)
+    const origin = homes.length ? homes : all.filter((k) => cell(k).mark === 'town');
+    if (!origin.length) return { keys: [], why: { type: 'needHomes' } };
     const dests = [];
     if (bridge && tiles.has(bridge)) dests.push({ k: bridge, to: 'bridge' });
     for (const k of all) { const d = DEST[cell(k).item]; if (d) dests.push({ k, to: d }); else if (tiles.get(k).fixed === 'oldschool') dests.push({ k, to: 'oldschool' }); }
     if (!dests.length) return { keys: [], why: { type: 'needPlace' } };
     // cycle lanes prefer the bridge to the mainland (somewhere to ride to); otherwise the nearest place
-    const c = centre(homes); const ranked = [...dests].sort((a, b) => (tool === 'cycle' ? (b.to === 'bridge') - (a.to === 'bridge') : 0) || distTo(c)(a.k) - distTo(c)(b.k));
+    const c = centre(origin); const ranked = [...dests].sort((a, b) => (tool === 'cycle' ? (b.to === 'bridge') - (a.to === 'bridge') : 0) || distTo(c)(a.k) - distTo(c)(b.k));
     const W = Math.max(...all.map((k) => xy(k)[0])) + 1, H = Math.max(...all.map((k) => xy(k)[1])) + 1;
     const cost = (gx, gz) => { const k = gx + ',' + gz; if (!tiles.has(k)) return Infinity; if (ok(k)) return 1; return ROUTE.has(cell(k).item) ? 0.6 : Infinity; };
     let linked = null; // a place the homes already reach: try the next one
     for (const d of ranked) {
-      const from = byNear(homes, xy(d.k))[0]; const route = findPath(xy(from), xy(d.k), cost, { w: W, h: H });
+      const from = byNear(origin, xy(d.k))[0]; const route = findPath(xy(from), xy(d.k), cost, { w: W, h: H });
       if (!route) continue;
       const keys = route.map(([x, z]) => x + ',' + z).filter((k) => k !== from && k !== d.k && ok(k));
-      if (keys.length) return { keys: keys.slice(0, Math.max(max, 4)), why: { type: 'link', to: d.to } };
+      if (keys.length) return { keys: keys.slice(0, Math.max(max, 4)), why: { type: homes.length ? 'link' : 'linkLand', to: d.to } };
       linked = linked || d.to;
     }
     return { keys: [], why: linked ? { type: 'linked', to: linked } : { type: 'needPlace' } };
