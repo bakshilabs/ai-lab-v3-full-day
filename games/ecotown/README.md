@@ -196,9 +196,8 @@ A mission is one of the six lessons, played on **Florence's practice island**, a
    | 5 | Turbine foundation, tower sections, generator housing, blades fitted, then a glowing cable to the town |
    | 6 | The school built step by step, then the ribbon is cut |
 
-6. **Reward.** Stars with their rules, **"How Florence handled your instruction"** (*No problem found*, *Florence misunderstood* or *The plan missed something*), a fact, and the new lens. 13–17 first gets a town-meeting dilemma. Then the player chooses:
-   - **Use Florence's plan:** what fits is added to their own town (never over something they built; the town-land cap applies; for 13–17 the AI Lab pays, so no credits are spent). The caption says how much fitted.
-   - **Keep my town as it is:** nothing changes.
+6. **Reward.** Stars with their rules, **"How Florence handled your instruction"** (*No problem found*, *Florence misunderstood* or *The plan missed something*), a fact, and the new lens. 13–17 first gets a town-meeting dilemma. 
+   There is one button: **"Your turn: build <level> your way"**. Florence's plan stays in her town (on the island beside the player's); nothing is copied into the player's town (owner, 17 Nov 2026: Florence first, then your own town; see `docs/ecotown-florence-first.md`). That level's build tab then opens in the player's town, with Florence's advice for it.
 
    Back in free building, the mission's lens is in the 🔍 lenses pop-over in the top-right strip, for checking their own town any time (lens bar: "Your town now").
 

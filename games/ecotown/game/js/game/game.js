@@ -711,7 +711,7 @@ export function createGame(app) {
     if (k && !app.reduce) world.confetti(world.tileTop(k).add(new THREE.Vector3(0, 4, 0)), 60);
   }
   // lens buttons in the icon strip, one per mission done
-  function renderLenses() { ui.setLenses(LEVEL_ORDER.filter((id) => G.labs[id]).map((id) => ({ id: LAB_LENS[id], icon: G.C.checks[LAB_LENS[id]].icon, label: G.C.checks[LAB_LENS[id]].label, on: sb.lens === LAB_LENS[id] })), G.S.lenses); }
+  function renderLenses() { ui.setLenses(LEVEL_ORDER.filter((id) => G.labs[id]).map((id) => ({ id: LAB_LENS[id], icon: G.C.checks[LAB_LENS[id]].icon, label: G.C.checks[LAB_LENS[id]].label, on: sb.lens === LAB_LENS[id] })), G.S.lenses); if (TT) requestAnimationFrame(() => TT.fit()); }
   async function toggleLens(id) {
     if (G.busy) return;
     if (sb.lens) { const was = sb.lens; sb.lens = null; await checks.leave(); renderLenses(); if (sb.tool) showAllowed(sb.tool); if (was === id) return; }

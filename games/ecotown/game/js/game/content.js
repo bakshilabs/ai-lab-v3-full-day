@@ -374,6 +374,8 @@ export const SANDBOX = {
     labGoalHow: 'Tap the AI Lab button (top right) when Florence asks', diaryDone: (t) => `AI Lab: “${t}” done. Florence built it in her town. Now I build mine.`, diaryAgain: (t) => `AI Lab: played “${t}” again for practice.`,
     charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this promise, but yours doesn’t yet. Build it your way: tap 🌼 to see what your town still needs.',
   });
+  J.spotWhy.linkLand = (to) => `⭐ Good spots: a line from your town land to ${to}, so the families can walk there when they come.`;
+  J.spotWhy.needHomes = 'Mark some town land first. Then I’ll show you where a path should go.';
   J.nextStep.florence = (id) => `Go to the AI Lab: tell Florence how to build ${wj[id]} in her town`;
   J.unlockTip.land = 'Land is unlocked! Before you build: keep off the flood meadow by the river, and leave the old wood for the deer. Pick 🗺 Land, then tap dry tiles to make town land.';
   J.unlockTip.move = 'Travel is unlocked! Before you build: footpaths and cycle lanes keep children safe on the way to school. Car roads near homes are dangerous to cross. Pick 🚲 Travel to start.';
@@ -394,6 +396,8 @@ export const SANDBOX = {
     labGoalHow: 'Open the AI Lab (top right) when a mission is available', diaryDone: (t) => `AI Lab: “${t}” complete. Florence built it in her town; own town next.`, diaryAgain: (t) => `AI Lab: “${t}” replayed for practice.`,
     charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this commitment; yours does not yet. Open 🌼 for what your town still needs.',
   });
+  S.spotWhy.needHomes = 'No town land yet: a route needs town land at one end.';
+  S.spotWhy.linkLand = (to) => `⭐ Good spots: a route from your town land to ${to}.`;
   S.nextStep.florence = (id) => `AI Lab: brief Florence on ${ws[id]} for her town`;
   S.unlockTip.land = 'Land unlocked. Before building: avoid the winter floodplain and the ancient woodland. Designate town land on dry ground.';
   S.unlockTip.move = 'Movement unlocked. Before building: footpaths and cycle lanes keep the school run safe; car roads near homes create unsafe crossings.';

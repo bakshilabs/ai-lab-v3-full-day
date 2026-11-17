@@ -72,7 +72,20 @@ export function createTwoTowns(app, T) {
   document.getElementById('layer').appendChild(el);
   el.addEventListener('click', (e) => { const b = e.target.closest('[data-tv]'); if (b && !tt.busy?.()) { app.audio?.tap?.(); tt.look(b.dataset.tv); } });
   tt.syncSwitch = () => el.querySelectorAll('[data-tv]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tv === tt.view)));
-  tt.showSwitch = (on) => { el.classList.toggle('hide', !on); tt.syncSwitch(); };
+  // on wide screens it sits in the top row, left of the camera and icon buttons; where that row is full (it would touch the
+  // town card) it drops under the icon strip. Phones place it with CSS.
+  const fit = () => {
+    if (el.classList.contains('hide')) return; el.style.right = ''; el.style.top = '';
+    if (innerWidth < 1200 || innerWidth <= 560) return;
+    const vis = (n) => n && !n.classList.contains('hide') && n.getBoundingClientRect().width > 0;
+    const left = Math.min(...[ui.P.strip, ui.P.camctl].filter(vis).map((n) => n.getBoundingClientRect().left), innerWidth);
+    el.style.right = `${Math.round(innerWidth - left + 10)}px`;
+    const card = vis(ui.P.card) ? ui.P.card.getBoundingClientRect() : null;
+    if (card && el.getBoundingClientRect().left < card.right + 8) { el.style.right = '14px'; el.style.top = `${Math.round(Math.max(ui.P.strip.getBoundingClientRect().bottom, 60) + 8)}px`; }
+  };
+  addEventListener('resize', () => requestAnimationFrame(fit));
+  tt.showSwitch = (on) => { el.classList.toggle('hide', !on); tt.syncSwitch(); if (on) { requestAnimationFrame(fit); setTimeout(fit, 400); } };
+  tt.fit = fit;
   rig.onOverview = (a) => { tt.view = a ? 'florence' : 'mine'; tt.syncSwitch(); }; // ⌂ and every other "whole island" view
   tt.update = (dt, t) => copy?.update(dt, t, { windStill: app.winterTest });
   return tt;

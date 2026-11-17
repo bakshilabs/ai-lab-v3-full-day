@@ -4,10 +4,19 @@
 // dev.ch[band][id] = { medal, score }.
 import { CHALLENGES as ALL_CHALLENGES, CHALLENGES_ON } from './challenges.js';
 
-export const RANKS = [
+// With the challenge towns (139 points in all)
+export const RANKS_CH = [
   { at: 0, name: 'Helper', icon: '🌱' }, { at: 8, name: 'Builder', icon: '🧱' }, { at: 20, name: 'Planner', icon: '📐' },
   { at: 35, name: 'Town Planner', icon: '🏘' }, { at: 65, name: 'Master Planner', icon: '🏅' }, { at: 100, name: 'Chief Planner', icon: '👑' }, // out of 139 with 13 challenges (were 50 and 70 out of 91 with 7)
 ];
+// Eco Town alone, while the challenges are hidden (35 points: 19 mission stars, 5 for a complete town, up to 6 for its
+// medal, up to 5 catches). A child who finishes the town (5), with a silver town (4), about two stars a mission and a few
+// catches reaches Chief Planner (owner, 17 Nov 2026: the top rank must be reachable by finishing Eco Town).
+export const RANKS_TOWN = [
+  { at: 0, name: 'Helper', icon: '🌱' }, { at: 4, name: 'Builder', icon: '🧱' }, { at: 9, name: 'Planner', icon: '📐' },
+  { at: 14, name: 'Town Planner', icon: '🏘' }, { at: 19, name: 'Master Planner', icon: '🏅' }, { at: 25, name: 'Chief Planner', icon: '👑' },
+];
+export const RANKS = CHALLENGES_ON ? RANKS_CH : RANKS_TOWN;
 export const MISSION_STARS = 19; // six missions × three stars, and the bias check's bonus star
 const TOWN_MEDAL = { bronze: 2, silver: 4, gold: 6 }; const CH_MEDAL = { bronze: 3, silver: 5, gold: 8 };
 const clamp = (v, hi) => Math.max(0, Math.min(hi, Number(v) || 0));
@@ -26,8 +35,9 @@ export function passport(dev = {}, band = 'junior', { challenges = CHALLENGES_ON
     { id: 'catches', got: clamp(me.catches, 5), max: 5 },
   ];
   const points = parts.reduce((a, p) => a + p.got, 0); const max = parts.reduce((a, p) => a + p.max, 0);
+  const RANKS = challenges ? RANKS_CH : RANKS_TOWN;
   const ri = RANKS.reduce((a, r, i) => (points >= r.at ? i : a), 0); const rank = RANKS[ri]; const nextRank = RANKS[ri + 1] || null;
-  return { points, max, parts, rank, rankIndex: ri, next: nextRank ? { ...nextRank, need: nextRank.at - points } : null,
+  return { points, max, parts, ranks: RANKS, rank, rankIndex: ri, next: nextRank ? { ...nextRank, need: nextRank.at - points } : null,
     medals: { gold: won.filter((c) => ch[c.id].medal === 'gold').length, silver: won.filter((c) => ch[c.id].medal === 'silver').length, bronze: won.filter((c) => ch[c.id].medal === 'bronze').length },
     challenges: CHALLENGES.map((c) => ({ id: c.id, name: c.name, icon: c.icon, medal: ch[c.id]?.medal || null, score: ch[c.id]?.score || 0 })),
     town: { medal: town.medal || null, score: town.score || 0, name: town.town || '' }, stars: clamp(me.stars, MISSION_STARS), complete: !!me.complete, catches: clamp(me.catches, 999),
