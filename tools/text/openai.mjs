@@ -19,7 +19,7 @@ export const MODEL = process.env.TEXT_MODEL || 'gpt-5.5';
 export const CACHE = process.env.TEXT_CACHE || path.join(os.tmpdir(), 'ai-lab-text-cache');
 fs.mkdirSync(CACHE, { recursive: true });
 const LOG = path.join(CACHE, 'tokens.jsonl');
-export const usage = { requests: 0, cached: 0, prompt: 0, completion: 0, reasoning: 0 };
+export const usage = { requests: 0, cached: 0, prompt: 0, promptCached: 0, completion: 0, reasoning: 0 };
 
 // chat(label, messages, schema, opts) -> parsed JSON object
 export async function chat(label, messages, schema, { effort = 'medium', retries = 4 } = {}) {
@@ -37,8 +37,8 @@ export async function chat(label, messages, schema, { effort = 'medium', retries
       if (msg?.refusal) throw new Error(`refused: ${msg.refusal}`);
       const parsed = JSON.parse(msg.content);
       const u = json.usage || {};
-      usage.requests++; usage.prompt += u.prompt_tokens || 0; usage.completion += u.completion_tokens || 0; usage.reasoning += u.completion_tokens_details?.reasoning_tokens || 0;
-      fs.appendFileSync(LOG, JSON.stringify({ at: new Date().toISOString(), label, model: json.model, prompt: u.prompt_tokens, completion: u.completion_tokens, reasoning: u.completion_tokens_details?.reasoning_tokens, hash }) + '\n');
+      usage.requests++; usage.prompt += u.prompt_tokens || 0; usage.promptCached += u.prompt_tokens_details?.cached_tokens || 0; usage.completion += u.completion_tokens || 0; usage.reasoning += u.completion_tokens_details?.reasoning_tokens || 0;
+      fs.appendFileSync(LOG, JSON.stringify({ at: new Date().toISOString(), label, model: json.model, prompt: u.prompt_tokens, cachedPrompt: u.prompt_tokens_details?.cached_tokens || 0, completion: u.completion_tokens, reasoning: u.completion_tokens_details?.reasoning_tokens, hash }) + '\n');
       fs.writeFileSync(file, JSON.stringify({ label, request: body, response: json, parsed }));
       return parsed;
     } catch (e) { lastErr = e; if (/^4(00|01|03|04)/.test(e.message)) break; await new Promise((r) => setTimeout(r, 2000 * 2 ** a)); }
@@ -48,9 +48,9 @@ export async function chat(label, messages, schema, { effort = 'medium', retries
 
 // all tokens ever logged in this cache folder (including earlier runs)
 export function tokenTotals() {
-  const t = { requests: 0, prompt: 0, completion: 0, reasoning: 0 };
+  const t = { requests: 0, prompt: 0, cachedPrompt: 0, completion: 0, reasoning: 0 };
   if (!fs.existsSync(LOG)) return t;
-  for (const l of fs.readFileSync(LOG, 'utf8').split('\n').filter(Boolean)) { const x = JSON.parse(l); t.requests++; t.prompt += x.prompt || 0; t.completion += x.completion || 0; t.reasoning += x.reasoning || 0; }
+  for (const l of fs.readFileSync(LOG, 'utf8').split('\n').filter(Boolean)) { const x = JSON.parse(l); t.requests++; t.prompt += x.prompt || 0; t.cachedPrompt += x.cachedPrompt || 0; t.completion += x.completion || 0; t.reasoning += x.reasoning || 0; }
   return t;
 }
 
