@@ -3,19 +3,26 @@
 //   The voice clips are the ones recorded by tests/video/episodes.mjs (its --work folder, sub-folder voice/).
 //   The music is rendered fresh with the game's own chip engine, so it runs on under the cuts instead of jumping.
 // Writes videos/trailer/eco-town-trailer.mp4, .jpg (poster) and .vtt (captions; the trailer is often watched muted).
+// Options: [--w 960 --h 540] size (cards are laid out at 960 × 540 and drawn at w/960 of that); [--kb 4500] file size;
+//   [--src <dir>] the episodes' --work folder: pictures are cut from its near-lossless <id>.video.mp4 when present
+//   (so they are not compressed twice), else from videos/episodes/<id>.mp4; [--builds <dir>] the same for the build
+//   films (record.mjs --work), else videos/<item>.mp4.
 import { createRequire } from 'module'; import fs from 'fs'; import path from 'path'; import http from 'http'; import { spawnSync } from 'child_process';
 const require = createRequire(import.meta.url);
 let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
 const args = process.argv.slice(2); const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const here = path.dirname(new URL(import.meta.url).pathname); const game = path.join(here, '..');
 const EP = path.join(game, 'videos', 'episodes'); const out = path.join(game, 'videos', 'trailer'); fs.mkdirSync(out, { recursive: true });
-const work = opt('work'), voices = opt('voices');
+const work = opt('work'), voices = opt('voices'), srcDir = opt('src'), buildDir = opt('builds');
 if (!work || !voices) { console.error('Usage: node tools/trailer.mjs --work <dir> --voices <dir>'); process.exit(1); }
 if (path.resolve(work).startsWith(path.resolve(game, '..', '..', '..'))) { console.error('--work must be outside the repository'); process.exit(1); }
 fs.mkdirSync(work, { recursive: true });
 const ff = (a) => { const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', ...a], { stdio: ['ignore', 'inherit', 'inherit'] }); if (r.status) throw new Error('ffmpeg failed: ' + a.join(' ')); };
 const probe = (f) => +spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).stdout.toString().trim();
-const FPS = 24, W = 960, H = 540;
+const FPS = 24, W = +opt('w', 960), H = +opt('h', 540), KB = +opt('kb', 4500), CW = 960, CH = 540;
+// the picture source for an episode or a build film: the recorder's near-lossless intermediate if there is one
+const pick = (dir, id, fallback) => { const f = dir && path.join(dir, `${id}.video.mp4`); return f && fs.existsSync(f) ? f : fallback; };
+const epSrc = (id) => pick(srcDir, id, path.join(EP, id + '.mp4')); const buildSrc = (id) => pick(buildDir, id, path.join(game, 'videos', id + '.mp4'));
 const index = JSON.parse(fs.readFileSync(path.join(EP, 'index.json'))).episodes;
 
 // ---------- the edit: three acts (Florence is sure / the children check / the fix), each opened by a card
@@ -41,18 +48,18 @@ const EDIT = [
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json' };
 const srv = http.createServer((q, r) => { const f = path.join(game, decodeURIComponent(q.url.split('?')[0])); if (!f.startsWith(game) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r); });
 await new Promise((r) => srv.listen(0, r)); const base = `http://localhost:${srv.address().port}/`;
-const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: CW, height: CH }, deviceScaleFactor: W / CW });
 await p.goto(base + 'tools/blank.html').catch(() => {}); // any page on the server will do for module imports
 
 // ---------- 2. pictures: each piece becomes an intermediate clip with the same size, rate and format
-const still = (ep, t, f) => { ff(['-ss', String(t), '-i', path.join(EP, ep + '.mp4'), '-frames:v', '1', '-q:v', '2', f]); return f; };
+const still = (ep, t, f) => { ff(['-ss', String(t), '-i', epSrc(ep), '-frames:v', '1', '-q:v', '2', f]); return f; };
 const enc = ['-r', String(FPS), '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS},format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '10', '-an'];
 const fontUrl = base + 'fonts/bricolage.woff2', interUrl = base + 'fonts/inter.woff2';
 async function card(html, bgFile, png) {
   const bg = 'data:image/jpeg;base64,' + fs.readFileSync(bgFile).toString('base64');
   await p.setContent(`<!doctype html><style>
     @font-face { font-family: B; src: url(${fontUrl}); } @font-face { font-family: I; src: url(${interUrl}); }
-    html, body { margin: 0; width: ${W}px; height: ${H}px; overflow: hidden; }
+    html, body { margin: 0; width: ${CW}px; height: ${CH}px; overflow: hidden; }
     .bg { position: absolute; inset: -30px; background: url(${bg}) center/cover; filter: blur(9px) saturate(1.15) brightness(.62); }
     .wrap { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #fffaf0; font-family: B, sans-serif; }
     h1 { margin: 0; font-size: 70px; line-height: 1.02; font-weight: 800; letter-spacing: -.01em; text-shadow: 0 4px 0 rgba(40,25,10,.35), 0 10px 40px rgba(0,0,0,.35); }
@@ -75,7 +82,7 @@ for (const [k, e] of EDIT.entries()) {
   if (e.kind === 'clip') {
     const cs = e.n.map((i) => index[e.ep].cues[i]);
     const a = Math.max(0, cs[0].t0 - 0.3), z = Math.min(index[e.ep].duration - 0.05, cs.at(-1).t1 + 0.1); const dur = +(z - a).toFixed(3);
-    ff(['-ss', (e.pic ?? a).toFixed(3), '-i', path.join(EP, e.ep + '.mp4'), '-t', dur.toFixed(3), ...enc, f]);
+    ff(['-ss', (e.pic ?? a).toFixed(3), '-i', epSrc(e.ep), '-t', dur.toFixed(3), ...enc, f]);
     e.n.forEach((i, j) => { voiceAt.push({ wav: path.join(voices, `${e.ep}.${i}.wav`), t: T + cs[j].t0 - a }); cues.push({ t0: T + cs[j].t0 - a, t1: T + cs[j].t1 - a - 0.2, who: cs[j].who, text: cs[j].text }); });
     T += probe(f);
   } else if (e.kind === 'card') {
@@ -84,7 +91,7 @@ for (const [k, e] of EDIT.entries()) {
     cues.push({ t0: T + 0.2, t1: T + e.dur - 0.2, who: '', text: e.big.replace(/<br>/g, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() });
     T += probe(f);
   } else if (e.kind === 'montage') {
-    const subs = e.films.map(([v, t], j) => { const s = path.join(work, `m${k}-${j}.mp4`); ff(['-ss', String(t), '-i', path.join(game, 'videos', v + '.mp4'), '-t', String(e.each), ...enc, s]); return s; });
+    const subs = e.films.map(([v, t], j) => { const s = path.join(work, `m${k}-${j}.mp4`); ff(['-ss', String(t), '-i', buildSrc(v), '-t', String(e.each), ...enc, s]); return s; });
     const lst = path.join(work, `m${k}.txt`); fs.writeFileSync(lst, subs.map((s) => `file '${s}'`).join('\n')); ff(['-f', 'concat', '-safe', '0', '-i', lst, '-c', 'copy', f]);
     sfx.push({ name: 'pop', t: T + 0.02 }, { name: 'pop', t: T + e.each }, { name: 'pop', t: T + 2 * e.each });
     T += probe(f);
@@ -150,7 +157,7 @@ ff([...inputs, '-filter_complex', [
 ].join(';'), '-map', '[m]', '-t', dur.toFixed(3), '-ar', '44100', '-ac', '1', wav]);
 
 // ---------- 5. final file (two-pass H.264, about 4.5 MB), poster and captions
-const mp4 = path.join(out, 'eco-town-trailer.mp4'); const AK = 96; const vk = Math.floor((4500 * 8) / dur - AK - 8); const log = path.join(work, 'tr.2pass');
+const mp4 = path.join(out, 'eco-town-trailer.mp4'); const AK = 96; const vk = Math.floor((KB * 8) / dur - AK - 8); const log = path.join(work, 'tr.2pass');
 const vf = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-profile:v', 'main', '-pix_fmt', 'yuv420p', '-b:v', `${vk}k`, '-maxrate', `${Math.round(vk * 1.8)}k`, '-bufsize', `${vk * 3}k`, '-g', String(FPS * 2), '-passlogfile', log];
 ff(['-i', video, ...vf, '-pass', '1', '-an', '-f', 'mp4', '/dev/null']);
 ff(['-i', video, '-i', wav, ...vf, '-pass', '2', '-c:a', 'aac', '-b:a', `${AK}k`, '-ac', '1', '-movflags', '+faststart', '-shortest', mp4]);

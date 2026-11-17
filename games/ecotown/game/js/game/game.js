@@ -74,8 +74,8 @@ export function createGame(app) {
   const TT = app.twoTowns = !CH && !OFF_HOME ? createTwoTowns(app, G.S.towns) : null; if (TT) TT.busy = () => G.busy || !sb.running;
   async function missionsAtHome() {
     if (G.busy) return; G.busy = true; let a = null;
-    try { const t = G.j ? 'The six AI Lab missions happen on the home island, on Florence’s practice island. Here all six lenses are already yours: use them to check your town.' : 'The six AI Lab missions run on the home island’s practice island. On this island all six lenses are already open.';
-      a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>Missions are on the home island</h2><p>${esc(t)}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="close">${esc(G.S.backToBuilding)}</button><button class="btn alt" data-act="home">🏡 Go to the home island</button></div>`, { say: t });
+    try { const t = G.j ? 'The six AI Lab missions are on the main island. Here, all six lenses are unlocked. Use them to check this town.' : 'Play the six AI Lab missions on the main island. On this island, all six lenses are unlocked.';
+      a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>Missions are on the main island</h2><p>${esc(t)}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="close">${esc(G.S.backToBuilding)}</button><button class="btn alt" data-act="home">🏡 Go to the main island</button></div>`, { say: t });
     } finally { G.busy = false; }
     if (a === 'home') { save(); location.search = ''; }
   }
@@ -88,7 +88,9 @@ export function createGame(app) {
   const pick = (o) => (typeof o === 'string' ? o : G.j ? o.j : o.s);
   const sim = (cells = G.cells) => simulate(terrain, cells, { natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 });
   app.natureStart = natureBaseline(terrain);
-  const help = (o) => ui.helper({ name: G.C.helperName, ...o });
+  // ages 8–12 see no percentages: Florence's confidence becomes words (the bar still fills)
+  const sureWords = (n) => (n >= 85 ? 'very sure' : n >= 70 ? 'quite sure' : n >= 55 ? 'a bit sure' : 'not very sure');
+  const help = (o) => ui.helper({ name: G.C.helperName, ...o, ...(G.j && o.sure != null ? { sureText: `Florence is ${sureWords(o.sure)}` } : {}) });
   const facil = (id, step) => ui.facil(T(id)?.facil?.[step] || null);
 
   // before power is unlocked the town is on the old island grid; after that, a still night shows whether the town's own power copes
@@ -207,7 +209,7 @@ export function createGame(app) {
       setTimeout(() => app.bot.beam(false), dur * 1000 + 300);
       res.plan.placements.forEach((_, i) => setTimeout(() => audio.ghost(i), i * 50));
       const why = G.j ? '' : `Why ${res.sure}%? Based on: reading <b>${res.breakdown.reading}%</b>, plan fit <b>${res.breakdown.fit}%</b>, experience <b>${res.breakdown.experience}%</b>, scaled to 48–92% (never certain). Tested: ${esc(res.plan.tested)}.`; // it used to show the three joined by × as if they multiplied to the total
-      help({ tag: G.C.ui.plotterGuess, html: guessHtml(res), sure: res.sure, sureLabel: G.C.ui.sure, why, say: res.plan.reading.join(' ') + (res.plan.targets?.length ? ' ' + res.plan.targets.map((t) => targetLine(t, G.j)).join(' ') : '') + ` ${res.sure} percent ${G.C.ui.sure}.` + (res.plan.wont?.length ? ' ' + res.plan.wont.join(' ') : ''), voice: 'helper' });
+      help({ tag: G.C.ui.plotterGuess, html: guessHtml(res), sure: res.sure, sureLabel: G.C.ui.sure, why, say: res.plan.reading.join(' ') + (res.plan.targets?.length ? ' ' + res.plan.targets.map((t) => targetLine(t, G.j)).join(' ') : '') + (G.j ? ` I'm ${sureWords(res.sure)}.` : ` ${res.sure} percent ${G.C.ui.sure}.`) + (res.plan.wont?.length ? ' ' + res.plan.wont.join(' ') : ''), voice: 'helper' });
       ui.legend('plan');
       await sleep(dur * 1000);
       return res;
@@ -1446,7 +1448,7 @@ export function createGame(app) {
     const s = sim(); const cycle = [...G.cells.values()].filter((c) => ['cycle', 'path', 'tram'].includes(c.item)).length; const cars = s.cars;
     const shareWalk = Math.max(55, Math.round(100 * (cycle + 1) / (cycle + cars + 1.5)));
     const gate = { walkers: Math.round(10 * shareWalk / 100), drivers: 10 - Math.round(10 * shareWalk / 100) };
-    if (!G.j && getModel()) { await teachFlorence(shareWalk); G.mistakes.push({ level: 'heart', habit: 'missing', why: 'Florence’s summary model was trained only on comments from the car-park box (drivers).', bias: true }); await sleep(800); }
+    if (!G.j && getModel()) { await teachFlorence(shareWalk); G.mistakes.push({ level: 'heart', habit: 'missing', why: 'Florence only learnt from comments left by drivers at the car park. She didn’t hear from people who walk or cycle.', bias: true }); await sleep(800); }
     else {
       // 8–12 (or no model): Florence says who she asked; the children ask the people at the school gate themselves
       help({ tag: 'SUMMARY', html: `<p>“Residents want more car parks.”</p><p>I asked <b>10 people at the car park</b>. 9 of them drive, so I’m very sure!</p>`, sure: 90, sureLabel: G.C.ui.sure, say: 'Residents want more car parks. I asked 10 people at the car park. 9 of them drive, so I’m very sure!', voice: 'helper' });
@@ -1459,7 +1461,7 @@ export function createGame(app) {
         tr.querySelector('[data-act]').onclick = resolve;
       }));
       audio.good();
-      help({ tag: 'COUNTED', tagCls: 'ok', html: `<p>“Most residents want <b>safe paths and cycle lanes</b>.”</p><p>At the school gate, <b>${gate.walkers} of 10 walk or cycle</b>. I was 90% sure before because I only asked drivers. Asking different people changed my answer!</p>`, sure: Math.round(100 * gate.walkers / 10), sureLabel: G.C.ui.sure, say: `Most residents want safe paths and cycle lanes. At the school gate, ${gate.walkers} of 10 walk or cycle. I was 90 percent sure before because I only asked drivers. Asking different people changed my answer!`, voice: 'helper' });
+      help({ tag: 'COUNTED', tagCls: 'ok', html: `<p>“Most residents want <b>safe paths and cycle lanes</b>.”</p><p>At the school gate, <b>${gate.walkers} out of 10 people walk or cycle</b>. I sounded sure before, but I had only asked drivers. Asking more people changed my answer!</p>`, sure: Math.round(100 * gate.walkers / 10), sureLabel: G.C.ui.sure, say: `Most residents want safe paths and cycle lanes. At the school gate, ${gate.walkers} out of 10 people walk or cycle. I sounded sure before, but I had only asked drivers. Asking more people changed my answer!`, voice: 'helper' });
       bonusStar(G.j ? 'You found who Florence forgot to ask!' : 'Found Florence’s biased sample');
       G.mistakes.push({ level: 'heart', habit: 'missing', why: 'Florence only asked drivers at the car park, so her summary left out everyone who walks.', bias: true });
       await sleep(1200); await continueBtn();
@@ -1472,7 +1474,7 @@ export function createGame(app) {
     const PROMISES = [
       [`Every home within ${W} minutes’ walk of school`, (x) => x.homes.length > 0 && x.walkMax <= W, (x) => (x.homes.length ? `longest walk ${x.walkMax} min (rule: ${W} min or less)` : 'no homes yet')],
       [`Town carbon under the ${TARGETS.carbonCeiling} t limit`, (x) => x.carbonOK, (x) => `${x.carbon} t of ${TARGETS.carbonCeiling} t`],
-      ['Lights on through a still winter night', (x) => x.power.winterOK, (x) => `supply ${x.power.winterSupply}, homes need ${x.power.demand}`],
+      ['Keep the lights on at night, even when there’s no sun or wind.', (x) => x.power.winterOK, (x) => `supply ${x.power.winterSupply}, homes need ${x.power.demand}`],
       ['Keep the bees and the deer', (x) => x.species.bees && x.species.deer, (x) => `bees ${x.species.bees ? 'stay' : 'gone'}, deer ${x.species.deer ? 'stay' : 'gone'}`],
       ['No home floods', (x) => x.flooded === 0, (x) => `${x.flooded} home${x.flooded === 1 ? '' : 's'} flood`],
       ['Enough food for everyone', (x) => x.food >= x.foodNeed, (x) => `${x.food} of ${x.foodNeed} ${G.j ? 'baskets' : 'units'}`],

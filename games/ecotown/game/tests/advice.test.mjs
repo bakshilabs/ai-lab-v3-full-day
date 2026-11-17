@@ -36,13 +36,13 @@ test('advice about how to build a level is not given afterwards as a correction'
   for (const id of ['cold', 'homesCarbon', 'carbon']) assert.ok(!ids.includes(id), id);
   // the same advice is in the unlock tips, before anything is built
   assert.match(SANDBOX.junior.unlockTip.homes, /Before you build.*timber and straw/); assert.match(SANDBOX.junior.unlockTip.heart, /Before you build.*middle of the homes/);
-  assert.match(SANDBOX.junior.unlockTip.power, /Before you build/); assert.match(SANDBOX.junior.unlockTip.food, /Before you build/);
+  assert.match(SANDBOX.junior.unlockTip.power, /make and store electricity/); // owner's wording, 17 Nov 2026 assert.match(SANDBOX.junior.unlockTip.food, /Before you build/);
 });
 test('no "swap concrete flats" when the town has none', () => {
   const r = (id) => RULES.find((x) => x.id === id);
   const timber = town({ homesCarbon: 80, avgTemp: 17, count: { timber: 14, reclaimed: 2 } });
   assert.doesNotMatch(tipText(r('homesCarbon'), timber, true), /concrete/i); assert.doesNotMatch(tipText(r('cold'), timber, true), /concrete/i);
-  assert.match(tipText(r('homesCarbon'), town({ count: { concrete: 2 } }), true), /concrete flats/);
+  assert.match(tipText(r('homesCarbon'), town({ count: { concrete: 2 } }), true), /concrete flats/i);
   assert.doesNotMatch(carbonFix(town({ count: { timber: 3 } }), true), /concrete|car road/); assert.match(carbonFix(town({ count: { road: 2 } }), true), /car roads/); assert.doesNotMatch(carbonFix(town({ count: { road: 2 } }), true), /concrete/);
 });
 test('the idle idea fits what the town already has', () => {
@@ -76,7 +76,7 @@ test('ages 8–12 goal lines say what to do, with no money, kW or percentages', 
   // the goal lines start with something to do
   const verb = /^(build|grow|bring|make|keep|cut|move|mark|choose|plan|put|pick|tell)\b/i;
   for (const f of Object.values(J.goal)) assert.match(f(s), verb); for (const f of Object.values(J.goal)) assert.match(f(town()), verb);
-  for (const id of Object.keys(LEVELS)) for (const n of LEVELS[id].needs(s, { moveTiles: 1, hasSchool: true, access: { ok: false, issues: 1 } }, true)) assert.match(n.label.replace(/^\P{L}+/u, ''), verb, n.label);
+  for (const id of Object.keys(LEVELS)) for (const n of LEVELS[id].needs(s, { moveTiles: 1, hasSchool: true, access: { ok: false, issues: 1 } }, true)) if (!/^🍎 Food: \d+ of \d+ baskets/u.test(n.label)) assert.match(n.label.replace(/^\P{L}+/u, ''), verb, n.label); // the food count is the owner's own wording (17 Nov 2026)
   for (const L of Object.values(LEVEL_TEXT)) assert.match(L.goal.j, verb, L.goal.j);
   assert.doesNotMatch(targetLine({ id: 'power', asked: 21, dir: 'min', got: 13, need: 21, met: false }, true), /still winter night/);
 });

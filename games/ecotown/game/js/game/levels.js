@@ -64,8 +64,8 @@ export const LEVELS = {
   food: {
     n: 4, newLens: 'nature', habit: 'one_word', palette: LEVEL_ITEMS.food,
     reveal(sim, base) { return !sim.species.bees || !sim.species.deer ? { nature: { n: Math.max(0, (base?.hedges ?? 16) - sim.hedges) } } : {}; },
-    needs: (sim, ctx, j) => [{ label: j ? `🍎 Grow ${sim.foodNeed} baskets of food, one for every 3 families (${sim.food} so far)` : `Food: ${sim.food} units (need ${sim.foodNeed}; 1 unit feeds 3 households)`, ok: sim.food >= sim.foodNeed }, { label: j ? '🐝 Keep the bees on the island' : 'Pollinators present', ok: sim.species.bees }, { label: j ? '🦌 Keep the deer on the island' : 'Deer present', ok: sim.species.deer }],
-    stat: (s, j) => [j ? 'Food baskets' : 'Food units', `${s.food} (need ${s.foodNeed})`],
+    needs: (sim, ctx, j) => [{ label: j ? `🍎 Food: ${sim.food} of ${sim.foodNeed} baskets (1 basket feeds 3 families)` : `Food: ${sim.food} units (need ${sim.foodNeed}; 1 unit feeds 3 households)`, ok: sim.food >= sim.foodNeed }, { label: j ? '🐝 Keep the bees on the island' : 'Pollinators present', ok: sim.species.bees }, { label: j ? '🦌 Keep the deer on the island' : 'Deer present', ok: sim.species.deer }],
+    stat: (s, j) => [j ? 'Baskets of food' : 'Food units', `${s.food} (need ${s.foodNeed})`],
   },
   power: {
     n: 5, newLens: 'winter', habit: 'typical', palette: LEVEL_ITEMS.power,

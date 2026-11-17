@@ -219,7 +219,7 @@ async function start() {
     pulled.then((from) => { if (waited && from === 'server' && document.getElementById('start') && !sessionStorage.getItem('eco.repull')) { try { sessionStorage.setItem('eco.repull', '1'); } catch { return; } location.reload(); } }).catch(() => {}); }
   const scr = h(`<div id="start"><div class="card">
     <span class="chip">A DELTAOPS LEARNING AI LAB</span><h1>Eco <span>Town</span></h1>
-    <p style="font-weight:600;color:#46596a;margin:4px 0">Build your own town on a floating island. Florence, your AI helper, gives tips as you build. Step into the AI Lab to test her plans: she is clever, and sometimes confidently wrong. Can you catch her mistakes?</p>
+    <p style="font-weight:600;color:#46596a;margin:4px 0">Build a town on a floating island. Florence is an AI helper who gives you tips. In the AI Lab, you can check her plans and find her mistakes. She can sound sure even when she’s wrong!</p>
     <div class="ages"><button class="age" data-band="junior"><b>Ages 8–12</b><span>Word tiles, picture chips and a friendly voice that reads everything aloud. Gentle consequences.</span></button><button class="age" data-band="senior"><b>Ages 13–17</b><span>Free-text instructions, real units, budgets and town-meeting dilemmas. 🔊 to hear any card.</span></button></div>
     <p class="both">Both versions have six AI Lab missions, ending with a bias check: who did Florence forget to ask? Next: name your town and choose how the missions are played.</p>
     <p class="leaderlink">Leading a group? <a href="leader.html">The leader’s one-hour run sheet</a></p>
