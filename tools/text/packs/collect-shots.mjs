@@ -11,7 +11,8 @@ import { execFileSync } from 'node:child_process';
 import { assign } from './match.mjs';
 import { extractAll } from '../extract.mjs';
 import { buildMoments } from '../pilot/moments.mjs';
-import SHOTS from './shots-map.mjs';
+import MAP, { EXTRA } from './shots-map.mjs';
+const SHOTS = [...MAP, ...EXTRA];
 
 const arg = (k, d = null) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const PLAY = arg('--play'), PILOT = arg('--pilot'), OUT = arg('--out');
