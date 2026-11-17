@@ -26,3 +26,4 @@ Alan likes challenges but worries they feel repetitive after six AI activities. 
 - Side-by-side towns: the child's own town and Florence's town are separate and shown together.
 - Florence's advice and any short film come before a level's blocks unlock, not after building.
 - Challenges hidden for now; the modules after Eco Town replace them.
+- Order (answers question 1): Florence first, then yours. At each level the child prompts Florence to build in her town, checks and corrects her plan, then their own town beside it unlocks for that level to build their way.
