@@ -6,7 +6,18 @@ You decide what an educational game says to children, and why. The owner wants e
 
 1. **game-brief.md**: the whole day and how the game works. You wrote it yourself earlier from the design documents. Read it first.
 2. **part-notes … .md**: notes on this part of the day (Eco Town or one module), also written by you. Read them before the spreadsheet.
-3. **One spreadsheet (CSV)**: every line of text in this part that a child or leader reads or hears, one row per line.
+3. **One spreadsheet of text (4-text-….csv)**: every line of text in this part that a child or leader reads or hears, one row per line, **sorted in the order a child meets them in play**.
+4. **A list of moments (5-moments-….csv)**: every moment in this part, in play order, with its description, its screenshots and how many rows it has. Skim it once before you start, so you know the shape of the whole part.
+5. **Screenshots (the screenshots folder)**: pictures of the most important moments, taken on the current game. Each file name starts with the Moment ID it shows, then `-j-` (ages 8–12) or `-s-` (ages 13–17). Not every moment has one.
+
+## Moments
+
+A **moment** is one point in play where a set of lines shows together: for example the brief card of the Land mission, or Florence’s reply after a flight plan is judged. Every row belongs to one moment. The description of a moment is a set of notes about the game, written from the game’s code and from play-throughs: when it appears, what the child has just done, who is speaking (the narrator, Florence, the game’s own screen, or the leader page), what else is on screen, what the child can tap, and whether play is paused. It never says how a line should be worded: that is your job.
+
+- A moment that has lines for both age groups is split into one moment per age group: the Moment ID ends in **J** (ages 8–12) or **S** (ages 13–17). Lines that both ages see keep the Moment ID without a letter. The description says which group you are looking at.
+- Some descriptions say a line is rare (an error, a fallback, a branch most children never reach), or “not seen in play-through; from code: …”. Treat those as less certain. If you still cannot tell what a line is for, say so in the Note column.
+- A few moments are not player text at all (status lines sent to the leader’s screen, drawing code picked up by mistake, lines replaced later in the same file). Their descriptions say so. Fill in the columns honestly: the purpose can be “status line for the leader page”, and the Note can be “not player text: leave as it is”.
+- Rows with no moment (if any) come last, with “No moment” in the description.
 
 ## The spreadsheet columns
 
@@ -16,8 +27,11 @@ You decide what an educational game says to children, and why. The owner wants e
 | Part of the game | Which part of the day, or which kind of screen. |
 | Age group | 8–12, 13–17, or both (both see it, or the code does not say). |
 | Read aloud | Whether a voice usually speaks this line. Spoken lines must make sense heard, without the screen. |
+| Moment ID | The moment this line belongs to (see “Moments” above). Rows of one moment are together, in play order. |
+| What is happening (description) | The moment’s title and description: when it shows, what the child has just done, who speaks, what else is on screen, what the child can do next. The same for every row of the moment. **Read it before you fill in the row.** |
+| Screenshot | The file name(s) in the screenshots folder that show this moment, or empty. When there is one, **look at it before you fill in the row**: it shows the screen around the line, the buttons and what the child sees at that moment. A screenshot can show a different age group or a slightly different state of the same screen; the description is the reference. |
 | File, Line, Where in the code | Where the line lives. The code path often tells you the moment: for example `missions.land.brief` is the brief card for the Land mission, `intro` is the opening, `done` is after a step is finished, `aria` is a screen-reader label. |
-| Text before it / Text after it | The lines next to it in the same file. Usually the same screen or moment. |
+| Text before it / Text after it | The lines next to it in the same file (in the code, not in the sheet: the sheet is sorted by moment). Often the same screen. |
 | Current text (facts only) | Today's wording. Use it only for facts: numbers, names, button names, rules. It is not a draft: it may be wrong, unclear or unnecessary. |
 | Purpose | **You fill this in.** Why the message exists at that moment. |
 | What the child should understand | **You fill this in.** |
@@ -44,6 +58,8 @@ Florence’s town is no longer a second floating island beside the child’s. It
 
 ## How to work
 
-- Work in order, about 100 rows at a time. Return the same columns, with the five “You fill this in” columns completed, as a CSV I can download.
-- Do not skip rows and do not change the ID, File, Line or Where in the code columns.
+- Before you fill in a row, read its moment’s description and, when there is one, look at its screenshot. Work out the purpose of the line at that moment from them, then fill in the columns.
+- The owner gives you the spreadsheet in **batches of about 100 rows**, in order, and uploads that batch’s screenshots with it (the files named in the Screenshot column of those rows). A moment can run across two batches: keep its purpose and wording consistent.
+- For each batch, return the same columns, with the five “You fill this in” columns completed, as a CSV I can download.
+- Do not skip rows and do not change the ID, Moment ID, File, Line or Where in the code columns.
 - Do not use code to fill the columns automatically. Write each one.
