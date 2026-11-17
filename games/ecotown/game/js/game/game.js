@@ -72,7 +72,7 @@ export function createGame(app) {
   async function missionsAtHome() {
     if (G.busy) return; G.busy = true; let a = null;
     try { const t = G.j ? 'The six AI Lab missions are on the main island. Here, all six lenses are unlocked. Use them to check this town.' : 'Play the six AI Lab missions on the main island. On this island, all six lenses are unlocked.';
-      a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>Missions are on the home island</h2><p>${esc(t)}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="close">${esc(G.S.backToBuilding)}</button><button class="btn alt" data-act="home">🏡 Go to the home island</button></div>`, { say: t });
+      a = await ui.modal(`<div class="ribbon">🧪 ${esc(G.S.labTitle)}</div><h2>Missions are on the main island</h2><p>${esc(t)}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="close">${esc(G.S.backToBuilding)}</button><button class="btn alt" data-act="home">🏡 Go to the main island</button></div>`, { say: t });
     } finally { G.busy = false; }
     if (a === 'home') { save(); location.search = ''; }
   }
