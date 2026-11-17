@@ -30,7 +30,7 @@ export const TOPICS = [
     j: 'Carbon comes from making things like concrete, and from cars. Timber and straw homes make much less. Keep the whole town under 160 tonnes.',
     s: 'Two big sources here: embodied carbon in materials (concrete is high, timber and straw low) and car use. Keep the town under 160 t.' } },
   { id: 'energy', keys: ['power', 'energy', 'electric', 'lights', 'winter', 'night', 'battery', 'wind', 'solar'], video: 'wind', a: {
-    j: 'On a still winter night, solar panels make nothing! Wind turbines and batteries keep the lights on when it’s dark and cold.',
+    j: 'Solar panels make no electricity after dark. Wind turbines make power when it’s windy, and batteries save power for nights when the wind stops.',
     s: 'Plan for the worst case: a still winter night. Solar gives nothing then; wind plus battery storage covers demand.' } },
   { id: 'food', keys: ['food', 'farm', 'hungry', 'eat', 'grow', 'crops'], video: 'mixed', a: {
     j: 'Every three families need one basket of food. Mixed farms and orchards grow food and still leave room for wildlife.',
@@ -58,7 +58,7 @@ export const TOPICS = [
     j: 'You earn stars in my AI Lab missions: one for finding the problem with your first check, one for naming my mistake, and one for a plan that passes. Catching a wrong idea of mine in your town earns a star too. Spend them in the Star shop: tap the ★ at the top.',
     s: 'Stars come from AI Lab missions (a first check that finds the flaw, naming the failure pattern, a plan that passes) and from catching a flawed suggestion in your town. They buy cosmetics in the Star shop (★ in the top bar) and never change the town’s score.' } },
   { id: 'next', keys: ['next', 'stuck', 'what should i do', 'what do i do', 'what now', 'how do i play', 'how to play', 'goal', 'goals', 'win', 'finish', 'mission', 'missions'], a: {
-    j: 'The line at the top of the screen always says your next step, and the 🌼 shows all your town’s goals. Grow the town, then come back here and try a mission: each one gives you a new lens for catching my mistakes.',
+    j: 'Look at the line at the top of the screen to see your next step. Tap 🌼 to see every town goal. When an AI Lab mission is ready, you can open it to check my plans.',
     s: 'The top bar shows your next step and 🌼 lists every town target. Build toward them, and run the AI Lab missions: each adds a lens for testing my plans. The town is complete when all targets are met and all six missions are done.' } },
   { id: 'ai', keys: ['what are you', 'who are you', 'robot', 'ai', 'computer', 'think'], a: {
     j: 'I’m Florence, an AI planning helper. I read your instructions and make a plan, very fast. But I don’t see the island like you do, so you’re the checker!',
