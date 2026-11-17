@@ -67,6 +67,9 @@ export function createTwoTowns(app, T) {
     if (copy) copy.root.visible = on; if (on) tt.yaw = null;
     live.textContent = on ? `${T.florence} · ${T.mine}` : '';
     if (app.reframe) app.reframe(); else tt.frame(rig.inset);
+    // the player's town fits its new pane (or the whole screen again): a short flight to its overview, which also settles a
+    // flight that was still on its way (after a mission the camera is often mid-flight when the split opens)
+    if (tt.building && skyView()) rig.overview(app.reduce ? 0.01 : 0.7);
   }
   // the game opens the split by itself (after a mission, in the intro) or is done with it; a build closes what it opened
   tt.auto = (on) => { tt.st = nextSplit(tt.st, on ? 'open' : 'close'); sync(); return new Promise((r) => setTimeout(r, app.reduce ? 50 : 600)); };
