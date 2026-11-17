@@ -156,7 +156,7 @@ export function createUI(root, labelsRoot, opts) {
       P.dock.classList.toggle('mini', !!o.mini);
       const line = o.say || (o.html ? h(`<div>${o.html}</div>`).textContent : '');
       D.speaker.innerHTML = `<div class="avatar">${pic()}</div><div class="say"><div class="name">${esc(o.name || 'Florence')} <em class="${o.tagCls || ''}">${esc(o.tag || 'GUESS')}</em>${!o.thinking && line && canSpeak() ? '<button class="spk" data-spk aria-label="Read aloud" title="Read aloud">🔊</button>' : ''}</div>
-        <div class="text">${o.html || ''}</div>${o.sure != null ? `<div class="sure"><div class="bar"><i></i></div><span>${o.sure}% ${esc(o.sureLabel || 'sure')}</span></div>` : ''}${o.why ? `<div class="why">${o.why}</div>` : ''}</div>`;
+        <div class="text">${o.html || ''}</div>${o.sure != null ? `<div class="sure"><div class="bar"><i></i></div><span>${o.sureText ? esc(o.sureText) : `${o.sure}% ${esc(o.sureLabel || 'sure')}`}</span></div>` : ''}${o.why ? `<div class="why">${o.why}</div>` : ''}</div>`;
       this.show('helper'); this.portrait?.mount(D.speaker);
       D.speaker.querySelector('[data-spk]')?.addEventListener('click', () => speak(line, { voice: 'helper', force: true }));
       if (o.sure != null) requestAnimationFrame(() => requestAnimationFrame(() => { const i = D.speaker.querySelector('.sure .bar i'); if (i) i.style.width = o.sure + '%'; }));

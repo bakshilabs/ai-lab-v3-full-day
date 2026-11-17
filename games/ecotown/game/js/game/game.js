@@ -85,7 +85,9 @@ export function createGame(app) {
   const pick = (o) => (typeof o === 'string' ? o : G.j ? o.j : o.s);
   const sim = (cells = G.cells) => simulate(terrain, cells, { natureStart: app.natureStart, addFamilies: G.extra.families, addCarbon: G.extra.carbon, addWinter: G.extra.winter || 0, addHealth: G.extra.health || 0, addCommunity: G.extra.community || 0, addNature: G.extra.nature || 0 });
   app.natureStart = natureBaseline(terrain);
-  const help = (o) => ui.helper({ name: G.C.helperName, ...o });
+  // ages 8–12 see no percentages: Florence's confidence becomes words (the bar still fills)
+  const sureWords = (n) => (n >= 85 ? 'very sure' : n >= 70 ? 'quite sure' : n >= 55 ? 'a bit sure' : 'not very sure');
+  const help = (o) => ui.helper({ name: G.C.helperName, ...o, ...(G.j && o.sure != null ? { sureText: `Florence is ${sureWords(o.sure)}` } : {}) });
   const facil = (id, step) => ui.facil(T(id)?.facil?.[step] || null);
 
   // before power is unlocked the town is on the old island grid; after that, a still night shows whether the town's own power copes
@@ -201,7 +203,7 @@ export function createGame(app) {
       setTimeout(() => app.bot.beam(false), dur * 1000 + 300);
       res.plan.placements.forEach((_, i) => setTimeout(() => audio.ghost(i), i * 50));
       const why = G.j ? '' : `Why ${res.sure}%? Based on: reading <b>${res.breakdown.reading}%</b>, plan fit <b>${res.breakdown.fit}%</b>, experience <b>${res.breakdown.experience}%</b>, scaled to 48–92% (never certain). Tested: ${esc(res.plan.tested)}.`; // it used to show the three joined by × as if they multiplied to the total
-      help({ tag: G.C.ui.plotterGuess, html: guessHtml(res), sure: res.sure, sureLabel: G.C.ui.sure, why, say: res.plan.reading.join(' ') + (res.plan.targets?.length ? ' ' + res.plan.targets.map((t) => targetLine(t, G.j)).join(' ') : '') + ` ${res.sure} percent ${G.C.ui.sure}.` + (res.plan.wont?.length ? ' ' + res.plan.wont.join(' ') : ''), voice: 'helper' });
+      help({ tag: G.C.ui.plotterGuess, html: guessHtml(res), sure: res.sure, sureLabel: G.C.ui.sure, why, say: res.plan.reading.join(' ') + (res.plan.targets?.length ? ' ' + res.plan.targets.map((t) => targetLine(t, G.j)).join(' ') : '') + (G.j ? ` I'm ${sureWords(res.sure)}.` : ` ${res.sure} percent ${G.C.ui.sure}.`) + (res.plan.wont?.length ? ' ' + res.plan.wont.join(' ') : ''), voice: 'helper' });
       ui.legend('plan');
       await sleep(dur * 1000);
       return res;
@@ -1456,7 +1458,7 @@ export function createGame(app) {
         tr.querySelector('[data-act]').onclick = resolve;
       }));
       audio.good();
-      help({ tag: 'COUNTED', tagCls: 'ok', html: `<p>“Most residents want <b>safe paths and cycle lanes</b>.”</p><p>At the school gate, <b>${gate.walkers} of 10 walk or cycle</b>. I was 90% sure before because I only asked drivers. Asking different people changed my answer!</p>`, sure: Math.round(100 * gate.walkers / 10), sureLabel: G.C.ui.sure, say: `Most residents want safe paths and cycle lanes. At the school gate, ${gate.walkers} of 10 walk or cycle. I was 90 percent sure before because I only asked drivers. Asking different people changed my answer!`, voice: 'helper' });
+      help({ tag: 'COUNTED', tagCls: 'ok', html: `<p>“Most residents want <b>safe paths and cycle lanes</b>.”</p><p>At the school gate, <b>${gate.walkers} of 10 walk or cycle</b>. I was ${G.j ? 'very sure' : '90% sure'} before because I only asked drivers. Asking different people changed my answer!</p>`, sure: Math.round(100 * gate.walkers / 10), sureLabel: G.C.ui.sure, say: `Most residents want safe paths and cycle lanes. At the school gate, ${gate.walkers} of 10 walk or cycle. I was ${G.j ? 'very sure' : '90 percent sure'} before because I only asked drivers. Asking different people changed my answer!`, voice: 'helper' });
       bonusStar(G.j ? 'You found who Florence forgot to ask!' : 'Found Florence’s biased sample');
       G.mistakes.push({ level: 'heart', habit: 'missing', why: 'Florence only asked drivers at the car park, so her summary left out everyone who walks.', bias: true });
       await sleep(1200); await continueBtn();
