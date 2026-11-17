@@ -1,5 +1,6 @@
 // The Star shop card and the "town complete" finale card. Text comes from content.js (SANDBOX[band].shop and
 // .finale); the shop rules are js/game/shop.js, the summary js/game/finale.js, the 3D looks js/world/cosmetics.js.
+import { CHALLENGES_ON } from '../game/challenges.js';
 import { esc } from './ui.js';
 import { SHOP, wallet, owns, isOn, needs, buy, setOn } from '../game/shop.js';
 import { FINALE_GROUPS } from '../game/finale.js';
@@ -58,7 +59,7 @@ export function showFinale(app, G, sum, { left = 0, title = '', score = null } =
     </div>
     ${habits ? `<h3 class="fhead">${esc(F.habits)}</h3><ul class="fhabits">${habits}</ul>` : ''}
     <p class="flesson">💡 ${esc(F.lesson)}</p>
-    <div class="row frow"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button><button class="btn alt" data-act="challenges">🏆 ${G.j ? 'Challenge towns' : 'Challenge towns'}</button>${left ? `<button class="btn alt" data-act="shop">★ ${esc(F.shop)}</button>` : ''}<button class="btn go" data-act="report">📜 ${esc(F.report)}</button></div>`,
+    <div class="row frow"><button class="btn alt" data-act="keep">${esc(G.S.keepBuilding)}</button>${CHALLENGES_ON ? `<button class="btn alt" data-act="challenges">🏆 Challenge towns</button>` : ''}${left ? `<button class="btn alt" data-act="shop">★ ${esc(F.shop)}</button>` : ''}<button class="btn go" data-act="report">📜 ${esc(F.report)}</button></div>`,
   { say, bind: (el) => { el.classList.remove('shopcard'); el.classList.add('finale'); setTimeout(() => { el.scrollTop = 0; }, 90); } })
     .finally(() => { delete document.documentElement.dataset.finale; setTimeout(() => app.ui.P.modal.classList.remove('finale'), 380); });
 }

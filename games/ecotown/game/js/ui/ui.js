@@ -281,6 +281,8 @@ export function createUI(root, labelsRoot, opts) {
     clear(kind) { for (const a of anchored.slice()) if (!kind || a.node.classList.contains(kind)) remove(a); },
     has(kind) { return anchored.some((a) => a.node.classList.contains(kind)); },
     spots(list) { this.clear('spot'); for (const l of list) add('spot', l); }, // Florence's good spots: a solid gold ⭐ pin over each tile
+    // pins of one kind ('mine': where the picked build already stands; 'farpin': the school and the homes too far from it)
+    pins(kind, list) { this.clear(kind); for (const l of list) add(`${kind} ${l.cls || ''}`, l); },
     update(camera, canvas) {
       const w = canvas.clientWidth, hgt = canvas.clientHeight;
       // keep bubbles out from under the town card and the icon strip (top corners)

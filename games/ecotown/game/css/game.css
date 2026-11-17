@@ -1218,6 +1218,20 @@ html[data-motion="reduce"] .modal.finale.hide, html[data-motion="reduce"] .modal
   #card .shopnew { top: -6px; right: -4px; font-size: 9px; padding: 2px 3px; }
 }
 html[data-street=on] #labels .spot { display: none; }
+
+/* Finding what you built (parent's playtest, Nov 2026): the picked build is ringed in blue where it already stands, with a
+   bouncing pin; the "school is too far" tip pins the school and the far homes. Pins never take taps. */
+#labels .mine, #labels .farpin { position: absolute; transform: translate(-50%, -100%); background: #29c4ff; color: #0d2a3a; border: 2px solid #0d2a3a; border-radius: 12px; padding: 2px 9px; font-weight: 900; font-size: .85em; white-space: nowrap; box-shadow: 0 3px 0 #0d2a3a; pointer-events: none; animation: minebob 1.1s ease-in-out infinite; }
+#labels .mine::after, #labels .farpin::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: #0d2a3a; }
+#labels .farpin.far { background: #ff4f8b; color: #fff; border-color: #5a1027; box-shadow: 0 3px 0 #5a1027; }
+#labels .farpin.far::after { border-top-color: #5a1027; }
+@keyframes minebob { 0%, 100% { margin-top: 0; } 50% { margin-top: -6px; } }
+@media (prefers-reduced-motion: reduce) { #labels .mine, #labels .farpin { animation: none; } }
+html[data-reduce] #labels .mine, html[data-reduce] #labels .farpin { animation: none; }
+html[data-street=on] #labels .mine, html[data-street=on] #labels .farpin { display: none; }
+#build .hk.mine { border: 5px solid #29c4ff; background: linear-gradient(#29c4ff,#29c4ff) 0 0/5px 5px no-repeat, linear-gradient(#29c4ff,#29c4ff) 100% 100%/5px 5px no-repeat, #9bbf5c; }
+#build .slot.item .built { position: absolute; top: 2px; right: 2px; z-index: 2; background: #29c4ff; color: #0d2a3a; font-style: normal; font-weight: 900; font-size: .62em; line-height: 1; padding: 2px 4px; border-radius: 6px; pointer-events: none; }
+#build .info p.moves { margin: 2px 0 0; font-weight: 800; color: #0d5a7a; }
 #build .info .ihead .spotwhy { display: block !important; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-line-clamp: unset; color: #ffd23f; font-weight: 800; font-size: .92em; margin: 0; }
 @media (max-width: 760px) { #build .info .ihead .spotwhy { white-space: normal; } #build .info .ihead { flex-wrap: wrap; } }
 @media (min-width: 761px) {
