@@ -109,7 +109,6 @@ export default [
     ['-power-retry', 'ET-M022', 'power-still-a-problem'],
     ['-power-plan.png', 'ET-M183', 'power-plan'],
     ['-heart-ask', 'ET-M051', 'biased-survey'],
-    ['-heart-teach', 'ET-M051', 'teach-florence'],
     ['-charter.png', 'ET-M052', 'charter'],
     ['-reflection.png', 'ET-M053', 'ai-rule'],
     ['-food-your-turn.png', ['ET-M031', 'ET-M032'], 'food-your-turn'],
@@ -124,8 +123,20 @@ export default [
     ['-move-hidden', 'ET-M126', 'travel-hidden-guess'],
     ['-homes-habit', 'ET-M021', 'habit-names'],
     ['-homes-reward', 'ET-M148', 'homes-reward'],
-    ['-heart-ask', 'ET-M051', 'biased-survey'],
+    ['-heart-teach', 'ET-M051', 'teach-florence'],
     ['-reflection.png', 'ET-M053', 'ai-rule'],
+  ]),
+  ...S('ecotown', 'pages', 'j', [
+    ['start-top', 'ET-M002', 'start-page-top'],
+    ['start-parts', 'ET-M007', 'start-page-part-cards'],
+    ['start-how', 'ET-M002', 'start-page-how-it-works'],
+    ['start-leaders', 'ET-M002', 'start-page-for-leaders'],
+    ['trailer', 'ET-M003', 'trailer-page'],
+  ]),
+  ...S('leader', 'pages', 'j', [
+    ['leader-top', ['LD-M001', 'LD-M006'], 'run-sheet-top'],
+    ['leader-hour', ['LD-M002', 'LD-M005'], 'the-hour-and-where-florence-is-wrong'],
+    ['leader-before', ['LD-M003', 'LD-M004', 'LD-M007', 'LD-M008'], 'setup-waits-and-help'],
   ]),
 ];
 // the break card is the same for every part (ui/talk.js): one picture, from the end of the drone hour

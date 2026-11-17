@@ -10,6 +10,12 @@
 //            <Moment ID>-<j|s>-<what>.jpg. A moment split by age takes the j pictures for 8–12 and the s pictures
 //            for 13–17 (the j pictures when there is no s one).
 //   --out    where the pack folders go (emptied first).   --zip  the zip to write (default <out>.zip).
+// The whole rebuild, from games/ecotown/game served on a port (e.g. python3 -m http.server 8931):
+//   1. play-throughs, one browser at a time, into <play>/<run> (run names as in shots-map.mjs): tests/playwright/
+//      drone.mjs, robots.mjs, roads.mjs, film.mjs, power.mjs (junior; power also senior), run.mjs junior and senior
+//      (FAST=1), and node tools/text/packs/capture-pages.cjs <url> <play>/pages
+//   2. node tools/text/packs/collect-shots.mjs --play <play> --pilot <pilot capture dir> --out <shots>
+//   3. node tools/text/extract.mjs --out rows.json; node tools/text/packs/build.mjs --rows rows.json --shots <shots> --out <dir>
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -57,8 +63,9 @@ for (const m of moments) {
   const ub = has.b ? make('b', m.id) : null, uj = make('j', `${m.id}J`), us = make('s', `${m.id}S`);
   for (const r of list) { const u = r.version === 'j' ? uj : r.version === 's' ? us : ub; u.rows.push(r); unitOf.set(r.id, u); }
 }
+const NOT_SEEN = /not seen in play-through/i;
 const unitDesc = (u) => {
-  const head = `${u.moment.t}. ${u.moment.d}`;
+  const head = `${u.moment.t}. ${u.moment.d}${u.moment.seen === false && !NOT_SEEN.test(u.moment.d) ? ' Not seen in the play-throughs; described from the code.' : ''}`;
   if (u.ver === 'j') return `${head} [This group: the lines for ages 8–12.]`;
   if (u.ver === 's') return `${head} [This group: the lines for ages 13–17.]`;
   if (u.ver === 'b') return `${head} [This group: the lines both ages see; each age’s own lines are in ${u.base}J and ${u.base}S.]`;
@@ -117,7 +124,7 @@ for (const p of PARTS) {
   if (shots.length) { const sd = path.join(dir, 'screenshots'); fs.mkdirSync(sd, { recursive: true }); for (const s of shots) fs.copyFileSync(s.src, path.join(sd, s.file)); }
   const noMoment = mine.filter((r) => !unitOf.get(r.id)).length;
   report.push({ part: p.dir, rows: mine.length, moments: new Set(us.map((u) => u.base)).size, units: us.length, noMoment, shots: shots.length,
-    notSeen: us.filter((u) => /not seen in play-through|Not seen in play-through/.test(u.moment.d)).reduce((n, u) => n + u.rows.length, 0) });
+    notSeen: us.filter((u) => u.moment.seen === false || NOT_SEEN.test(u.moment.d)).reduce((n, u) => n + u.rows.length, 0) });
 }
 // a short read-me at the top of the zip
 fs.writeFileSync(path.join(OUT, 'README.txt'), [
