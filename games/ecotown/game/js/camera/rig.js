@@ -47,7 +47,10 @@ export function createRig(stage, canvas, fadeEl) {
     // scripted distances were tuned on a 16:10 screen; scale them for this screen's shape
     fit(d) { const ref = 280; /* a 1280×800 screen with the build panel */ return d * Math.max(0.8, this.frameDist() / ref); },
     minDist() { return 26; },
-    maxDist() { return this.frameDist() * 1.35; },
+    maxDist() { return this.frameDist() * 1.35 * (this.wide || 1); },
+    // two towns (js/game/twotowns.js): while looking at Florence's island or both islands, the pan limits and the zoom-out
+    // limit grow to take them in. pan: { x: [lo, hi], z: [lo, hi] } or null for the player's island; wide: zoom-out factor
+    pan: null, wide: 1,
     skyPose(o = sky) {
       const p = new THREE.Vector3(Math.sin(o.yaw) * Math.cos(o.pitch), Math.sin(o.pitch), Math.cos(o.yaw) * Math.cos(o.pitch)).multiplyScalar(o.dist).add(o.target);
       return { pos: p, look: o.target.clone(), fov: SKY_FOV };
@@ -81,10 +84,12 @@ export function createRig(stage, canvas, fadeEl) {
     },
     // home: also turn back to the starting direction (after a mission's turntable, or the ⌂ button: a lost player wants
     // the view they know; it used to keep whatever way the island had turned)
-    overview(dur = 1.4, home = false) {
-      sky.autoPitch = true;
-      if (this.portrait()) return this.toSky({ target: new THREE.Vector3(...PORTRAIT.target), dist: this.frameDist(), pitch: PORTRAIT.pitch, yaw: PORTRAIT.yaw }, dur);
-      return this.toSky({ target: new THREE.Vector3(0, 1, -2), dist: this.frameDist(), pitch: 34 * DEG, ...(home ? { yaw: HOME_YAW } : {}) }, dur);
+    // at: the island to frame, when it is not the main one (Florence's town beside the player's, js/game/twotowns.js)
+    overview(dur = 1.4, home = false, at = null) {
+      sky.autoPitch = true; this.onOverview?.(at); this.pan = at ? { x: [PAN.x[0] + at.x, PAN.x[1] + at.x], z: [PAN.z[0] + at.z, PAN.z[1] + at.z] } : null; this.wide = 1;
+      const off = (v) => (at ? v.add(at) : v);
+      if (this.portrait()) return this.toSky({ target: off(new THREE.Vector3(...PORTRAIT.target)), dist: this.frameDist(), pitch: PORTRAIT.pitch, yaw: PORTRAIT.yaw }, dur);
+      return this.toSky({ target: off(new THREE.Vector3(0, 1, -2)), dist: this.frameDist(), pitch: 34 * DEG, ...(home ? { yaw: HOME_YAW } : {}) }, dur);
     },
     focus(point, { dist = 70, pitch = 42 * DEG, yaw = sky.yaw } = {}, dur = 1.2) { return this.toSky({ target: point.clone(), dist: this.fit(dist), pitch, yaw }, dur); },
     // frame a set of world points (a plan, the tiles a check found): fits their bounding sphere in the free area
@@ -183,7 +188,7 @@ export function createRig(stage, canvas, fadeEl) {
       }
     },
   };
-  function clampTarget() { sky.target.x = clamp(sky.target.x, PAN.x[0], PAN.x[1]); sky.target.z = clamp(sky.target.z, PAN.z[0], PAN.z[1]); }
+  function clampTarget() { const P = rig.pan || PAN; sky.target.x = clamp(sky.target.x, P.x[0], P.x[1]); sky.target.z = clamp(sky.target.z, P.z[0], P.z[1]); }
   // the point on the ground (y = 1) under a screen position (NDC), for zooming towards the cursor
   const ray = new THREE.Raycaster(); const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
   function groundAt(n) { ray.setFromCamera(n, cam); const p = new THREE.Vector3(); return ray.ray.intersectPlane(ground, p) ? p : null; }
