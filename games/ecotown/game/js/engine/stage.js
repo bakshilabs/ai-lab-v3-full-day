@@ -131,7 +131,8 @@ export function createStage(canvas, skyEl) {
     // Split screen (js/game/twotowns.js): { main, other, cam, hide } or null. main and other are panes ({ x, y, w, h } in CSS
     // pixels from the top left). The main camera draws the main pane with the usual effects; cam draws the other pane straight
     // to the canvas, with no post-processing and without redrawing the shadow map (Florence's town stands outside the
-    // shadow area, so it gets none). hide: an object shown only in the other pane. One renderer, one WebGL context.
+    // shadow area, so it gets none). hide: an object shown only in the other pane; enter/leave: called around the other pane
+    // (a lens greys the player's town through a shared uniform; Florence's pane keeps its colours). One renderer, one WebGL context.
     split: null,
     setSplit(s) {
       const a = this.split?.main, b = s?.main; this.split = s;
@@ -180,7 +181,7 @@ export function createStage(canvas, skyEl) {
       inPane(sp.main, camera, W, H, () => { dome.position.copy(camera.position); draw(sp.main.w * renderer.getPixelRatio(), sp.main.h * renderer.getPixelRatio()); });
       if (sp.hide) sp.hide.visible = true;
       const au = renderer.shadowMap.autoUpdate; renderer.shadowMap.autoUpdate = false;
-      inPane(sp.other, sp.cam, W, H, () => { dome.position.copy(sp.cam.position); renderer.render(scene, sp.cam); });
+      inPane(sp.other, sp.cam, W, H, () => { dome.position.copy(sp.cam.position); sp.enter?.(); try { renderer.render(scene, sp.cam); } finally { sp.leave?.(); } });
       renderer.shadowMap.autoUpdate = au;
       renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H); dome.position.copy(camera.position);
     },

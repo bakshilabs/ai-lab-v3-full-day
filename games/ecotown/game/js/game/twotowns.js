@@ -16,6 +16,7 @@ import { createWorld } from '../world/world.js';
 import { emptyCell } from '../sim/sim.js';
 import { ITEMS } from '../world/catalog.js';
 import { esc } from '../ui/ui.js';
+import { WORLD } from '../engine/voxel.js';
 import { splitPanes, paneInset, centreOffset, freeShape, paneAt, splitOn, nextSplit, loadPref, savePref } from './split.js';
 
 const DEG = Math.PI / 180;
@@ -67,6 +68,9 @@ export function createTwoTowns(app, T) {
     if (copy) copy.root.visible = on; if (on) tt.yaw = null;
     live.textContent = on ? `${T.florence} · ${T.mine}` : '';
     if (app.reframe) app.reframe(); else tt.frame(rig.inset);
+    // opening: the player's town fits its pane with a short flight to its overview, which also settles a flight still on its
+    // way (after a mission the camera is often mid-flight). Closing (often right after a build) only rescales the view.
+    if (on && tt.building && skyView()) rig.overview(app.reduce ? 0.01 : 0.7);
   }
   // the game opens the split by itself (after a mission, in the intro) or is done with it; a build closes what it opened
   tt.auto = (on) => { tt.st = nextSplit(tt.st, on ? 'open' : 'close'); sync(); return new Promise((r) => setTimeout(r, app.reduce ? 50 : 600)); };
@@ -81,14 +85,15 @@ export function createTwoTowns(app, T) {
     if (!tt.on) { tt.panes = null; stage.setSplit(null); deco.hidden = true; document.getElementById('labels').style.clipPath = ''; delete document.documentElement.dataset.split; return base; }
     const P = tt.panes = splitPanes(W, H, base); const mine = paneInset(P.mine, W, H, base); tt.her = paneInset(P.florence, W, H, base);
     cam.aspect = W / H; const o = centreOffset(W, H, tt.her); cam.setViewOffset(W, H, o.x, o.y, W, H);
-    stage.setSplit({ main: P.mine, other: P.florence, cam, hide: ensure().root });
+    stage.setSplit({ main: P.mine, other: P.florence, cam, hide: ensure().root, enter: lensOff, leave: lensBack });
     document.documentElement.dataset.split = P.stacked ? 'stack' : 'side';
     // the line, and the labels beside it: side by side, at the top of the free area; stacked, either side of the line
     deco.hidden = false; const ls = line.style, hs = lblHers.style, ms = lblMine.style;
     for (const s of [hs, ms]) { s.left = s.right = s.top = s.bottom = ''; s.transform = ''; }
     if (!P.stacked) {
       Object.assign(ls, { left: `${P.line - 2}px`, top: '0px', width: '4px', height: `${H}px` });
-      const top = `${Math.round(base.top + 10)}px`; hs.top = ms.top = top;
+      const card = ui.P.card && !ui.P.card.classList.contains('hide') ? ui.P.card.getBoundingClientRect().bottom : 0; // (a side tray leaves no top inset: keep clear of the card)
+      const top = `${Math.round(Math.max(base.top, card) + 10)}px`; hs.top = ms.top = top;
       hs.right = `${W - P.line + 10}px`; ms.left = `${P.line + 10}px`;
     } else {
       Object.assign(ls, { left: '0px', top: `${P.line - 2}px`, width: `${W}px`, height: '4px' });
@@ -98,6 +103,9 @@ export function createTwoTowns(app, T) {
     const m = P.mine; document.getElementById('labels').style.clipPath = `inset(${m.y}px ${W - m.x - m.w}px ${H - m.y - m.h}px ${m.x}px)`;
     return mine;
   };
+  // a lens greys the town through one shared uniform (WORLD.clay); it shows only on the player's town, so Florence's pane is
+  // drawn with it off and her town keeps its colours
+  let clay = 0; const lensOff = () => { clay = WORLD.clay.value; WORLD.clay.value = 0; }; const lensBack = () => { WORLD.clay.value = clay; };
   // pointers over Florence's pane: no building, panning or zooming there (rig.js); a tap says where building happens
   rig.paneBlock = (x, y) => tt.on && paneAt(tt.panes, x, y) === 'florence';
 

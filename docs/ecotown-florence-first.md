@@ -84,7 +84,12 @@ screen that can be shown or hidden** instead (`js/game/twotowns.js`; pure rules 
   its own town. It is hidden when the split is closed.
 - **Performance.** Florence's pane is drawn without post-processing (no colour grade or SMAA), without shadows and without
   redrawing the shadow map; the main pane's effects run at the pane's size, not the screen's. "auto" graphics still step
-  down on a slow device. Numbers below in the hand-over.
+  down on a slow device. Measured in software 3D at "mid", 1366 × 800, both towns built up (the clear plans for all six
+  levels), draw calls / triangles per frame: single view (split hidden) 503 / 366k; split view 662 / 556k. The old layout
+  measured the same way: the player's town with the copy beside it 503 / 450k, "Both" 654 / 539k, the copy switched off
+  498 / 365k. So the split costs about what the old "Both" view did, and the single view no longer pays for the copy
+  (about 84k triangles saved). At 820 × 1180: single 503 / 364k, split 652 / 556k. Frame times in software 3D are not
+  meaningful for a real tablet; a real-device check is still needed.
 - **Phones.** Upright: Florence's pane on top, the child's below, each about a third of the screen between the card and
   the tray. Landscape phones split left and right.
 

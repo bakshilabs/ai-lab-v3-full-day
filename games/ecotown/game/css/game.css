@@ -2242,7 +2242,7 @@ html[data-street=on] #towns, html[data-inside=on] #towns { display: none; }
 /* narrower screens: the town card and the icon strip fill the top row, so the toggle sits just under the strip */
 @media (max-width: 1199px) { #towns { top: 90px; right: 14px; } }
 @media (max-width: 560px) { #towns { top: 90px; bottom: auto; right: auto; left: 74px; min-height: 44px; padding: 3px 8px; font-size: .78rem; } #splitdeco .panelbl { font-size: .82rem; padding: 3px 9px; } }
-@media (max-height: 560px) and (orientation: landscape) { #towns { top: 54px; right: 10px; min-height: 40px; padding: 2px 8px; font-size: .76rem; } #splitdeco .panelbl { font-size: .78rem; padding: 2px 8px; } }
+@media (max-height: 560px) and (orientation: landscape) { #towns { top: 66px; right: 10px; min-height: 40px; padding: 2px 8px; font-size: .76rem; } #splitdeco .panelbl { font-size: .78rem; padding: 2px 8px; } }
 /* the town card stops short of the camera button as well as the icon strip (at 820 px the Lenses button pushed the
    camera button over the 13-17 credits chip) */
 @media (min-width: 761px) and (min-height: 561px) { #card { max-width: calc(100vw - var(--stripw, 220px) - 44px - 66px); } }
