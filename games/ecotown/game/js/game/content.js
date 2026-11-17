@@ -356,6 +356,59 @@ export const SANDBOX = {
   },
 };
 
+// ---- Florence first, then your own town (owner, 17 Nov 2026; docs/ecotown-florence-first.md). START OF BLOCK
+// At each level the player tells Florence what to build in HER town and checks her plan; then that level opens in their OWN
+// town, beside hers. These lines are new or replace older ones (no recordings yet: the device voice reads them).
+{
+  const WHAT = { j: { land: 'the town land', move: 'the paths', homes: 'the homes', food: 'the farms', power: 'the power', heart: 'the school' }, s: { land: 'site selection', move: 'movement routes', homes: 'housing', food: 'food production', power: 'power and water', heart: 'the school' } };
+  const J = SANDBOX.junior, S = SANDBOX.senior; const wj = WHAT.j, ws = WHAT.s;
+  Object.assign(J, {
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to look at', notHere: 'That’s Florence’s town. You build in your own town: tap “Your town”.' },
+    missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Go to the AI Lab',
+    invite: Object.fromEntries(Object.entries(wj).map(([id, w]) => [id, `My turn first! Come to the AI Lab and tell me how to build ${w} in my town. Then you build yours.`])),
+    opensAfter: (t) => `Opens after Florence’s mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First, in your town:',
+    yourTurn: (cat) => `Your turn: build ${cat} your way`, backToYours: 'Back to your town',
+    compare: 'Look: Florence’s town and yours, side by side. Now build it your way!',
+    practice: 'Florence builds this in her own town. Your town, beside hers, stays just as you built it.',
+    labIntro: 'In each mission you tell Florence what to build in her town, check her plan and catch her mistakes. Then you build the same part your way in your town.',
+    labGoalHow: 'Tap the AI Lab button (top right) when Florence asks', diaryDone: (t) => `AI Lab: “${t}” done. Florence built it in her town. Now I build mine.`, diaryAgain: (t) => `AI Lab: played “${t}” again for practice.`,
+    charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this promise, but yours doesn’t yet. Build it your way: tap 🌼 to see what your town still needs.',
+  });
+  J.spotWhy.linkLand = (to) => `⭐ Good spots: a line from your town land to ${to}, so the families can walk there when they come.`;
+  J.spotWhy.needHomes = 'Mark some town land first. Then I’ll show you where a path should go.';
+  J.nextStep.florence = (id) => `Go to the AI Lab: tell Florence how to build ${wj[id]} in her town`;
+  J.unlockTip.land = 'Land is unlocked! Before you build: keep off the flood meadow by the river, and leave the old wood for the deer. Pick 🗺 Land, then tap dry tiles to make town land.';
+  J.unlockTip.move = 'Travel is unlocked! Before you build: footpaths and cycle lanes keep children safe on the way to school. Car roads near homes are dangerous to cross. Pick 🚲 Travel to start.';
+  Object.assign(J.intro, {
+    towns: 'This is my town, and this is yours. They are both empty!',
+    how: 'Here’s how we build. First you tell me what to build in my town, and you check my plan for mistakes. Then you build it your way in your town.',
+    lab: 'This is my AI Lab. I’m clever… but sometimes I’m confidently wrong. Can you catch me?', overToYou: 'Let’s start with the land!', go: 'Go to the AI Lab',
+  });
+  Object.assign(S, {
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to view', notHere: 'That is Florence’s town. You build in your own: select “Your town”.' },
+    missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Open the AI Lab',
+    invite: Object.fromEntries(Object.entries(ws).map(([id, w]) => [id, `Next: brief me in the AI Lab on ${w} for my town. Then build your own version.`])),
+    opensAfter: (t) => `Opens after the AI Lab mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First:',
+    yourTurn: (cat) => `Your turn: build ${cat}`, backToYours: 'Back to your town',
+    compare: 'Florence’s town and yours, side by side. Your turn to build.',
+    practice: 'Florence builds this in her own town. Your town, beside hers, is not changed.',
+    labIntro: 'Each mission: brief Florence for her town, test her plan with evidence, identify the failure mode and re-specify. Then build the same system your way in your town.',
+    labGoalHow: 'Open the AI Lab (top right) when a mission is available', diaryDone: (t) => `AI Lab: “${t}” complete. Florence built it in her town; own town next.`, diaryAgain: (t) => `AI Lab: “${t}” replayed for practice.`,
+    charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this commitment; yours does not yet. Open 🌼 for what your town still needs.',
+  });
+  S.spotWhy.needHomes = 'No town land yet: a route needs town land at one end.';
+  S.spotWhy.linkLand = (to) => `⭐ Good spots: a route from your town land to ${to}.`;
+  S.nextStep.florence = (id) => `AI Lab: brief Florence on ${ws[id]} for her town`;
+  S.unlockTip.land = 'Land unlocked. Before building: avoid the winter floodplain and the ancient woodland. Designate town land on dry ground.';
+  S.unlockTip.move = 'Movement unlocked. Before building: footpaths and cycle lanes keep the school run safe; car roads near homes create unsafe crossings.';
+  Object.assign(S.intro, {
+    towns: 'Two towns: mine and yours. Both start empty.',
+    how: 'At each stage you brief me for my town and test my plan for errors. Then you build the same system your way in yours.',
+    lab: 'My AI Lab: brief me, test my plan with evidence, and find where I went wrong. I am often confident. I am not always right.', overToYou: 'We start with site selection.', go: 'Open the AI Lab',
+  });
+}
+// ---- Florence first (END OF BLOCK)
+
 // Per-level text. j = junior, s = senior. {n} placeholders are filled from the simulation.
 // newThing: what this level adds (shown on the brief card). hidden: the "spot the hidden guess" step for
 // a clean first try (answer is option 0; options are shuffled on screen).

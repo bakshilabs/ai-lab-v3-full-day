@@ -24,7 +24,7 @@ export function carbonFix(s, j) {
 // In priority order. lab: the AI Lab mission that teaches this problem. lens: the check that shows it.
 // ctx: { open: unlocked categories, hasSchool }
 export const RULES = [
-  { id: 'start', when: (s) => s.townTiles === 0, text: { j: 'Let’s choose where your town will go. Tap 🗺 Land, then tap dry squares on the island to mark them as Town land.', s: 'Start with site selection: mark town land (🗺 Land), then connect it with paths.' } },
+  { id: 'start', when: (s, c) => s.townTiles === 0 && (!c?.open || c.open.includes('land')), /* (only once Land is open: Florence first) */ text: { j: 'Let’s choose where your town will go. Tap 🗺 Land, then tap dry squares on the island to mark them as Town land.', s: 'Start with site selection: mark town land (🗺 Land), then connect it with paths.' } },
   // (not while the player is draining the meadow: homes stand on it and none of them floods. On the delta island that is the way to build.)
   { id: 'flood', lab: 'land', lens: 'flood', when: (s) => s.townFlooded >= 2 && !(s.flooded === 0 && s.homes.some((h) => h.zone === 'meadow')), text: { j: (s) => `${s.townFlooded} of your Town land tiles are on ground that floods in winter. Use Remove to clear those tiles, then choose dry ground higher up the slope.`, s: (s) => `${pl(s.townFlooded, 'town tile')} on the winter floodplain. Relocate to higher ground.` } },
   { id: 'wood', lab: 'land', lens: 'nature', when: (s) => s.townOnWood >= 2, text: { j: 'Your town is cutting into the old wood, where the deer live. Mark that land “Keep wild” instead.', s: (s) => `${pl(s.townOnWood, 'town tile')} clear ancient woodland. Pick another site.` } },

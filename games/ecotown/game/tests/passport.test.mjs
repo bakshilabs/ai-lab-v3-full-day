@@ -1,7 +1,7 @@
 // The club passport: points and ranks from the device record. Every rank can be reached, the top rank takes
 // most of the challenges, and the tip always points at something not done yet.
 import test from 'node:test'; import assert from 'node:assert/strict';
-import { passport, RANKS, MISSION_STARS } from '../js/game/passport.js';
+import { passport, RANKS_CH as RANKS, RANKS_TOWN, MISSION_STARS } from '../js/game/passport.js';
 import { CHALLENGES } from '../js/game/challenges.js';
 const ON = { challenges: true }; // the challenge towns are hidden for now (CHALLENGES_ON); these tests check the passport with them on
 
@@ -37,4 +37,15 @@ test('with the challenge towns hidden, the passport has no challenge points, lis
   const p = passport({ junior: { score: 95, medal: 'gold' }, me: { junior: { stars: 19, complete: true, catches: 5 } }, ch: { junior: all('gold') } }, 'junior', { challenges: false });
   assert.equal(p.points, MISSION_STARS + 5 + 6 + 5); assert.equal(p.challenges.length, 0); assert.ok(!p.parts.some((x) => x.id === 'challenges')); assert.equal(p.tip.id, 'done'); assert.doesNotMatch(p.tip.text, /challenge|Chief/i);
   const mid = passport({ junior: { score: 78, medal: 'silver' }, me: { junior: { stars: 14, complete: true } } }, 'junior', { challenges: false }); assert.notEqual(mid.tip.id, 'challenge');
+});
+
+test('with the challenges hidden, a child who finishes Eco Town can reach the top rank', () => {
+  const off = { challenges: false }; const r = (dev) => passport(dev, 'junior', off);
+  assert.equal(r({}).rank.name, 'Helper');
+  const finished = r({ junior: { score: 80, medal: 'silver' }, me: { junior: { stars: 12, complete: true, catches: 4 } } });
+  assert.equal(finished.points, 12 + 5 + 4 + 4); assert.equal(finished.rank.name, 'Chief Planner', 'a good finish reaches the top');
+  const best = r({ junior: { score: 95, medal: 'gold' }, me: { junior: { stars: MISSION_STARS, complete: true, catches: 5 } } }); assert.equal(best.rank.name, 'Chief Planner'); assert.equal(best.next, null);
+  const missionsOnly = r({ me: { junior: { stars: 9 } } }); assert.equal(missionsOnly.rank.name, 'Planner', 'the missions alone, without finishing the town, stop below the top');
+  assert.ok(r({ me: { junior: { stars: MISSION_STARS, catches: 5 } } }).rank.name !== 'Chief Planner', 'the top rank needs a finished town');
+  assert.equal(finished.ranks, RANKS_TOWN); for (let i = 1; i < RANKS_TOWN.length; i++) assert.ok(RANKS_TOWN[i].at > RANKS_TOWN[i - 1].at);
 });

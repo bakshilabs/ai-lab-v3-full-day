@@ -1,5 +1,5 @@
 // A player who only follows the game's own hints: the next-step line and Florence's first good spot (G.hint()).
-// The hints must lead to all eight town goals without a dead end, and must not repeat one build more than 4 times running.
+// With the six missions done, the hints must lead to all eight town goals without a dead end, and must not repeat one build more than 4 times running.
 // Usage: node tests/playwright/hints.mjs [junior|senior] [screenshot.png] [baseUrl]
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -12,6 +12,9 @@ await p.addInitScript(() => localStorage.setItem('ecotown.prefs', JSON.stringify
 await p.goto(base + 'index.html'); await p.click(`[data-band="${band}"]`); await p.click('[data-go]');
 const sk = await p.waitForSelector('[data-introskip]', { timeout: 120000 }).catch(() => null); if (sk) await sk.click().catch(() => {});
 await p.waitForSelector('#build [data-cat="land"]', { timeout: 180000 }); await p.waitForTimeout(1500);
+// Florence first: each level opens after its AI Lab mission. This run is about the hints in the player's own town, so the six
+// missions count as done (the play-through, run.mjs, plays them); the "your turn" steps are then already behind it.
+await p.evaluate(() => { const { G } = window.__eco.app; for (const id of ['land', 'move', 'homes', 'food', 'power', 'heart']) G.labs[id] = { stars: 1 }; G.ever = ['land', 'move', 'homes', 'food', 'power', 'heart']; });
 let last = '', stuck = 0, fail = '', run = 0, lastTool = '', done = false;
 for (let i = 0; i < 160; i++) {
   const r = await p.evaluate(() => { const G = window.__eco.app.G; const h = G.hint(); let placed = null;
