@@ -1,11 +1,15 @@
-// End-to-end play-through of free building and all six AI Lab missions, for one age band, with screenshots.
+// End-to-end play-through of the Florence-first hour (docs/ecotown-florence-first.md), for one age band, with screenshots.
 // Usage: node tests/playwright/run.mjs <baseUrl> <junior|senior> <outDir> [width height] [cards|text] [flawed|clean|mixed]
 //   flawed: the vague instruction first (catch Florence's mistake); clean: a clear instruction first (hidden-guess step);
-//   mixed: alternate. Requires Playwright and a static server for games/ecotown/game.
-// The run builds town land by tapping the island, checks that categories unlock as the town grows and that
-// Florence's tips appear, then plays each mission from the AI Lab board. After the missions it uses Florence's
-// plan in the town (except the "Getting around" mission, where it keeps the town and checks nothing changed),
-// so the town grows through every unlock, and it ends on the town report.
+//   mixed: alternate. Requires Playwright and a static server for games/ecotown/game. INTRO=1 plays the intro (it ends at
+//   the AI Lab door and starts mission 1); FAST=1 uses low graphics, reduced motion and no build films.
+// At each level it checks: the level's build tab is locked in the player's town before Florence's mission and a tap there
+// builds nothing; the mission is played in Florence's town on the whole screen (no split); her plan is not copied into the
+// player's town; the tab opens afterwards with her advice; the split screen opens by itself to compare the two towns and
+// stays until the player builds; then it does the player's small step (following the game's own hints, by real build taps)
+// until the next mission is ready. The split screen (js/game/twotowns.js): its toggle never overlaps another control, a
+// tap on Florence's pane builds nothing, the lenses work in the player's pane, and the choice comes back after a reload.
+// After the six missions it follows the hints to finish the town, then the lens, the report and the save.
 import { createRequire } from 'module';
 import fs from 'fs';
 const require = createRequire(import.meta.url);
@@ -18,71 +22,99 @@ const LEVELS = [
   ['move', 'street', 'Make it easy for everyone to get to school.', 'Safe walking and cycling. Cars stay at the edge.'],
   ['homes', 'carbon', 'Build strong homes that will last for years.', 'Warm, low-carbon homes from timber and straw.'],
   ['food', 'nature', 'Grow as much food as we possibly can.', 'Enough food, and keep the hedges for the bees.'],
-  ['power', 'winter', 'Make enough clean, green power for every home.', 'Winter-night power with batteries, rain gardens and compost.'],
+  ['power', 'winter', 'Make enough clean, green power for every home.', 'Keep the lights on through a still winter night with batteries. Add rain gardens and compost.'],
   ['heart', 'walk', 'Put the new school right in the middle.', 'School within a 15-minute walk of every home.'],
 ];
+const T0 = Date.now(); const times = {}; const mark = (k) => (times[k] = Math.round((Date.now() - T0) / 1000));
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const p = await b.newPage({ viewport: { width: +W, height: +H } });
 await p.addInitScript((fast) => { window.__sayLog = []; if (fast) localStorage.setItem('ecotown.prefs', JSON.stringify({ quality: 'low', reduce: true })); }, !!process.env.FAST);
 const errors = []; p.on('pageerror', (e) => errors.push(e.message + ' ' + (e.stack || '').split('\n')[1])); p.on('console', (m) => m.type() === 'error' && !/404/.test(m.text()) && errors.push(m.text()));
 const requests = []; p.on('request', (r) => { if (!r.url().startsWith(base)) requests.push(r.url()); });
-const budget = []; const checks = {};
-// story episodes (js/ui/epviewer.js): a film before and after each mission, the first time. The run skips each one as soon as
-// its Skip button shows. (Playwright's own Chromium has no H.264, so there the game carries on without the film.)
+const budget = []; const checks = {}; const fails = [];
+const expect = (name, ok) => { checks[name] = ok; if (ok !== true) fails.push(name); };
+// story episodes (js/ui/epviewer.js): the run skips each film as soon as its Skip button shows
 let episodesSkipped = 0; await p.addLocatorHandler(p.locator('#episode [data-skip]'), async (skip) => { episodesSkipped++; await skip.click(); });
 let n = 0; const shot = async (name) => { await p.waitForTimeout(500); await p.screenshot({ path: `${out}/${String(++n).padStart(2, '0')}-${name}.png` }); };
 const click = async (sel, t = 20000) => { await p.waitForSelector(sel, { state: 'visible', timeout: t }); await p.click(sel); };
-const panelsVisible = () => p.evaluate(() => [...document.querySelectorAll('#layer > .panel:not(.hide)')].map((n) => n.id).filter(Boolean));
+const panelsVisible = () => p.evaluate(() => [...document.querySelectorAll('#layer > .panel:not(.hide)')].map((x) => x.id).filter(Boolean));
 const A = '#dock [data-actions] ';
+const town = () => p.evaluate(() => JSON.stringify([...window.__eco.app.G.cells].filter(([, c]) => c.item || c.mark || c.mods?.length).sort()));
+const florence = () => p.evaluate(() => JSON.stringify([...window.__eco.app.G.fcells].filter(([, c]) => c.item || c.mark || c.mods?.length).sort()));
+const locked = (cat) => p.evaluate((c) => document.querySelector(`#build [data-cat="${c}"]`)?.classList.contains('locked'), cat);
+// a real tap on the screen over a tile of the player's island (null when none is on screen)
+const tapPoint = (k) => p.evaluate((key) => { const { app } = window.__eco; const v = app.world.tileTop(key).project(app.stage.camera); const r = app.stage.renderer.domElement.getBoundingClientRect(); const x = r.left + ((v.x + 1) / 2) * r.width, y = r.top + ((1 - v.y) / 2) * r.height; return document.elementFromPoint(x, y) === app.stage.renderer.domElement ? { x, y } : null; }, k);
+// the split screen: whether it is on, and which visible controls the toggle overlaps (also the credits chip vs the top row)
+const split = () => p.evaluate(() => { const tt = window.__eco.app.twoTowns; return { on: !!tt?.on, pressed: document.querySelector('#towns')?.getAttribute('aria-pressed'), layout: document.documentElement.dataset.split || null, stage: !!window.__eco.app.stage.split }; });
+const overlaps = () => p.evaluate(() => {
+  const box = (e) => { if (!e || e.classList.contains('hide') || e.hidden) return null; const r = e.getBoundingClientRect(); return r.width && r.height && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden' ? r : null; };
+  const hit = (a, b) => a && b && a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+  const t = box(document.querySelector('#towns')); const out = [];
+  for (const id of ['card', 'strip', 'camctl', 'build', 'lensbar', 'alert', 'lenspop', 'goalpop']) if (hit(t, box(document.getElementById(id)))) out.push(id);
+  const cr = box(document.querySelector('#card .credits'));
+  for (const id of ['strip', 'camctl']) if (hit(cr, box(document.getElementById(id)))) out.push(`credits/${id}`);
+  for (const id of ['strip', 'camctl']) if (hit(box(document.getElementById('card')), box(document.getElementById(id)))) out.push(`card/${id}`);
+  return out; });
+const noOverlap = async (name) => { const o = await overlaps(); if (o.length) { checks[`overlap-${name}`] = o.join(','); fails.push(`overlap-${name}`); } };
+// a real tap in the middle of Florence's pane while the screen is split
+const tapHerPane = () => p.evaluate(() => { const P = window.__eco.app.twoTowns.panes; const r = P.florence; return { x: r.x + r.w * 0.5, y: P.stacked ? r.y + r.h * 0.6 : r.y + r.h * 0.5 }; });
+const freeTiles = () => p.evaluate(() => { const { app, terrain } = window.__eco; return [...terrain.tiles.values()].filter((t) => ['field', 'slope'].includes(t.zone) && !t.fixed && !app.G.cells.get(t.k)?.mark && !app.G.cells.get(t.k)?.item).map((t) => t.k); });
+// try to build a locked level by tapping its tab and then a tile, like a player: nothing may change
+async function buildAhead(cat) {
+  const before = await town(); await p.click(`#build [data-cat="${cat}"]`).catch(() => {}); await p.waitForTimeout(300);
+  for (const k of (await freeTiles()).slice(0, 12)) { const pt = await tapPoint(k); if (pt) { await p.mouse.click(pt.x, pt.y); await p.waitForTimeout(250); break; } }
+  // also the keyboard shortcut for the tab, then a tap
+  return before === (await town());
+}
+// the player's own step toward the next mission, by the game's own hint, with real build taps where the tile is on screen
+async function yourTurn(next) {
+  for (let i = 0; i < 40; i++) {
+    const h = await p.evaluate(() => window.__eco.app.G.hint());
+    if (h.mission === next || !h.unlock) return i;
+    if (!h.tool || !h.spots.length) { console.log('NO HINT', JSON.stringify(h)); return -1; }
+    await p.evaluate((t) => { const { G } = window.__eco.app; G.showWhere?.(t); }, h.tool); await p.waitForTimeout(300);
+    const pt = await tapPoint(h.spots[0]); const before = await town();
+    if (pt) { await p.mouse.click(pt.x, pt.y); await p.waitForTimeout(350); }
+    if (before === (await town())) await p.evaluate(([k, t]) => window.__eco.app.G.act(k, t), [h.spots[0], h.tool]); // off screen: the same build through the game's own tap
+    await p.waitForTimeout(150);
+  }
+  return -1;
+}
 
 await p.goto(base + 'index.html');
 await shot('start');
 await click(`[data-band="${band}"]`);
 await click('[data-name]'); await p.fill('[data-name]', 'Otter Bend'); await shot('name'); await click('[data-go]');
-await p.waitForTimeout(800);
-// Florence's intro: INTRO=1 plays it (three tiles, the build video), otherwise it is skipped
+await p.waitForTimeout(800); mark('start');
+let introToLab = false;
 if (process.env.INTRO) {
-  for (let i = 0; i < 14 && !(await p.evaluate(() => window.__eco.app.G?.introDone)); i++) {
-    const r = await Promise.race([p.waitForSelector('#florence:not(.hide) [data-next]', { timeout: 120000 }).then(() => 'next'), p.waitForSelector('#florence [data-introbar]', { timeout: 120000 }).then(() => 'tap'), p.waitForSelector('#modal:not(.hide) video', { timeout: 120000 }).then(() => 'video')]).catch(() => 'none');
-    if (r === 'next') { await shot(`intro-${i}`); await p.click('#florence [data-next]').catch(() => {}); await p.waitForTimeout(600); }
-    else if (r === 'tap') { await shot('intro-tap'); await p.evaluate(() => { const { G } = window.__eco.app; const ks = [...window.__eco.terrain.tiles.values()].filter((t) => t.zone === 'slope' && !t.fixed).slice(0, 3).map((t) => t.k); for (const k of ks) G.placeAt(k, 'town'); }); await p.waitForTimeout(1500); }
-    else if (r === 'video') { await p.waitForTimeout(2500); checks.introVideoPlays = await p.evaluate(() => { const v = document.querySelector('#modal video'); return !!v && v.readyState >= 2 && v.currentTime > 0; }); await shot('intro-video'); await p.click('#modal [data-act]'); }
-    else break;
+  for (let i = 0; i < 8; i++) {
+    const r = await p.waitForSelector('#florence:not(.hide) [data-next]', { timeout: 120000 }).catch(() => null); if (!r) break;
+    await shot(`intro-${i}`); const label = await p.textContent('#florence [data-next]');
+    if (i === 0) { await p.waitForTimeout(900); const s = await split(); checks.introOpensSplit = s.on && s.pressed === 'true'; await shot('intro-split'); }
+    await p.click('#florence [data-next]').catch(() => {}); await p.waitForTimeout(700);
+    if (/AI Lab/.test(label)) { introToLab = true; break; }
   }
-  checks.introDone = await p.evaluate(() => window.__eco.app.G?.introDone); checks.introTilesKept = await p.evaluate(() => window.__eco.app.G.sim().townTiles);
+  checks.introEndsAtTheLab = introToLab;
 } else { const sk = await p.waitForSelector('[data-introskip]', { timeout: 120000 }).catch(() => null); if (sk) await sk.click().catch(() => {}); }
+mark('intro');
 
-// ---------- free building: straight onto the island, with the build bar and Florence's first tip
-await p.waitForSelector('#build [data-cat="land"]', { timeout: 180000 });
-checks.noForcedCard = await p.evaluate(() => document.querySelector('#modal').classList.contains('hide'));
-await p.waitForSelector('#florence:not(.hide) .fhead em', { timeout: 15000 }).then(() => (checks.firstTip = true)).catch(() => (checks.firstTip = false));
-await shot('build-start'); budget.push(['build-start-live', await panelsVisible()]);
-checks.homesLockedAtStart = await p.evaluate(() => document.querySelector('[data-cat="homes"]').classList.contains('locked'));
-// tap six dry tiles on the island with the town-land tool, like a player
-await click('#build [data-cat="land"]'); await click('#build [data-t="town"]');
-const spots = await p.evaluate(() => {
-  const { app, terrain } = window.__eco; const cam = app.stage.camera; const cv = app.stage.renderer.domElement.getBoundingClientRect(); const out = [];
-  for (const t of terrain.tiles.values()) {
-    if (!['field', 'slope'].includes(t.zone) || t.fixed) continue;
-    const v = app.world.tileTop(t.k).project(cam); if (Math.abs(v.x) > 0.8 || v.y < -0.6 || v.y > 0.8) continue;
-    const x = cv.left + ((v.x + 1) / 2) * cv.width, y = cv.top + ((1 - v.y) / 2) * cv.height;
-    if (document.elementFromPoint(x, y) !== app.stage.renderer.domElement) continue; // under a panel (Florence's card, the hotbar): a player wouldn't tap there
-    out.push({ k: t.k, x, y });
-  }
-  return out;
-});
-let placed = 0;
-for (const s of spots) {
-  if (placed >= 6) break;
-  const before = await p.evaluate(() => window.__eco.app.G.sim().townTiles);
-  await p.mouse.click(s.x, s.y); await p.waitForTimeout(250);
-  if (await p.evaluate((b0) => window.__eco.app.G.sim().townTiles > b0, before)) placed++;
+if (!introToLab) {
+  await p.waitForSelector('#build [data-cat="land"]', { timeout: 180000 });
+  await p.waitForSelector('#florence:not(.hide) [data-tiplab]', { timeout: 20000 }).then(() => (checks.firstTipInvitesToTheLab = true)).catch(() => (checks.firstTipInvitesToTheLab = false));
+  await shot('build-start'); budget.push(['build-start-live', await panelsVisible()]);
+  expect('everythingLockedAtStart', await p.evaluate(() => [...document.querySelectorAll('#build [data-cat]')].every((x) => x.classList.contains('locked'))));
+  expect('cannotBuildLandBeforeMission1', await buildAhead('land'));
+  expect('splitHiddenAtStart', !(await split()).on);
+  await noOverlap('start');
+  await click('#towns'); await p.waitForTimeout(1600); { const s = await split(); expect('toggleShowsSplit', s.on && s.pressed === 'true' && !!s.layout && s.stage); }
+  checks.copyOutOfMainView = await p.evaluate(() => window.__eco.app.world2.root.position.x > 4000);
+  await shot('split-empty'); await noOverlap('split');
+  { const before = await town(); await p.click('#build [data-cat="land"]').catch(() => {}); const pt = await tapHerPane(); await p.mouse.click(pt.x, pt.y); await p.waitForTimeout(500);
+    expect('tapOnHerPaneBuildsNothing', before === (await town())); checks.tapOnHerPaneCaption = await p.evaluate(() => (document.querySelector('#toast:not(.hide)')?.textContent || '') === window.__eco.app.G.S.towns.notHere); }
+  await p.keyboard.press('Escape'); await p.focus('#towns'); await p.keyboard.press('Enter'); await p.waitForTimeout(1200);
+  expect('keyboardHidesSplit', !(await split()).on && (await split()).pressed === 'false' && !(await split()).stage);
 }
-checks.tappedTownTiles = placed;
-await p.waitForTimeout(600); await shot('build-town-land');
-checks.homesUnlockedByGrowing = await p.evaluate(() => !document.querySelector('[data-cat="homes"]').classList.contains('locked'));
-// clear the tapped tiles again, so the missions' plans fit the town as designed
-await p.evaluate(() => { const { G } = window.__eco.app; for (const [k, c] of [...G.cells]) if (c.mark === 'town' && !c.item) G.placeAt(k, 'erase'); });
 
 async function instruct(text, card) {
   await p.waitForSelector('#dock:not(.hide) [data-actions] h3', { timeout: 30000 });
@@ -91,78 +123,111 @@ async function instruct(text, card) {
 }
 let li = 0;
 for (const [id, check, vague, clear] of LEVELS) {
-  const clean = path === 'clean' || (path === 'mixed' && li++ % 2 === 1);
-  // a modal from free building (the town-complete card) may be up: keep building
+  const clean = path === 'clean' || (path === 'mixed' && li % 2 === 1); li++;
   const pop = await p.$('#modal:not(.hide) [data-act="keep"]'); if (pop) { await pop.click(); await p.waitForTimeout(600); }
-  await click('#strip [data-lab]', 30000); // the AI Lab classroom, then its Missions button
-  if (li === 1) { await p.waitForSelector('#dock [data-missions]', { timeout: 30000 }); await click('#dock [data-sq]'); await p.waitForTimeout(1500); await shot('classroom'); checks.classroomAnswer = await p.evaluate(() => (document.querySelector('#dock [data-speaker]')?.textContent || '').length > 40); }
-  await click('#dock [data-missions]', 30000);
-  await p.waitForSelector(`#modal:not(.hide) [data-act="lab:${id}"]`, { timeout: 10000 }).catch(async () => { console.log('MISSION NOT READY', id, await p.evaluate(() => ({ ever: window.__eco.app.G.ever, families: window.__eco.app.G.sim().families }))); });
-  if (id === 'land') await shot('lab-board');
-  const before = await p.evaluate(() => JSON.stringify([...window.__eco.app.G.cells]));
-  await click(`#modal:not(.hide) [data-act="lab:${id}"]`);
-  await click('#modal:not(.hide) [data-act="go"]', 60000); // brief card
+  const mine = await town(); const hers = await florence();
+  if (!(li === 1 && introToLab)) {
+    expect(`${id}LockedBeforeMission`, await locked(id));
+    if (li === 2) { await click('#strip [data-lab]', 30000); await p.waitForSelector('#dock [data-missions]', { timeout: 30000 }); await click('#dock [data-sq]'); await p.waitForTimeout(1500); await shot('classroom'); checks.classroomAnswer = await p.evaluate(() => (document.querySelector('#dock [data-speaker]')?.textContent || '').length > 40);
+      await click('#dock [data-missions]', 30000); await p.waitForSelector(`#modal:not(.hide) [data-act="lab:${id}"]`, { timeout: 10000 }); await shot('lab-board');
+      checks.boardLaterMissionsLocked = await p.evaluate(() => document.querySelectorAll('#modal .labrow.locked').length === 4);
+      await click(`#modal:not(.hide) [data-act="lab:${id}"]`);
+    } else if (li === 3) { await p.evaluate(() => { const { G } = window.__eco.app; G.labBoard(); }); await click(`#modal:not(.hide) [data-act="lab:${id}"]`, 30000); } // the board from the 🧪 track
+    else { await p.waitForSelector('#build [data-golab], #florence [data-tiplab]', { timeout: 60000 }); await p.click('#build [data-golab], #florence [data-tiplab]'); } // the locked tab's "Go to the AI Lab", or Florence's invitation
+  }
+  await click('#modal:not(.hide) [data-act="go"]', 90000); // brief card
+  mark(`${id}-start`);
   await p.waitForTimeout(400);
+  checks[`${id}PlayedInHerTown`] = await p.evaluate(() => { const { app } = window.__eco; return app.inLab && !app.twoTowns.on && !app.stage.split && app.G.cells !== app.G.fcells; }); // her town has the whole screen
+  if (li === 1) await shot('mission-in-progress');
   if (!clean) {
     await instruct(vague, 0); await p.waitForTimeout(2200); await shot(`${id}-plan`); budget.push([`${id}-plan`, await panelsVisible()]);
     await click(`${A}[data-c="${check}"]`); await p.waitForSelector('#alert:not(.hide)', { timeout: 30000 }); await shot(`${id}-check-${check}`); budget.push([`${id}-check`, await panelsVisible()]);
     await click(A + '[data-go]'); await p.waitForTimeout(1500);
     await shot(`${id}-habit`);
     const habit = await p.evaluate(() => window.__eco.app.__expectHabit);
-    await click(`${A}[data-h="${habit}"]`); await p.waitForTimeout(900);
-    await p.waitForTimeout(1200); await shot(`${id}-retry`); // Florence's explanation above the instruction tray (must be readable on a phone)
+    await click(`${A}[data-h="${habit}"]`); await p.waitForTimeout(2100); await shot(`${id}-retry`);
     await instruct(clear, 1);
   } else {
     await instruct(clear, 1); await p.waitForTimeout(2200); await shot(`${id}-plan-clear`);
     await click(`${A}[data-c="${check}"]`);
     await click(A + '[data-accept]', 40000); await shot(`${id}-checked`);
-    await p.waitForSelector(A + '[data-o]', { timeout: 30000 });
-    await shot(`${id}-hidden`);
+    await p.waitForSelector(A + '[data-o]', { timeout: 30000 }); await shot(`${id}-hidden`);
     await click(A + '[data-o="0"]'); await click(A + '[data-go]');
   }
   if (!process.env.FAST) { await p.waitForSelector('#filmtitle', { timeout: 40000 }); await p.waitForTimeout(4200); await shot(`${id}-film`); }
   if (id === 'heart') {
     if (band === 'junior') { await p.waitForSelector(A + '[data-r]', { timeout: 400000 }); await shot('heart-ask'); for (let i = 0; i < 6; i++) await click(`${A}[data-r="${i}"]`); await click(A + '[data-act="all"]'); await p.waitForTimeout(800); await shot('heart-counted'); await click(A + '[data-go]'); }
-    else { await click(A + '[data-act="gate"]', 400000); await p.waitForTimeout(1500); await shot('heart-teach'); await click(A + '[data-go]', 60000); } // the balanced result waits for Next (a town meeting used to cover it)
+    else { await click(A + '[data-act="gate"]', 400000); await p.waitForTimeout(1500); await shot('heart-teach'); await click(A + '[data-go]', 60000); }
   }
-  // senior town meetings, then the reward card: use Florence's plan, or keep the town
-  for (let i = 0; i < 3; i++) {
+  // senior town meetings, then the reward card with one button: your turn
+  for (let i = 0; i < 4; i++) {
     const m = await p.waitForSelector('#modal:not(.hide) [data-act]', { timeout: 400000 });
     const act = await m.getAttribute('data-act');
-    if (act === 'keep' || act === 'use') { await p.waitForTimeout(500); await shot(`${id}-reward`); await click(`#modal:not(.hide) [data-act="${id === 'move' ? 'keep' : 'use'}"]`); break; }
+    if (act === 'go' && await p.$('#modal:not(.hide) .stars3')) { await p.waitForTimeout(500); await shot(`${id}-reward`); checks[`${id}NoUsePlanButton`] = !(await p.$('#modal [data-act="use"]')); await click('#modal:not(.hide) [data-act="go"]'); break; }
     await m.click(); await p.waitForTimeout(500);
   }
   if (id === 'heart') { await p.waitForSelector(A + '[data-p]', { timeout: 30000 }); for (const i of [0, 1, 2, 3]) await click(`${A}[data-p="${i}"]`); await shot('charter'); await click(A + '[data-ok]'); checks.charterNumbers = await p.evaluate(() => !!document.querySelector('#modal ul.charter small')); await shot('charter-result'); await click('#modal:not(.hide) [data-act="ok"]');
-    // after the sixth mission: the "Before I trust an AI plan, I…" reflection (review A-04), then one clear next action
-    if (Object.keys(await p.evaluate(() => window.__eco.app.G.labs)).length >= 6) {
-      await p.waitForSelector('#modal:not(.hide) [data-ri]', { timeout: 30000 }); await click('#modal [data-ri="0"]'); await click('#modal [data-ri="3"]'); await p.fill('#modal [data-rown]', 'ask a friend to check it'); await shot('reflection');
-      checks.reflectionSentence = await p.evaluate(() => document.querySelector('#modal [data-rsay]')?.textContent || ''); await click('#modal [data-act="done"]');
-      await p.waitForSelector('#modal:not(.hide) [data-act="build"], #modal:not(.hide) [data-act="finale"]', { timeout: 30000 }); await shot('reflection-rule');
-      checks.reflectionSaved = await p.evaluate(() => !!window.__eco.app.G.reflectDone && /ask a friend/.test(window.__eco.app.G.reflection));
-      await p.click('#modal:not(.hide) [data-act="build"], #modal:not(.hide) [data-act="finale"]');
-    } }
-  await p.waitForSelector('#build [data-cat]', { timeout: 30000 }); await p.waitForTimeout(800);
-  // adopting a plan lays the groundwork and builds the first four; the player builds the rest. The run builds them where the
-  // plan had them (as a player following the good spots would), so the town still grows through every unlock.
-  if (id !== 'move') { checks[`${id}PlanLeftForPlayer`] = await p.evaluate(() => { const { G } = window.__eco.app; const left = G.planLeft || []; let n = 0; for (const q of left) { const tool = q.item || q.mod || q.mark; if (G.placeAt(q.k, tool, { free: true })) n++; } G.planLeft = []; return `${n}/${left.length}`; }); await p.waitForTimeout(1200); }
-  const after = await p.evaluate(() => JSON.stringify([...window.__eco.app.G.cells]));
-  if (id === 'move') checks.keepLeavesTownUnchanged = before === after;
-  else checks[`${id}PlanAdded`] = before !== after;
-  await shot(`${id}-back-to-building`); budget.push([`${id}-back-live`, await panelsVisible()]);
-  console.log('mission done', id, clean ? 'clean' : 'flawed', 'stars', await p.evaluate(() => window.__eco.app.G.stars), 'unlocked', await p.evaluate(() => window.__eco.app.G.ever.join(',')));
+    await p.waitForSelector('#modal:not(.hide) [data-ri]', { timeout: 30000 }); await click('#modal [data-ri="0"]'); await click('#modal [data-ri="3"]'); await p.fill('#modal [data-rown]', 'ask a friend to check it'); await shot('reflection');
+    checks.reflectionSentence = await p.evaluate(() => document.querySelector('#modal [data-rsay]')?.textContent || ''); await click('#modal [data-act="done"]');
+    await p.waitForSelector('#modal:not(.hide) [data-act="build"], #modal:not(.hide) [data-act="finale"]', { timeout: 30000 }); await shot('reflection-rule');
+    checks.reflectionSaved = await p.evaluate(() => !!window.__eco.app.G.reflectDone && /ask a friend/.test(window.__eco.app.G.reflection));
+    await p.click('#modal:not(.hide) [data-act="build"], #modal:not(.hide) [data-act="finale"]');
+  }
+  await p.waitForSelector('#build [data-cat]', { timeout: 60000 }); mark(`${id}-done`);
+  // back outside: the player's town is as they left it, Florence's has her plan, the level opens, with her advice first
+  expect(`${id}PlanNotCopiedIntoYourTown`, mine === (await town()));
+  expect(`${id}FlorenceTownGrew`, hers !== (await florence()));
+  await p.waitForSelector('#towns[aria-pressed="true"]', { timeout: 8000 }).then(() => (checks[`${id}SplitAtCompare`] = true)).catch(() => { checks[`${id}SplitAtCompare`] = false; fails.push(`${id}SplitAtCompare`); });
+  await p.waitForTimeout(1200); await shot(`${id}-compare`); await noOverlap(`${id}-compare`);
+  expect(`${id}OpensAfterMission`, !(await locked(id)));
+  checks[`${id}AdviceAtUnlock`] = await p.evaluate((x) => { const t = document.querySelector('#florence')?.textContent || ''; return /unlocked|Before you build|Before building/i.test(t); }, id);
+  await p.waitForTimeout(5500); checks[`${id}SplitStays`] = (await split()).on; // it used to close after about 5 seconds
+  await shot(`${id}-your-turn`); budget.push([`${id}-back-live`, await panelsVisible()]);
+  const next = LEVELS[li]?.[0];
+  if (next) {
+    expect(`${next}CannotBeBuiltAhead`, await buildAhead(next));
+    const n2 = await yourTurn(next); checks[`${id}YourTurnBuilds`] = n2; if (n2 < 0) fails.push(`${id}YourTurn`);
+    if (n2 > 0) expect(`${id}SplitClosesOnBuild`, !(await split()).on);
+    await p.waitForTimeout(600); await shot(`${id}-your-turn-done`);
+  }
+  mark(`${id}-yours`);
+  console.log('mission done', id, clean ? 'clean' : 'flawed', 'stars', await p.evaluate(() => window.__eco.app.G.stars), 'open', await p.evaluate(() => window.__eco.app.G.ever.join(',')), `${Math.round((Date.now() - T0) / 1000)} s`);
 }
+// the rest of the town, by the hints (as a player who follows the next-step line would)
+for (let i = 0; i < 90; i++) {
+  const pop = await p.$('#modal:not(.hide) [data-act="keep"]'); if (pop) { await shot('town-complete'); checks.townComplete = true; await pop.click(); await p.waitForTimeout(600); break; }
+  const h = await p.evaluate(() => window.__eco.app.G.hint()); if (!h.tool || !h.spots.length) break;
+  await p.evaluate(([k, t]) => window.__eco.app.G.act(k, t), [h.spots[0], h.tool]); await p.waitForTimeout(200);
+}
+await p.waitForTimeout(2500); { const pop = await p.$('#modal:not(.hide) [data-act="keep"]'); if (pop) { await shot('town-complete'); checks.townComplete = true; await pop.click(); await p.waitForTimeout(600); } }
+mark('town');
 checks.lensButtons = await p.evaluate(() => document.querySelectorAll('#lenspop [data-lens]').length);
-const play = await p.$('#build [data-play]'); if (play) { await p.click('#build [data-play]'); /* by selector: the bar re-renders (credits, clock), which detached a held element */ await p.waitForSelector('#modal:not(.hide) video', { timeout: 20000 }); await p.waitForTimeout(3000); checks.paletteVideoPlays = await p.evaluate(() => { const v = document.querySelector('#modal video'); return !!v && v.readyState >= 2 && v.currentTime > 0; }); await shot('video-card'); await click('#modal:not(.hide) [data-act="close"]'); }
+const play = await p.$('#build [data-play]'); if (play) { await p.click('#build [data-play]'); await p.waitForSelector('#modal:not(.hide) video', { timeout: 20000 }); await p.waitForTimeout(3000); checks.paletteVideoPlays = await p.evaluate(() => { const v = document.querySelector('#modal video'); return !!v && v.readyState >= 2; }); await p.click('#modal [data-act="close"]'); }
 await click('#strip [data-lensbtn]'); await click('#lenspop [data-lens="flood"]'); await p.waitForTimeout(1500); await shot('lens-flood'); await click('#lensbar [data-lensx]');
-const pop = await p.$('#modal:not(.hide) [data-act="keep"]'); if (pop) { await shot('town-complete'); checks.townComplete = true; await pop.click(); await p.waitForTimeout(600); }
+// the split at the end: both built-up towns; a lens works in the player's pane; the toggle clear of every control
+await click('#towns'); await p.waitForTimeout(1600); expect('splitAtEnd', (await split()).on); await shot('split-end'); await noOverlap('end');
+await click('#strip [data-lensbtn]'); await noOverlap('lenses-open'); await click('#lenspop [data-lens="nature"]'); await p.waitForTimeout(1500); await shot('lens-in-split');
+checks.lensInSplit = await p.evaluate(() => !!document.querySelector('#lensbar:not(.hide)')); await click('#lensbar [data-lensx]'); await p.waitForTimeout(800);
+checks.splitAfterLens = (await split()).on;
 await shot('town-built');
-await click('#strip [data-menu]'); await click('#settings [data-m-act="report"]'); // the report is in the ☰ menu
+await click('#strip [data-menu]'); await click('#settings [data-m-act="report"]');
 await p.waitForSelector('#report', { timeout: 60000 }); await p.waitForTimeout(800); await shot('report');
 await click('#report [data-close]'); await p.waitForSelector('#build [data-cat]', { timeout: 30000 }); checks.backFromReport = true;
-checks.saved = await p.evaluate(() => !!localStorage.getItem('ecotown.save.v3'));
+// both towns are saved: reload and carry on, and the two towns come back as they were
+const savedMine = await town(); const savedHers = await florence();
+await p.evaluate(() => window.__eco.app.G.flush());
+checks.saved = await p.evaluate(() => { const d = JSON.parse(localStorage.getItem('ecotown.save.v3') || 'null'); return !!d && d.flow === 2 && d.fcells?.length > 10 && d.cells?.length > 10; });
+const splitBefore = (await split()).on;
+await p.reload(); await click('[data-carry]', 60000); await p.waitForSelector('#build [data-cat]', { timeout: 120000 }); await p.waitForTimeout(1500);
+expect('reloadKeepsYourTown', savedMine === (await town())); expect('reloadKeepsFlorenceTown', savedHers === (await florence()));
+expect('reloadKeepsSplitChoice', (await split()).on === splitBefore); await shot('split-after-reload');
+await click('#towns'); await p.waitForTimeout(1200); await shot('split-hidden');
+mark('end');
 const said = await p.evaluate(() => window.__sayLog || []);
 fs.writeFileSync(`${out}/said.json`, JSON.stringify(said, null, 1));
 const over = budget.filter(([k, v]) => v.filter((x) => ['dock', 'alert', 'lensbar', 'modal'].includes(x)).length > (/live/.test(k) ? 2 : 4));
 checks.episodesSeen = await p.evaluate(() => Object.keys(window.__eco.app.G.eps || {}).length); checks.episodesSkipped = episodesSkipped;
-console.log(JSON.stringify({ checks, errors, external: requests, panelBudgetViolations: over, spoken: said.length, missingClips: said.reduce((a, x) => a + x.missing.length, 0) }, null, 1));
+console.log(JSON.stringify({ checks, fails, times, errors, external: requests, panelBudgetViolations: over, spoken: said.length, missingClips: said.reduce((a, x) => a + x.missing.length, 0) }, null, 1));
 await b.close();
+if (fails.length || errors.length) process.exit(1);

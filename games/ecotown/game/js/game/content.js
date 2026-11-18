@@ -14,7 +14,7 @@ export const CONTENT = {
       one_word: { label: 'Took one word too far', hint: 'chased “best”, “fast” or “most”', icon: '🎯', explain: 'Florence chased one word, like “best”, “fast” or “most”, and forgot everything else.' },
       typical: { label: 'Only thought of a normal day', hint: 'forgot the hardest day, or some people', icon: '📅', explain: 'Florence planned for a normal day or a typical person, not for everyone or for the hardest day.' },
       missing: { label: 'Was missing information', hint: 'did not know a fact she needed', icon: '🧩', explain: 'Florence didn’t have a fact she needed, so she couldn’t plan for it.' },
-      literal: { label: 'Read the words too exactly', hint: 'did what you said, not what you meant', icon: '📏', explain: 'Florence did exactly what the words said, not what you meant.' },
+      literal: { label: 'Followed your words, not what you meant', hint: 'did what you said, not what you meant', icon: '📏', explain: 'Florence did exactly what the words said, not what you meant.' },
     },
     checks: {
       flood: { label: 'Flood lens', icon: '🌊' }, carbon: { label: 'Carbon lens', icon: '🌫' }, nature: { label: 'Nature lens', icon: '🦋' },
@@ -26,13 +26,13 @@ export const CONTENT = {
     ui: {
       start: 'Start', next: 'Next', check: 'Check Florence’s plan', how: 'How will you check Florence’s plan?', build: 'Build it', usePlan: 'Use Florence’s plan', done: 'Done building',
       tell: 'Tell Florence what to do', send: 'Send to Florence', typeInstead: 'Type it instead', useTiles: 'Use word tiles', useCards: 'Use a card',
-      whyWrong: 'Why did this plan go wrong?', tryClearer: 'Give Florence a clearer instruction', nothingHere: 'This check found nothing wrong. It only tests one thing, so other problems could still be there: check another way, or use the plan if you are happy.',
-      nothingButOwn: 'The town’s rule is kept here, but the plan misses a target you wrote yourself. Check another way, or use the plan and see.',
-      partly: 'Partly right: the town’s rules are kept, but not your own target.', partlyTag: 'PARTLY RIGHT', partlyHead: 'The plan misses your own target', partlyAsk: 'You can write a clearer instruction, or keep the plan as it is.', partlyKeep: 'Keep this plan', partlyFix: 'Write it again',
+      whyWrong: 'Why did this plan go wrong?', tryClearer: 'Give Florence a clearer instruction', nothingHere: 'This lens found no problem, but it checks only one part of the plan. Try another lens to check something else, or use the plan if you’re happy with it.',
+      nothingButOwn: 'Florence followed the town’s rules, but missed a goal you set yourself. Try another lens, or use the plan and see what happens.',
+      partly: 'Partly right: Florence followed the town rules, but missed one of your own goals.', partlyTag: 'PARTLY RIGHT', partlyHead: 'The plan misses your own target', partlyAsk: 'You can write a clearer instruction, or keep the plan as it is.', partlyKeep: 'Keep this plan', partlyFix: 'Write it again',
       shortHead: { partly: 'Mission finished: your own target was missed', broke: 'Mission finished: one rule is broken' }, shortRibbon: { partly: 'Partly right', broke: 'A rule is broken' },
       unknown: 'I don’t know how to plan that yet.', tryWords: 'Try words like', sure: 'sure', plotterGuess: 'GUESS', checked: 'PLAN CHECKED',
       foundIt: 'You found the problem!', moveIn: 'Moving day', live: 'A day in your town', continue: 'Continue', back: 'Back to the island',
-      reward: 'Level complete', stars: 'Stars', firstTry: 'Clear first time!', alsoFits: (n) => `Your answer counts. I would also call it “${n}”: both fit.`, manyTries: (n) => `Fixed in ${n} tries! The third star is for fixing it in one or two. Play the mission again to earn it.`, contra: (w) => `Hold on: you wrote “${w}”, but my plan did the opposite and still passed. I only spot key words, so I missed your “not”. Tell me what you really want.`, lucky: { contra: 'The plan passed, but your instruction said the opposite of what the plan does. Florence missed a “not”. No star for clear first time.', repeats: 'The plan passed, but your instruction mostly said the same word again and again. A clear instruction says what matters and why, so anyone could follow it. No star for clear first time.', emoji: 'The plan passed, but pictures aren’t an instruction. Say in words what matters and why. No star for clear first time.', short: 'The plan passed, but your instruction was only a word or two. Florence had to guess the rest. No star for clear first time.', wont: 'The plan passed only because Florence refused part of what you asked. No star for clear first time.', silly: 'The plan passed, but only because Florence left out the silly part: it isn’t something a town can build. A clear instruction is one a real builder could follow. No star for clear first time.' },
+      reward: 'Level complete', stars: 'Stars', firstTry: 'Clear first time!', alsoFits: (n) => `Your answer counts. I would also call it “${n}”: both fit.`, manyTries: (n) => `Fixed in ${n} tries! The third star is for fixing it in one or two. Play the mission again to earn it.`, contra: (w) => `You wrote “${w}”. My plan passed the check, but I missed “not” and did the opposite of what you asked. Tell me what you DO want.`, lucky: { contra: 'The plan passed, but Florence missed “not” and did the opposite of what you asked. No star for a clear first instruction.', repeats: 'The plan passed, but your instruction mostly said the same word again and again. A clear instruction says what matters and why, so anyone could follow it. No star for clear first time.', emoji: 'The plan passed, but pictures aren’t an instruction. Say in words what matters and why. No star for clear first time.', short: 'The plan passed, but your instruction was only a word or two. Florence had to guess the rest. No star for clear first time.', wont: 'The plan passed only because Florence refused part of what you asked. No star for clear first time.', silly: 'The plan passed, but only because Florence left out the silly part: it isn’t something a town can build. A clear instruction is one a real builder could follow. No star for clear first time.' },
       unfair: 'Wait: the school is meant for every family, not just the richest ones. Ask for a place that is fair to everyone.', unfairTag: 'NOT FAIR', report: 'Town report', newLens: 'New lens in this mission', newTest: 'New test in this mission', petition: 'Residents are worried',
       correct: 'Correct!', notQuite: 'Not quite.', lookAgain: 'Look at Florence’s guess again:', itWas: 'It was', hidden: 'Florence still guessed one thing. Which one?',
       emptyText: 'Type an instruction first', guessCard: 'Florence’s guess',
@@ -102,15 +102,15 @@ export const SANDBOX = {
     cats: { land: 'Land', move: 'Travel', homes: 'Homes', food: 'Food', power: 'Power', heart: 'Town heart' },
     buildWhat: 'What to build', dayClock: 'The time in your town', tools: 'Tools', erase: 'Remove', credits: 'credits', fromHouseholds: 'from the families',
     unlocksWhen: 'Unlocks when you have:', now: 'Now', townLand: 'Town land', families: 'families', tiles: 'tiles', food: 'food',
-    removeFirst: 'Remove what’s built here first', already: 'Already here', townFull: (n) => `Town land is full (${n} tiles). Remove a tile first.`, noCredits: 'Not enough credits yet',
+    removeFirst: 'Remove what’s built here first', already: 'Already here', townFull: (n) => `Your town already has ${n} Town land tiles, which is the limit. To add a new tile, use Remove on an old one first.`, noCredits: 'Not enough credits yet',
     sameHere: (a) => `That’s already ${a}`, replaced: (a, b) => `${a} swapped for ${b}`, replaces: (a) => `Swaps out: ${a}`,
     keyFree: 'You can build here', keySwap: 'Swaps out what’s there', keyNo: 'Can’t build here', keyErase: 'You can remove this',
     events: { stormBad: (n) => `Winter storm! The river rose in the night and ${n} home${n === 1 ? '' : 's'} flooded.`, stormTip: 'The storm flooded homes on the meadow. Build homes up on dry land, or add rain gardens and reed beds.', stormGood: 'Winter storm last night, and every home stayed dry!',
-      darkBad: 'A still, dark winter night: no wind, no sun, and the lights went out!', darkTip: 'The lights went out on a still winter night. Wind turbines and battery stores keep them on.', darkGood: 'A still, dark winter night, and the lights stayed on!' },
+      darkBad: 'It’s a winter night with no wind or sunshine, and the lights have gone out!', darkTip: 'The lights went out because there was no wind or sunshine. Build a Battery store to save electricity for nights like this. Wind turbines make more when it’s windy.', darkGood: 'It was a winter night with no wind or sunshine, and the lights stayed on!' },
     keyHave: 'Already your town land', missionsDone: (n) => `${n} OF 6 MISSIONS DONE`, readyN: (n) => `${n} ready`, tapAgain: (name) => `Tap again to knock down the ${name} and build here`, tapTile: 'Tap a tile on the island to build there', kbHint: 'Arrow keys move the blue tile cursor. Enter builds there.', kbHere: 'Enter: build here',
     nextGoal: 'Next goal',
     suggest: {
-      tag: 'IDEA', sure: (n) => `I’m ${n}% sure!`, check: 'Check it with a lens', use: 'Use it', no: 'No thanks', judge: 'You checked. Was I right?', right: 'Right', wrong: 'Wrong',
+      tag: 'OPTIONAL IDEA', sure: (n) => (n >= 95 ? 'I’m completely sure!' : 'I’m really sure!'), /* ages 8–12 see no percentages */ check: 'Check it with a lens', use: 'Use it', no: 'No thanks', judge: 'You checked. Was I right?', right: 'Right', wrong: 'Wrong',
       caught: 'You caught me! I was confidently wrong. That’s exactly how to use an AI helper.', goodCheck: 'Thanks for checking! It was a good idea this time, so I’ll build it.',
       missed: 'Look again: the lens showed a problem. I was wrong, even though I sounded sure.', doubted: 'Actually, that one was fine! Checking is still the right habit. I’ll build it.',
       oops: (why) => `Oops… I was confidently wrong. ${why} Next time, check my idea with a lens first!`, catches: (n) => `${n} mistake${n === 1 ? '' : 's'} caught`,
@@ -122,16 +122,27 @@ export const SANDBOX = {
       orchard: { text: 'An orchard here would grow fruit and feed the bees.' }, park: { text: 'A park here would make the town healthier.' },
     },
     labGoal: (n) => `Catch Florence’s mistakes in the AI Lab (${n} of 6 missions)`, labGoalHow: 'Tap the AI Lab button (top right) and play the missions',
-    classHello: 'Welcome to my classroom! Ask me anything about building a green town, and I’ll show you on the big screen. Or pick a mission to test my plans.', askPlaceholder: 'Ask Florence a question…', askFlorence: 'Ask Florence', ask: 'Ask', missions: 'Missions', askTag: 'ANSWER', classTitle: 'AI Lab classroom',
-    next: 'Next', goesOn: 'Goes on', removeDesc: 'Takes away the top thing on a tile (an add-on, then the building, then the land mark). You get its credits back.',
+    classHello: 'Welcome to my classroom! Ask me anything about building a green town, and I’ll show you on the big screen. Or pick a mission to test my plans.', askPlaceholder: 'Ask Florence a question…', askFlorence: 'Ask', ask: 'Ask', missions: 'Missions', askTag: 'ANSWER', classTitle: 'AI Lab classroom',
+    next: 'Next', goesOn: 'Goes on', removeDesc: 'Remove takes things off a tile one at a time: first an extra feature, then the building, then the Town land mark. You can use the space again.',
     zone: { town: 'town land', field: 'fields', meadow: 'the flood meadow', slope: 'the slope', coast: 'the beach', wood: 'the old wood', wetland: 'the wetland (marsh)', river: 'the river', home: 'a home' },
-    nextStep: { land: (n, of = 6) => (of === 3 ? `Mark ${n} more tile${n === 1 ? '' : 's'} of town land` : `Homes open at ${of} tiles of town land: mark ${n} more`), fam: (n, cat) => `Build homes for ${n} more famil${n === 1 ? 'y' : 'ies'} to unlock ${cat}`, food: (n, cat = 'Town heart') => `Your families need food: grow ${n} more basket${n === 1 ? '' : 's'} to unlock ${cat}` },
+    nextStep: { land: (n, of = 6) => (of === 3 ? `Mark ${n} more tile${n === 1 ? '' : 's'} of town land` : `Homes unlock at ${of} Town land tiles. Mark ${n} more to get there.`), fam: (n, cat) => `Build homes for ${n} more famil${n === 1 ? 'y' : 'ies'} to unlock ${cat}`, food: (n, cat = 'Town heart') => `Your town needs more food. Grow ${n} more basket${n === 1 ? '' : 's'} of food with a Mixed farm or Orchard to unlock ${cat}.` },
     goalsTitle: 'Your town’s goals', goalsDone: (n) => `${n} of 8 goals done`, opensWith: (cat) => `opens with ${cat}`, tapGoals: 'Tap 🌼 to see all your goals',
     goalMet: { homes: 'Goal done: homes for 40 families!', food: 'Goal done: enough food for everyone!', nature: 'Goal done: plenty of room for nature!', health: 'Goal done: a healthy town!', energy: 'Goal done: lights on all winter!', community: 'Goal done: lots of places to meet!', carbon: 'Goal done: carbon under the limit!', walk: 'Goal done: every home is close to school!' },
-    goalHow: { homes: 'Build homes on town land', food: 'Farms, orchards and allotments', nature: 'Keep wild land, hedges, parks', health: 'Paths, cycle lanes, parks, warm homes', energy: 'Wind turbines and batteries', community: 'Market, hall, allotments, festival', carbon: 'Low-carbon homes, fewer cars', walk: 'A school near every home' },
+    goalHow: { homes: 'Pick 🏡 Homes and build on your town land.', food: 'Build farms, orchards or allotments. One basket of food feeds 3 families.', nature: 'Mark land “Keep wild”, plant hedges or build parks.', health: 'Build footpaths, cycle lanes and parks, and keep the homes warm.', energy: 'Build wind turbines and battery stores. Solar roofs make nothing on a winter night.', community: 'Build a market, a community hall, allotments or a festival field.', carbon: 'Build low-carbon homes and use footpaths instead of car roads.', walk: 'Build the school close to the homes. A town has one school: build it again and it moves.' },
     fixed: { flood: 'Nice! No homes will flood now.', wood: 'The wood is safe again. Thank you!', crossing: 'Every road now has a safe crossing.', cold: 'Those homes are warm now!', homesCarbon: 'Much less carbon in your homes now.', hungry: 'Everyone has enough food now!', wildlife: 'The wildlife has room again.', winter: 'The lights will stay on all winter now.', rain: 'The rain has somewhere to go now.', school: 'Your town has a school!', walk: 'Every home is close to school now.', carbon: 'Carbon is back under the limit!' },
-    nextIdea: { homes: 'More families are coming. Try a Timber terrace on town land.', food: 'Families need food. Try a Mixed farm or an Orchard.', nature: 'Nature needs room. Try Keep wild land, a hedge or a park.', health: 'Make it healthier: a Cycle lane from the homes to the bridge or the school, or a Park next to the homes.', energy: 'Keep the lights on: try a Wind turbine and a Battery store.', community: 'Give people places to meet: a Market square or a Community hall.', carbon: 'Cut carbon: swap concrete flats for timber or straw homes.', walk: 'Build a Town school close to the homes.', walk2: 'Some homes are too far from the school. A town has one school: build it again nearer those homes and it moves there, or add paths.' },
+    nextIdea: { homes: 'Forty families are coming. Build a Timber terrace on your town land.', homesMore: 'More families are still coming. Build more homes on your town land, next to the ones you have.', food: 'The families need food. Build a Mixed farm or an Orchard near the homes.', nature: 'Nature needs room. Mark land “Keep wild”, or plant a hedge or a park.', health: 'Make the town healthier: build a Cycle lane from the homes to the bridge or the school, or a Park next to the homes.', energy: 'Keep the lights on through winter: build a Wind turbine, then a Battery store.', energyMore: 'The lights still go out on a still winter night. Build another Wind turbine or a Battery store.', community: 'Give people places to meet: build a Market square or a Community hall.', carbon: 'Cut carbon: swap your concrete flats for timber or straw homes.', carbonRoads: 'Cut carbon: swap your car roads for footpaths or cycle lanes.', carbonOther: 'Cut carbon: build a Repair café or a Compost hub. They take carbon away.', walk: 'Build a Town school close to the homes.', walk2: 'Some homes are too far from school. To move your school, choose Town school and tap a new tile closer to those homes. The old school moves there. Or add Footpaths.' },
     showWhere: 'Show me where', keySpot: 'Good spot',
+    // finding what you built: the build you picked is ringed in blue where it already stands (a parent's playtest: "she
+    // put the school in and she couldn't find it")
+    keyMine: 'Already built here', mineHere: (name, n) => (n > 1 ? `Your ${name} (${n} built)` : `Your ${name}`), mineUnique: (name) => `Your ${name} is here`, mineMore: 'Yours', slotBuilt: 'Built ✓',
+    moves: (name) => `A town has one ${name}. Yours is ringed in blue: build it somewhere else and it moves there.`, moved: (name) => `Your ${name} moved here.`,
+    schoolHere: 'Your school', farHome: (m) => `${m} min to school`,
+    ahead: (what) => `You’ve already built ${what} in your own town, so you’re ahead! Here Florence plans on her practice island. Check her plan with the lens, then use the same lens on your own town.`,
+    aheadWhat: { land: 'town land', move: 'paths and roads', homes: 'homes', food: 'farms', power: 'power and water', heart: 'a school' },
+    aheadDone: (what) => `Your town already has ${what}, so Florence will only add what is still missing.`,
+    doneWhat: { land: 'enough town land', move: 'safe paths', homes: 'homes for 40 families', food: 'enough food', power: 'enough power for a winter night', heart: 'a school close to every home' },
+    planSkippedDone: (what) => `Your town already had ${what}, so she left those parts out.`,
+    doneParts: { land: 'enough town land', homes: 'homes for 40 families', food: 'enough food', power: 'enough power for a winter night', rain: 'somewhere for the rain', waste: 'a compost hub or repair café', school: 'a school' },
     spotTo: { bridge: 'the bridge to the mainland', school: 'the school', market: 'the market', hall: 'the community hall', oldschool: 'the old school' },
     spotWhy: {
       link: (to) => `⭐ Good spots: a line from the homes to ${to}, so people can ride or walk there.`, linked: (to) => `The homes already join up with ${to}. Nice!`,
@@ -141,29 +152,33 @@ export const SANDBOX = {
       farm: '⭐ Good spots: near the homes, but not on town land.', nearHomes: (n) => `⭐ Good spots: right by the homes${n > 1 ? ` (${n} homes close by)` : ''}, so families can walk there.`,
     },
     lenses: 'Lenses', camera: 'Camera', menu: 'Menu', settings: 'Settings', watchIntro: 'Watch Florence’s intro again', viewStreet: 'Walk down the street', viewInside: 'Look inside a home', home: 'Back to the whole island',
-    sound: 'Sound', soundOn: 'On', soundFx: 'Effects only', soundOff: 'Off', music: 'Music', earnedToday: (n) => `+${n} 💰 earned today from the families`,
+    sound: 'Sound', soundOn: 'On', soundFx: 'Effects only', soundOff: 'Off', music: 'Music', earnedToday: (n) => `+${n} ⭐ earned today from the families`,
     introGoals: 'This line always tells you what to do next. Tap 🌼 to see all your goals, and tap any build to see what it does.',
     goal: {
-      homes: (s) => `homes for 40 families (${s.familiesSafe} so far)`, food: (s) => `enough food (${s.food} of ${s.foodNeed} baskets)`, nature: (s) => (s.species && (!s.species.bees || !s.species.deer) ? `bring back the ${[!s.species.bees && 'bees', !s.species.deer && 'deer'].filter(Boolean).join(' and ')}` : 'more room for nature'), health: () => 'a healthier town: paths, parks, warm homes',
-      energy: () => 'lights on through a still winter night', community: () => 'places to meet: market, hall, allotments', carbon: (s) => `carbon at 160 t or less (now ${s.carbon} t)`, walk: (s) => (s.walkMax > 15 ? `every home within 15 minutes of school (now ${s.walkMax})` : 'a school for the town'),
+      homes: (s) => `build homes for 40 families (${s.familiesSafe} so far)`, food: (s) => `build farms until you have ${s.foodNeed} baskets of food (${s.food} so far)`, nature: (s) => (s.species && (!s.species.bees || !s.species.deer) ? `bring back the ${[!s.species.bees && 'bees', !s.species.deer && 'deer'].filter(Boolean).join(' and ')}` : 'make more room for nature'), health: () => 'make the town healthier with paths, parks and warm homes',
+      energy: () => 'keep the lights on through a dark winter night with no wind', community: () => 'build places to meet, like a market, a hall or allotments', carbon: (s) => `cut the town’s carbon to 160 tonnes or less (now ${s.carbon})`, walk: (s) => (s.walkMax > 15 ? `move the school so every walk is 15 minutes or less (now ${s.walkMax})` : 'build a school for the town'),
     },
     allGoals: 'Your town has everything it needs!',
     unlocked: 'unlocked!',
     unlockTip: {
-      homes: 'Homes unlocked! 40 families are coming. Build homes on your town land.', food: 'Food unlocked! Farms, orchards and beehives can feed the families.',
-      power: 'Power and water unlocked! Keep the lights on, even on a cold, still night.', heart: 'Town heart unlocked! Your town needs a school, a market and places to play.',
+      // Florence's advice for each set of builds comes here, when they unlock and before anything is placed (owner, 16 Nov
+      // 2026: "that is not helpful if you have already built your town")
+      homes: 'Homes are unlocked, and 40 families are coming! Before you build: timber and straw homes stay warm and make little carbon. Concrete flats make lots of carbon and get cold. Pick 🏡 Homes and build on your town land.',
+      food: 'Food is unlocked! Before you build: keep the hedges, because the bees and deer live there. Mixed farms and orchards grow food and leave room for wildlife. Pick 🍎 Food to start.',
+      power: 'Power and water unlocked! Add ways to make and store electricity so the lights stay on at night, even when there is no wind.',
+      heart: 'Town heart is unlocked! Before you build: put the school in the middle of the homes, so every walk to school is short. A town has only one school. Pick 🏫 Town heart to start.',
       land: '', move: '',
     },
     labReady: 'A new AI Lab mission is ready.', showInLab: 'Show me in the AI Lab', useLens: 'Look with the lens', closeLens: 'Close',
     moveIn: 'Here they come! The first family arrives on the sky-ferry.',
     classFirst: 'Do the missions in order', playAgain: 'play again', ready: 'Ready!',
-    labIntro: 'Step into the AI Lab: give Florence an instruction, check her plan, and catch her mistakes. Then come back to building.',
+    labIntro: 'In the AI Lab, tell Florence what to plan. Use the lenses to check her work and spot mistakes. Then decide whether to use the plan in your town.',
     watchDay: 'Watch a whole day', backToBuilding: 'Back to building', mission: 'MISSION',
-    practice: 'Florence practises on a copy of the island. Your town is safe until you choose to use her plan.',
+    practice: 'In the AI Lab, Florence works on a practice copy of the island. Your own town will not change unless you choose Use Florence’s plan.',
     notNow: 'Not now', tellMissing: 'Tell Florence what her plan left out', missionDone: 'Mission complete', newTool: 'New lens to use',
-    useQuestion: 'Want Florence’s fixed plan in your town? She marks it out and builds the first few on empty tiles. You build the rest. Your builds stay.',
+    useQuestion: 'Do you want to add parts of Florence’s corrected plan to your town? She will build the first few parts on empty tiles. Everything you already built stays where it is. You can build the rest yourself.',
     keepMine: 'Keep my town as it is', usePlan: 'Use Florence’s plan',
-    charterPlan: 'Florence’s plan', charterTown: 'Your town', charterGap: 'Florence’s plan keeps this promise on the practice island, but your own town doesn’t yet: it has grown differently. Tap 🌼 to see what your town still needs.',
+    charterPlan: 'Florence’s plan', charterTown: 'Your town', charterGap: 'Florence’s practice town met this goal, but your own town has different buildings and has not met it yet. Tap 🌼 to see what your town still needs.',
     reflect: {
       ribbon: 'All six missions done!', title: 'You can catch an AI’s mistakes now.', how: 'Finish the sentence. Tap the ideas you will use, or write your own.',
       stem: 'Before I trust an AI plan, I', own: 'Or in my own words:', placeholder: 'check what it guessed', done: 'This is my rule',
@@ -171,10 +186,10 @@ export const SANDBOX = {
       ruleHead: 'Your AI rule', keep: 'Use this rule with any AI: at school, at home, anywhere. It is saved in your town report.',
       townLeft: 'Your town is not finished yet. Next:', toBuild: 'Back to building', toFinale: 'See my finished town',
     },
-    meetingBroke: (what) => `That choice breaks a rule the plan had kept: ${what}.`, meetingBrokeHead: 'This choice breaks a rule', meetingKeep: 'Keep this choice', meetingAgain: 'Choose again', slipped: (what) => `Your town was complete. Now it needs: ${what}.`,
+    meetingBroke: (what) => `That choice breaks a rule the plan had kept: ${what}.`, meetingBrokeHead: 'This choice breaks a rule', meetingKeep: 'Keep this choice', meetingAgain: 'Choose again', slipped: (what) => `Your town was complete, but something changed. Now you need to ${what}.`,
     pause: ['Florence was very sure. Why did her plan still go wrong?', 'Which check changed your mind about a plan?'], pauseRibbon: 'Pause and talk', pauseHow: 'Screens down for a minute. Tell your partner or your leader what you think.', pauseGo: 'Carry on',
     finishRibbon: 'Session finished', finishPractised: 'You practised', finishChoices: 'Your choices', finishResult: 'Your town now', finishStill: 'Still to do', finishTalk: 'Talk about it',
-    planUsed: (n, skip) => `Florence built ${n} part${n === 1 ? '' : 's'} of her plan in your town.${skip ? ` ${skip} didn’t fit.` : ''}`, planLeft: (n) => `${n} more ${n === 1 ? 'is' : 'are'} yours to build: look for the ★.`, planDidntFit: 'Your town has no empty tiles for Florence’s plan yet. Mark more town land, then her ideas can fit!', townDiffers: (g) => `Still to do in your town: ${g}.`,
+    planUsed: (n, skip) => `Florence added ${n} part${n === 1 ? '' : 's'} of her plan to your town.${skip ? ` ${skip} didn’t fit.` : ''}`, planLeft: (n) => `You still need to build ${n} more part${n === 1 ? '' : 's'}. Look for the ★ markers on the map.`, planDidntFit: 'There are no empty tiles in your town for Florence to add her plan. Make more Town land if you have room, then try again.', townDiffers: (g) => `Still to do in your town: ${g}.`,
     completeRibbon: 'Town complete!', completeText: 'Every family has a home, there’s enough food, the lights stay on in winter and every home is close to school. Well done!', keepBuilding: 'Keep building',
     // the Star shop (js/ui/rewards.js): looks only, never the score
     shop: {
@@ -205,13 +220,13 @@ export const SANDBOX = {
       tag: 'HELLO', yourTurnTag: 'YOUR TURN', next: 'Next', skip: 'Skip intro', tiles: 'Town land',
       hello: 'Hi! I’m Florence, your AI planning helper. Let’s build a town together!',
       meadow: 'This flat meadow looks perfect for houses… but look! The river spills over it every winter.',
-      yourTurn: 'Up here it stays dry and sunny. Your turn: tap three tiles to make town land.',
+      yourTurn: 'Up here it stays dry and sunny. Your turn: tap three tiles to make Town land.',
       wellDone: 'Brilliant! That’s the start of your town. Mark 3 more tiles and Homes will open.',
       wellDone2: 'Brilliant! That’s the start of your town. Mark 2 more tiles and Homes will open.', wellDone1: 'Brilliant! That’s the start of your town. Mark 1 more tile and Homes will open.', wellDoneOpen: 'Brilliant! That’s the start of your town, and Homes are open now.',
       video: 'Here’s how a home gets built. Watch from above, then from the street.',
-      videoLater: 'When homes unlock, tap ▶ on any build to watch how it’s built.',
+      videoLater: 'When Homes unlock, tap ▶ on any build to watch how it’s built.',
       unlocks: 'More builds unlock as your town grows. Forty families are on their way!',
-      lab: 'This is my AI Lab. Come here when you want to test my plans. I’m clever… but sometimes I’m confidently wrong. Can you catch me?',
+      lab: 'This is my AI Lab. Here you can test my plans. Sometimes I sound very sure even when I’m wrong. Can you find my mistakes?',
       overToYou: 'Over to you! I’ll give you tips while you build.',
     },
   },
@@ -247,7 +262,16 @@ export const SANDBOX = {
     goalMet: { homes: 'Target met: 40 households housed.', food: 'Target met: food supply ≥ need.', nature: 'Target met: nature at 100%.', health: 'Target met: health at 100%.', energy: 'Target met: winter-night supply ≥ demand.', community: 'Target met: community at 100%.', carbon: 'Target met: carbon at 160 t or less.', walk: 'Target met: every home ≤ 15 min from school.' },
     goalHow: { homes: 'Homes on town land', food: 'Farms, orchards, allotments', nature: 'Wild land, hedges, parks', health: 'Active travel, parks, warm homes', energy: 'Wind and storage for winter nights', community: 'Market, hall, allotments', carbon: 'Low embodied carbon, fewer cars', walk: 'School within 15 min of every home' },
     fixed: { flood: 'Resolved: no homes at flood risk.', wood: 'Resolved: woodland intact.', crossing: 'Resolved: every road has a crossing.', cold: 'Resolved: homes stay warm in winter.', homesCarbon: 'Resolved: embodied carbon down.', hungry: 'Resolved: food supply meets need.', wildlife: 'Resolved: habitat restored.', winter: 'Resolved: winter-night supply covers demand.', rain: 'Resolved: drainage in place.', school: 'Resolved: the town has a school.', walk: 'Resolved: every home within the walking limit.', carbon: 'Resolved: carbon under the ceiling.' },
-    nextIdea: { homes: 'Next: more housing. A Timber terrace houses 4 with low embodied carbon.', food: 'Next: food. A Mixed farm or Orchard raises supply without much carbon.', nature: 'Next: nature. Keep-wild land, hedges and parks raise it.', health: 'Next: health. A cycle lane linking homes to the mainland bridge or the school, and parks beside the homes.', energy: 'Next: winter power. Wind plus a Battery store covers still nights.', community: 'Next: community. A Market square or Community hall.', carbon: 'Next: carbon. Replace high-embodied-carbon homes.', walk: 'Next: a Town school within 15 minutes of every home.', walk2: 'Next: the furthest homes are over 15 minutes from school. A town has one school: rebuild it nearer them (it relocates), or add paths.' },
+    nextIdea: { homes: 'Next: more housing. A Timber terrace houses 4 with low embodied carbon.', homesMore: 'Next: more housing. Add homes beside the existing ones; a Timber terrace houses 4 with low embodied carbon.', energyMore: 'Next: winter power. Supply still falls short on a still night: add wind or a Battery store.', carbonRoads: 'Next: carbon. Replace car roads with footpaths and cycle lanes.', carbonOther: 'Next: carbon. Repair cafés and compost hubs offset embodied carbon.', food: 'Next: food. A Mixed farm or Orchard raises supply without much carbon.', nature: 'Next: nature. Keep-wild land, hedges and parks raise it.', health: 'Next: health. A cycle lane linking homes to the mainland bridge or the school, and parks beside the homes.', energy: 'Next: winter power. Wind plus a Battery store covers still nights.', community: 'Next: community. A Market square or Community hall.', carbon: 'Next: carbon. Replace high-embodied-carbon homes.', walk: 'Next: a Town school within 15 minutes of every home.', walk2: 'Next: the furthest homes are over 15 minutes from school. A town has one school: rebuild it nearer them (it relocates), or add paths.' },
+    keyMine: 'Already built', mineHere: (name, n) => (n > 1 ? `Existing ${name} (${n})` : `Existing ${name}`), mineUnique: (name) => `Your ${name}`, mineMore: 'Existing', slotBuilt: 'Built',
+    moves: (name) => `One ${name} per town: the existing one is ringed in blue. Building it elsewhere relocates it.`, moved: (name) => `${name[0].toUpperCase() + name.slice(1)} relocated here.`,
+    schoolHere: 'School', farHome: (m) => `${m} min to school`,
+    ahead: (what) => `Your own town already has ${what}. This mission runs on Florence’s practice island; test her plan, then apply the same lens to your town.`,
+    aheadWhat: { land: 'town land', move: 'movement routes', homes: 'housing', food: 'food production', power: 'power and drainage', heart: 'a school' },
+    aheadDone: (what) => `Your town already has ${what}; adopting the plan adds only what is still missing.`,
+    doneWhat: { land: 'enough town land', move: 'safe routes', homes: 'housing for 40 households', food: 'enough food', power: 'winter-night power', heart: 'a school within 15 minutes of every home' },
+    planSkippedDone: (what) => `Your town already had ${what}, so those placements were skipped.`,
+    doneParts: { land: 'enough town land', homes: 'housing for 40 households', food: 'enough food', power: 'winter-night power', rain: 'rainwater drainage', waste: 'waste handling', school: 'a school' },
     showWhere: 'Show suggested spots', keySpot: 'Suggested spot',
     spotTo: { bridge: 'the mainland bridge', school: 'the school', market: 'the market square', hall: 'the community hall', oldschool: 'the old school' },
     spotWhy: {
@@ -267,8 +291,8 @@ export const SANDBOX = {
     allGoals: 'All town targets met.',
     unlocked: 'unlocked',
     unlockTip: {
-      homes: 'Housing unlocked: 40 households need homes on town land. Watch embodied carbon.', food: 'Food unlocked: one food unit feeds three households. Watch the habitats.',
-      power: 'Power, water and waste unlocked: plan for the worst case, a still winter night.', heart: 'Town heart unlocked: a school within a 15-minute walk of every home.',
+      homes: 'Housing unlocked: 40 households need homes on town land. Before you build: timber and straw have low embodied carbon and stay warm; concrete is high-carbon and cold.', food: 'Food unlocked: one food unit feeds three households. Before you build: hedgerows are habitat, so mixed farms and orchards keep the pollinators and deer.',
+      power: 'Power, water and waste unlocked. Before you build: plan for the worst case, a still winter night, when solar gives nothing; wind and storage cover it.', heart: 'Town heart unlocked. Before you build: place the school centrally, within a 15-minute walk of every home.',
       land: '', move: '',
     },
     labReady: 'New AI Lab mission available.', showInLab: 'Open the AI Lab', useLens: 'Run the lens', closeLens: 'Close lens',
@@ -292,7 +316,7 @@ export const SANDBOX = {
     pause: ['Florence was confident. Why did the plan still fail?', 'Which piece of evidence changed your decision about a plan?'], pauseRibbon: 'Pause and discuss', pauseHow: 'Screens down for a minute. Explain your answer to a partner or the leader.', pauseGo: 'Carry on',
     finishRibbon: 'Session finished', finishPractised: 'You practised', finishChoices: 'Your decisions', finishResult: 'The town now', finishStill: 'Still open', finishTalk: 'Discuss', meetingBrokeHead: 'This choice breaks a limit',
     planUsed: (n, skip) => `Applied ${n} placement${n === 1 ? '' : 's'} from Florence’s plan, funded by the AI Lab (no credits spent).${skip ? ` ${skip} skipped (occupied or not allowed).` : ''}`, planLeft: (n) => `The Lab funds the first few buildings; the remaining ${n} ${n === 1 ? 'is' : 'are'} yours to build.`, planDidntFit: 'No free tiles for the plan’s placements. Designate more town land to make room.', townDiffers: (g) => `The plan passed on the practice island; your town differs (more homes or other builds). Still open here: ${g}.`,
-    completeRibbon: 'Town complete', completeText: 'All petals at "enough", carbon under the ceiling, winter-night power secured, every home within 15 minutes of school.', keepBuilding: 'Keep building',
+    completeRibbon: 'Town complete', completeText: 'All petals at “enough”, carbon under the ceiling, winter-night power secured, every home within 15 minutes of school.', keepBuilding: 'Keep building',
     shop: {
       title: 'Star shop', menu: 'Star shop', done: 'Done', on: 'On', off: 'Off', owned: 'Unlocked',
       intro: 'Spend stars on cosmetic rewards. They are visual only: the simulation and your town’s scores are unaffected.',
@@ -320,7 +344,7 @@ export const SANDBOX = {
       tag: 'HELLO', yourTurnTag: 'YOUR TURN', next: 'Next', skip: 'Skip intro', tiles: 'Town land',
       hello: 'Hi, I’m Florence, the town’s AI planning assistant. You make the decisions; I make plans.',
       meadow: 'The river meadow is flat and cheap to build on. It is also the winter floodplain.',
-      yourTurn: 'This slope stays dry. Designate three tiles of town land to start.',
+      yourTurn: 'This slope stays dry. Designate three tiles of Town land to start.',
       wellDone: 'Good. That’s your first site. Housing unlocks at 6 town tiles: 3 more.',
       wellDone2: 'Good. That’s your first site. Housing unlocks at 6 town tiles: 2 more.', wellDone1: 'Good. That’s your first site. Housing unlocks at 6 town tiles: 1 more.', wellDoneOpen: 'Good. That’s your first site, and housing is already unlocked.',
       video: 'Each build goes up in stages. Here is a timber terrace, from above and at street level.',
@@ -332,13 +356,66 @@ export const SANDBOX = {
   },
 };
 
+// ---- Florence first, then your own town (owner, 17 Nov 2026; docs/ecotown-florence-first.md). START OF BLOCK
+// At each level the player tells Florence what to build in HER town and checks her plan; then that level opens in their OWN
+// town, beside hers. These lines are new or replace older ones (no recordings yet: the device voice reads them).
+{
+  const WHAT = { j: { land: 'the town land', move: 'the paths', homes: 'the homes', food: 'the farms', power: 'the power', heart: 'the school' }, s: { land: 'site selection', move: 'movement routes', homes: 'housing', food: 'food production', power: 'power and water', heart: 'the school' } };
+  const J = SANDBOX.junior, S = SANDBOX.senior; const wj = WHAT.j, ws = WHAT.s;
+  Object.assign(J, {
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to look at', toggle: 'Florence’s town', notHere: 'That is Florence’s town. You build in your town.' }, // toggle, notHere: working text for the split screen (docs/two-towns-new-text.md)
+    missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Go to the AI Lab',
+    invite: Object.fromEntries(Object.entries(wj).map(([id, w]) => [id, `My turn first! Come to the AI Lab and tell me how to build ${w} in my town. Then you build yours.`])),
+    opensAfter: (t) => `Opens after Florence’s mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First, in your town:',
+    yourTurn: (cat) => `Your turn: build ${cat} your way`, backToYours: 'Back to your town',
+    compare: 'Look: Florence’s town and yours, side by side. Now build it your way!',
+    practice: 'Florence builds this in her own town. Your town, beside hers, stays just as you built it.',
+    labIntro: 'In each mission you tell Florence what to build in her town, check her plan and catch her mistakes. Then you build the same part your way in your town.',
+    labGoalHow: 'Tap the AI Lab button (top right) when Florence asks', diaryDone: (t) => `AI Lab: “${t}” done. Florence built it in her town. Now I build mine.`, diaryAgain: (t) => `AI Lab: played “${t}” again for practice.`,
+    charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this promise, but yours doesn’t yet. Build it your way: tap 🌼 to see what your town still needs.',
+  });
+  J.spotWhy.linkLand = (to) => `⭐ Good spots: a line from your town land to ${to}, so the families can walk there when they come.`;
+  J.spotWhy.needHomes = 'Mark some town land first. Then I’ll show you where a path should go.';
+  J.nextStep.florence = (id) => `Go to the AI Lab: tell Florence how to build ${wj[id]} in her town`;
+  J.unlockTip.land = 'Land is unlocked! Before you build: keep off the flood meadow by the river, and leave the old wood for the deer. Pick 🗺 Land, then tap dry tiles to make town land.';
+  J.unlockTip.move = 'Travel is unlocked! Before you build: footpaths and cycle lanes keep children safe on the way to school. Car roads near homes are dangerous to cross. Pick 🚲 Travel to start.';
+  Object.assign(J.intro, {
+    towns: 'This is my town, and this is yours. They are both empty!',
+    how: 'Here’s how we build. First you tell me what to build in my town, and you check my plan for mistakes. Then you build it your way in your town.',
+    lab: 'This is my AI Lab. I’m clever… but sometimes I’m confidently wrong. Can you catch me?', overToYou: 'Let’s start with the land!', go: 'Go to the AI Lab',
+  });
+  Object.assign(S, {
+    towns: { florence: 'Florence’s town', mine: 'Your town', both: 'Both', label: 'Which town to view', toggle: 'Florence’s town', notHere: 'That is Florence’s town. You build in your town.' }, // toggle, notHere: working text for the split screen (docs/two-towns-new-text.md)
+    missionsOf: (n) => `${n} of 6 missions`, goToLab: 'Open the AI Lab',
+    invite: Object.fromEntries(Object.entries(ws).map(([id, w]) => [id, `Next: brief me in the AI Lab on ${w} for my town. Then build your own version.`])),
+    opensAfter: (t) => `Opens after the AI Lab mission “${t}”`, afterMission: (t) => `After “${t}”`, firstStep: 'First:',
+    yourTurn: (cat) => `Your turn: build ${cat}`, backToYours: 'Back to your town',
+    compare: 'Florence’s town and yours, side by side. Your turn to build.',
+    practice: 'Florence builds this in her own town. Your town, beside hers, is not changed.',
+    labIntro: 'Each mission: brief Florence for her town, test her plan with evidence, identify the failure mode and re-specify. Then build the same system your way in your town.',
+    labGoalHow: 'Open the AI Lab (top right) when a mission is available', diaryDone: (t) => `AI Lab: “${t}” complete. Florence built it in her town; own town next.`, diaryAgain: (t) => `AI Lab: “${t}” replayed for practice.`,
+    charterPlan: 'Florence’s town', charterGap: 'Florence’s town keeps this commitment; yours does not yet. Open 🌼 for what your town still needs.',
+  });
+  S.spotWhy.needHomes = 'No town land yet: a route needs town land at one end.';
+  S.spotWhy.linkLand = (to) => `⭐ Good spots: a route from your town land to ${to}.`;
+  S.nextStep.florence = (id) => `AI Lab: brief Florence on ${ws[id]} for her town`;
+  S.unlockTip.land = 'Land unlocked. Before building: avoid the winter floodplain and the ancient woodland. Designate town land on dry ground.';
+  S.unlockTip.move = 'Movement unlocked. Before building: footpaths and cycle lanes keep the school run safe; car roads near homes create unsafe crossings.';
+  Object.assign(S.intro, {
+    towns: 'Two towns: mine and yours. Both start empty.',
+    how: 'At each stage you brief me for my town and test my plan for errors. Then you build the same system your way in yours.',
+    lab: 'My AI Lab: brief me, test my plan with evidence, and find where I went wrong. I am often confident. I am not always right.', overToYou: 'We start with site selection.', go: 'Open the AI Lab',
+  });
+}
+// ---- Florence first (END OF BLOCK)
+
 // Per-level text. j = junior, s = senior. {n} placeholders are filled from the simulation.
 // newThing: what this level adds (shown on the brief card). hidden: the "spot the hidden guess" step for
 // a clean first try (answer is option 0; options are shuffled on screen).
 export const LEVEL_TEXT = {
   land: {
     title: 'Read the land',
-    goal: { j: 'Choose where your town will grow', s: 'Site selection: where should the town grow?' },
+    goal: { j: 'Choose dry land where your town can grow', s: 'Site selection: where should the town grow?' },
     brief: { j: 'Families are coming! Florence will find land for 40 families.', s: 'Florence will select 18 tiles of land for 40 households. You set the brief.' },
     newThing: { lens: 'flood', j: 'See which land floods in winter.', s: 'Overlay the winter flood extent on the plan.' },
     flaw: { flood: { j: 'The meadow floods every winter', s: '{n} of 18 town tiles are on the floodplain' }, nature: { j: 'The old wood would be cut down', s: '{n} town tiles would clear ancient woodland' } },
@@ -356,9 +433,9 @@ export const LEVEL_TEXT = {
   },
   move: {
     title: 'Getting around',
-    goal: { j: 'Design the streets: cars, bikes or feet?', s: 'Movement network: how do people reach school and the ferry?' },
-    brief: { j: 'Children need to get to the island school. Tell Florence how.', s: 'Connect homes to the island school and the ferry. Who is “everyone”?' },
-    newThing: { lens: 'street', test: true, label: { j: 'Rush-hour street view', s: 'Rush-hour ground truth' }, j: 'Stand in the street at 8:45 am, when children walk to school.', s: 'Observe the route at 8:45 am peak.' },
+    goal: { j: 'Plan safe ways for children to get to school', s: 'Movement network: how do people reach school and the ferry?' },
+    brief: { j: 'Children need to get to the island school. Tell Florence how they should travel.', s: 'Connect homes to the island school and the ferry. Who is “everyone”?' },
+    newThing: { lens: 'street', test: true, label: { j: 'Rush-hour street view', s: 'Rush-hour ground truth' }, j: 'Stand in the street at 8:45 am, when children walk to school, and look at the traffic.', s: 'Observe the route at 8:45 am peak.' },
     flaw: { street: { j: '8:45 am: children can’t cross', s: '{n} car tiles on the children’s route at 8:45 am' }, access: { j: 'Not step-free: busy roads or rough ground on the way', s: 'Step-free audit: {n} problems on the routes to school and the ferry' } },
     tiles: ['Make it', 'easy', 'safe', 'for everyone', 'to get to school', 'walking', 'cycling', 'footpaths', 'a tram', 'cars stay at the edge', 'no cars', 'fast'],
     cards: [['Make it easy for everyone to get to school.', 'vague'], ['Safe walking and cycling. Cars stay at the edge.', 'clear'], ['Build a tram line all the way to school.', 'other']],
@@ -375,7 +452,7 @@ export const LEVEL_TEXT = {
   homes: {
     title: 'Homes',
     goal: { j: 'Build homes for the first 40 families', s: 'Housing: 40 households, under the embodied-carbon limit' },
-    brief: { j: 'Florence will build the homes. What should they be like?', s: 'Embodied-carbon limit: 70 t for the homes’ materials. Households: 40.' },
+    brief: { j: 'Tell Florence what the homes should be like, and she will build them.', s: 'Embodied-carbon limit: 70 t for the homes’ materials. Households: 40.' },
     newThing: { lens: 'carbon', j: 'See how much carbon goes into building the homes.', s: 'Embodied carbon of the building materials.' },
     flaw: { carbon: { j: 'Carbon cloud: {n}× over the homes’ limit', s: 'Embodied carbon {n}× the 70 t limit' }, inside: { j: 'Brrr! {n} °C inside with the heating off', s: 'Indoor temperature {n} °C with heating off' } },
     tiles: ['Build', 'strong', 'cheap', 'warm', 'low-carbon', 'homes', 'from wood', 'and straw', 'reused bricks', 'with green roofs', 'lots of', 'tall'],
@@ -392,7 +469,7 @@ export const LEVEL_TEXT = {
   },
   food: {
     title: 'Food',
-    goal: { j: 'Grow food for the whole town', s: 'Food system: enough food without losing biodiversity' },
+    goal: { j: 'Grow enough food for the town, and keep the wildlife', s: 'Food system: enough food without losing biodiversity' },
     brief: { j: 'Everyone needs food. Tell Florence how to grow it.', s: 'Food need is set by households. Habitats are part of the test.' },
     newThing: { lens: 'nature', j: 'See where animals and bees live, and whether they stay.', s: 'Habitat and species presence after the plan.' },
     flaw: { nature: { j: 'The bees and deer have left', s: 'Pollinators and deer lost: {n} hedgerow tiles removed' } },
@@ -410,14 +487,14 @@ export const LEVEL_TEXT = {
   },
   power: {
     title: 'Water, power and waste',
-    goal: { j: 'Power, rain and rubbish: keep the town running all year', s: 'Utilities: worst-case power, rainwater and waste' },
-    brief: { j: 'Homes need power on the darkest winter night. Rain needs somewhere to go, and rubbish too.', s: 'Size power for a still winter night. Batteries only help if something charges them. Also manage rainwater and waste.' },
-    newThing: { lens: 'winter', test: true, j: 'Test the town on the coldest, stillest winter night.', s: 'Worst-case test: a still winter night.' },
+    goal: { j: 'Keep the lights on, deal with rainwater and manage rubbish', s: 'Utilities: worst-case power, rainwater and waste' },
+    brief: { j: 'Make sure homes have electricity at night. Build somewhere for rainwater to go, and a way to deal with rubbish.', s: 'Size power for a still winter night. Batteries only help if something charges them. Also manage rainwater and waste.' },
+    newThing: { lens: 'winter', test: true, j: 'Try the winter-night test: what happens when it’s cold, dark and there is no wind?', s: 'Worst-case test: a still winter night.' },
     flaw: { winter: { j: 'Still winter night: blackout', s: 'Winter-night supply {n} of demand' } },
     tiles: ['Make', 'enough', 'clean power', 'for a still', 'winter night', 'store the sunshine', 'batteries', 'wind turbines', 'solar roofs', 'rain gardens', 'a repair café', 'compost'],
-    cards: [['Make enough clean, green power for every home.', 'vague'], ['Winter-night power with batteries, rain gardens and compost.', 'clear'], ['Buy all our power from the big city.', 'other']],
+    cards: [['Make enough clean, green power for every home.', 'vague'], ['Keep the lights on through a still winter night with batteries. Add rain gardens and compost.', 'clear'], ['Buy all our power from the big city.', 'other']],
     debrief: 'Solar roofs worked on an average day. Why test a still winter night?',
-    fact: { j: 'Batteries save sunshine from the day to use at night.', s: 'Grid planners size systems for peak winter demand, not average demand.', src: 'National Grid ESO, “Winter Outlook” reports' },
+    fact: { j: 'Batteries store extra electricity made by solar panels during the day, so homes can use it at night.', s: 'Grid planners size systems for peak winter demand, not average demand.', src: 'National Grid ESO, “Winter Outlook” reports' },
     complete: { j: 'Lights on!', s: 'Utilities running' },
     live: { j: 'A snowy winter day in your town', s: 'A still winter day' },
     hidden: {
@@ -428,7 +505,7 @@ export const LEVEL_TEXT = {
   },
   heart: {
     title: 'A school for everyone',
-    goal: { j: 'Where should the new school go?', s: 'Town centre: school, market and nature links' },
+    goal: { j: 'Choose a spot for the new school, close to every home', s: 'Town centre: school, market and nature links' },
     brief: { j: 'The little island school is full. Where should the new school go?', s: 'Place the new school. Then the market, park and nature links.' },
     newThing: { lens: 'walk', j: 'See how many minutes each home is from school.', s: 'Walking time from every home to school.' },
     flaw: { walk: { j: 'Too far! {n} min walk from the furthest home', s: 'Longest walk to school: {n} min' }, access: { j: 'Not step-free: rough ground on the way to school', s: 'Step-free audit: {n} problems on the routes' } },

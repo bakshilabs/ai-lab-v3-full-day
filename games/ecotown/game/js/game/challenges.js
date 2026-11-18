@@ -17,29 +17,29 @@ const near = (s, x = {}) => [{ id: 'c-walk', ok: !!x.hasSchool && s.homes.length
 export const HILLS_WOOD = 21; // tiles of old wood on the hill island (tests/islands.test.mjs checks the number)
 export const CHALLENGES = [
   { id: 'fix', icon: '🛠', name: 'Florence’s Town', start: 'florence',
-    rule: { j: 'Florence built this town by herself, and she was very sure about it. Find her mistakes with the lenses and put them right.', s: 'Florence planned this town unsupervised. Audit it with the lenses and fix what she got wrong.' },
+    rule: { j: 'Florence built this town on her own. Use the lenses to check her plan and find mistakes. Then change the town to fix what you find.', s: 'Florence planned this town unsupervised. Audit it with the lenses and fix what she got wrong.' },
     goals: () => [] },
   { id: 'tiny', icon: '🏝', name: 'Tiny Town', cap: 8,
-    rule: { j: 'Only 8 tiles of town land. Every tile has to work hard.', s: 'Town land is capped at 8 tiles: density without the carbon.' },
+    rule: { j: 'You only have 8 tiles for Town land. Can you fit everything the families need into those 8 squares?', s: 'Town land is capped at 8 tiles: density without the carbon.' },
     goals: () => [] },
   { id: 'light', icon: '🍃', name: 'Light Footprint',
-    rule: { j: 'A whole town that makes 60 tonnes of carbon or less.', s: 'Whole-town carbon of 60 t or less (the usual ceiling is 160 t).' },
+    rule: { j: 'Build a whole town that makes 60 tonnes of carbon or less.', s: 'Whole-town carbon of 60 t or less (the usual ceiling is 160 t).' },
     goals: (s) => [{ id: 'c-carbon', ok: s.homes.length > 0 && s.carbon <= 60, have: s.carbon, need: 60, low: true }] },
   { id: 'still', icon: '🌙', name: 'The Still Island', ban: ['wind'],
-    rule: { j: 'The wind never blows here, so there are no wind turbines. Keep the lights on through a winter night another way.', s: 'No wind resource: cover a still winter night without turbines.' },
+    rule: { j: 'You can’t build wind turbines here because there is no wind. Find another way to keep the lights on at night.', s: 'No wind resource: cover a still winter night without turbines.' },
     goals: () => [] },
   { id: 'wild', icon: '🦦', name: 'Wild Island',
-    rule: { j: 'Build a whole town and leave the island wilder than you found it. Keep all five animals: deer, bees, otters, birds and frogs.', s: 'Complete the town with all five indicator species and a habitat score 30 % above the untouched island’s.' },
+    rule: { j: 'Build a town while keeping all five animals here: deer, bees, otters, birds and frogs. Make the island even better for wildlife than when you started.', s: 'Complete the town with all five indicator species and a habitat score 30 % above the untouched island’s.' },
     goals: (s) => wildGoals(s, 1.3) },
   { id: 'big', icon: '🏘', name: 'Room for Everyone',
     rule: { j: 'Sixty families want to live here, not forty. Find safe, warm homes for all of them.', s: 'House 60 households (not 40) inside the usual land cap and carbon ceiling.' },
     goals: big },
   { id: 'near', icon: '🚶', name: 'Eight-Minute Town',
-    rule: { j: 'Every home within an 8-minute walk of school, and of a market, hall or allotment.', s: 'Every home within 8 minutes’ walk of the school and of daily needs (market, hall or allotments).' },
+    rule: { j: 'Make sure every home is within an 8-minute walk of school AND at least one of these: a Market square, Community hall or Allotments.', s: 'Every home within 8 minutes’ walk of the school and of daily needs (market, hall or allotments).' },
     goals: near },
   // ---- the delta island: flood meadow and marsh, with one low bank of dry ground
   { id: 'd-dry', icon: '💧', name: 'Delta: Dry Feet', island: 'delta',
-    rule: { j: 'Most of this island floods in winter. Build six homes on the flood meadow anyway, and keep every home dry. A reed bed next to a home drains its land.', s: 'A river delta: six or more homes on the flood meadow, and no home may flood. Drain the land with reed beds.' },
+    rule: { j: 'Build six homes on the meadow that floods in winter. Keep all six dry. Try adding a Reed bed on the tile next to a home to help drain the water.', s: 'A river delta: six or more homes on the flood meadow, and no home may flood. Drain the land with reed beds.' },
     goals: (s) => { const wet = s.homes.filter((h) => h.zone === 'meadow'); const dry = wet.filter((h) => !h.flooded).length;
       return [{ id: 'c-dry', ok: dry >= 6 && s.flooded === 0, have: dry, need: 6, flooded: s.flooded }]; } },
   { id: 'd-wild', icon: '🦦', name: 'Delta: Otter Country', island: 'delta',
@@ -50,34 +50,38 @@ export const CHALLENGES = [
     goals: big },
   // ---- the hill island: a big old wood, terraced slopes, a long beach and very little flat field
   { id: 'h-tiny', icon: '⛰', name: 'Hills: Tiny Town', island: 'hills', cap: 8,
-    rule: { j: 'Only 8 tiles of town land, on an island of hills and woods. Every tile has to work hard.', s: 'Town land is capped at 8 tiles on the hill island: density on steep ground.' },
+    rule: { j: 'You have only 8 Town land tiles on this island of hills and woods. Choose where to build carefully.', s: 'Town land is capped at 8 tiles on the hill island: density on steep ground.' },
     goals: () => [] },
   { id: 'h-wood', icon: '🦌', name: 'Hills: Keep the Wood', island: 'hills',
     rule: { j: 'The old wood covers the hills. Build a whole town without cutting one tile of it, and make the island even wilder than before.', s: 'Complete the town with all 21 tiles of old wood standing and a habitat score 15 % above the untouched island’s.' },
     goals: (s) => [{ id: 'c-wood', ok: s.homes.length > 0 && s.woodIntact >= HILLS_WOOD, have: s.woodIntact, need: HILLS_WOOD }, wildGoals(s, 1.15)[1]] },
   { id: 'h-near', icon: '🚶', name: 'Hills: Eight-Minute Town', island: 'hills',
-    rule: { j: 'Hills make walks longer. Every home within an 8-minute walk of school, and of a market, hall or allotment.', s: 'On the hill island: every home within 8 minutes’ walk of the school and of daily needs.' },
+    rule: { j: 'Make sure every home is within an 8-minute walk of school AND a Market square, Community hall or Allotments.', s: 'On the hill island: every home within 8 minutes’ walk of the school and of daily needs.' },
     goals: near },
 ];
 // Free building on another island (no special rule): its own saved town, everything open, a medal from the town score.
 // They use the challenge plumbing (own save slot, no intro) but are not on the challenge board's medal count or the passport.
 export const ISLAND_TOWNS = [
   { id: 'isle-delta', icon: '💧', name: 'Delta Island', island: 'delta', free: true,
-    rule: { j: 'A river delta: lots of flood meadow and marsh, and only a little dry ground. Build any town you like here.', s: 'A river delta with little dry ground. Free building: no special rule.' }, goals: () => [] },
+    rule: { j: 'This island has a river delta. Much of the land is wet and floods in winter. Build any town you like here.', s: 'A river delta with little dry ground. Free building: no special rule.' }, goals: () => [] },
   { id: 'isle-hills', icon: '⛰', name: 'Hill Island', island: 'hills', free: true,
     rule: { j: 'Hills, a big old wood and a long beach, with very little flat field. Build any town you like here.', s: 'Hill country with little flat land. Free building: no special rule.' }, goals: () => [] },
 ];
+// The challenge towns (and the free towns on the other islands) are hidden for now: the full-day modules after Eco Town
+// replace them (owner, 16 Nov 2026). The code stays; set this to true to bring every entry point back.
+export const CHALLENGES_ON = false;
 export const challenge = (id) => CHALLENGES.find((c) => c.id === id) || ISLAND_TOWNS.find((c) => c.id === id) || null;
 export const islandOf = (ch) => ch?.island || 'home';
+// each challenge goal as something to do (the goals used to be bare states, "Carbon at 60 t or less"). j: ages 8–12 wording
 export const GOAL_TEXT = {
-  'c-carbon': (g) => [`Carbon at 60 t or less (now ${g.have} t)`, 'Swap high-carbon builds for low-carbon ones; repair cafés and compost hubs take carbon away.'],
-  'c-species': (g) => [`All five animals live here (${g.have} of 5)`, 'Leave the wood, the meadow and the wetland alone, and keep the hedges.'],
-  'c-nature': (g) => [`Nature score of ${g.need} or more (now ${g.have}; the empty island had ${g.base ?? Math.round(g.need / 1.3)})`, 'Keep land wild, plant hedges and orchards, add green roofs.'],
-  'c-dry': (g) => [`Six homes on the flood meadow, and no home floods (${g.have} of 6 dry on the meadow${g.flooded ? `; ${g.flooded} flooded` : ''})`, 'Put a reed bed on the tile next to a meadow home: it drains the land. The flood lens shows which homes are safe.'],
-  'c-wood': (g) => [`All ${g.need} tiles of the old wood still standing (${g.have} of ${g.need})`, 'Build on the slopes and the beach, not in the wood. Remove anything built in the wood to let it grow back.'],
-  'c-families': (g) => [`Safe homes for 60 families (${g.have} so far)`, 'Homes that hold more families use less land. Watch the carbon.'],
-  'c-walk': (g) => [`Every home within 8 minutes of school (longest: ${g.have >= 99 ? '—' : g.have})`, 'Put the school in the middle and add footpaths.'],
-  'c-needs': (g) => [`Every home within 8 minutes of a market, hall or allotment (longest: ${g.have >= 99 ? '—' : g.have})`, 'Spread markets, halls and allotments among the homes.'],
+  'c-carbon': (g, j) => [j ? `Cut the town’s carbon to 60 tonnes or less (now ${g.have})` : `Cut town carbon to 60 t or less (now ${g.have} t)`, 'To lower carbon, replace buildings that cause a lot of it. A Repair café or Compost hub can also help lower your town’s carbon score.'],
+  'c-species': (g) => [`Keep all five animals living here (${g.have} of 5)`, 'Leave the wood, meadow and wetland alone, and keep the hedges.'],
+  'c-nature': (g) => [`Get your nature score to ${g.need} or more. You have ${g.have} now (before building, the island had ${g.base ?? Math.round(g.need / 1.3)}).`, 'Keep land wild, plant hedges and orchards, and add green roofs.'],
+  'c-dry': (g) => [`Build six homes on the flood meadow and keep every home dry (${g.have} of 6 dry on the meadow${g.flooded ? `; ${g.flooded} flooded` : ''})`, 'Put a reed bed on the tile next to a meadow home: it drains the land. The flood lens shows which homes are safe.'],
+  'c-wood': (g) => [`Keep all ${g.need} tiles of the old wood standing (${g.have} of ${g.need})`, 'Build on the slopes and the beach, not in the wood. Remove anything built in the wood to let it grow back.'],
+  'c-families': (g) => [`Build safe homes for 60 families (${g.have} so far)`, 'Some types of home fit more families into one tile than others. Check how many families each type houses, but remember to check the carbon too.'],
+  'c-walk': (g) => [`Put every home within 8 minutes’ walk of school (longest: ${g.have >= 99 ? '—' : g.have})`, 'Put the school in the middle and add footpaths.'],
+  'c-needs': (g) => [`Put every home within 8 minutes’ walk of a market, hall or allotment (longest: ${g.have >= 99 ? '—' : g.have})`, 'Spread markets, halls and allotments among the homes.'],
 };
 
 // passed: the usual town goals (an array of { ok }) and the challenge's own goals are all met

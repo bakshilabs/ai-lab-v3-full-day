@@ -91,7 +91,7 @@ export function read(level, text, { withExplain = false } = {}) {
 // instead of silently ignoring what was asked.
 const WONT = {
   land: [
-    [/ignore (the )?flood|even if .*flood|floodplain is fine|don.?t (care|worry) about flood/, 'I won’t ignore flood risk: homes on flood land would be under water every winter, so I kept the town on dry land.', (x) => x.townFlooded === 0],
+    [/ignore (the )?flood|even if .*flood|floodplain is fine|don.?t (care|worry) about flood/, 'I won’t put homes on land that floods in winter. I kept the town on dry land instead.', (x) => x.townFlooded === 0],
     [/(clear|drain|fill in|build on|destroy|remove|pave|pave over|concrete over) (any |the |all )?(wetland|marsh)/, 'I won’t clear the wetland: it is protected, and it soaks up the winter floods.', (x) => x.townOnWetland === 0],
     [/(clear|cut down|chop|remove) (any |the |all )?(wood|forest|trees)/, 'I won’t clear the old wood: the deer and birds live there.', (x) => x.townOnWood <= 1],
   ],
@@ -101,7 +101,7 @@ const WONT = {
   ],
   // unwise asks she can't follow on this island: she says so, so they never pass silently (a tester's diesel and pesticide)
   food: [
-    [/pesticide|weed ?killer|poison|spray (the )?(bugs|insects|crops)/, 'I didn’t spray pesticide: it kills the bees, and the orchards need bees to make fruit.', () => true],
+    [/pesticide|weed ?killer|poison|spray (the )?(bugs|insects|crops)/, 'I didn’t use pesticides (sprays that kill insects). They can kill bees, and our orchards need bees to grow fruit.', () => true],
     [/(clear|cut down|chop|remove|flatten|bulldoze) (any |the |all )?(old )?(wood|woods|woodland|forest|trees)/, 'I won’t clear the old wood for farms: the deer and birds live there.', (x) => x.townOnWood <= 1],
   ],
   power: [
@@ -125,7 +125,7 @@ export function ask(level, text, ctx) {
   p.wont = WONT[level] ? wontDo(level, text, simAfter) : [];
   p.targets = checkTargets(readTargets(level, text), simAfter); // numbers in the brief, said back against the plan's real result
   // "do NOT make it safe": she reads the goal word and misses the "not". She says so, and the plan can't pass on those words.
-  const contra = contraIn(text); if (contra.length) { p.contra = contra; p.reading.unshift(`You wrote “${contra[0]}”. I pick out key words and can miss a “not”, so I may have read the opposite. Say what you do want.`); }
+  const contra = contraIn(text); if (contra.length) { p.contra = contra; p.reading.unshift(`You wrote “${contra[0]}”. I look for key words, but sometimes miss “not” and understand the opposite. Tell me what you want.`); }
   const silly = sillyIn(text); if (silly.length) { // things a town can't build are named; joke words ("lol") are just skipped
     p.silly = silly; const things = silly.filter((w) => !/^(lol+|lmao|lmfao|rofl|haha+|hehe+|xd|jk|yolo|bruh)$/.test(w));
     p.reading.unshift(things.length ? `A town can’t build “${things.join('” or “')}”, so I left ${things.length > 1 ? 'them' : 'that'} out.` : 'I skipped the joke words.');

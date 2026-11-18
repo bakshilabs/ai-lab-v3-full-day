@@ -4,7 +4,7 @@
 *{box-sizing:border-box}body{margin:0;font:500 15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;color:#1f2a37;background:#f4f1ea}
 header{background:#2b3a55;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px}header b{font-size:1.2em}header span{opacity:.75}
 main{max-width:1100px;margin:0 auto;padding:18px}section{background:#fff;border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-h2{margin:0 0 10px;font-size:1.1em}label{display:block;font-weight:700;font-size:.85em;margin-bottom:3px}input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid #cfd6de;width:100%}
+h2{margin:0 0 10px;font-size:1.1em}label{display:block;font-weight:700;font-size:.85em;margin-bottom:3px}input,textarea{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid #cfd6de;width:100%}
 .grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr auto;gap:10px;align-items:end}button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;background:#e8edf2}
 button.go{background:#2e9b5a;color:#fff}button.warn{background:#fde3dc;color:#a3321f}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #eef1f4;vertical-align:middle}
 th{font-size:.8em;color:#64748b;text-transform:uppercase;letter-spacing:.04em}.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.8em;font-weight:800}
@@ -23,7 +23,7 @@ th{font-size:.8em;color:#64748b;text-transform:uppercase;letter-spacing:.04em}.p
 <div><label for="note">Note</label><input id="note" placeholder="Pilot, autumn term"></div><button class="go" id="create">Create</button></div><div class="err" id="err"></div></section>
 <section><h2>Organisations</h2><table><thead><tr><th>Organisation</th><th>Leader code</th><th>Licence dates</th><th>Status</th><th>Groups</th><th>Learners / seats</th><th>Active now</th><th></th></tr></thead><tbody id="orgs"></tbody></table></section>
 <section id="groupsSec" style="display:none"><h2 id="groupsTitle">Groups</h2><table><thead><tr><th>Group</th><th>Join code</th><th>Dates</th><th>Status</th><th>Learners</th><th>Active now</th><th></th></tr></thead><tbody id="groups"></tbody></table>
-<div class="grid3"><div><label for="gname">New group</label><input id="gname" placeholder="Saturday club" maxlength="60"></div><div><label for="gstarts">From</label><input id="gstarts" type="date"></div><div><label for="gends">Until (inclusive)</label><input id="gends" type="date"></div><button class="go" id="gcreate">Add group</button></div>
+<div class="grid3"><div><label for="gname">New group</label><input id="gname" placeholder="Saturday club" maxlength="60"></div><div><label for="gstarts">From</label><input id="gstarts" type="date"></div><div><label for="gends">Until (inclusive)</label><input id="gends" type="date"></div><div><label for="gcodes">Join code(s), optional</label><textarea id="gcodes" rows="2" placeholder="Leave empty for a new code, or paste codes you already have (WORD-1234), one group each"></textarea></div><button class="go" id="gcreate">Add group</button></div>
 <p class="muted">Learner records are deleted 30 days after a group’s end date, and at once when a group or an organisation is deleted. No names are stored.</p></section>
 </main><div id="sheet"></div>
 <script>
@@ -52,7 +52,13 @@ $('orgs').onclick=async(e)=>{const t=e.target.closest('button');if(!t)return;con
  if(t.dataset.a==='restore')await api(`/orgs/${id}`,{method:'PATCH',body:{revoked:false}});
  if(t.dataset.a==='delete'&&confirm(`Delete ${o.name} permanently, with all its groups, learners and saved progress?`)){await api(`/orgs/${id}`,{method:'DELETE'});if(current===id){current=null;$('groupsSec').style.display='none';}}
  await load();}catch(err){alert(err.message);}};
-$('gcreate').onclick=async()=>{if(!current)return;try{await api(`/orgs/${current}/groups`,{method:'POST',body:{name:$('gname').value,starts:$('gstarts').value,ends:$('gends').value}});$('gname').value='';await load();}catch(err){alert(err.message);}};
+$('gcreate').onclick=async()=>{if(!current)return;const codes=$('gcodes').value.split(/[\s,;]+/).filter(Boolean),name=$('gname').value.trim(),done=[];
+ const base={starts:$('gstarts').value,ends:$('gends').value};
+ try{if(!codes.length)await api(`/orgs/${current}/groups`,{method:'POST',body:{...base,name}});
+  // several codes: one group each, named "<name> 1", "<name> 2"… (or "Group 1"…) in the order pasted
+  else for(const [i,code] of codes.entries()){await api(`/orgs/${current}/groups`,{method:'POST',body:{...base,code,name:codes.length>1?`${name||'Group'} ${i+1}`:(name||'Group')}});done.push(code);}
+  $('gname').value='';$('gcodes').value='';}catch(err){const left=codes.filter((c)=>!done.includes(c));$('gcodes').value=left.join('\n');alert(err.message+(left.length?`\n\nNot added yet: ${left[0]}${left.length>1?` and ${left.length-1} more`:''} (left in the box).`:''));}
+ await load();};
 $('groups').onclick=async(e)=>{const t=e.target.closest('button');if(!t||!current)return;const id=t.dataset.id,g=groups.find((x)=>x.id===id),p=`/orgs/${current}/groups/${id}`;try{
  if(t.dataset.g==='dates'){const s=prompt('From (YYYY-MM-DD)',g.starts);if(!s)return;const en=prompt('Until (YYYY-MM-DD, inclusive)',g.ends);if(!en)return;await api(p,{method:'PATCH',body:{starts:s,ends:en}});}
  if(t.dataset.g==='off'&&confirm(`Switch off ${g.name}? Learners playing now will be stopped.`))await api(p,{method:'PATCH',body:{revoked:true}});

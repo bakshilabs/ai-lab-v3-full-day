@@ -1,5 +1,5 @@
 // The club passport card and its printable certificate (rules: js/game/passport.js).
-import { passport, RANKS } from '../game/passport.js';
+import { passport } from '../game/passport.js';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const MED = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 const PART = { stars: ['★', 'Mission stars'], complete: ['🎉', 'Town complete'], town: ['🏡', 'Town medal'], challenges: ['🏆', 'Challenge medals'], catches: ['🔍', 'Florence’s wrong ideas caught'] };
@@ -10,9 +10,9 @@ export function passportHtml(band, dev = readDevice()) {
   return `<div class="passport"><span class="chip">🎒 CLUB PASSPORT</span>
     <h2 class="prank"><span aria-hidden="true">${p.rank.icon}</span> ${esc(p.rank.name)}</h2>
     <div class="pbar" role="progressbar" aria-label="Points to the next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i><span>${p.points} points${p.next ? ` · ${p.next.need} more for ${esc(p.next.name)}` : ' · top rank'}</span></div>
-    <ol class="pranks" aria-label="Ranks">${RANKS.map((r, i) => `<li class="${i <= p.rankIndex ? 'got' : ''}${i === p.rankIndex ? ' now' : ''}"><b aria-hidden="true">${r.icon}</b><span>${esc(r.name)}</span><small>${r.at}</small></li>`).join('')}</ol>
+    <ol class="pranks" aria-label="Ranks">${p.ranks.map((r, i) => `<li class="${i <= p.rankIndex ? 'got' : ''}${i === p.rankIndex ? ' now' : ''}"><b aria-hidden="true">${r.icon}</b><span>${esc(r.name)}</span><small>${r.at}</small></li>`).join('')}</ol>
     <ul class="pparts">${p.parts.map((x) => `<li><b aria-hidden="true">${PART[x.id][0]}</b><span>${esc(PART[x.id][1])}</span><em>${x.got} / ${x.max}</em></li>`).join('')}</ul>
-    <ul class="pch" aria-label="Challenge towns">${p.challenges.map((c) => `<li class="${c.medal ? 'got' : ''}" title="${esc(c.name)}"><b aria-hidden="true">${c.medal ? MED[c.medal] : c.icon}</b><span>${esc(c.name)}</span></li>`).join('')}</ul>
+    ${p.challenges.length ? `<ul class="pch" aria-label="Challenge towns">${p.challenges.map((c) => `<li class="${c.medal ? 'got' : ''}" title="${esc(c.name)}"><b aria-hidden="true">${c.medal ? MED[c.medal] : c.icon}</b><span>${esc(c.name)}</span></li>`).join('')}</ul>` : ''}
     <p class="ptip">➜ <b>Next:</b> ${esc(p.tip.text)}</p></div>`;
 }
 

@@ -203,7 +203,7 @@ const PLANNERS = {
     }
     const maxMode = slots.has('max_food') || (!slots.has('enough_food') && !['bees', 'keep_hedges', 'wildlife', 'allotments', 'orchard', 'local'].some((s) => slots.has(s)));
     if (maxMode) { reading.push('“As much food as possible” = plough every free field into big fields.'); assumptions.push('More food is always better.'); }
-    else reading.push(asked > sim0.foodNeed ? `Your target: at least ${asked} food units (the families need ${sim0.foodNeed}).` : `Enough food for ${sim0.families} families (${need} baskets).`);
+    else reading.push(asked > sim0.foodNeed ? `Your target: at least ${asked} food units (the families need ${sim0.foodNeed}).` : `Food for ${sim0.families} families: ${need} baskets (1 basket feeds 3 families).`);
     const habit = maxMode ? 'one_word' : !slots.has('keep_hedges') && !slots.has('bees') && !slots.has('wildlife') ? 'missing' : null;
     const habitWhy = maxMode ? 'Florence chased “as much as possible” and ploughed up every hedge.' : habit ? 'Florence didn’t know the bees and deer live in the hedges.' : '';
     if (slots.has('keep_hedges')) reading.push('Keep the hedges.');

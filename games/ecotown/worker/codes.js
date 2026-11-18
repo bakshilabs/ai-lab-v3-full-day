@@ -124,9 +124,13 @@ export function createDirectory(storage) {
     },
     async listOrgs() { return [...(await storage.list({ prefix: 'o:' })).values()].sort((a, b) => b.created - a.created); },
     // a new group gets its id and its join code here, so a join code is unique across every organisation
-    async reserveJoin(org) {
+    // admin only: a chosen join code (WORD-1234), e.g. codes a club already handed out; it must be free
+    async reserveJoin(org, want) {
       if (!(await storage.get('o:' + org))) throw new Error('No such organisation');
-      const code = await fresh('j:', () => `${word()}-${digits()}`); const group = randId(4);
+      let code;
+      if (want) { code = normalise(want); if (!/^[A-Z]{3,12}-\d{4}$/.test(code)) throw new Error('A join code must look like WORD-1234'); if (await storage.get('j:' + code)) throw new Error('That join code is already in use'); }
+      else code = await fresh('j:', () => `${word()}-${digits()}`);
+      const group = randId(4);
       await storage.put('j:' + code, { org, group }); return { code, group };
     },
     async release(code) { await storage.delete('j:' + code); },
@@ -308,8 +312,8 @@ export function createService(dir, orgOf) {
     const O = orgOf(t.org); const r = await O.leaderCheck(t.secret, now); return r.ok ? fn(O, r.org) : r;
   };
   const admin = (id) => { if (!ORG_ID.test(id || '')) throw new Error('No such organisation'); return orgOf(id); };
-  async function addGroup(O, orgId, input, now) {
-    const { code, group } = await dir.reserveJoin(orgId);
+  async function addGroup(O, orgId, input, now, chosen) {
+    const { code, group } = await dir.reserveJoin(orgId, chosen);
     try { return await O.addGroup({ id: group, code, name: input?.name, starts: input?.starts, ends: input?.ends }, now); } catch (e) { await dir.release(code); throw e; }
   }
   return {
@@ -352,7 +356,7 @@ export function createService(dir, orgOf) {
     },
     async deleteOrg(id) { await admin(id).destroy(); await dir.removeOrg(id); },
     listGroups: (id, now = Date.now()) => admin(id).groups(now),
-    createGroup: (id, input, now = Date.now()) => addGroup(admin(id), id, input, now),
+    createGroup: (id, input, now = Date.now()) => addGroup(admin(id), id, input, now, input?.code), // admin may choose the join code
     updateGroup: (id, gid, patch) => { const { name, starts, ends, revoked } = patch || {}; return admin(id).updateGroup(gid, { name, starts, ends, revoked }); },
     async deleteGroup(id, gid) { const { code } = await admin(id).deleteGroup(gid); await dir.release(code); },
   };

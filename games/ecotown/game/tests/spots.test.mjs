@@ -19,9 +19,15 @@ test('a cycle lane prefers the bridge to the mainland when there is one', () => 
   assert.equal(r.why.to, 'bridge');
 });
 
-test('with no homes, a path says to build homes first', () => {
+test('with no homes and no town land, a path says to mark land first', () => {
   const r = goodSpots('path', { tiles, cells: new Map(), items: ITEMS, ok: okFree(new Map()) });
   assert.equal(r.why.type, 'needHomes'); assert.equal(r.keys.length, 0);
+});
+
+test('Florence first: paths open before homes, so a path runs from the town land to the old school', () => {
+  const cells = new Map([['0,1', { mark: 'town', item: null, mods: [] }], ['0,0', { mark: 'town', item: null, mods: [] }]]);
+  const r = goodSpots('path', { tiles, cells, items: ITEMS, ok: okFree(cells) });
+  assert.equal(r.why.type, 'linkLand'); assert.equal(r.why.to, 'oldschool'); assert.ok(r.keys.length >= 3);
 });
 
 test('a park goes right by the homes', () => {

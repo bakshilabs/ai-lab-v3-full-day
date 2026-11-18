@@ -211,3 +211,15 @@ test('fifty wrong codes never block a right one', async () => {
   for (let i = 0; i < 50; i++) { assert.equal((await S.join('NOPE-0000', '', '', NOW)).reason, 'unknown'); assert.equal((await S.leaderLogin('LEAD-NOPE-0000', NOW)).reason, 'unknown'); assert.equal((await S.join(g.code, 'Nobody 99', '', NOW)).reason, 'no_badge'); }
   assert.ok((await S.join(g.code, '', '', NOW)).ok); assert.ok((await S.leaderLogin(org.leaderCode, NOW)).ok);
 });
+
+test('the admin can give a group a chosen join code (codes a club already has); a leader cannot', async () => {
+  const { S } = site(); const org = await S.createOrg(ORG, NOW);
+  const g = await S.createGroup(org.id, { name: 'Group 1', code: 'kestrel 5895' }, NOW);
+  assert.equal(g.code, 'KESTREL-5895');
+  await assert.rejects(S.createGroup(org.id, { name: 'Group 2', code: 'KESTREL-5895' }, NOW), /already in use/);
+  await assert.rejects(S.createGroup(org.id, { name: 'Group 3', code: 'nope' }, NOW), /WORD-1234/);
+  const r = await S.join('KESTREL-5895', '', null, NOW); assert.ok(r.ok, 'a child can join with the chosen code');
+  const lead = await S.leaderLogin(org.leaderCode, NOW);
+  const lg = await S.leaderAddGroup(lead.session, { name: 'Leader group', code: 'ISLAND-4484' }, NOW);
+  assert.notEqual(lg.group.code, 'ISLAND-4484', 'leaders always get a made-up code');
+});

@@ -156,7 +156,7 @@ export function createUI(root, labelsRoot, opts) {
       P.dock.classList.toggle('mini', !!o.mini);
       const line = o.say || (o.html ? h(`<div>${o.html}</div>`).textContent : '');
       D.speaker.innerHTML = `<div class="avatar">${pic()}</div><div class="say"><div class="name">${esc(o.name || 'Florence')} <em class="${o.tagCls || ''}">${esc(o.tag || 'GUESS')}</em>${!o.thinking && line && canSpeak() ? '<button class="spk" data-spk aria-label="Read aloud" title="Read aloud">🔊</button>' : ''}</div>
-        <div class="text">${o.html || ''}</div>${o.sure != null ? `<div class="sure"><div class="bar"><i></i></div><span>${o.sure}% ${esc(o.sureLabel || 'sure')}</span></div>` : ''}${o.why ? `<div class="why">${o.why}</div>` : ''}</div>`;
+        <div class="text">${o.html || ''}</div>${o.sure != null ? `<div class="sure"><div class="bar"><i></i></div><span>${o.sureText ? esc(o.sureText) : `${o.sure}% ${esc(o.sureLabel || 'sure')}`}</span></div>` : ''}${o.why ? `<div class="why">${o.why}</div>` : ''}</div>`;
       this.show('helper'); this.portrait?.mount(D.speaker);
       D.speaker.querySelector('[data-spk]')?.addEventListener('click', () => speak(line, { voice: 'helper', force: true }));
       if (o.sure != null) requestAnimationFrame(() => requestAnimationFrame(() => { const i = D.speaker.querySelector('.sure .bar i'); if (i) i.style.width = o.sure + '%'; }));
@@ -281,6 +281,8 @@ export function createUI(root, labelsRoot, opts) {
     clear(kind) { for (const a of anchored.slice()) if (!kind || a.node.classList.contains(kind)) remove(a); },
     has(kind) { return anchored.some((a) => a.node.classList.contains(kind)); },
     spots(list) { this.clear('spot'); for (const l of list) add('spot', l); }, // Florence's good spots: a solid gold ⭐ pin over each tile
+    // pins of one kind ('mine': where the picked build already stands; 'farpin': the school and the homes too far from it)
+    pins(kind, list) { this.clear(kind); for (const l of list) add(`${kind} ${l.cls || ''}`, l); },
     update(camera, canvas) {
       const w = canvas.clientWidth, hgt = canvas.clientHeight;
       // keep bubbles out from under the town card and the icon strip (top corners)

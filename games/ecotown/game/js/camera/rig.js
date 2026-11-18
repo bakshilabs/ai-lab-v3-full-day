@@ -31,10 +31,11 @@ export function createRig(stage, canvas, fadeEl) {
     // distance that fits a span of the island in the free area (the island is ~100 × 75, with cliffs ~40 high)
     // tall, narrow free areas (phones held upright): the island is width-limited, so the frame trims the margin
     // (and the floating rocks) and looks down a little more steeply, letting the island fill more of the screen
-    portrait() { return this.freeAspect().aspect < 0.85; },
-    frameDist(span = this.portrait() ? 90 : 102, fill = 0.92) { // 102: the buildable land fills the free area; the rim's far rocks and the cliff's roots may run off it (112 left tiles 22 px wide on a laptop)
-      const { aspect, fw, fh } = this.freeAspect();
-      if (this.portrait()) {
+    portrait(fa = this.freeAspect()) { return fa.aspect < 0.85; },
+    // fa: the shape of another free area (Florence's pane in the split screen, js/game/twotowns.js); default this camera's
+    frameDist(span, fill = 0.92, fa = this.freeAspect()) { // 102: the buildable land fills the free area; the rim's far rocks and the cliff's roots may run off it (112 left tiles 22 px wide on a laptop)
+      const { aspect, fw, fh } = fa; const portrait = this.portrait(fa); span ??= portrait ? 90 : 102;
+      if (portrait) {
         // phones held upright: fit the buildable tiles (not the wild rim) across the width, seen from the
         // portrait yaw where the island's long axis runs up the screen; the rim may run off the sides
         const tx = Math.tan((SKY_FOV * DEG) / 2) * cam.aspect * fw, ty = Math.tan((SKY_FOV * DEG) / 2) * fh;
@@ -48,6 +49,9 @@ export function createRig(stage, canvas, fadeEl) {
     fit(d) { const ref = 280; /* a 1280×800 screen with the build panel */ return d * Math.max(0.8, this.frameDist() / ref); },
     minDist() { return 26; },
     maxDist() { return this.frameDist() * 1.35; },
+    // the split screen (js/game/twotowns.js): paneBlock(x, y) is true over Florence's pane. Pointers that start there never
+    // pan, zoom or build; a tap there calls onPaneTap. Her pane has its own fixed camera.
+    paneBlock: null, onPaneTap: null,
     skyPose(o = sky) {
       const p = new THREE.Vector3(Math.sin(o.yaw) * Math.cos(o.pitch), Math.sin(o.pitch), Math.cos(o.yaw) * Math.cos(o.pitch)).multiplyScalar(o.dist).add(o.target);
       return { pos: p, look: o.target.clone(), fov: SKY_FOV };
@@ -183,7 +187,7 @@ export function createRig(stage, canvas, fadeEl) {
       }
     },
   };
-  function clampTarget() { sky.target.x = clamp(sky.target.x, PAN.x[0], PAN.x[1]); sky.target.z = clamp(sky.target.z, PAN.z[0], PAN.z[1]); }
+  function clampTarget() { const P = PAN; sky.target.x = clamp(sky.target.x, P.x[0], P.x[1]); sky.target.z = clamp(sky.target.z, P.z[0], P.z[1]); }
   // the point on the ground (y = 1) under a screen position (NDC), for zooming towards the cursor
   const ray = new THREE.Raycaster(); const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
   function groundAt(n) { ray.setFromCamera(n, cam); const p = new THREE.Vector3(); return ray.ray.intersectPlane(ground, p) ? p : null; }
@@ -201,13 +205,16 @@ export function createRig(stage, canvas, fadeEl) {
   const ndc = (e) => { const r = canvas.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); };
   const ndcAt = (x, y) => { const r = canvas.getBoundingClientRect(); return new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1); };
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  const other = new Map(); // pointers that started over Florence's pane (split screen)
   canvas.addEventListener('pointerdown', (e) => {
+    if (rig.paneBlock?.(e.clientX, e.clientY)) { other.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now() }); return; }
     canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); downAt = performance.now(); moved = 0; button = e.button;
     if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = sky.dist; ang0 = Math.atan2(b.y - a.y, b.x - a.x); mid0 = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
   });
   canvas.addEventListener('pointermove', (e) => {
+    if (other.has(e.pointerId)) return;
     const p = pts.get(e.pointerId);
-    if (!p) { if (rig.mode !== 'street') rig.onHover?.(ndc(e), e); return; }
+    if (!p) { if (rig.mode !== 'street') rig.onHover?.(rig.paneBlock?.(e.clientX, e.clientY) ? null : ndc(e), e); return; }
     const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
     if (rig.locked) return;
     if (pts.size === 2 && rig.mode === 'sky') {
@@ -225,6 +232,7 @@ export function createRig(stage, canvas, fadeEl) {
     if (rig.mode === 'street' && rig.street && moved > 6) { rig.street.yaw += dx * 0.005; rig.street.pitch = clamp(rig.street.pitch + dy * 0.004, STREET.pitch[0], STREET.pitch[1]); } // drag to look (the view follows the finger)
   });
   const up = (e) => {
+    const o = other.get(e.pointerId); if (o) { other.delete(e.pointerId); if (Math.hypot(e.clientX - o.x, e.clientY - o.y) < 10 && performance.now() - o.t < 700) rig.onPaneTap?.(); return; }
     const was = pts.has(e.pointerId); pts.delete(e.pointerId); if (pts.size < 2) { pinch0 = 0; mid0 = null; }
     if (button === 2) { if (was && moved <= 4 && performance.now() - downAt < 700) rig.onAltTap?.(ndc(e), e); return; } // a right-click (not a right-drag): erase while building
     if (!was || moved > (rig.building ? 14 : 8) || performance.now() - downAt > 700) return;
@@ -234,8 +242,8 @@ export function createRig(stage, canvas, fadeEl) {
     const near = lastXY && Math.hypot(e.clientX - lastXY[0], e.clientY - lastXY[1]) < 24;
     if (now - lastTap < 320 && near) { rig.onDoubleTap?.(ndc(e), e); lastTap = 0; } else { lastTap = now; lastXY = [e.clientX, e.clientY]; rig.onTap?.(ndc(e), e); }
   };
-  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', (e) => pts.delete(e.pointerId));
-  canvas.addEventListener('wheel', (e) => { if (rig.locked || rig.mode !== 'sky') return; e.preventDefault(); zoomTo(sky.dist * Math.exp(e.deltaY * 0.0012), ndc(e)); }, { passive: false });
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); other.delete(e.pointerId); });
+  canvas.addEventListener('wheel', (e) => { if (rig.paneBlock?.(e.clientX, e.clientY)) { e.preventDefault(); return; } if (rig.locked || rig.mode !== 'sky') return; e.preventDefault(); zoomTo(sky.dist * Math.exp(e.deltaY * 0.0012), ndc(e)); }, { passive: false });
   // keyboard, only when the island has focus (or nothing in the interface does)
   const STREET_KEYS = new Set(['w', 'a', 's', 'd', 'q', 'e', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']); const keys = new Set();
   window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase())); window.addEventListener('blur', () => keys.clear());
