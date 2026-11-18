@@ -5,7 +5,7 @@ export const WELCOME_KEY = 'ecotown.welcome'; export const SAVE_KEY = 'ecotown.s
 // how: three short lines on getting around in that part (shown in the welcome's guide and on the start page)
 export const PARTS = [
   { id: 'town', n: 1, icon: '🏡', title: 'Eco Town', time: 'about an hour', query: '?part=town',
-    blurb: 'Build your own town with Florence, your AI helper. She is clever, and sometimes wrong. Check her plans before you trust them.',
+    blurb: 'Build your own town with Florence, your AI helper. She is clever and sometimes wrong. Check her plans before you trust them.',
     how: ['Pick a build at the bottom, then tap a tile on the island.', 'The line at the top left always says your next step.', 'The AI Lab button opens a mission when its number shows.'] },
   { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', time: 'about an hour', query: '?module=drone',
     blurb: 'Six jobs drones do: safety checks, flying by hand, deliveries, farm maps, inspecting a turbine and a bridge, and search and rescue.',
@@ -27,15 +27,15 @@ export const EVERYWHERE = ['“Back to my town” at the top left always takes y
 
 // The welcome film: seven short scenes. say: the line spoken and shown. view: which camera move (js/welcome.js).
 export const SCENES = [
-  { id: 'hello', view: 'wide', icon: '👋', title: 'Welcome to the AI Lab', say: 'Welcome to the AI Lab. Today you will plan a town, and then work with the machines of its future.' },
-  { id: 'florence', view: 'florence', icon: '🤖', title: 'Meet Florence', say: 'This is Florence, your AI helper. She is clever and she works fast. She is not always right.' },
+  { id: 'hello', view: 'wide', icon: '👋', title: 'Welcome to the AI Lab', say: 'Welcome to the AI Lab. Today you will plan a town, then work with the machines of its future.' },
+  { id: 'florence', view: 'florence', icon: '🤖', title: 'Meet Florence', say: 'This is Florence, your AI helper. She is clever and works fast, but she is not always right.' },
   { id: 'town', view: 'town', part: 'town', icon: '🏡', title: 'Part 1: Eco Town', say: 'First, build your own town. Florence makes plans. You check them with evidence before you trust them.' },
   { id: 'drone', view: 'low', part: 'drone', icon: '🚁', title: 'Part 2: Drones at work', say: 'Next, put drones to work. Check them, fly them, deliver, map a farm, inspect a turbine, and search for someone lost.' },
   { id: 'robots', view: 'street', part: 'robots', icon: '🤖', title: 'Part 3: Robots at work', say: 'Then put robots to work. Choose their sensors, program an arm, write safety rules, teach them, and design a rescue robot.' },
   { id: 'roads', view: 'road', part: 'roads', icon: '🚗', title: 'Part 4: Self-driving cars', say: 'Then work on self-driving cars. Give them sensors, teach them, set their rules, test them, plan a fleet and redesign the street.' },
   { id: 'film', view: 'town', part: 'film', icon: '🎬', title: 'Part 5: Town film studio', say: 'Then make a film of the town. Plan the shots, direct Florence, edit, add captions, and check what is real.' },
   { id: 'power', view: 'high', part: 'power', icon: '⚡', title: 'Part 6: Power control room', say: 'Last, run the power control room. Keep the lights on, plan for the weather, and get through a storm night.' },
-  { id: 'page', view: 'high', icon: '📄', title: 'Take it home', say: 'At the end you take home a page that shows what you made. Ready? Let us see how to get around.' },
+  { id: 'page', view: 'high', icon: '📄', title: 'Take it home', say: 'At the end you can take home a page that shows what you made. Ready? Now let us see how to get around.' },
 ];
 
 // What has been done, from the saved town (or null): for the ticks on the start page.

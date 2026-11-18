@@ -62,7 +62,7 @@ export async function runWelcome({ stage, world, life, terrain, bot, app }) {
 
   // 1. the opening card (a tap here also lets the browser play sound)
   await new Promise((res) => {
-    root.innerHTML = `<div class="wcard"><h1>Welcome to the <span>AI Lab</span></h1><p>A short film shows you the six parts of today. Then you will see how to get around in each one.</p>
+    root.innerHTML = `<div class="wcard"><h1>Welcome to the <span>AI Lab</span></h1><p>A short film shows you the six parts of today. Then it shows you how to get around in each one.</p>
       <div class="wend"><button data-skip>Skip the film</button><button class="go" data-play>▶ Play the welcome film</button></div></div>`;
     root.querySelector('[data-play]').onclick = () => res('play'); root.querySelector('[data-skip]').onclick = () => res('skip'); root.querySelector('[data-play]').focus();
   }).then(async (a) => {

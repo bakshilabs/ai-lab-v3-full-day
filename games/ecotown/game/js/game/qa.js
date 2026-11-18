@@ -72,7 +72,7 @@ export const TOPICS = [
     s: 'It depends on the build. Housing: dry slope, out of the floodplain. A school: where the longest walk is shortest. Farms: near homes, off town land. Select a build to see the ★ suggested tiles and the reason.' } },
   // small talk: a short, warm answer in character, then back to the town (a reviewer's "fav colour?" got a flat deflection)
   { id: 'joke', keys: ['joke', 'jokes', 'funny', 'laugh', 'riddle'], a: {
-    j: 'Here’s one! Why did the wind turbine get a medal? Because it was a big fan of clean energy! …I’m 97% sure that was funny. You’d better check.',
+    j: 'Here’s one! Why did the wind turbine get a medal? Because it was a big fan of clean energy! …I’m not sure that was funny. You’d better check.',
     s: 'One joke, then back to work. I told a planner my plan was 95% certain. She asked, “Certain of what?” I’m still calculating. Moral: ask an AI what its confidence is confidence in.' } },
   { id: 'chat', keys: ['favourite', 'favorite', 'colour', 'color', 'hello', 'hi', 'how are you', 'your name', 'how old', 'pet', 'hobby'], a: {
     j: 'Ooh, fun question! My favourite colour is leaf green, like a healthy hedge, and my favourite sound is bees buzzing. I’m a robot, so I never get tired! Now ask me about your town: floods, bees, or any build.',

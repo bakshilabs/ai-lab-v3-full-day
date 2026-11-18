@@ -1409,7 +1409,7 @@ export function createGame(app) {
   const partlyChoice = (own) => ui.modal(`<div class="ribbon">${esc(G.C.ui.partlyTag)}</div><h2>${esc(G.C.ui.partlyHead)}</h2><ul class="starlist">${own.map((o) => `<li>✗ ${esc(o)}</li>`).join('')}</ul><p>${esc(G.C.ui.partlyAsk)}</p><div class="row" style="justify-content:center"><button class="btn alt" data-act="keep">${esc(G.C.ui.partlyKeep)}</button><button class="btn go" data-act="fix">✎ ${esc(G.C.ui.partlyFix)}</button></div>`, { say: `${G.C.ui.partlyHead} ${own.join(' ')} ${G.C.ui.partlyAsk}` });
   // what to add to a brief after a check still finds a problem (the lens names the problem; this names the fix)
   const FIX_HINT = {
-    flood: { j: 'the town land must stay dry in winter.', s: 'a constraint: no town land on the floodplain.' },
+    flood: { j: 'the Town land must stay dry in winter.', s: 'a constraint: no Town land on the floodplain.' },
     nature: { j: 'what to keep wild: the old wood, or the hedges and the bees.', s: 'what must be protected: woodland, hedgerows, pollinators.' },
     street: { j: 'children must walk and cycle to school safely.', s: 'who must be safe: children walking and cycling at 8:45 am.' },
     access: { j: 'everyone must get there, wheelchairs and buggies too.', s: 'a step-free route for wheelchairs and buggies.' },

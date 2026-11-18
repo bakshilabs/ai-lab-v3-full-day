@@ -75,7 +75,7 @@ export const islandOf = (ch) => ch?.island || 'home';
 // each challenge goal as something to do (the goals used to be bare states, "Carbon at 60 t or less"). j: ages 8–12 wording
 export const GOAL_TEXT = {
   'c-carbon': (g, j) => [j ? `Cut the town’s carbon to 60 tonnes or less (now ${g.have})` : `Cut town carbon to 60 t or less (now ${g.have} t)`, 'To lower carbon, replace buildings that cause a lot of it. A Repair café or Compost hub can also help lower your town’s carbon score.'],
-  'c-species': (g) => [`Keep all five animals living here (${g.have} of 5)`, 'Leave the wood, the meadow and the wetland alone, and keep the hedges.'],
+  'c-species': (g) => [`Keep all five animals living here (${g.have} of 5)`, 'Leave the wood, meadow and wetland alone, and keep the hedges.'],
   'c-nature': (g) => [`Get your nature score to ${g.need} or more. You have ${g.have} now (before building, the island had ${g.base ?? Math.round(g.need / 1.3)}).`, 'Keep land wild, plant hedges and orchards, and add green roofs.'],
   'c-dry': (g) => [`Build six homes on the flood meadow and keep every home dry (${g.have} of 6 dry on the meadow${g.flooded ? `; ${g.flooded} flooded` : ''})`, 'Put a reed bed on the tile next to a meadow home: it drains the land. The flood lens shows which homes are safe.'],
   'c-wood': (g) => [`Keep all ${g.need} tiles of the old wood standing (${g.have} of ${g.need})`, 'Build on the slopes and the beach, not in the wood. Remove anything built in the wood to let it grow back.'],

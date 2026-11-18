@@ -30,7 +30,7 @@ export const EPISODES = [
   // ------------------------------------------------------------------ 1 · land
   {
     id: 'land-open', mission: 'land', kind: 'open', n: 1, title: 'The best land', music: 'day',
-    learn: { eco: 'Flat land beside a river is a flood plain.', ai: 'An AI can take one vague word ("best") too far.', from: 'LAB-GUIDE.md section 5 (Level 1), section 9A "Level 1: Read the land"; DESIGN.md "The six levels"' },
+    learn: { eco: 'Flat land beside a river is a flood plain.', ai: 'An AI can take one vague word (“best”) too far.', from: 'LAB-GUIDE.md section 5 (Level 1), section 9A "Level 1: Read the land"; DESIGN.md "The six levels"' },
     card: { ask: 'Is the flattest land the best land?' },
     plans: { flawed: ['land', ['best']] },
     setup: { seed: 'land', hour: 10, florence: '4,6', cast: { posy: '4,6+-3.6,1.6', dev: '4,6+3.6,1.6' }, otter: '2,6' },
@@ -76,7 +76,7 @@ export const EPISODES = [
   // ------------------------------------------------------------------ 2 · move
   {
     id: 'move-open', mission: 'move', kind: 'open', n: 2, title: 'Easy for everyone', music: 'day',
-    learn: { eco: 'How people get to school shapes the whole town.', ai: 'When an instruction leaves a gap ("everyone"), an AI fills it with a guess.', from: 'LAB-GUIDE.md section 5 (Level 2), section 9A "Level 2: Getting around"' },
+    learn: { eco: 'How people get to school shapes the whole town.', ai: 'When an instruction leaves a gap (“everyone”), an AI fills it with a guess.', from: 'LAB-GUIDE.md section 5 (Level 2), section 9A "Level 2: Getting around"' },
     card: { ask: 'Who is “everyone”?' },
     plans: { flawed: ['move', ['easy_access']] },
     setup: { seed: 'move', hour: 8.4, florence: '7,6+0,1', cast: { posy: '7,6+-3.8,2.2', dev: '7,6+3.8,2.2' }, otter: '2,6' },
@@ -166,7 +166,7 @@ export const EPISODES = [
   // ------------------------------------------------------------------ 4 · food
   {
     id: 'food-open', mission: 'food', kind: 'open', n: 4, title: 'As much as possible', music: 'day',
-    learn: { eco: 'Farmland is shared with wildlife: hedges are part of it.', ai: 'An AI does exactly what the words say ("as much as possible").', from: 'LAB-GUIDE.md section 5 (Level 4), section 9A "Level 4: Food"' },
+    learn: { eco: 'Farmland is shared with wildlife: hedges are part of it.', ai: 'An AI does exactly what the words say (“as much as possible”).', from: 'LAB-GUIDE.md section 5 (Level 4), section 9A "Level 4: Food"' },
     card: { ask: 'What should Florence keep?' },
     plans: { flawed: ['food', ['most_food']] },
     setup: { seed: 'food', hour: 10.5, florence: '6,3+0,0.5', cast: { posy: '6,3+-3.8,1.9', dev: '6,3+3.8,1.9' }, otter: '2,4' },
@@ -188,7 +188,7 @@ export const EPISODES = [
   },
   {
     id: 'food-close', mission: 'food', kind: 'close', n: 4, title: 'Enough', music: 'lab',
-    learn: { eco: 'Habitat corridors: hedges are homes and safe routes for wildlife. "Enough" food, not "most".', ai: 'An AI does what you say, not what you mean: say what must be kept as well as what you want.', from: 'LAB-GUIDE.md section 5 (Level 4: nature lens, bees and deer leave; clearer card "Enough food, and keep the hedges for the bees."), section 9A Level 4 ("What does enough mean instead of most?"), section 2 (learning outcome 3)' },
+    learn: { eco: 'Habitat corridors: hedges are homes and safe routes for wildlife. “Enough” food, not “most”.', ai: 'An AI does what you say, not what you mean: say what must be kept as well as what you want.', from: 'LAB-GUIDE.md section 5 (Level 4: nature lens, bees and deer leave; clearer card "Enough food, and keep the hedges for the bees."), section 9A Level 4 ("What does enough mean instead of most?"), section 2 (learning outcome 3)' },
     card: { eco: 'Hedges are homes and paths for wildlife. Grow enough, not most.', ai: 'An AI does what you say. Tell it what to keep.' },
     plans: { flawed: ['food', ['most_food']], clear: ['food', CLEAR.food] },
     setup: { seed: 'food', apply: 'flawed', hour: 13, florence: '6,3+0,0.5', cast: { posy: '6,3+-3.8,1.9', dev: '6,3+3.8,1.9' }, otter: '2,4' },
@@ -255,7 +255,7 @@ export const EPISODES = [
   // ------------------------------------------------------------------ 6 · heart
   {
     id: 'heart-open', mission: 'heart', kind: 'open', n: 6, title: 'The middle', music: 'day',
-    learn: { eco: 'Where the school goes decides how far every child walks.', ai: 'An AI reads words exactly ("the middle"), and it matters who it asks.', from: 'LAB-GUIDE.md section 5 (Level 6 and "Residents\' summary mistake"), section 9A "Level 6: A school for everyone"' },
+    learn: { eco: 'Where the school goes decides how far every child walks.', ai: 'An AI reads words exactly (“the middle”), and it matters who it asks.', from: 'LAB-GUIDE.md section 5 (Level 6 and "Residents\' summary mistake"), section 9A "Level 6: A school for everyone"' },
     card: { ask: 'The middle of what?' },
     plans: { flawed: ['heart', ['middle']] },
     setup: { seed: 'heart', hour: 11, florence: '7,6+0,1', cast: { posy: '7,6+-3.8,2.2', dev: '7,6+3.8,2.2' }, otter: '2,6' },
@@ -278,7 +278,7 @@ export const EPISODES = [
   },
   {
     id: 'heart-close', mission: 'heart', kind: 'close', n: 6, title: 'Ask everyone', music: 'lab',
-    learn: { eco: 'Walkable towns: school within a 15-minute walk of every home, and it matters who gets asked.', ai: 'Biased examples give biased answers: Florence only asked drivers. (Also: she read "the middle" too exactly.)', from: 'LAB-GUIDE.md section 5 (Level 6: walking-time lens; "Residents\' summary mistake": "Residents want more car parks", counted only drivers), section 9A Level 6, section 2 (learning outcome 6); DESIGN.md "The living town" (last paragraph)' },
+    learn: { eco: 'Walkable towns: school within a 15-minute walk of every home, and it matters who gets asked.', ai: 'Biased examples give biased answers: Florence only asked drivers. (Also: she read “the middle” too exactly.)', from: 'LAB-GUIDE.md section 5 (Level 6: walking-time lens; "Residents\' summary mistake": "Residents want more car parks", counted only drivers), section 9A Level 6, section 2 (learning outcome 6); DESIGN.md "The living town" (last paragraph)' },
     card: { eco: 'School a short walk from every home.', ai: 'If an AI only asks some people, its answer is unfair. Ask everyone.' },
     plans: { flawed: ['heart', ['middle']], clear: ['heart', ['walk_time'], { minutes: 15 }] },
     setup: { seed: 'heart', apply: 'flawed', hour: 12, florence: '7,6+0,1', cast: { posy: '7,6+-3.8,2.2', dev: '7,6+3.8,2.2' }, otter: '2,6' },
