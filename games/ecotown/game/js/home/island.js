@@ -30,15 +30,6 @@ export function createIsland(canvas, { reduced = false } = {}) {
   const world = new THREE.Group(); scene.add(world);
 
   const BOX = new THREE.BoxGeometry(1, 1, 1);
-  // a gable end: a triangle one unit wide and one high, one deep (its base on y = 0), with flat faces
-  const PRISM = (() => {
-    const A = [-0.5, 0], B = [0.5, 0], P = [0, 1], pos = [], nor = [], idx = [];
-    const face = (pts, n) => { const o = pos.length / 3; for (const q of pts) { pos.push(...q); nor.push(...n); } idx.push(o, o + 1, o + 2); if (pts.length === 4) idx.push(o, o + 2, o + 3); };
-    const k = 1 / Math.hypot(1, 0.5);
-    face([[...A, 0.5], [...B, 0.5], [...P, 0.5]], [0, 0, 1]); face([[...B, -0.5], [...A, -0.5], [...P, -0.5]], [0, 0, -1]);
-    face([[...B, 0.5], [...B, -0.5], [...P, -0.5], [...P, 0.5]], [k, 0.5 * k, 0]); face([[...A, -0.5], [...A, 0.5], [...P, 0.5], [...P, -0.5]], [-k, 0.5 * k, 0]);
-    const ge = new THREE.BufferGeometry(); ge.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); ge.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); ge.setIndex(idx); return ge;
-  })();
   const mats = new Map(); const mat = (h) => { if (!mats.has(h)) mats.set(h, new THREE.MeshLambertMaterial({ color: h })); return mats.get(h); };
   const box = (parent, w, h, d, x, y, z, color, shadow = true) => { const m = new THREE.Mesh(BOX, mat(color)); m.scale.set(w, h, d); m.position.set(x, y, z); m.castShadow = shadow; m.receiveShadow = true; parent.add(m); return m; };
   // bake a group's still boxes into one mesh with vertex colours: one draw call per build, not one per box
@@ -99,14 +90,19 @@ export function createIsland(canvas, { reduced = false } = {}) {
     const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = (i % 2) * Math.PI / 2; world.add(g);
     const wall = PAL.wall[i % 3]; const tall = i % 3 === 1 ? 2.1 : 1.45;
     box(g, 1.9, tall, 1.9, 0, tall / 2, 0, i % 4 === 2 ? PAL.timber : wall);
-    // a gable roof: the wall carries on up to the ridge, and a slab lies on each slope with eaves all round
-    const rise = 0.72, half = 0.95, a = Math.atan(rise / half), eave = 0.24, th = 0.14, len = (half + eave) / Math.cos(a), rc = i % 5 === 3 ? PAL.green : PAL.roof[i % 3];
-    const gable = new THREE.Mesh(PRISM, mat(i % 4 === 2 ? PAL.timber : wall)); gable.scale.set(1.9, rise, 1.9); gable.position.set(0, tall, 0); gable.castShadow = gable.receiveShadow = true; g.add(gable);
-    for (const sd of [1, -1]) { const mx = (half + eave) / 2; box(g, len, th, 2.24, sd * (mx + Math.sin(a) * th / 2), tall + rise - mx * Math.tan(a) + Math.cos(a) * th / 2, 0, rc).rotation.z = -sd * a; }
-    box(g, 0.24, 0.12, 2.24, 0, tall + rise + th * 0.9, 0, rc);
+    // a stepped roof like the main game's homes: one course of tiles per step, in two shades, overhanging the walls by a
+    // step all round; the end walls step up to the ridge in the wall's colour; every third home has solar tiles on one slope
+    const u = 0.95 / 4, rc = i % 5 === 3 ? PAL.green : PAL.roof[i % 3], dark = '#' + C(rc).multiplyScalar(0.86).getHexString(), wc = i % 4 === 2 ? PAL.timber : wall;
+    for (let r = 0; r <= 4; r++) {
+      if (r < 4) box(g, 2 * (0.95 - r * u), u, 1.9, 0, tall + (r + 0.5) * u, 0, wc);
+      for (const sd of r < 4 ? [1, -1] : [1]) for (let k = 0; k < 10; k++) {
+        const sun = i % 3 === 0 && sd > 0 && r >= 1 && r <= 3 && k >= 2 && k <= 7;
+        box(g, r < 4 ? u : 2 * u, u, u, r < 4 ? sd * (0.95 + (0.5 - r) * u) : 0, tall + (r + 0.5) * u, (k - 4.5) * u, sun ? PAL.solar : (k + r) % 2 ? rc : dark);
+      }
+    }
+    if (i % 3) { box(g, u, 3.6 * u, u, -2.5 * u, tall + 3.3 * u, -2.5 * u, '#9a5a3c'); box(g, u * 1.3, u * 0.5, u * 1.3, -2.5 * u, tall + 5.35 * u, -2.5 * u, '#5b4a40', false); }
     box(g, 0.42, 0.75, 0.06, 0.4, 0.38, 0.97, '#7a5a33', false);
     box(g, 0.42, 0.38, 0.06, -0.45, tall * 0.62, 0.97, '#9fd0f5', false);
-    if (i % 3 === 0) { const mx = 0.52, off = th + 0.035; box(g, 0.8, 0.06, 1.5, mx + Math.sin(a) * off, tall + rise - mx * Math.tan(a) + Math.cos(a) * off, 0, PAL.solar, false).rotation.z = -a; }
     bake(g); houses.push(g); return g;
   };
   [[4, -5.5], [7.2, -5.5], [10, -5], [4, -2.2], [7.5, -2], [4.2, 1.6], [7.3, 2], [10, 1.2], [10.2, -2.3]].forEach(([x, z], i) => house(x, z, i));
