@@ -1,9 +1,9 @@
-// Uploads dist/ as the full-day camp's own Cloudflare Worker "ailab" (https://ailab.deltaops.workers.dev; one API call; works behind a token-injecting proxy).
+// Uploads dist/ as the full-day camp's own Cloudflare Worker "ecotown-future" (https://ecotown-future.deltaops.workers.dev; one API call; works behind a token-injecting proxy).
 // Usage: node build.mjs && CF_ACCOUNT_ID=... node worker/deploy.mjs
 // The API token is sent by the environment's proxy (or set CF_API_TOKEN when running elsewhere).
 // FULL-DAY COPY (owner, 18 Nov 2026): the camp has its own worker, media store and code store. It must NEVER deploy to the
 // original classroom site ("ecotown" worker, KV "ecotown-voice") of bakshilabs/ai-lab-v3; the guard below stops that.
-const WORKER = 'ailab', KV_TITLE = 'ailab-voice';
+const WORKER = 'ecotown-future', KV_TITLE = 'ecotown-future-voice';
 if (WORKER === 'ecotown' || KV_TITLE === 'ecotown-voice') throw new Error('Refusing to deploy over the original Eco Town site.');
 import fs from 'node:fs';
 import path from 'node:path';
