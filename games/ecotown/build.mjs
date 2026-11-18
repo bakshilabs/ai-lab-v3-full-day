@@ -74,9 +74,12 @@ html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\n?/, '')
   .replace('<script type="module" src="js/main.js"></script>', `<script type="module" src="assets/${jsName}"></script>`)
   .replace('<head>', '<head>\n<meta name="robots" content="noindex, nofollow">');
 fs.writeFileSync(path.join(OUT, 'play.html'), html);
-// 5a. the AI Lab start page is the site's front door (index.html): the welcome and the four parts
+// 5a. the AI Lab start page is the site's front door (index.html): the welcome and the four parts.
+// Its 3D island (js/home/island.js, with three.js) is a bundle of its own that hub.js loads after the first paint.
+const islandRes = await build({ entryPoints: [path.join(SRC, 'js', 'home', 'island.js')], bundle: true, format: 'esm', target: 'es2020', minify: true, legalComments: 'none', sourcemap: false, write: false, charset: 'utf8' });
+const islandJs = islandRes.outputFiles[0].text; const islandName = `island-${hash(islandJs)}.js`; fs.writeFileSync(path.join(A, islandName), islandJs);
 const hubRes = await build({ entryPoints: [path.join(SRC, 'js', 'hub.js')], bundle: true, format: 'esm', target: 'es2020', minify: true, legalComments: 'none', sourcemap: false, write: false, charset: 'utf8',
-  define: { __ECO_BUILD__: JSON.stringify(BUILD), __ECO_HUB__: JSON.stringify('./'), __ECO_GAME__: JSON.stringify('play.html') } });
+  define: { __ECO_BUILD__: JSON.stringify(BUILD), __ECO_HUB__: JSON.stringify('./'), __ECO_GAME__: JSON.stringify('play.html'), __ECO_ISLAND__: JSON.stringify(`./${islandName}`) } });
 const hubJs = hubRes.outputFiles[0].text; const hubName = `hub-${hash(hubJs)}.js`; fs.writeFileSync(path.join(A, hubName), hubJs);
 let hub = fs.readFileSync(path.join(SRC, 'start.html'), 'utf8');
 hub = hub.replaceAll('fonts/', 'assets/fonts/').replace('<script type="module" src="js/hub.js"></script>', `<script type="module" src="assets/${hubName}"></script>`).replaceAll('href="index.html', 'href="play.html');
