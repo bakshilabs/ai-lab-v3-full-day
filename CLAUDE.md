@@ -17,6 +17,7 @@ Read first:
 ## Redesign being explored (owner, 18 Nov 2026; proposals only, nothing built into the game yet)
 - The owner prefers the clear look of the start page island (`js/home/island.js`: big plain blocks, few colours, hard shadows, stepped roofs) and is exploring a complete redesign in it. Design the outline before coding.
 - **One world of six towns**, one per hour, at the island's scale (squares stay the same size): proposal page `games/ecotown/game/tests/visual/worldmap.html`.
+- **Six weeks, six hours of play in total** (owner, 18 Nov 2026): one town each week, one hour each, six levels per town. The single island is too small for this (about 500 squares, room for 25 to 30 buildings); the six-town world is the map to design for. Each choice a child makes should leave a visible mark on their town.
 - **No free play.** Every level: the child prompts Florence with word buttons, Florence proposes different design or operating solutions, the child looks at their outcomes through lenses and chooses. Flow diagram: `docs/redesign/game-flow.html`.
 - **Do not carry over "Florence could be wrong" or how sure she is** (the owner found it confusing), in Eco Town too. This overrides the Eco Town lesson described above once the redesign is built.
 
