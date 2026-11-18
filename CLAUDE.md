@@ -19,6 +19,7 @@ Read first:
 - **One world of six towns**, one per hour, at the island's scale (squares stay the same size): proposal page `games/ecotown/game/tests/visual/worldmap.html`.
 - **Six weeks, six hours of play in total** (owner, 18 Nov 2026): one town each week, one hour each, six levels per town. The single island is too small for this (about 500 squares, room for 25 to 30 buildings); the six-town world is the map to design for. Each choice a child makes should leave a visible mark on their town.
 - **No free play.** Every level: the child prompts Florence with word buttons, Florence proposes different design or operating solutions, the child looks at their outcomes through lenses and chooses. Flow diagram: `docs/redesign/game-flow.html`.
+- **Wireframe deck of all 36 levels:** `docs/redesign/wireframes.html`, with its words in `docs/redesign/wireframes-data.js`. The owner has no OpenAI credits (18 Nov 2026) and said "don't use open ai for this", so Claude wrote the sample words on the wireframes. That permission covers these wireframes only; the rule below still holds for the game's real text until the owner says otherwise.
 - **Do not carry over "Florence could be wrong" or how sure she is** (the owner found it confusing), in Eco Town too. This overrides the Eco Town lesson described above once the redesign is built.
 
 ## Rules for this repository

@@ -1,0 +1,186 @@
+<title>AI Lab Wireframes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* layout: a slide deck. A toolbar on top, one wireframe screen in the middle, a note for the reader below. */
+  :root {
+    --bg: #f4f5f2; --panel: #ffffff; --fg: #20261f; --muted: #5d665a; --line: #c9cfc5; --soft: #e9ece6; --good: #24734a; --bad: #a8402b; --c: #2f7d4f;
+    --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #151915; --panel: #1d231d; --fg: #e7ece3; --muted: #a3ae9d; --line: #3a4438; --soft: #262e25; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #151915; --panel: #1d231d; --fg: #e7ece3; --muted: #a3ae9d; --line: #3a4438; --soft: #262e25; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-block: 14px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 12px; }
+  h1, h2, h3, p { margin: 0; } h1 { font-size: clamp(1.5rem, 3.6vw, 2.2rem); line-height: 1.15; } h2 { font-size: 1.15rem; line-height: 1.25; } h3 { font-size: 1rem; }
+  button, select { font: inherit; color: inherit; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .bar select, .nav { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 42px; }
+  .nav { cursor: pointer; font-weight: 600; } .nav:disabled { opacity: 0.4; cursor: default; } .nav.go { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .count { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+  .crumbs b { border-left: 5px solid var(--c); padding-left: 8px; } .crumbs span { color: var(--muted); }
+  .steps { display: flex; gap: 4px; } .steps i { flex: 1; height: 5px; border-radius: 3px; background: var(--line); } .steps i.on { background: var(--c); }
+
+  /* the wireframe screen: everything inside this frame is what the child would see */
+  .screen { background: var(--panel); border: 2px solid var(--fg); border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); min-height: 470px; }
+  .screen.wide { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr); } .screen.full { grid-template-columns: minmax(0, 1fr); }
+  .view { position: relative; background: var(--soft); border-right: 2px solid var(--fg); min-height: 200px; display: flex; align-items: center; justify-content: center; padding: 44px 18px 18px; }
+  .view svg { position: absolute; inset: 0; width: 100%; height: 100%; } .view line { stroke: var(--line); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .view .tag { position: absolute; top: 10px; left: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; color: var(--muted); }
+  .view .cap { position: relative; background: var(--panel); border: 1px dashed var(--muted); border-radius: 8px; padding: 10px 12px; max-width: 30ch; text-align: center; color: var(--muted); font-size: 0.92rem; }
+  .marks { position: relative; display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+  .mark, .let { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; border: 2px solid var(--fg); background: var(--panel); font-weight: 700; }
+  .mark.on, .let.on { background: var(--fg); color: var(--bg); }
+  .col { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .panel { padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .lv { font-size: 0.82rem; color: var(--muted); }
+  .say { display: flex; gap: 10px; align-items: flex-start; } .say .who { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  .say p { background: var(--soft); border-radius: 4px 12px 12px 12px; padding: 10px 12px; }
+  .how { color: var(--muted); } .lab { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .sent { border: 1.5px solid var(--fg); border-radius: 10px; padding: 12px; font-size: 1.08rem; line-height: 1.9; }
+  .gap { -webkit-box-decoration-break: clone; box-decoration-break: clone; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 14%, var(--panel)); border-radius: 8px; padding: 2px 8px; white-space: normal; }
+  .gap.new { border-style: dashed; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wb { border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--panel); }
+  .wb.on, .cardx.on, .tog.on { border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 14%, var(--panel)); }
+  .wb.on::before, .tog.on .tick::before { content: '✓ '; font-weight: 700; }
+  .btn { align-self: flex-start; border: 2px solid var(--fg); border-radius: 10px; padding: 8px 16px; font-weight: 700; background: var(--fg); color: var(--bg); } .btn.sec { background: transparent; color: var(--fg); }
+  .cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .cardx { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .cardx .top { display: flex; gap: 8px; align-items: center; font-weight: 700; } .cardx .btn { font-size: 0.9rem; padding: 5px 12px; margin-top: auto; }
+  .res { border-top: 1px solid var(--line); padding-top: 6px; font-size: 0.93rem; } .res .ln { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-weight: 600; }
+  .rate { font-weight: 700; } .rate.g { color: var(--good); } .rate.p { color: var(--bad); } .rate.f { color: var(--muted); }
+  .togs { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .tog { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 0.93rem; } .tog b { display: block; }
+  .list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+  .note { border-left: 4px solid var(--line); padding: 2px 0 2px 12px; color: var(--muted); max-width: 90ch; } .note b { color: var(--fg); }
+  .cover { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(18px, 4vw, 40px); display: flex; flex-direction: column; gap: 14px; } .cover p, .cover li { max-width: 72ch; }
+  .key { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } .key div { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  @media (max-width: 760px) { .screen, .screen.wide { grid-template-columns: minmax(0, 1fr); } .view { border-right: 0; border-bottom: 2px solid var(--fg); min-height: 150px; } .count { margin-left: 0; width: 100%; } }
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <button class="nav" id="prev">← Back</button>
+    <button class="nav go" id="next">Next →</button>
+    <select id="town" aria-label="Go to a town"></select>
+    <select id="level" aria-label="Go to a level"></select>
+    <span class="count" id="count"></span>
+  </div>
+  <div id="stage"></div>
+</div>
+
+<script type="module">
+  import D from './wireframes-data.js';
+  const U = D.ui, ABC = 'ABC';
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // notes for the reader: what is new at each level
+  const LADDER = [
+    'At level 1, Florence starts the sentence, offers two solutions, and gives the child one lens.',
+    'At level 2, the child fills two gaps. The two solutions are each better under a different lens.',
+    'At level 3, the child builds the whole sentence. Florence offers three solutions, and there are two lenses.',
+    'At level 4, there are three lenses. After comparing, the child adds to the sentence and asks again.',
+    'At level 5, the child also chooses which three lenses to use.',
+    'At level 6, the child chooses the lenses and also gives a reason for the choice. The teacher uses that reason in the talk afterwards.',
+  ];
+  const STEP = {
+    job: ['The job', 'The town is shown here, with the place for this job marked.', ''],
+    ask: ['The child asks', 'The town stays on the screen while the child builds the sentence.', 'The filled buttons are the ones that this sample child tapped. The sentence at the top changes as each button is tapped.'],
+    offers: ['Florence offers', 'Each solution is drawn on the town and marked with its letter.', 'Florence shows her solutions. All of them would work, and none of them is marked as the right answer.'],
+    lenses: ['The child picks lenses', 'Each solution is drawn on the town and marked with its letter.', 'The child picks three lenses from the town’s list. The ticked lenses are the ones that this sample child picked.'],
+    compare: ['The child compares', 'Tapping a lens colours the town to show that result for each solution.', 'Each result has a rating in words, and a short phrase that says what the child would see in the town.'],
+    add: ['The child adds to the sentence', 'The town stays on the screen while the child adds to the sentence.', 'The child cannot choose yet. The game asks for one more part of the sentence first. The new part has a dashed outline.'],
+    offers2: ['Florence offers again', 'The new solutions are drawn on the town and marked with their letters.', 'The fuller sentence brings three new solutions that fit the job more closely.'],
+    compare2: ['The child compares again', 'Tapping a lens colours the town to show that result for each solution.', 'The new results are better overall than the first ones, and there is still a real choice to make.'],
+    choose: ['The child chooses', 'Each solution is drawn on the town and marked with its letter.', 'The child may choose any solution, or go back and change the sentence. The outlined card is the one that this sample child chose.'],
+    reason: ['The child gives a reason', 'The chosen solution stays marked on the town.', 'The chosen reason is saved for the teacher’s talk at the end of the hour.'],
+    result: ['The town shows the choice', 'The town shows the chosen solution being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right.'],
+  };
+
+  // ---- the list of screens ----------------------------------------------------------------------------------------
+  const slides = [{ kind: 'cover' }];
+  D.towns.forEach((t, ti) => {
+    slides.push({ kind: 'town', ti });
+    t.levels.forEach((v, li) => {
+      const steps = ['job', 'ask', 'offers', ...(v.lens ? ['lenses'] : []), 'compare', ...(v.again ? ['add', 'offers2', 'compare2'] : []), 'choose', ...(v.reasons ? ['reason'] : []), 'result'];
+      steps.forEach((step, si) => slides.push({ kind: 'step', ti, li, step, si, of: steps.length }));
+    });
+    slides.push({ kind: 'jobs', ti });
+  });
+  slides.push({ kind: 'end' });
+
+  // ---- pieces of a screen -----------------------------------------------------------------------------------------
+  const say = (text) => `<div class="say"><span class="who" aria-label="Florence">F</span><p>${esc(text)}</p></div>`;
+  const sentence = (v, withAdd) => `<p class="lab">${esc(U.yourSentence)}</p><p class="sent">${v.s.map((x) => (Array.isArray(x) ? `<span class="gap">${esc(x[x[0] + 1])}</span>` : esc(x))).join(' ')}${withAdd ? `, <span class="gap new">${esc(v.again.add[v.again.add[0] + 1])}</span>` : ''}.</p>`;
+  const buttons = (g) => `<div class="opts">${g.slice(1).map((o, i) => `<span class="wb${i === g[0] ? ' on' : ''}">${esc(o)}</span>`).join('')}</div>`;
+  const rate = (r) => `<span class="rate ${r}">${r === 'g' ? '✓' : r === 'p' ? '✗' : '–'} ${esc({ g: U.good, f: U.fair, p: U.poor }[r])}</span>`;
+  function cards(t, sol, o = {}) {
+    return `<div class="cards">${sol.map((s, i) => `<div class="cardx${o.pick === i ? ' on' : ''}"><div class="top"><span class="let${o.pick === i ? ' on' : ''}">${ABC[i]}</span>${esc(s[0])}</div>${o.res ? o.res.map((r) => `<div class="res"><div class="ln">${esc(t.lenses.find((l) => l[0] === r[0])[1])} ${rate(r[i + 1][0])}</div>${esc(r[i + 1][1])}</div>`).join('') : `<span>${esc(s[1])}</span>`}${o.use ? `<span class="btn${o.pick === i ? '' : ' sec'}">${esc(U.use)}</span>` : ''}</div>`).join('')}</div>`;
+  }
+  const view = (cap, n, pick, tag = 'Town view') => `<div class="view"><svg preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true"><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg><span class="tag">${tag}</span><div class="col">${n ? `<div class="marks">${[...Array(n)].map((_, i) => `<span class="mark${pick === i ? ' on' : ''}">${ABC[i]}</span>`).join('')}</div>` : ''}<p class="cap">${cap}</p></div></div>`;
+
+  function stepScreen(s) {
+    const t = D.towns[s.ti], v = t.levels[s.li], st = STEP[s.step], sol = v.again && ['offers2', 'compare2', 'choose', 'result'].includes(s.step) ? v.again.sol : v.sol, res = v.again && s.step !== 'compare' ? v.again.res : v.res;
+    const head = `<p class="lv">${esc(t.name)} · Level ${s.li + 1} of 6 · ${esc(v.name)}</p>`;
+    let p = '', marks = 0, pick = -1, wide = false;
+    if (s.step === 'job') p = `<h2>${esc(v.name)}</h2>${say(v.job)}<span class="btn">${esc(U.start)}</span>`;
+    if (s.step === 'ask') p = `<p class="how">${esc(s.li === 0 ? U.askHowOne : U.askHow)}</p>${sentence(v)}${v.s.filter(Array.isArray).map(buttons).join('')}<span class="btn">${esc(U.ask)}</span>`;
+    if (s.step === 'offers' || s.step === 'offers2') { p = `${say(s.step === 'offers' ? U.offers : U.better)}${cards(t, sol)}`; marks = sol.length; }
+    if (s.step === 'lenses') { const used = v.res.map((r) => r[0]); p = `<p class="how">${esc(U.lensHow)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog${used.includes(l[0]) ? ' on' : ''}"><b class="tick">${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.lensesDone)}</span>`; marks = sol.length; wide = true; }
+    if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(U.compareHow)}</p>${cards(t, sol, { res })}`; marks = sol.length; wide = true; }
+    if (s.step === 'add') p = `<p class="how">${esc(U.addHow)}</p>${sentence(v, true)}${buttons(v.again.add)}<span class="btn">${esc(U.ask)}</span>`;
+    if (s.step === 'choose') { p = `<p class="how">${esc(U.chooseHow)}</p>${cards(t, sol, { res, use: true, pick: v.pick })}<span class="btn sec">${esc(U.again)}</span>`; marks = sol.length; pick = v.pick; wide = true; }
+    if (s.step === 'reason') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div></div><p class="how">${esc(U.reasonHow)}</p><div class="opts">${v.reasons.map((r, i) => `<span class="wb${i === v.reason ? ' on' : ''}" style="border-radius:10px">${esc(r)}</span>`).join('')}</div>`; marks = sol.length; pick = v.pick; }
+    if (s.step === 'result') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div><span>${esc(sol[v.pick][1])}</span></div>${say(v.after)}<span class="btn">${esc(s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
+    const mk = s.step === 'result' ? `<div class="marks"><span class="mark on">${ABC[v.pick]}</span></div>` : '';
+    const vw = s.step === 'result' ? view(st[1], 0).replace('<p class="cap">', `${mk}<p class="cap">`) : view(st[1], marks, pick);
+    const note = s.step === 'job' ? LADDER[s.li] : st[2];
+    return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>Level ${s.li + 1} of 6: ${esc(v.name)}</span><span>Screen ${s.si + 1} of ${s.of}: ${st[0]}</span>`, steps: [s.si, s.of], colour: t.colour,
+      html: `<div class="screen${wide ? ' wide' : ''}">${vw}<div class="panel">${head}${p}</div></div><p class="note"><b>Note for the reader.</b> ${note}</p>` };
+  }
+  function townScreen(s) {
+    const t = D.towns[s.ti];
+    return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>The town opens</span>`, colour: t.colour,
+      html: `<div class="screen">${view('The whole world is shown here. This week’s town is lit up, and the towns from earlier weeks show what the child chose in them.', 0, -1, 'World map')}<div class="panel"><h2>${esc(t.name)}</h2>${say(t.intro)}<p class="lab">${esc(U.lensesTitle)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog"><b>${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.enter)}</span></div></div><p class="note"><b>Note for the reader.</b> This is the first screen of week ${s.ti + 1}. The six levels of ${esc(t.name)} follow, and each level is shown one screen at a time.</p>` };
+  }
+  function jobsScreen(s) {
+    const t = D.towns[s.ti];
+    return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>The end of the hour</span>`, colour: t.colour,
+      html: `<div class="screen full"><div class="panel"><p class="lv">${esc(t.name)}</p><h2>${esc(U.jobsTitle)}</h2><p>${esc(t.jobsLine)}</p><ul class="list">${t.jobs.map((j) => `<li>${esc(j)}</li>`).join('')}</ul><h2>${esc(U.talkTitle)}</h2>${say(t.talk)}<p>${esc(s.ti === 5 ? U.lastLine : U.breakLine)}</p></div></div><p class="note"><b>Note for the reader.</b> This is the last screen of the hour. The teacher leads the talk, using the question on the screen and the reasons that the children gave in level 6.</p>` };
+  }
+  const cover = () => ({ colour: '#2f7d4f', html: `<div class="cover"><p class="lab">A proposal, shown screen by screen</p><h1>The new game: every screen of all 36 levels</h1>
+    <p>This deck walks through the new game in the order that a child would play it. There are six towns, one for each week, and each town has six levels. Each level is shown one screen at a time.</p>
+    <p>Press <b>Next</b> to move forward one screen. You can also use the arrow keys on a keyboard, or the two menus at the top to jump to any town or level.</p>
+    <div class="key"><div><h3>Inside the thick frame</h3><p>Everything inside the frame is what the child would see on the screen, including the words.</p></div>
+    <div><h3>The box with a cross</h3><p>This box stands for the 3D town. A short caption says what the town would show at that moment.</p></div>
+    <div><h3>Outlined buttons with a tick</h3><p>These are the buttons that a sample child tapped. They show one way through the level.</p></div>
+    <div><h3>The note below the frame</h3><p>The note is written for you. The child does not see it.</p></div></div>
+    <p>I wrote the sample words on these screens myself, as you asked. They show how each level would read. They are not final.</p></div>` });
+  const end = () => ({ colour: '#2f7d4f', html: `<div class="cover"><p class="lab">The end of the deck</p><h1>That is all six towns and all 36 levels.</h1>
+    <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered solutions, the child compared their results through lenses, and the child chose one.</p>
+    <p>Three questions are still open from the earlier diagram.</p>
+    <ol class="list"><li>Should some levels keep a short part that the child does by hand, such as flying the last few seconds of the route they chose?</li><li>Should a child be allowed to choose a weaker solution and see what happens? These wireframes allow it.</li><li>Should every town start again at the easy first level, as it does in these wireframes, or should later towns start harder?</li></ol></div>` });
+
+  // ---- moving between screens -------------------------------------------------------------------------------------
+  const $ = (id) => document.getElementById(id), stage = $('stage');
+  let at = 0;
+  $('town').innerHTML = `<option value="">Go to a town</option>${D.towns.map((t, i) => `<option value="${i}">Week ${i + 1}: ${esc(t.name)}</option>`).join('')}`;
+  function show(n, push = true) {
+    at = Math.max(0, Math.min(slides.length - 1, n)); const s = slides[at];
+    const r = s.kind === 'cover' ? cover() : s.kind === 'end' ? end() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s);
+    document.documentElement.style.setProperty('--c', r.colour);
+    stage.innerHTML = `${r.crumbs ? `<div class="crumbs">${r.crumbs}</div>` : ''}${r.steps ? `<div class="steps" style="margin:8px 0">${[...Array(r.steps[1])].map((_, i) => `<i class="${i <= r.steps[0] ? 'on' : ''}"></i>`).join('')}</div>` : '<div style="height:8px"></div>'}${r.html}`;
+    $('count').textContent = `Screen ${at + 1} of ${slides.length}`; $('prev').disabled = at === 0; $('next').disabled = at === slides.length - 1;
+    $('town').value = s.ti ?? '';
+    $('level').innerHTML = s.ti === undefined ? '<option value="">Go to a level</option>' : `<option value="">Go to a level</option>${D.towns[s.ti].levels.map((v, i) => `<option value="${i}">Level ${i + 1}: ${esc(v.name)}</option>`).join('')}`;
+    $('level').value = s.li ?? ''; $('level').disabled = s.ti === undefined;
+    if (push) try { history.replaceState(null, '', `#${at + 1}`); } catch (e) { /* a preview may not allow it */ }
+  }
+  $('prev').onclick = () => show(at - 1); $('next').onclick = () => show(at + 1);
+  $('town').onchange = (e) => { if (e.target.value !== '') show(slides.findIndex((s) => s.kind === 'town' && s.ti === +e.target.value)); };
+  $('level').onchange = (e) => { if (e.target.value !== '') show(slides.findIndex((s) => s.kind === 'step' && s.ti === slides[at].ti && s.li === +e.target.value)); };
+  addEventListener('keydown', (e) => { if (e.target.tagName === 'SELECT') return; if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(at + 1); } if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(at - 1); } });
+  let tx = null; stage.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', (e) => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 70) show(at + (dx < 0 ? 1 : -1)); }, { passive: true });
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
+  window.deck = { slides, show, get at() { return at; } };
+</script>
