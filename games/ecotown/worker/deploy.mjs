@@ -1,10 +1,10 @@
-// Uploads dist/ as the "ecotown" Cloudflare Worker (one API call; works behind a token-injecting proxy).
+// Uploads dist/ as the full-day camp's own Cloudflare Worker "ailab" (https://ailab.deltaops.workers.dev; one API call; works behind a token-injecting proxy).
 // Usage: node build.mjs && CF_ACCOUNT_ID=... node worker/deploy.mjs
 // The API token is sent by the environment's proxy (or set CF_API_TOKEN when running elsewhere).
-// FULL-DAY COPY: this script would overwrite the live classroom site ("ecotown" worker) in the original repository
-// (bakshilabs/ai-lab-v3). It is switched off here until the full-day club has its own worker, voice store and
-// passcode store. Do not remove this line without giving the camp its own names below.
-throw new Error('Deploy is switched off in ai-lab-v3-full-day: the camp does not have its own site yet (see CLAUDE.md).');
+// FULL-DAY COPY (owner, 18 Nov 2026): the camp has its own worker, media store and code store. It must NEVER deploy to the
+// original classroom site ("ecotown" worker, KV "ecotown-voice") of bakshilabs/ai-lab-v3; the guard below stops that.
+const WORKER = 'ailab', KV_TITLE = 'ailab-voice';
+if (WORKER === 'ecotown' || KV_TITLE === 'ecotown-voice') throw new Error('Refusing to deploy over the original Eco Town site.');
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -12,13 +12,13 @@ import { execFileSync } from 'node:child_process';
 const here = path.dirname(new URL(import.meta.url).pathname);
 const DIST = path.join(here, '..', 'dist');
 const ACCOUNT = process.env.CF_ACCOUNT_ID; if (!ACCOUNT) throw new Error('Set CF_ACCOUNT_ID');
-const API = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/ecotown`;
+const API = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/${WORKER}`;
 const auth = { Authorization: `Bearer ${process.env.CF_API_TOKEN || 'proxy-injected'}` };
 
 const form = new FormData(); const files = [];
 const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f !== '_headers') files.push(p); } };
 walk(DIST);
-// voice packs are too big for the Worker script: they go to Workers KV (namespace "ecotown-voice"), served only with a session
+// voice packs are too big for the Worker script: they go to Workers KV (namespace KV_TITLE), served only with a session
 const VOICE_FILES = files.filter((p) => p.includes(`${path.sep}voice${path.sep}`)); for (const v of VOICE_FILES) files.splice(files.indexOf(v), 1);
 // so do Florence's portrait, the build pictures and the build videos (key = their path, e.g. videos/timber.mp4)
 const MEDIA_FILES = files.filter((p) => /^(img|videos)\//.test(path.relative(DIST, p).split(path.sep).join('/'))); for (const m of MEDIA_FILES) files.splice(files.indexOf(m), 1);
@@ -27,8 +27,8 @@ let kvId = null;
 if (VOICE_FILES.length) {
   const list = await (await fetch(KVAPI + '?per_page=100', { headers: auth })).json();
   if (!list.success) { console.error('KV list failed', JSON.stringify(list.errors)); process.exit(1); }
-  kvId = list.result.find((n) => n.title === 'ecotown-voice')?.id;
-  if (!kvId) { const c = await (await fetch(KVAPI, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'ecotown-voice' }) })).json(); if (!c.success) { console.error('KV create failed', JSON.stringify(c.errors)); process.exit(1); } kvId = c.result.id; }
+  kvId = list.result.find((n) => n.title === KV_TITLE)?.id;
+  if (!kvId) { const c = await (await fetch(KVAPI, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: JSON.stringify({ title: KV_TITLE }) })).json(); if (!c.success) { console.error('KV create failed', JSON.stringify(c.errors)); process.exit(1); } kvId = c.result.id; }
   // only upload files that aren't there yet (pack bins are content-hashed; the small index files always)
   const keys = new Set(); let cursor = ''; do { const r = await (await fetch(`${KVAPI}/${kvId}/keys?limit=1000${cursor ? '&cursor=' + cursor : ''}`, { headers: auth })).json(); for (const k of r.result || []) keys.add(k.name); cursor = r.result_info?.cursor || ''; } while (cursor);
   for (const f of VOICE_FILES) {
