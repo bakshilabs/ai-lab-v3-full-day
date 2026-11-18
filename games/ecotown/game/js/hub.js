@@ -41,7 +41,16 @@ const rows = $$('.strip .row');
 FILMS.forEach((f, i) => { rows[i % 2].insertAdjacentHTML('beforeend', `<div class="tile" style="background-image:url(img/home/tiles/${f}.webp)">${light ? '' : `<video muted loop playsinline preload="none" data-src="videos/${f}.mp4"></video>`}</div>`); });
 if (!light && 'IntersectionObserver' in window) {
   const vio = new IntersectionObserver((es) => es.forEach(({ target: v, isIntersecting }) => {
-    if (isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().then(() => v.classList.add('playing')).catch(() => {}); } else v.pause();
+    // the tile's still picture stays until the film is really showing frames; a slow or failed film just leaves the picture
+    if (isIntersecting) {
+      if (!v.src) {
+        const show = () => v.classList.add('playing');
+        v.addEventListener('playing', () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(show) : show()), { once: true });
+        v.addEventListener('error', () => v.remove(), { once: true });
+        v.src = v.dataset.src;
+      }
+      v.play().catch(() => {});
+    } else v.pause();
   }), { threshold: 0.3 });
   $$('.tile video').forEach((v) => vio.observe(v));
 }
