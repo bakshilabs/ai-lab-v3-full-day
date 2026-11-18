@@ -1,0 +1,218 @@
+<title>AI Lab Game Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* layout: three figures down one column: one mission, the six levels, then every module level by level */
+  :root {
+    --bg: #f6f8f4; --panel: #ffffff; --fg: #23301f; --muted: #5b6a55; --line: #d9e0d2; --accent: #2f7d4f; --soft: #e8f1e6; --good: #2f7d4f; --bad: #b8452f;
+    --display: 'Space Grotesk', 'Trebuchet MS', system-ui, sans-serif; --body: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #334032; --accent: #7fd19c; --soft: #243024; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #334032; --accent: #7fd19c; --soft: #243024; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 34px; }
+  h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); } h2 { font-size: 1.35rem; } h3 { font-size: 1rem; }
+  p { margin: 0; max-width: 70ch; } .lede { color: var(--muted); font-size: 1.05rem; }
+  header, section { display: flex; flex-direction: column; gap: 12px; }
+  .tag { font: 600 0.75rem var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  figcaption { color: var(--muted); font-size: 0.9rem; max-width: 80ch; }
+  .scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  .scroll svg { display: block; min-width: 940px; width: 100%; height: auto; color: var(--fg); font-family: var(--body); }
+  svg .box { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+  svg .chip { fill: var(--soft); stroke: var(--accent); stroke-width: 1; }
+  svg .card { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  svg .h { font: 700 15px var(--display); fill: currentColor; } svg .n { font: 700 12px var(--display); fill: var(--bg); }
+  svg .t { font-size: 12px; fill: currentColor; } svg .m { font-size: 11.5px; fill: var(--muted); }
+  svg .ok { font: 700 15px var(--body); fill: var(--good); } svg .no { font: 700 15px var(--body); fill: var(--bad); }
+  svg .arr { stroke: currentColor; stroke-width: 1.6; fill: none; } svg .loop { stroke: var(--accent); stroke-width: 2; fill: none; stroke-dasharray: 6 4; } svg .lt { font: 600 12px var(--body); fill: var(--accent); }
+  svg .dot { fill: var(--fg); }
+
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 900px; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  tr:last-child > * { border-bottom: 0; } tr > *:last-child { border-right: 0; }
+  thead th { font: 700 0.85rem var(--display); background: var(--soft); } thead th small { display: block; font: 500 0.78rem var(--body); color: var(--muted); }
+  tbody th { font-weight: 600; width: 13%; background: var(--bg); }
+  .lv b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--fg); color: var(--bg); font: 700 0.78rem var(--display); margin-right: 6px; }
+  .bars { display: flex; gap: 3px; margin-bottom: 5px; } .bars i { width: 14px; height: 8px; border-radius: 2px; background: var(--accent); } .bars i.o { background: var(--line); }
+  .mods tbody th { border-left: 6px solid var(--c); width: 15%; } .mods tbody th small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; }
+  .mods td strong { display: block; } .mods td span { color: var(--muted); }
+  .mods td.end { background: var(--soft); width: 11%; }
+  .role { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .role div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .role p { font-size: 0.94rem; }
+  ul, ol { margin: 0; padding-left: 1.25em; max-width: 72ch; display: flex; flex-direction: column; gap: 7px; }
+  .ask { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="tag">Proposal · how the redesigned game plays</span>
+    <h1>Ask, look, decide</h1>
+    <p class="lede">There is no free building. In every level of every town the child does the same three things: asks Florence with a sentence built from word buttons, looks through lenses at the outcome of each solution she proposes, and chooses one. Florence is never set up to be wrong and never says how sure she is. What changes from level to level is how much the child does alone.</p>
+  </header>
+
+  <section>
+    <h2>1 · One level</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 1100 392" role="img" aria-label="One level: the job, the child's prompt built from word buttons, Florence's three scenarios, the lenses that score each scenario, and the decision, with a loop back to the prompt when no scenario is good enough.">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker></defs>
+
+          <!-- 1 the job -->
+          <rect class="box" x="10" y="40" width="170" height="250" rx="10"/>
+          <circle class="dot" cx="32" cy="64" r="11"/><text class="n" x="32" y="68" text-anchor="middle">1</text><text class="h" x="50" y="69">The job</text>
+          <text class="m" x="24" y="96">A real job, in one line.</text>
+          <rect class="card" x="24" y="112" width="142" height="74" rx="6"/>
+          <text class="t" x="34" y="134">A parcel has to get</text><text class="t" x="34" y="151">from Drone City</text><text class="t" x="34" y="168">to Eco Town.</text>
+          <text class="m" x="24" y="212">The town on screen shows</text><text class="m" x="24" y="228">where it happens.</text>
+
+          <!-- 2 prompt -->
+          <rect class="box" x="230" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="252" cy="64" r="11"/><text class="n" x="252" y="68" text-anchor="middle">2</text><text class="h" x="270" y="69">Ask Florence</text>
+          <text class="m" x="244" y="96">A sentence from word buttons.</text>
+          <rect class="chip" x="244" y="110" width="104" height="26" rx="13"/><text class="t" x="296" y="127" text-anchor="middle">Fly the parcel</text>
+          <rect class="chip" x="244" y="142" width="92" height="26" rx="13"/><text class="t" x="290" y="159" text-anchor="middle">to Eco Town</text>
+          <rect class="chip" x="244" y="174" width="162" height="26" rx="13"/><text class="t" x="325" y="191" text-anchor="middle">keeping clear of people</text>
+          <rect class="chip" x="244" y="206" width="146" height="26" rx="13"/><text class="t" x="317" y="223" text-anchor="middle">with battery to spare</text>
+          <text class="m" x="244" y="258">Ages 13–17 can type it.</text>
+
+          <!-- 3 scenarios -->
+          <rect class="box" x="470" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="492" cy="64" r="11"/><text class="n" x="492" y="68" text-anchor="middle">3</text><text class="h" x="510" y="69">She proposes</text>
+          <text class="m" x="484" y="96">Solutions, drawn in the town.</text>
+          <rect class="card" x="484" y="110" width="162" height="46" rx="6"/><text class="h" x="496" y="139">A</text><text class="t" x="518" y="130">Straight over</text><text class="t" x="518" y="146">the hospital</text>
+          <rect class="card" x="484" y="162" width="162" height="46" rx="6"/><text class="h" x="496" y="191">B</text><text class="t" x="518" y="182">Round by</text><text class="t" x="518" y="198">the river</text>
+          <rect class="card" x="484" y="214" width="162" height="46" rx="6"/><text class="h" x="496" y="243">C</text><text class="t" x="518" y="234">High over</text><text class="t" x="518" y="250">the towers</text>
+          <text class="m" x="484" y="278">All three would work.</text>
+
+          <!-- 4 lenses -->
+          <rect class="box" x="710" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="732" cy="64" r="11"/><text class="n" x="732" y="68" text-anchor="middle">4</text><text class="h" x="750" y="69">See the outcomes</text>
+          <text class="m" x="724" y="96">Each lens shows one outcome.</text>
+          <text class="h" x="806" y="128" text-anchor="middle">A</text><text class="h" x="842" y="128" text-anchor="middle">B</text><text class="h" x="878" y="128" text-anchor="middle">C</text>
+          <line class="arr" x1="724" y1="138" x2="890" y2="138" style="stroke:var(--line)"/>
+          <text class="t" x="724" y="162">Safety</text><text class="no" x="806" y="163" text-anchor="middle">✗</text><text class="ok" x="842" y="163" text-anchor="middle">✓</text><text class="ok" x="878" y="163" text-anchor="middle">✓</text>
+          <text class="t" x="724" y="194">Battery</text><text class="ok" x="806" y="195" text-anchor="middle">✓</text><text class="ok" x="842" y="195" text-anchor="middle">✓</text><text class="no" x="878" y="195" text-anchor="middle">✗</text>
+          <text class="t" x="724" y="226">Wind</text><text class="ok" x="806" y="227" text-anchor="middle">✓</text><text class="no" x="842" y="227" text-anchor="middle">✗</text><text class="ok" x="878" y="227" text-anchor="middle">✓</text>
+          <text class="m" x="724" y="258">The picture and the numbers</text><text class="m" x="724" y="274">are the evidence.</text>
+
+          <!-- 5 decide -->
+          <rect class="box" x="950" y="40" width="140" height="250" rx="10"/>
+          <circle class="dot" cx="972" cy="64" r="11"/><text class="n" x="972" y="68" text-anchor="middle">5</text><text class="h" x="990" y="69">Decide</text>
+          <text class="m" x="964" y="96">Choose one,</text><text class="m" x="964" y="112">and say why.</text>
+          <rect class="chip" x="964" y="128" width="112" height="30" rx="6"/><text class="t" x="1020" y="148" text-anchor="middle">Use B</text>
+          <rect class="card" x="964" y="166" width="112" height="30" rx="6"/><text class="t" x="1020" y="186" text-anchor="middle">Ask again</text>
+          <text class="m" x="964" y="226">Then watch it</text><text class="m" x="964" y="242">happen in the</text><text class="m" x="964" y="258">town, for real.</text>
+
+          <line class="arr" x1="180" y1="165" x2="226" y2="165" marker-end="url(#ah)"/><text class="m" x="203" y="156" text-anchor="middle">sets</text>
+          <line class="arr" x1="420" y1="165" x2="466" y2="165" marker-end="url(#ah)"/><text class="m" x="443" y="156" text-anchor="middle">sends</text>
+          <line class="arr" x1="660" y1="165" x2="706" y2="165" marker-end="url(#ah)"/><text class="m" x="683" y="156" text-anchor="middle">checks</text>
+          <line class="arr" x1="900" y1="165" x2="946" y2="165" marker-end="url(#ah)"/><text class="m" x="923" y="156" text-anchor="middle">weighs</text>
+          <path class="loop" d="M1020 290 V340 H325 V294" marker-end="url(#ah2)"/>
+          <text class="lt" x="672" y="362" text-anchor="middle">Want a better outcome? Change the words and ask again. A fuller prompt brings solutions that fit better.</text>
+        </svg>
+      </div>
+      <figcaption>One level, using the drone delivery as the example. Each solution does well under some lenses and less well under others, so the child either accepts a trade or improves the prompt. The example words are mine; the real word buttons would come from the OpenAI text pipeline.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>2 · From the first level to the last</h2>
+    <p>Every town has six levels and climbs the same ladder. Level 1 is nearly all Florence; level 6 is nearly all the child.</p>
+    <figure>
+      <div class="scroll">
+        <table>
+          <thead><tr><th></th>
+            <th class="lv"><b>1</b>Learn the loop<small>Florence leads</small></th><th class="lv"><b>2</b>Two views<small>lenses disagree</small></th><th class="lv"><b>3</b>Say more<small>a whole sentence</small></th>
+            <th class="lv"><b>4</b>Ask again<small>improve the prompt</small></th><th class="lv"><b>5</b>Pick your lenses<small>which outcomes matter</small></th><th class="lv"><b>6</b>Your call<small>the child leads</small></th></tr></thead>
+          <tbody>
+            <tr><th>The prompt</th>
+              <td><div class="bars"><i></i><i class="o"></i><i class="o"></i><i class="o"></i></div>One gap to fill in a sentence Florence has started.</td>
+              <td><div class="bars"><i></i><i></i><i class="o"></i><i class="o"></i></div>Two gaps: what, and where.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i class="o"></i></div>The whole sentence: what, where and one limit.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i class="o"></i></div>The whole sentence, then a second go with words added or swapped.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i></i></div>The whole sentence, with a limit for each thing that matters.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i></i></div>The whole sentence, from every word the town has taught.</td></tr>
+            <tr><th>Florence's solutions</th>
+              <td>Two, clearly different.</td><td>Two. Each wins under one lens.</td><td>Three.</td><td>Three. A fuller prompt brings three that fit better.</td><td>Three. They differ most under lenses the child has to pick.</td><td>Three, for the town's biggest job.</td></tr>
+            <tr><th>The lenses</th>
+              <td><div class="bars"><i></i><i class="o"></i><i class="o"></i><i class="o"></i></div>One, handed over.</td>
+              <td><div class="bars"><i></i><i></i><i class="o"></i><i class="o"></i></div>Two, handed over.</td>
+              <td><div class="bars"><i></i><i></i><i class="o"></i><i class="o"></i></div>Two, handed over.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i class="o"></i></div>Three, handed over.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i></i></div>The child chooses which to use.</td>
+              <td><div class="bars"><i></i><i></i><i></i><i></i></div>All of them, in any order.</td></tr>
+            <tr><th>The decision</th>
+              <td>Pick the better one.</td><td>Pick, knowing what is given up.</td><td>Pick, and see it play out.</td><td>Compare, ask again, then pick.</td><td>Pick, after choosing which outcomes matter here.</td><td>Pick, and choose the reason. The reason goes to "Talk it over".</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figcaption>The bars show how much of the prompt and how many lenses are in the child's hands at each level.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>3 · Every town, level by level</h2>
+    <p>The level titles are the missions already approved in the curriculum. Under each is what Florence's solutions are about in that level.</p>
+    <figure>
+      <div class="scroll">
+        <table class="mods">
+          <thead><tr><th>Town and its lenses</th><th class="lv"><b>1</b></th><th class="lv"><b>2</b></th><th class="lv"><b>3</b></th><th class="lv"><b>4</b></th><th class="lv"><b>5</b></th><th class="lv"><b>6</b></th><th>Then</th></tr></thead>
+          <tbody>
+            <tr><th style="--c:#c8643f">1 · Eco Town<small>Flood · Walking time · Carbon · Nature · Winter power · Fairness</small></th>
+              <td><strong>Land</strong><span>Where the town stands.</span></td><td><strong>Getting around</strong><span>Paths and streets.</span></td><td><strong>Homes</strong><span>What to build them from.</span></td>
+              <td><strong>Food</strong><span>Where the farms go.</span></td><td><strong>Power</strong><span>How to light the town in winter.</span></td><td><strong>A school for everyone</strong><span>Where it stands.</span></td>
+              <td class="end" rowspan="6"><strong>Jobs that use this</strong><span>then "Talk it over" with the teacher, a break, and the road to the next town.</span></td></tr>
+            <tr><th style="--c:#3f78b5">2 · Drone City<small>Safety · Battery · Wind · Coverage</small></th>
+              <td><strong>Ground school</strong><span>Fly today, wait, or fly elsewhere.</span></td><td><strong>Hand flying</strong><span>Ways to hold steady and land in a crosswind.</span></td><td><strong>Delivery</strong><span>Routes to the Eco Town pad.</span></td>
+              <td><strong>Farm survey</strong><span>Survey patterns over Robot Farm.</span></td><td><strong>Inspection</strong><span>How close to fly to the turbine and the bridge.</span></td><td><strong>Search and rescue</strong><span>Search plans at dusk.</span></td></tr>
+            <tr><th style="--c:#6f9a3a">3 · Robot Farm<small>Accuracy · Safe near people · Speed · Cost of a mistake</small></th>
+              <td><strong>How a robot works</strong><span>Which sensor for which job.</span></td><td><strong>Robot arm</strong><span>Step orders for packing a tray.</span></td><td><strong>Hospital delivery</strong><span>Rules for the corridor.</span></td>
+              <td><strong>Recycling sorter</strong><span>Which examples to teach it with.</span></td><td><strong>Farm robot</strong><span>How sure it must be before it pulls.</span></td><td><strong>Flood rescue</strong><span>Robot designs for a flooded street.</span></td></tr>
+            <tr><th style="--c:#8d6f9c">4 · Crossways<small>Safety · Waiting time · Fair to everyone · Weather</small></th>
+              <td><strong>How the car sees</strong><span>Sets of sensors.</span></td><td><strong>Recognising things</strong><span>Which street scenes to label.</span></td><td><strong>Rules of the road</strong><span>Speeds and gaps at the crossing.</span></td>
+              <td><strong>Testing</strong><span>What to change after a failed run.</span></td><td><strong>A shared fleet</strong><span>How many cars, and where they wait.</span></td><td><strong>Redesign the street</strong><span>Street layouts.</span></td></tr>
+            <tr><th style="--c:#d0558a">5 · Studio Bay<small>Story · Feeling · Everyone can follow · True and fair</small></th>
+              <td><strong>Crew language</strong><span>Shots for one scene.</span></td><td><strong>Storyboard</strong><span>Orders for the shots.</span></td><td><strong>Directing</strong><span>First cuts of the film.</span></td>
+              <td><strong>Editing</strong><span>Pace and music.</span></td><td><strong>For everyone</strong><span>Captions and a described version.</span></td><td><strong>True or made up?</strong><span>Which shots to trust and use.</span></td></tr>
+            <tr><th style="--c:#c79a2e">6 · Power Ridge<small>Lights on · Clean · People's needs · What if it goes wrong</small></th>
+              <td><strong>Balance</strong><span>Ways to meet the morning rise.</span></td><td><strong>Forecast</strong><span>Plans for a still, dull day.</span></td><td><strong>Storage</strong><span>When to fill and use the battery.</span></td>
+              <td><strong>Automation rules</strong><span>Rule sets, tried on three days.</span></td><td><strong>Smart demand</strong><span>Which jobs to move, and when.</span></td><td><strong>Storm night</strong><span>Orders for bringing power back.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figcaption>Thirty-six levels, each run as the five steps in figure 1 at the step of the ladder in figure 2. The lens names are working names.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>4 · Across the day</h2>
+    <div class="role">
+      <div><h3>Florence is the same all day</h3><p>In every town she proposes different solutions to the job. All of them would work. She is not there to be caught out, and there is no "how sure" figure anywhere.</p></div>
+      <div><h3>Two kinds of solution</h3><p>Design: where it goes and what it is made of, such as a route, a street layout or a robot's body. Operating: how it is run, such as a rule set, a timetable or an order of work. Each town has both.</p></div>
+      <div><h3>The last level is the whole world</h3><p>Power Ridge feeds every town, so Storm night is decided on the whole map: who gets power back first, and what that means for each town.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What this changes</h2>
+    <ul>
+      <li><strong>Eco Town's old lesson goes.</strong> "AI can be confidently wrong; check it" and the percentage beside Florence's plans are not carried over. Eco Town plays like the other five towns.</li>
+      <li><strong>Eco Town loses its free building.</strong> Today a child builds a town of their own between missions. Here the six missions are the hour, and the town grows from the scenarios the child chooses.</li>
+      <li><strong>Hands-on levels become judging levels.</strong> Hand flying, labelling scenes and editing are things a child does by hand in the approved curriculum. In this flow Florence proposes ways of doing them and the child judges, unless a short hands-on step is kept inside those levels.</li>
+      <li><strong>The town shows the result.</strong> The chosen scenario plays out in the 3D town, so the world from the map proposal fills in as the day goes on.</li>
+    </ul>
+  </section>
+
+  <section class="ask">
+    <h2>Decisions for you</h2>
+    <ol>
+      <li><strong>Keep a hands-on step?</strong> For example, after choosing a flight plan the child flies its last ten seconds. It keeps the real skill but is a small piece of play outside the loop.</li>
+      <li><strong>Can a child choose a weak scenario?</strong> I would let them, and show what happens, then offer "Ask again". The other way is to block it until the lenses pass.</li>
+      <li><strong>Is the ladder the same in every town,</strong> or does each later town start a step higher because the child has already learnt the loop?</li>
+    </ol>
+  </section>
+</div>

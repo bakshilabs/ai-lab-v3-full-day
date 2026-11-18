@@ -14,6 +14,12 @@ Read first:
 - `docs/pilot-plan.md`: the plan for the morning hour and the server (sections F and G say what is built). `docs/RELEASES.md`: what is in the current build and its known issues. `docs/LOAD.md`: load results (local runs only).
 - `games/ecotown/`: module 1, copied from `bakshilabs/ai-lab-v3` (`games/ecotown/`, commit `a5fd92c`, 14 Nov 2026). Its own notes are in `games/ecotown/CLAUDE.md`; they were written for the original repository.
 
+## Redesign being explored (owner, 18 Nov 2026; proposals only, nothing built into the game yet)
+- The owner prefers the clear look of the start page island (`js/home/island.js`: big plain blocks, few colours, hard shadows, stepped roofs) and is exploring a complete redesign in it. Design the outline before coding.
+- **One world of six towns**, one per hour, at the island's scale (squares stay the same size): proposal page `games/ecotown/game/tests/visual/worldmap.html`.
+- **No free play.** Every level: the child prompts Florence with word buttons, Florence proposes different design or operating solutions, the child looks at their outcomes through lenses and chooses. Flow diagram: `docs/redesign/game-flow.html`.
+- **Do not carry over "Florence could be wrong" or how sure she is** (the owner found it confusing), in Eco Town too. This overrides the Eco Town lesson described above once the redesign is built.
+
 ## Rules for this repository
 - **Never deploy to the original sites.** `ecotown.deltaops.workers.dev` and `bakshilabs.github.io/ai-lab-v3` belong to the original repository and stay unchanged. This repository's own live site is **`https://ecotown-future.deltaops.workers.dev`** (owner, 18 Nov 2026): Worker `ecotown-future`, KV namespace `ecotown-future-voice`, its own Durable Object code store. Deploy with `cd games/ecotown && node build.mjs && NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt CF_ACCOUNT_ID=9c5ee116be85caa02b46ec934ed28bbf node worker/deploy.mjs`, built from `main`. `/admin` is behind the existing Cloudflare Access app "Eco Town admin" (the new domain was added to it).
 - The AI Lab as it stands (the town and six missions) is taken to be one hour. Do not cut it to fit.
