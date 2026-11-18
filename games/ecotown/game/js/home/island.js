@@ -171,6 +171,7 @@ export function createIsland(canvas, { reduced = false } = {}) {
   let shot = 'hero'; const cam = { t: new THREE.Vector3(1.5, -1.5, 0.5), r: 70, phi: 1.2, th: 0.2, sx: 0, sy: 0 };
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 }; let heroP = 0, zoom = 1, shift = { x: 0, y: 0 }; let orbit = 0;
   const tmp = new THREE.Vector3(), wp = new THREE.Vector3(), Q0 = new THREE.Quaternion();
+  let driver = null; // a test page can take the camera over (tests/visual/walk.html)
   let W = 1, H = 1; let T = 0, last = 0, running = false, raf = 0, ema = 0.016, frames = 0, downgraded = false;
 
   function resize() {
@@ -218,7 +219,7 @@ export function createIsland(canvas, { reduced = false } = {}) {
     if (!running) return;
     raf = requestAnimationFrame(tick);
     const raw = Math.min(0.25, (now - (last || now)) / 1000); const dt = raw; last = now; // real time, so a slow device still builds in about two seconds
-    animate(reduced ? 0 : dt); frameCamera(raw || 0.016); renderer.render(scene, camera);
+    animate(reduced ? 0 : dt); if (driver) driver(raw || 0.016, T); else frameCamera(raw || 0.016); renderer.render(scene, camera);
     // a slow device gets fewer pixels and no shadows, once
     ema = ema * 0.95 + dt * 0.05; frames++;
     if (!downgraded && frames > 90 && ema > 0.034) { downgraded = true; dpr = 1; renderer.setPixelRatio(1); renderer.shadowMap.enabled = false; scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); resize(); }
@@ -238,6 +239,9 @@ export function createIsland(canvas, { reduced = false } = {}) {
     setShift(x, y, z = 1) { shift = { x, y }; zoom = z; },
     // for still pictures: jump straight to a shot at a given time
     still(name, t = 8) { shot = name; T = t; animate(0); for (let i = 0; i < 400; i++) frameCamera(0.05); renderer.render(scene, camera); },
+    // for the walk-about test page: the island's parts, and a way to take the camera over each frame
+    parts: { THREE, world, camera, inside, zone, houses, trees, turbines, cars },
+    drive(fn) { driver = fn; camera.clearViewOffset(); },
     dispose() { this.stop(); ro.disconnect(); renderer.dispose(); },
   };
 }
