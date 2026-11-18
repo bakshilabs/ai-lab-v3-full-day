@@ -41,7 +41,7 @@ export const EPISODES = [
         { who: 'posy', say: 'Florence! Please find the best land for our town.', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump']] },
         { who: 'florence', say: 'Best land? Easy!', do: [['fl', 'look', null], ['fl', 'think', { at: 0.1 }]] } ] },
       { cam: cam('4,5', 78, 0.5, 0.6, { to: { yaw: 0.38 } }), beats: [
-        { who: 'florence', say: 'Here! Flat, wide and right by the river. I am 82% sure!', do: [['fl', 'point', '3,4'], ['ghost', 'flawed', { at: 0.3 }], ['sfx', 'ghost', { at: 0.3 }], ['fl', 'proud', { at: 2.6 }], ['pill', 'florence', '82% sure!', 3.2, { at: 2.6 }]] },
+        { who: 'florence', say: 'Here! Flat, wide and right by the river. I am very sure!', do: [['fl', 'point', '3,4'], ['ghost', 'flawed', { at: 0.3 }], ['sfx', 'ghost', { at: 0.3 }], ['fl', 'proud', { at: 2.6 }], ['pill', 'florence', 'I am very sure!', 3.2, { at: 2.6 }]] },
         { wait: 1.6, do: [['build', 'flawed', { dur: 1.1, stagger: 0.06 }], ['sfx', 'pop']] } ] },
       { cam: cam('2,6+2,1', 25, 0.1, 0.38, { up: 1.2, to: { dist: 22 } }), beats: [
         { who: 'dev', say: 'Hmm. Why is the grass so squelchy?', do: [['kid', 'dev', 'at', '3,6+-1.6,2'], ['kid', 'dev', 'face', '2,6+0,2'], ['otter', 'pop', { at: 0.6 }], ['sfx', 'tip', { at: 0.6 }]] },
@@ -87,7 +87,7 @@ export const EPISODES = [
         { who: 'posy', say: 'Make it easy for everyone to get to school!', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump']] },
         { who: 'florence', say: 'Easy for everyone? Then everyone needs a big, wide road!', do: [['fl', 'look', null], ['fl', 'surprised'], ['fl', 'proud', { at: 1.6 }]] } ] },
       { cam: cam('8,7', 84, 0.3, 0.66, { to: { yaw: 0.18 } }), beats: [
-        { who: 'florence', say: 'And a car park at the school gate. I am 77% sure!', do: [['fl', 'point', '9,7'], ['build', 'flawed', { dur: 1.6, stagger: 0.12 }], ['sfx', 'pop'], ['pill', 'florence', '77% sure!', 3, { at: 2.2 }]] },
+        { who: 'florence', say: 'And a car park at the school gate. I am very sure!', do: [['fl', 'point', '9,7'], ['build', 'flawed', { dur: 1.6, stagger: 0.12 }], ['sfx', 'pop'], ['pill', 'florence', 'I am very sure!', 3, { at: 2.2 }]] },
         { wait: 1.2, do: [['kid', 'posy', 'walk', '7,6+-2.2,2.8', 1], ['kid', 'dev', 'walk', '7,6+1.4,2.8', 1]] } ] },
       { cam: cam('7,7+0,-1', 32, -0.3, 0.2, { up: 2.2, to: { yaw: -0.18 } }), beats: [
         { who: 'dev', say: 'But Florence, we walk to school.', do: [['kid', 'dev', 'face', 'fl'], ['kid', 'posy', 'face', '7,7'], ['fl', 'look', 'dev']] },
@@ -132,7 +132,7 @@ export const EPISODES = [
         { who: 'posy', say: 'Florence, build strong homes, please!', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump']] },
         { who: 'florence', say: 'Strong? I know strong! Concrete and steel!', do: [['fl', 'look', null], ['fl', 'proud', { at: 0.9 }]] } ] },
       { cam: cam('10,5', 74, 0.35, 0.56, { up: 4, to: { yaw: 0.15 } }), beats: [
-        { who: 'florence', say: 'They will stand for years. I am 85% sure!', do: [['fl', 'point', '10,6'], ['build', 'flawed', { dur: 3.2, stagger: 0.15 }], ['sfx', 'pop'], ['pill', 'florence', '85% sure!', 3, { at: 2 }]] },
+        { who: 'florence', say: 'They will stand for years. I am very sure!', do: [['fl', 'point', '10,6'], ['build', 'flawed', { dur: 3.2, stagger: 0.15 }], ['sfx', 'pop'], ['pill', 'florence', 'I am very sure!', 3, { at: 2 }]] },
         { wait: 2.2, do: [['fl', 'look', null], ['fl', 'cheer', { at: 0.8 }]] } ] },
       { cam: cam('8,6', 46, -0.5, 0.2, { up: 4.5, to: { dist: 42 } }), beats: [
         { who: 'dev', say: 'They do look strong. But is strong all a home should be?', do: [['kid', 'dev', 'face', '10,6'], ['kid', 'posy', 'face', '10,6'], ['kid', 'dev', 'face', 'fl', { at: 1.8 }]] } ] },
@@ -177,7 +177,7 @@ export const EPISODES = [
         { who: 'posy', say: 'Florence, grow as much food as possible!', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump']] },
         { who: 'florence', say: 'As much as possible? Then I will plough everything!', do: [['fl', 'look', null], ['fl', 'surprised'], ['fl', 'proud', { at: 1.5 }]] } ] },
       { cam: cam('7,2+0,2', 86, 0.3, 0.66, { to: { yaw: 0.15 } }), beats: [
-        { who: 'florence', say: 'Every field. Every hedge. I am 79% sure!', do: [['fl', 'point', '7,2'], ['build', 'flawed', { dur: 1.5, stagger: 0.08 }], ['sfx', 'pop'], ['pill', 'florence', '79% sure!', 3, { at: 1.8 }]] },
+        { who: 'florence', say: 'Every field. Every hedge. I am very sure!', do: [['fl', 'point', '7,2'], ['build', 'flawed', { dur: 1.5, stagger: 0.08 }], ['sfx', 'pop'], ['pill', 'florence', 'I am very sure!', 3, { at: 1.8 }]] },
         { wait: 1.6, do: [['fl', 'look', null]] } ] },
       { cam: cam('6,3+0,0.5', 42, 0.3, 0.3, { up: 3, to: { dist: 38 } }), beats: [
         { who: 'dev', say: 'Wait. Where did the hedges go? And the bees?', do: [['kid', 'dev', 'face', '7,2'], ['kid', 'posy', 'face', '5,2'], ['kid', 'dev', 'face', 'fl', { at: 1.6 }]] } ] },
@@ -211,7 +211,7 @@ export const EPISODES = [
   // ------------------------------------------------------------------ 5 · power
   {
     id: 'power-open', mission: 'power', kind: 'open', n: 5, title: 'Very, very sure', music: 'day',
-    learn: { eco: 'Power has to work on the hard days, not only the normal ones.', ai: 'A high "% sure" is not the same as being right.', from: 'LAB-GUIDE.md section 5 (Level 5), section 9A "Level 5", section 9B question 4' },
+    learn: { eco: 'Power has to work on the hard days, not only the normal ones.', ai: 'A high “sure” score is not the same as being right.', from: 'LAB-GUIDE.md section 5 (Level 5), section 9A "Level 5", section 9B question 4' },
     card: { ask: 'Is very sure the same as right?' },
     plans: { flawed: ['power', ['enough_power']] },
     setup: { seed: 'power', hour: 12, florence: '7,6+0,1', cast: { posy: '7,6+-3.8,2.2', dev: '7,6+3.8,2.2' }, otter: '2,6' },
@@ -223,16 +223,16 @@ export const EPISODES = [
       { cam: cam('10,5', 70, 0.3, 0.6, { up: 3, to: { yaw: 0.14 } }), beats: [
         { who: 'florence', say: 'Solar panels on every roof! On a normal day, that is plenty.', do: [['fl', 'look', null], ['fl', 'point', '10,6'], ['build', 'flawed', { dur: 1.6, stagger: 0.12 }], ['sfx', 'pop']] } ] },
       { cam: cam('7,6+0,1', 34, 0.12, 0.24, { up: 3.4 }), beats: [
-        { who: 'florence', say: 'I am 90% sure. That is very, very sure!', do: [['fl', 'look', null], ['fl', 'proud', { at: 0.2 }], ['pill', 'florence', '90% sure!', 3.4, { at: 0.3 }]] },
+        { who: 'florence', say: 'I am very sure. That is very, very sure!', do: [['fl', 'look', null], ['fl', 'proud', { at: 0.2 }], ['pill', 'florence', 'I am very sure!', 3.4, { at: 0.3 }]] },
         { who: 'dev', say: 'What about a day that is not normal?', do: [['fl', 'look', 'dev'], ['kid', 'dev', 'jump', { at: 0.1 }]] } ] },
       { cam: cam('10,5', 100, -0.05, 0.72, { to: { yaw: 0.1 } }), beats: [
-        { who: 'narrator', say: 'Ninety per cent sure. Is that the same as right?' },
+        { who: 'narrator', say: 'Very sure. Is that the same as right?' },
         { who: 'narrator', say: 'Which day would you test?', do: [['card']] } ] },
     ],
   },
   {
     id: 'power-close', mission: 'power', kind: 'close', n: 5, title: 'The winter night', music: 'night',
-    learn: { eco: 'Winter power and storage: plan for a still winter night, and store energy for later.', ai: 'Confident is not the same as correct: 90% sure was wrong, 74% sure and tested was right.', from: 'LAB-GUIDE.md section 5 (Level 5: winter test, blackout; "Unsure but right" moment, 74% sure), section 9A Level 5, section 9B question 4 ("Sure isn\'t right")' },
+    learn: { eco: 'Winter power and storage: plan for a still winter night, and store energy for later.', ai: 'Confidence is not the same as correct: the first plan was wrong, while the tested plan was right.', from: 'LAB-GUIDE.md section 5 (Level 5: winter test, blackout; "Unsure but right" moment, 74% sure), section 9A Level 5, section 9B question 4 ("Sure isn\'t right")' },
     card: { eco: 'Plan power for the hardest night. Store some for later.', ai: 'Sure is not the same as right. Test the plan.' },
     plans: { flawed: ['power', ['enough_power']], clear: ['power', CLEAR.power] },
     setup: { seed: 'power', apply: 'flawed', hour: 15.5, florence: '7,6+0,1', cast: { posy: '7,6+-3.8,2.2', dev: '7,6+3.8,2.2' }, otter: '2,6', lights: 'all' },
@@ -241,10 +241,10 @@ export const EPISODES = [
         { who: 'narrator', say: 'A still winter night. The sun has gone.', do: [['time', 20.5, 1, 3.2], ['still', true], ['sfx', 'dusk', { at: 0.4 }]] },
         { who: 'dev', say: 'The winter test! Look. Every light has gone out.', do: [['lights', 'out', 1.6, { at: 0.6 }], ['sfx', 'flaw', { at: 1.2 }], ['label', '10,5', 'Lights on: {lit} of {homes} homes', 3.2, 'bad', { at: 2.1 }]] } ] },
       { cam: cam('7,6+0,1', 38, -0.3, 0.26, { up: 3.2 }), beats: [
-        { who: 'florence', say: 'Oops. But I was 90% sure!', do: [['fl', 'oops']] },
+        { who: 'florence', say: 'Oops. But I was very sure!', do: [['fl', 'oops']] },
         { who: 'posy', say: 'Enough power for a still winter night. Store the sunshine.', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump', { at: 0.2 }]] } ] },
       { cam: cam('10,5', 108, 0.25, 0.6, { up: 3, to: { yaw: 0.1 } }), beats: [
-        { who: 'florence', say: 'A wind turbine and batteries. I have not planned for winter before. Only 74% sure.', do: [['time', 14, 0.6, 0.6], ['reset'], ['build', 'clear', { dur: 2.2, stagger: 0.15, at: 0.4 }], ['sfx', 'pop', { at: 0.4 }], ['fl', 'look', null], ['fl', 'think', { at: 3 }], ['pill', 'florence', 'Only 74% sure', 3.2, { at: 3.4 }]] } ] },
+        { who: 'florence', say: 'A wind turbine and batteries. I have not planned for winter before. I’m not completely sure, but let’s test it.', do: [['time', 14, 0.6, 0.6], ['reset'], ['build', 'clear', { dur: 2.2, stagger: 0.15, at: 0.4 }], ['sfx', 'pop', { at: 0.4 }], ['fl', 'look', null], ['fl', 'think', { at: 3 }], ['pill', 'florence', 'Only 74% sure', 3.2, { at: 3.4 }]] } ] },
       { cam: cam('10,5', 86, -0.3, 0.5, { up: 3, to: { yaw: -0.15 } }), beats: [
         { who: 'dev', say: 'Test it again. The lights stay on!', do: [['time', 20.5, 1, 1.4], ['lights', 'all'], ['label', '10,5', 'Lights on: {lit} of {homes} homes ✓', 3, 'ok', { at: 1.5 }], ['sfx', 'pass', { at: 1.5 }], ['kid', 'dev', 'jump', { at: 1.6 }], ['fl', 'cheer', { at: 1.8 }]] },
         { who: 'narrator', say: 'Plan your power for the hardest night, and store some for later.' } ] },
@@ -266,7 +266,7 @@ export const EPISODES = [
         { who: 'posy', say: 'Put the school right in the middle, Florence!', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump']] },
         { who: 'florence', say: 'The middle. I will measure!', do: [['fl', 'look', null], ['fl', 'peer', '5,5', { at: 0.4 }]] } ] },
       { cam: cam('6,6', 70, 0.3, 0.6, { up: 2, to: { yaw: 0.15 } }), beats: [
-        { who: 'florence', say: 'Here! The exact middle of the island. I am 81% sure!', do: [['fl', 'at', '6,7+-1,0'], ['fl', 'point', '5,5'], ['build', 'flawed', { dur: 3, stagger: 0.1 }], ['sfx', 'pop'], ['pill', 'florence', '81% sure!', 3, { at: 2.4 }]] },
+        { who: 'florence', say: 'Here! The exact middle of the island. I am very sure!', do: [['fl', 'at', '6,7+-1,0'], ['fl', 'point', '5,5'], ['build', 'flawed', { dur: 3, stagger: 0.1 }], ['sfx', 'pop'], ['pill', 'florence', 'I am very sure!', 3, { at: 2.4 }]] },
         { wait: 1.8, do: [['fl', 'look', null], ['fl', 'cheer', { at: 0.6 }]] } ] },
       { cam: cam('8,6', 96, -0.5, 0.42, { up: 2, to: { yaw: -0.4 } }), beats: [
         { who: 'dev', say: 'That is a long way from my house.', do: [['kid', 'dev', 'at', '11,5+-2.6,3.4'], ['kid', 'posy', 'at', '11,5+-0.4,3.6'], ['kid', 'dev', 'face', '5,5'], ['kid', 'posy', 'face', '5,5']] },
@@ -291,7 +291,7 @@ export const EPISODES = [
       { cam: cam('8,5', 108, 0.15, 0.78), beats: [
         { who: 'florence', say: 'Moved! Now every home is close enough. Checked!', do: [['reset'], ['cells', 'clear'], ['lens', 'walk'], ['sfx', 'pass', { at: 0.3 }], ['fl', 'look', null], ['fl', 'cheer', { at: 1.2 }]] } ] },
       { cam: cam('7,6+0,1', 36, -0.3, 0.25, { up: 3.2 }), beats: [
-        { who: 'florence', say: 'One more thing. People want more car parks! I asked ten of them.', do: [['lens', null], ['fl', 'proud', { at: 1.4 }], ['pill', 'florence', '82% sure!', 2.6, { at: 1.6 }]] },
+        { who: 'florence', say: 'One more thing. People want more car parks! I asked ten of them.', do: [['lens', null], ['fl', 'proud', { at: 1.4 }], ['pill', 'florence', 'I am very sure!', 2.6, { at: 1.6 }]] },
         { who: 'dev', say: 'Where did you ask?', do: [['fl', 'look', 'dev']] },
         { who: 'florence', say: 'At the car park.', do: [['fl', 'look', null], ['fl', 'think']] },
         { who: 'posy', say: 'So you only asked drivers! Ask at the school gate too.', do: [['fl', 'look', 'posy'], ['kid', 'posy', 'jump', { at: 0.1 }], ['fl', 'oops', { at: 1.2 }], ['sfx', 'flaw', { at: 1.2 }]] } ] },

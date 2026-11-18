@@ -46,7 +46,7 @@ test('each episode has a script, a camera for every shot and a closing card', ()
 test('an opening shows Florence sure of herself and never gives the answer away', () => {
   for (const ep of EPISODES.filter((e) => e.kind === 'open')) {
     const acts = ep.shots.flatMap((s) => s.beats).flatMap((b) => b.do || []);
-    assert.ok(acts.some((a) => a[0] === 'pill' && /% sure/.test(a[2])), `${ep.id}: Florence says how sure she is`);
+    assert.ok(acts.some((a) => a[0] === 'pill' && a[1] === 'florence' && /sure/.test(a[2])), `${ep.id}: Florence says how sure she is`); // in words since 18 Nov 2026 (owner: the films drop percentages)
     assert.ok(!acts.some((a) => ['lens', 'flood', 'lights', 'reset'].includes(a[0])), `${ep.id}: no lens, test or fix in an opening`);
     assert.ok(!ep.plans.clear, `${ep.id}: the clear plan is not in an opening`);
     const closing = episode(`${ep.mission}-close`); const acts2 = closing.shots.flatMap((s) => s.beats).flatMap((b) => b.do || []);
