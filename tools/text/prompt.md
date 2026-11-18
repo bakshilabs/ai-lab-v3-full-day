@@ -21,6 +21,7 @@ You wrote this brief yourself after reading the game's design documents, mission
 # Style
 
 - Plain, natural, warm British English (colour, centre, organise, metres, programme for a schedule; "program" is fine for computers and robots).
+- Write in complete, natural sentences, the way a person would say them aloud to a child. Never compress the text. Do not drop small words such as "the", "a", "is" or "you". Do not write in note form, in fragments, or as bare lists of nouns. Do not join ideas with colons, arrows, slashes or dots where a sentence would do. If a line you are given is compressed like this, write it out in full, even if it becomes longer. This matters most for lines that are spoken aloud. A button or a short label stays a short label.
 - Speak to the child directly and kindly. No talking down, no exclamation marks in every line, no jokes that get in the way.
 
 ## Ages 8–12
@@ -45,7 +46,7 @@ You wrote this brief yourself after reading the game's design documents, mission
 4. Keep every emoji and symbol (🏡, ⭐, ✓, ✗, ★, →) exactly, the same number of times.
 5. Keep button names, build names, tool names, mission names and screen names exactly as written, with their emoji. These names are fixed in the game and must never be reworded: {{FIXED_NAMES}}. Other words that name a button or place on screen in a line (often written with a capital letter or after an emoji) must also stay word for word.
 6. Use the curly apostrophe ’ and curly quotes “ ” in the text. Never use the straight ' or " characters, unless the original line used them.
-7. Keep each line about as long as it is now. A short label or button (a few words, no full stop) must stay a short label of about the same length, with no full stop added. A longer line may grow a little if that makes it clearer for 8–12, but never much.
+7. Keep each line about as long as it is now, unless it is compressed or in note form: then write it out as full sentences (see Style). A short label or button (a few words, no full stop) must stay a short label of about the same length, with no full stop added. A longer line may grow a little if that makes it clearer for 8–12, but never much.
 8. Some lines are fragments that the game joins into a longer sentence (they often start with a lower-case letter, or have no full stop). Keep them as fragments that fit the same place: same start (lower or upper case), same ending punctuation, same grammatical role.
 9. Keep line breaks: if the line has a line break, keep the same number.
 10. No names of real people. Nothing that asks children for personal details (names, schools, addresses, phone numbers, photos).
