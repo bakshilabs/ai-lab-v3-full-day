@@ -20,12 +20,12 @@ export function createIsland(canvas, { reduced = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: (window.devicePixelRatio || 1) < 2, powerPreference: 'default', preserveDrawingBuffer: false });
   let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   renderer.setPixelRatio(dpr); renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap; // hard-edged shadows: nothing on the island is soft
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 400);
   scene.add(new THREE.HemisphereLight('#fff6e8', '#8a7a5a', 1.55));
   const sun = new THREE.DirectionalLight('#fff0d0', 2.1); sun.position.set(-18, 34, 20); sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 90 }); sun.shadow.bias = -0.0015; sun.shadow.normalBias = 0.04;
+  sun.shadow.mapSize.set(4096, 4096); Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 90 }); sun.shadow.bias = -0.0015; sun.shadow.normalBias = 0.04;
   scene.add(sun);
   const world = new THREE.Group(); scene.add(world);
 
