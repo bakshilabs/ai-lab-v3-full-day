@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Six Towns World Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* layout: the map first, as large as the screen allows; the outline reads below it in one column */
+  :root {
+    --bg: #f6f8f4; --panel: #ffffff; --fg: #23301f; --muted: #5b6a55; --line: #d9e0d2; --accent: #2f7d4f; --chip: #ffffffee; --chip-fg: #23301f;
+    --display: 'Space Grotesk', 'Trebuchet MS', system-ui, sans-serif; --body: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #2f3a2e; --accent: #7fd19c; --chip: #1c241cee; --chip-fg: #e8efe2; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #2f3a2e; --accent: #7fd19c; --chip: #1c241cee; --chip-fg: #e8efe2; color-scheme: dark; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 28px; }
+  h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); } h2 { font-size: 1.35rem; } h3 { font-size: 1.05rem; }
+  p { margin: 0; max-width: 68ch; } .lede { color: var(--muted); font-size: 1.05rem; }
+  header { display: flex; flex-direction: column; gap: 8px; }
+  .tag { font: 600 0.75rem var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+
+  .stage { position: relative; height: min(72vh, 680px); min-height: 380px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(#bfe6fb, #eaf7ff); touch-action: none; user-select: none; -webkit-user-select: none; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+  .bar { position: absolute; left: 10px; right: 10px; top: 10px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+  .bar button { pointer-events: auto; font: 600 0.82rem var(--body); color: var(--chip-fg); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .bar button:focus-visible, .pin:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .bar .walk { margin-left: auto; }
+  .pin { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; white-space: nowrap; font: 600 0.85rem var(--body); color: #23301f; background: #ffffffea; border: 0; border-radius: 999px; padding: 4px 11px 4px 4px; cursor: pointer; box-shadow: 0 2px 0 #0000001f; will-change: transform; }
+  .pin b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font: 700 0.8rem var(--display); background: var(--c); }
+  .hint { position: absolute; left: 12px; bottom: 10px; right: 12px; font-size: 0.8rem; color: #23301f; pointer-events: none; }
+  .hint span { background: #ffffffd9; border-radius: 6px; padding: 3px 8px; }
+  .hint .w, [data-walking="on"] .hint .m { display: none; } [data-walking="on"] .hint .w { display: inline; }
+  #stick { position: absolute; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; background: #2b3a552e; pointer-events: none; }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: #2b3a5580; }
+
+  section { display: flex; flex-direction: column; gap: 12px; }
+  .towns { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .town { background: var(--panel); border: 1px solid var(--line); border-top: 5px solid var(--c); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .town .hr { font: 600 0.75rem var(--body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .town p { font-size: 0.94rem; } .town .see { color: var(--muted); }
+  ul { margin: 0; padding-left: 1.2em; max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .ask { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .ask ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">Proposal · nothing here is in the game yet</span>
+    <h1>One world, six towns</h1>
+    <p class="lede">A map for the redesigned day. Each hour gets its own town with its own character, all on one piece of land a child can cross. The squares are the same size as on the start page island, and each town is about the size of that island.</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="map" aria-label="3D map of the six towns"></canvas>
+    <button class="pin" data-town="eco" style="--c:#c8643f" hidden><b>1</b>Eco Town</button>
+    <button class="pin" data-town="drone" style="--c:#3f78b5" hidden><b>2</b>Drone City</button>
+    <button class="pin" data-town="robot" style="--c:#6f9a3a" hidden><b>3</b>Robot Farm</button>
+    <button class="pin" data-town="roads" style="--c:#8d6f9c" hidden><b>4</b>Crossways</button>
+    <button class="pin" data-town="film" style="--c:#d0558a" hidden><b>5</b>Studio Bay</button>
+    <button class="pin" data-town="power" style="--c:#c79a2e" hidden><b>6</b>Power Ridge</button>
+    <div class="bar">
+      <button data-view="world" aria-pressed="true">Whole world</button>
+      <button data-view="eco">1 Eco Town</button>
+      <button data-view="drone">2 Drone City</button>
+      <button data-view="robot">3 Robot Farm</button>
+      <button data-view="roads">4 Crossways</button>
+      <button data-view="film">5 Studio Bay</button>
+      <button data-view="power">6 Power Ridge</button>
+      <button class="walk" data-walk aria-pressed="false">Walk here</button>
+    </div>
+    <div id="stick" hidden><i></i></div>
+    <p class="hint"><span class="m">Drag to turn · wheel or pinch to zoom · pick a town</span><span class="w">W A S D or arrows to walk · Shift to run · Space to jump · drag to look. On touch, drag the left half to walk.</span></p>
+  </div>
+
+  <section>
+    <h2>The six towns</h2>
+    <p>The names are working names. Any words children see would come from the OpenAI text pipeline, as now.</p>
+    <div class="towns">
+      <div class="town" style="--c:#c8643f"><span class="hr">Hour 1 · planning with an AI that can be wrong</span><h3>1 · Eco Town</h3><p>Low rise. Small homes with stepped roofs, an orchard, the river through the middle. It sits in the centre and every other town joins on to it.</p><p class="see">On the map: nine homes on a ring road, the orchard, the delivery pad.</p></div>
+      <div class="town" style="--c:#3f78b5"><span class="hr">Hour 2 · drones, from delivery to rescue</span><h3>2 · Drone City</h3><p>High rise. Glass towers up to sixteen floors with landing pads on their roofs, a drone port with stacked landing decks, and a hospital to keep clear of.</p><p class="see">On the map: ten towers, the port mast, drones flying out to the other towns.</p></div>
+      <div class="town" style="--c:#6f9a3a"><span class="hr">Hour 3 · robots: sense, think, act</span><h3>3 · Robot Farm</h3><p>Wide and flat. Long crop rows in four colours, glasshouses, a red barn, and sheds for packing and sorting.</p><p class="see">On the map: four field robots at work, a robot arm at the packing shed, the sorting belt.</p></div>
+      <div class="town" style="--c:#8d6f9c"><span class="hr">Hour 4 · self-driving cars and the street</span><h3>4 · Crossways</h3><p>Mid rise. A grid of streets with crossings and signals, brick blocks of two to four floors, a school, a car park and a charging depot.</p><p class="see">On the map: cars on the street loop, shared white cars running out to Eco Town and Studio Bay.</p></div>
+      <div class="town" style="--c:#d0558a"><span class="hr">Hour 5 · making films with AI</span><h3>5 · Studio Bay</h3><p>Bright and playful. Two sound stages, a street of false house fronts, a camera crane on rails, an open-air screen with seats, a lagoon with a pier and a lighthouse.</p><p class="see">On the map: the crane moves along its track and swings its arm.</p></div>
+      <div class="town" style="--c:#c79a2e"><span class="hr">Hour 6 · keeping the lights on</span><h3>6 · Power Ridge</h3><p>High ground in three steps. Wind turbines along the top, a solar field, the town batteries, the control room, and a dam that feeds the river.</p><p class="see">On the map: power lines run from the control room to every other town.</p></div>
+    </div>
+  </section>
+
+  <div class="two">
+    <section>
+      <h2>How the day moves through it</h2>
+      <ul>
+        <li><strong>The map is the menu.</strong> A child opens the day on the whole world and sees which town is next. Finished towns stay lit and busy.</li>
+        <li><strong>Each hour has a home town.</strong> Its six missions start there, in the place that fits the job.</li>
+        <li><strong>The breaks are for exploring.</strong> After the talk, a child can walk their figure to the next town along the road. This is where "Finished early?" play could live.</li>
+        <li><strong>Eco Town is the middle.</strong> Every road leads back to it, so it is where each hour ends and the next begins.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>One world, shared work</h2>
+      <p>Because the towns sit side by side, missions already in the curriculum can cross between them:</p>
+      <ul>
+        <li>The drone <strong>farm survey</strong> flies over Robot Farm's real fields; the <strong>inspection</strong> flies to a Power Ridge turbine and the high bridge.</li>
+        <li>The drone <strong>delivery</strong> lands on the pad in Eco Town.</li>
+        <li>The <strong>shared fleet</strong> of self-driving cars runs between Crossways, Eco Town and Studio Bay.</li>
+        <li>The <strong>film crew</strong> can shoot in any town already visited.</li>
+        <li>The <strong>control room</strong> keeps every town's lights on, so the last hour of the day is about the whole world.</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="two">
+    <section>
+      <h2>What stays the same</h2>
+      <ul>
+        <li><strong>The scale.</strong> One square is one square. Each town is close to the start page island's 30 by 22 squares; the whole world is about 78 by 62.</li>
+        <li><strong>The look.</strong> Big plain blocks, a small set of colours plus one accent per town, hard shadows, stepped roofs.</li>
+        <li><strong>The teaching.</strong> The curriculum, the six missions an hour, the talk and the break are untouched. Eco Town keeps its own lesson.</li>
+        <li><strong>The start page.</strong> It keeps the single island the clubs liked.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>What this map does not settle</h2>
+      <ul>
+        <li>Where Eco Town's buildable tiles sit, and how big a child's own town can grow.</li>
+        <li>How each mission's screen looks inside its town. The map shows where it happens, not how it plays.</li>
+        <li>Speed on school devices. The world is about six times the land of the island and has only been run in a test browser.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="ask">
+    <h2>Decisions for you</h2>
+    <ol>
+      <li><strong>One land or six islands?</strong> This map is one piece of land with roads between towns. The other way is six floating islands joined by bridges, which keeps each town's edge clear but makes walking between them slower.</li>
+      <li><strong>Eco Town in the middle?</strong> Here it is the hub. The other way is a ring in the order of the day, with nothing at the centre.</li>
+      <li><strong>Walk, or tap to travel?</strong> A walking figure makes the world feel big but costs minutes. It could be for breaks only, with a tap on the map during the hour.</li>
+      <li><strong>Do the towns open one at a time,</strong> or is the whole world visible and open from the start?</li>
+    </ol>
+  </section>
+</div>
+<script type="module" src="worldmap.js"></script>
+</body>
+</html>
