@@ -1,5 +1,6 @@
 // Eco Town's routes, kept apart from worker.js so they can be tested in Node (worker.js adds the game files and pages).
-//  - Learners: join page at "/", then the protected game (only with a valid session cookie). A whole group shares one
+//  - Everyone: the landing page at "/" is open, with what it loads (owner, 20 Nov 2026; see PUBLIC below).
+//  - Learners: the join page in place of any other page, then the protected game (only with a valid session cookie). A whole group shares one
 //    join code; each device that joins becomes its own learner with a made-up badge. One device per badge at a time.
 //  - Leaders: /leader, with the organisation's leader code. A leader only ever reaches their own organisation.
 //  - Admin (the company): /admin, behind Cloudflare Access AND verified here (Access login token).
@@ -13,7 +14,7 @@ const BASE = {
   'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
 };
-const TYPES = { png: 'image/png', jpg: 'image/jpeg', mp4: 'video/mp4', html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json', bin: 'application/octet-stream', woff2: 'font/woff2', vtt: 'text/vtt; charset=utf-8' };
+const TYPES = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', mp4: 'video/mp4', html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json', bin: 'application/octet-stream', woff2: 'font/woff2', vtt: 'text/vtt; charset=utf-8' };
 const json = (o, status = 200, extra = {}) => new Response(JSON.stringify(o), { status, headers: { ...BASE, 'Content-Type': 'application/json', ...extra } });
 const text = (s, status = 200) => new Response(s, { status, headers: { ...BASE, 'Content-Type': 'text/plain' } });
 const html = (s, status = 200) => new Response(s, { status, headers: { ...BASE, 'Content-Type': TYPES.html } });
@@ -44,6 +45,11 @@ const recent = new Map(); // session -> time of its last successful check in thi
 // files whose name carries a hash of their contents never change: the player's own browser may keep them for a week
 // (the page itself is never stored, so the game still can't start without a valid session)
 const KEEP = { 'Cache-Control': 'private, max-age=604800, immutable' };
+// The landing page is open to everyone, with no code (owner, 20 Nov 2026): the start page, its two scripts, the fonts,
+// its pictures and the eight short build films of its film strip (FILMS in js/hub.js). The game, its voices, the other
+// pictures and films, and every other page still need a session.
+const PUBLIC = (f) => f === '/index.html' || /^\/assets\/(hub|island)-[a-f0-9]{8,}\.js$/.test(f) || /^\/assets\/fonts\/[a-z0-9_-]+\.woff2$/.test(f)
+  || /^\/img\/home\/(tiles\/)?[a-z0-9_-]+\.webp$/.test(f) || /^\/videos\/(timber|wind|solar|orchard|cycle|greenroof|tram|hives)\.mp4$/.test(f);
 const hashed = (f) => /^\/assets\/(app|m)-[a-f0-9]{8,}\.[a-z]+$/.test(f) || /^\/voice\/pack-[a-z]+-[a-f0-9]{8,}\.bin$/.test(f);
 const cookie = (req, name) => (req.headers.get('Cookie') || '').match(new RegExp('(?:^|; ?)' + name + '=([^;]+)'))?.[1] || '';
 const setCookie = (name, value, age) => ({ 'Set-Cookie': `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${age}` });
@@ -146,15 +152,17 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     if (p.startsWith('/api/')) return json({ error: 'not found' }, 404);
 
     // ---------------- game files: only with a valid session
-    const file = p === '/' ? '/index.html' : p; const page = file === '/index.html' || file === '/play.html'; // the start page and the game page: both show the join page without a session
+    const file = p === '/' ? '/index.html' : p; const page = file.endsWith('.html'); // a page asked for without a session shows the join page
     // The page itself and every heartbeat ask the organisation's store. The other files of one page load (about a hundred)
     // reuse a recent "yes" for a minute, so a class starting together is one store call each, not a hundred.
-    const hit = !page && recent.get(sess);
-    const r = hit && now - hit < 60e3 ? { ok: true } : await S.check(sess, now, { touch: page });
-    if (r.ok && !hit) { if (recent.size > 5000) recent.clear(); recent.set(sess, now); } else if (!r.ok) recent.delete(sess);
-    if (!r.ok) {
-      if (page) return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''));
-      return text('Login required', 403);
+    if (!PUBLIC(file)) {
+      const hit = !page && recent.get(sess);
+      const r = hit && now - hit < 60e3 ? { ok: true } : await S.check(sess, now, { touch: page });
+      if (r.ok && !hit) { if (recent.size > 5000) recent.clear(); recent.set(sess, now); } else if (!r.ok) recent.delete(sess);
+      if (!r.ok) {
+        if (page) return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''));
+        return text('Login required', 403);
+      }
     }
     // recorded voices live in Workers KV (too big for the script); same session rule as every other game file
     if (file.startsWith('/voice/') && env.VOICE) {
@@ -164,7 +172,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     }
     // Florence's portrait, build pictures, build videos and the story episodes (videos/episodes/) also live in KV. Videos need byte ranges (Safari/iPad).
     if (/^\/(img|videos)\//.test(file) && env.VOICE) {
-      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|videos\/((episodes|trailer)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt))$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
+      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|img\/home\/(tiles\/)?[a-z0-9_-]+\.webp|videos\/((episodes|trailer)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt))$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
       const v = await env.VOICE.get(key, 'arrayBuffer'); if (!v) return new Response('Not found', { status: 404, headers: BASE });
       const type = TYPES[key.split('.').pop()] || 'application/octet-stream';
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get('Range') || '');
@@ -206,6 +214,6 @@ h.onclick=()=>{const on=w.classList.toggle('on');h.setAttribute('aria-expanded',
 f.onsubmit=async(e)=>{e.preventDefault();b.disabled=true;m.textContent='';
  try{const body={code:$('c').value};if(w.classList.contains('on')&&g.value.trim())body.badge=g.value;
  const r=await fetch('/api/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();
- if(d.ok){location.replace('/');return;}m.textContent=d.message||'Sorry, that didn’t work.';}catch{m.textContent='Could not connect. Check the internet and try again.';}b.disabled=false;};
+ if(d.ok){location.replace(location.href);return;}m.textContent=d.message||'Sorry, that didn’t work.';}catch{m.textContent='Could not connect. Check the internet and try again.';}b.disabled=false;};
 </script></body></html>`;
 }

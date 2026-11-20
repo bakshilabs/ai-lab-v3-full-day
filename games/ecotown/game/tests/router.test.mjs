@@ -14,7 +14,8 @@ function fakeEnv() {
   const get = (name) => { if (!objects.has(name)) { const mem = memStorage(); objects.set(name, { mem, store: createCodeStore(mem) }); } return objects.get(name); };
   return { objects, CODES: { idFromName: (n) => n, get: (name) => ({ call: async (...a) => structuredClone(await get(name).store.call(...structuredClone(a))) }) } };
 }
-const FILES = { '/index.html': '<h1>the game</h1>', '/assets/app-0123abcd.js': 'console.log(1)' };
+const FILES = { '/index.html': '<h1>the landing page</h1>', '/play.html': '<h1>the game</h1>', '/leader.html': '<h1>run sheet</h1>', '/assets/app-0123abcd.js': 'console.log(1)',
+  '/assets/hub-0123abcd.js': 'hub', '/assets/island-0123abcd.js': 'island', '/assets/fonts/inter.woff2': 'font' };
 function app({ admin = true } = {}) {
   const env = fakeEnv(); const handle = makeHandler({ files: FILES, adminHtml: 'ADMIN PAGE', leaderHtml: 'LEADER PAGE', access: async () => admin });
   const call = async (method, path, { body, cookie, raw } = {}) => {
@@ -32,22 +33,37 @@ async function club(call, name = 'Oak Club', seats = 20) {
   return { org, g };
 }
 
+test('the landing page is open to everyone; the game, its files and other pages are not', async () => {
+  const { call } = app();
+  for (const p of ['/', '/index.html']) { const r = await call('GET', p); assert.equal(r.status, 200); assert.equal(r.text, '<h1>the landing page</h1>'); }
+  for (const p of ['/assets/hub-0123abcd.js', '/assets/island-0123abcd.js', '/assets/fonts/inter.woff2']) assert.equal((await call('GET', p)).status, 200, p);
+  for (const p of ['/play.html', '/leader.html']) assert.match((await call('GET', p)).text, /Type your group’s code/, p);
+  for (const p of ['/assets/app-0123abcd.js', '/img/home/../florence.png', '/videos/episodes/e1.mp4', '/videos/trailer/t.mp4', '/voice/pack-junior.json']) assert.equal((await call('GET', p)).status, 403, p);
+  // the landing page's pictures and its eight build films live in KV and are open; other media are not
+  const kv = new Map([['img/home/hero-wide.webp', 'H'], ['img/home/tiles/wind.webp', 'T'], ['videos/wind.mp4', 'V'], ['videos/house.mp4', 'X']]);
+  const env = fakeEnv(); env.VOICE = { get: async (k) => (kv.has(k) ? new TextEncoder().encode(kv.get(k)).buffer : null) };
+  const handle = makeHandler({ files: FILES, adminHtml: '', leaderHtml: '', access: async () => false });
+  const get = (p) => handle(new Request('https://test.example' + p), env);
+  for (const [p, type] of [['/img/home/hero-wide.webp', 'image/webp'], ['/img/home/tiles/wind.webp', 'image/webp'], ['/videos/wind.mp4', 'video/mp4']]) { const r = await get(p); assert.equal(r.status, 200, p); assert.equal(r.headers.get('Content-Type'), type); }
+  assert.equal((await get('/videos/house.mp4')).status, 403);
+});
+
 test('the join page shows until a learner joins; then the game and its files are served', async () => {
   const { call } = app(); const { g } = await club(call);
-  const page = await call('GET', '/'); assert.equal(page.status, 200); assert.match(page.text, /Type your group’s code/); assert.match(page.text, /I already have a badge/); assert.ok(!page.text.includes('the game'));
+  const page = await call('GET', '/play.html'); assert.equal(page.status, 200); assert.match(page.text, /Type your group’s code/); assert.match(page.text, /I already have a badge/); assert.ok(!page.text.includes('the game'));
   assert.equal((await call('GET', '/assets/app-0123abcd.js')).status, 403);
   const bad = await call('POST', '/api/join', { body: { code: 'NOPE-0000' } }); assert.equal(bad.status, 401); assert.deepEqual(Object.keys(bad.data), ['ok', 'reason', 'message']); assert.equal(bad.data.reason, 'unknown'); assert.equal(bad.set, '');
   const j = await call('POST', '/api/join', { body: { code: g.code } });
   assert.equal(j.status, 200); assert.deepEqual(Object.keys(j.data).sort(), ['badge', 'ends', 'group', 'learner', 'ok']); assert.deepEqual(j.data.group, { name: 'Saturday club' }); assert.equal(j.data.ends, later);
   assert.match(j.set, /^eco_s=[a-f0-9]{12}\.[a-f0-9]{24}\.[a-f0-9]{48}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000$/);
-  const game = await call('GET', '/', { cookie: j.cookie }); assert.equal(game.text, '<h1>the game</h1>'); assert.match(game.headers.get('Cache-Control'), /no-store/);
+  const game = await call('GET', '/play.html', { cookie: j.cookie }); assert.equal(game.text, '<h1>the game</h1>'); assert.match(game.headers.get('Cache-Control'), /no-store/);
   const asset = await call('GET', '/assets/app-0123abcd.js', { cookie: j.cookie }); assert.equal(asset.status, 200); assert.match(asset.headers.get('Cache-Control'), /immutable/);
   assert.equal((await call('GET', '/nothing.js', { cookie: j.cookie })).status, 404);
   const me = await call('GET', '/api/me', { cookie: j.cookie }); assert.deepEqual(me.data, { ok: true, learner: j.data.learner, badge: j.data.badge, group: { name: 'Saturday club' }, ends: later });
   assert.equal((await call('GET', '/api/me')).status, 401);
   const alias = await call('POST', '/api/login', { body: { code: g.code } }); assert.ok(alias.data.ok, '/api/login still works'); assert.notEqual(alias.data.learner, j.data.learner);
   const out = await call('POST', '/api/logout', { cookie: j.cookie }); assert.match(out.set, /Max-Age=0/);
-  assert.match((await call('GET', '/', { cookie: j.cookie })).text, /Type your group’s code/);
+  assert.match((await call('GET', '/play.html', { cookie: j.cookie })).text, /Type your group’s code/);
 });
 
 test('heartbeat carries a status; a badge on a second device replaces the first', async () => {
@@ -59,7 +75,7 @@ test('heartbeat carries a status; a badge on a second device replaces the first'
   const none = await call('POST', '/api/heartbeat'); assert.equal(none.status, 409); assert.equal(none.data.reason, 'none');
   const b = await call('POST', '/api/join', { body: { code: g.code, badge: a.data.badge } }); assert.equal(b.data.learner, a.data.learner);
   const old = await call('POST', '/api/heartbeat', { cookie: a.cookie }); assert.equal(old.status, 409); assert.equal(old.data.reason, 'replaced'); assert.ok(old.data.message);
-  assert.match((await call('GET', '/', { cookie: a.cookie })).text, /another device/);
+  assert.match((await call('GET', '/play.html', { cookie: a.cookie })).text, /another device/);
   const nb = await call('POST', '/api/join', { body: { code: g.code, badge: 'Nobody 99' } }); assert.equal(nb.status, 401); assert.equal(nb.data.reason, 'no_badge');
 });
 
