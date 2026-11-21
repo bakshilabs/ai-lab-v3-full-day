@@ -74,6 +74,9 @@
   .sticky .grip button { border: 0; background: rgba(0, 0, 0, 0.1); color: inherit; border-radius: 6px; padding: 2px 7px; cursor: pointer; font-size: 0.8rem; }
   .sticky textarea { border: 0; background: transparent; color: inherit; font: 15px/1.4 var(--body); padding: 8px; min-height: 110px; resize: vertical; width: 100%; } .sticky textarea:focus { outline: 2px solid #26240f; outline-offset: -2px; }
   .status { color: var(--muted); font-size: 0.92rem; }
+  .editing .ed { outline: 1px dashed currentColor; outline-offset: 2px; border-radius: 3px; cursor: text; }
+  .editing .ed:hover { background: #fff3a8; color: #17160a; }
+  .ed[contenteditable] { background: #fff3a8; color: #17160a; outline: 2px solid #26240f; outline-offset: 2px; border-radius: 3px; }
 </style>
 
 <div class="wrap">
@@ -81,8 +84,10 @@
     <button class="nav" id="vboard">Whiteboard</button>
     <button class="nav" id="vdeck">One screen at a time</button>
     <button class="nav" id="theme">Dark</button>
+    <button class="nav" id="edit">Edit the words</button>
     <span class="status" id="status"></span>
   </div>
+  <p class="help" id="edithelp" hidden><b>How to edit the words.</b> Every piece of text that you can change now has a dashed outline. Click a piece of text, type the new words, and press <b>Enter</b> to save them. Press <b>Escape</b> to leave the text as it was. To put the original words back, delete all of the words and press Enter. Your changes are saved for everyone who opens this page.</p>
   <div class="bar" id="deckbar">
     <button class="nav" id="prev">← Back</button>
     <button class="nav go" id="next">Next →</button>
@@ -132,6 +137,30 @@
     reason: ['The child gives a reason', 'The chosen solution stays marked on the town.', 'The chosen reason is saved for the teacher’s talk at the end of the hour.'],
     result: ['The town shows the choice', 'The town shows the chosen solution being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right.'],
   };
+
+  // ---- words that a reader can change on the page ---------------------------------------------------------------
+  // Each changed piece of text is kept in the shared database (collection "words"), with the place it belongs to.
+  const ROOT = { ui: U, towns: D.towns, ladder: LADDER, step: STEP }, orig = new Map();
+  const SKIP = /(^|\/)(id|colour)$|lenses\/\d+\/0$|res\/\d+\/0$|res\/\d+\/\d+\/0$/;
+  (function walk(o, at) { for (const k of Object.keys(o)) { const v = o[k], q = at ? `${at}/${k}` : k; if (typeof v === 'string') { if (!SKIP.test(q)) orig.set(q, v); } else if (v && typeof v === 'object') walk(v, q); } })(ROOT, '');
+  const getAt = (path) => path.split('/').reduce((o, k) => o[k], ROOT);
+  const setAt = (path, v) => { const ks = path.split('/'), last = ks.pop(); ks.reduce((o, k) => o[k], ROOT)[last] = v; };
+  let index = new Map();
+  const reindex = () => { index = new Map(); for (const q of orig.keys()) { const v = getAt(q); if (!index.has(v)) index.set(v, []); index.get(v).push(q); } };
+  reindex();
+  function mark(root, s) { // wrap each piece of text that comes from the word list, and remember where it belongs
+    const lv = s && s.li !== undefined ? `towns/${s.ti}/levels/${s.li}/` : null, tn = s && s.ti !== undefined ? `towns/${s.ti}/` : null;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), found = []; let n;
+    while ((n = w.nextNode())) { const t = n.nodeValue.trim(); if (t && index.has(t) && !n.parentElement.closest('header, .crumbs, .ed')) found.push([n, t]); }
+    for (const [node, t] of found) {
+      const ps = index.get(t); let pick = lv ? ps.filter((q) => q.startsWith(lv)) : [];
+      if (!pick.length && tn) pick = ps.filter((q) => q.startsWith(tn) && !q.includes('/levels/'));
+      if (!pick.length) pick = ps.filter((q) => !q.startsWith('towns/'));
+      if (!pick.length) continue;
+      const sp = document.createElement('span'); sp.className = 'ed'; sp.dataset.p = pick.join('|'); sp.textContent = t;
+      const v = node.nodeValue, a = v.indexOf(t); node.replaceWith(v.slice(0, a), sp, v.slice(a + t.length));
+    }
+  }
 
   // ---- the list of screens ----------------------------------------------------------------------------------------
   const slides = [{ kind: 'cover' }];
@@ -207,6 +236,7 @@
     const r = s.kind === 'cover' ? cover() : s.kind === 'end' ? end() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s);
     document.documentElement.style.setProperty('--c', r.colour);
     stage.innerHTML = `${r.crumbs ? `<div class="crumbs">${r.crumbs}</div>` : ''}${r.steps ? `<div class="steps" style="margin:8px 0">${[...Array(r.steps[1])].map((_, i) => `<i class="${i <= r.steps[0] ? 'on' : ''}"></i>`).join('')}</div>` : '<div style="height:8px"></div>'}${r.html}`;
+    mark(stage, s);
     $('count').textContent = `Screen ${at + 1} of ${slides.length}`; $('prev').disabled = at === 0; $('next').disabled = at === slides.length - 1;
     $('town').value = s.ti ?? '';
     $('level').innerHTML = s.ti === undefined ? '<option value="">Go to a level</option>' : `<option value="">Go to a level</option>${D.towns[s.ti].levels.map((v, i) => `<option value="${i}">Level ${i + 1}: ${esc(v.name)}</option>`).join('')}`;
@@ -234,6 +264,7 @@
       t.levels.forEach((v, li) => { h += `<div class="lane" id="lane-${ti}-${li}" style="--c:${t.colour}"><div class="lanehead">Level ${li + 1} of 6<span>${esc(v.name)}</span></div>${slides.map((s, n) => (s.kind === 'step' && s.ti === ti && s.li === li ? card(n, `Screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`) : '')).join('')}</div>`; });
     });
     board.insertAdjacentHTML('afterbegin', h);
+    for (const c of board.querySelectorAll('.cardw')) mark(c, slides[+c.dataset.n]);
     $('jump').innerHTML = `<option value="">Go to a level</option>${D.towns.map((t, ti) => `<optgroup label="Week ${ti + 1}: ${esc(t.name)}">${t.levels.map((v, li) => `<option value="${ti}-${li}">Level ${li + 1}: ${esc(v.name)}</option>`).join('')}</optgroup>`).join('')}`;
     new ResizeObserver(() => { fit(); placeAll(); }).observe(board); fit(); for (const id of notes.keys()) paint(id); lightComments();
   }
@@ -303,6 +334,7 @@
     [db, me] = await Promise.all([use('db'), use('user')]);
     if (!db) { clearTimeout(slow); return status('Note cards are not available in this view. You may need to sign in.'); }
     try { const w = me ? await me.can('data.write') : null; canWrite = w !== false; } catch (e) { /* a refused write will say so */ }
+    watchWords();
     db.collection('notes').onSnapshot((snap) => {
       clearTimeout(slow); const seen = new Set();
       for (const d of snap.docs) { seen.add(d.id); notes.set(d.id, d.data() || {}); if (built) paint(d.id); }
@@ -310,6 +342,35 @@
       status(`${snap.size === 1 ? 'There is 1 note card' : `There are ${snap.size} note cards`} on the whiteboard.${canWrite ? '' : ' Your access lets you read them but not change them.'}`); names();
     }, () => { clearTimeout(slow); status('The note cards could not be loaded.'); });
   })();
+  // ---- editing the words ----------------------------------------------------------------------------------------
+  let stale = false;
+  const editingNow = () => { const a = document.activeElement; return !!(a && a.classList && a.classList.contains('ed') && a.isContentEditable); };
+  function refresh() { // draw every screen again from the current words
+    if (editingNow()) { stale = true; return; } stale = false; reindex(); show(at, false);
+    if (built) for (const c of board.querySelectorAll('.cardw')) { const s = slides[+c.dataset.n], r = s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); while (c.lastChild && c.lastChild !== c.firstElementChild) c.lastChild.remove(); c.insertAdjacentHTML('beforeend', r.html); mark(c, s); }
+  }
+  const setEditing = (on) => { document.documentElement.classList.toggle('editing', on); $('edit').textContent = on ? 'Finish editing' : 'Edit the words'; $('edit').classList.toggle('on', on); $('edithelp').hidden = !on; if (on && !db) status('You can try the editing here, but your changes cannot be saved in this view.'); else if (on && !canWrite) status('Your access lets you read this page but not change its words.'); };
+  $('edit').onclick = () => setEditing(!document.documentElement.classList.contains('editing'));
+  document.addEventListener('click', (e) => {
+    if (!document.documentElement.classList.contains('editing')) return; const sp = e.target.closest && e.target.closest('.ed'); if (!sp || sp.isContentEditable) return;
+    sp.dataset.was = sp.textContent; sp.setAttribute('contenteditable', 'plaintext-only'); if (!sp.isContentEditable) sp.setAttribute('contenteditable', 'true'); sp.focus();
+  });
+  document.addEventListener('keydown', (e) => { const sp = e.target; if (!sp.classList || !sp.classList.contains('ed') || !sp.isContentEditable) return; e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); sp.blur(); } if (e.key === 'Escape') { sp.textContent = sp.dataset.was; sp.blur(); } }, true);
+  document.addEventListener('focusout', async (e) => {
+    const sp = e.target; if (!sp.classList || !sp.classList.contains('ed') || !sp.hasAttribute('contenteditable')) return;
+    sp.removeAttribute('contenteditable'); const text = sp.textContent.replace(/\s+/g, ' ').trim().slice(0, 400), paths = sp.dataset.p.split('|');
+    if (text === sp.dataset.was) { if (stale) refresh(); return; }
+    for (const q of paths) setAt(q, text || orig.get(q)); refresh();
+    if (!db) return; let by = null; try { by = me ? await me.id() : null; } catch (err) { /* stays unnamed */ }
+    for (const q of paths) { const ref = db.collection('words').doc(q.replace(/\//g, '.')); try { if (!text || text === orig.get(q)) await ref.delete(); else await ref.set({ path: q, text, was: orig.get(q), by, at: new Date().toISOString() }); status('Your change to the words has been saved.'); } catch (err) { status('That change to the words could not be saved. Your access may not allow it.'); } }
+  });
+  function watchWords() {
+    db.collection('words').onSnapshot((snap) => {
+      const now = new Map(); for (const d of snap.docs) { const w = d.data() || {}; if (typeof w.path === 'string' && orig.has(w.path) && typeof w.text === 'string' && w.text.trim()) now.set(w.path, w.text.slice(0, 400)); }
+      let changed = false; for (const q of orig.keys()) { const v = now.get(q) ?? orig.get(q); if (getAt(q) !== v) { setAt(q, v); changed = true; } }
+      if (changed) refresh();
+    }, () => { /* the page still shows the original words */ });
+  }
   show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
   setView(/^#\d+$/.test(location.hash) ? 'deck' : store.get('wf-view', 'board'));
   window.deck = { slides, show, setView, get at() { return at; } };
