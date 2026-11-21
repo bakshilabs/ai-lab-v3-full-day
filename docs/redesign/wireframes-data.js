@@ -10,12 +10,13 @@
 //           helper (town)  a line that explains Florence.  watch  what the town shows during the tests.  how, lensHow  instructions for this level only.
 //           labels  a different name for a check in this level only, by check id.
 //           scene  one line shown above the word buttons, so the child knows what the choices are for.
+//           retry  { pick, after }  the path drawn when the child presses Try another plan (Land level only).
 //           hands  the short step that the child does by hand.  recap  [question, answer] shown after the result.
 //           lens (levels 5 and 6)  the child picks the lenses, so the screen offers the whole town list.
 //           reasons, reason (level 6), pick (the plan the sample child chooses), after (what Florence says).
 export default {
   ui: {
-    start: 'Start', enter: 'Enter the town', ask: 'Ask Florence', use: 'Choose this one', again: 'Ask again', next: 'Next level', onward: 'Next', tryOther: 'Try another plan', done: 'Done', finish: 'Finish the town', lensesDone: 'Use these checks',
+    start: 'Start', enter: 'Enter the town', ask: 'Ask Florence', use: 'Choose this one', again: 'Ask again', next: 'Next level', onward: 'Next', tryOther: 'Try another plan', tried: 'You have already tried plan', chooseAgain: 'Choose a different plan to see what happens in the town.', otherPlan: 'The other plan', whichKeep: 'You have now seen two plans in the town. Which one do you want to keep?', keepThis: 'Keep this plan', keepFirst: 'Go back to my first plan', done: 'Done', finish: 'Finish the town', lensesDone: 'Use these checks',
     askHowOne: 'Florence has started the sentence. Tap one word button to finish it.',
     askHow: 'Tap a word button for each gap to build your sentence for Florence.',
     offers: 'Here are my plans. Let’s test what happens with each one.',
@@ -44,6 +45,7 @@ export default {
           s: ['Find land for the town that stays safe when the river rises because it is', [2, 'on a bank beside the river', 'far away from the river', 'high up and far away']],
           watch: 'Rain falls and the river rises. Water spreads across the low land and pulls at the river bank.',
           hands: 'Now place the town yourself. Drag the town onto the land that you chose.',
+          retry: { pick: 0, after: 'The town now stands right beside the river. People are close to the water, and the river can wear the bank away in a flood.' },
           recap: ['What keeps a town safe when the river rises?', 'Building on high land, a long way from the river.'],
           sol: [['Right beside the river', 'The town stands on a raised bank at the edge of the river.'], ['On the far meadow', 'The town stands on low, flat land, a long way from the river.'], ['On the far hill', 'The town stands high up, a long way from the river.']],
           res: [['flood', ['f', 'The river can wear the bank away'], ['p', 'A big flood spreads across flat land'], ['g', 'Homes stay dry in a storm']]],
