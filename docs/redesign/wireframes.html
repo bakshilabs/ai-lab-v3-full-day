@@ -159,7 +159,7 @@
     hands: ['The child does it by hand', 'The child drags or taps on the town itself to carry out the plan.', 'This is a short step that the child does by hand. It carries out the plan that the child chose, and it has no wrong answer.'],
     recap: ['A quick recap', 'The town shows the finished job.', 'The child sees the question first. The answer appears when the child taps the screen. This makes the lesson of the level plain.'],
     choose2: ['The child tries another plan', 'Each plan is drawn on the town and marked with its letter.', 'The child pressed “Try another plan” on the screen before this one. The game says which plan they tried first, and they pick a different one. The tests have already been done, so the results are shown straight away.'],
-    result2: ['The town shows the other plan', 'The town changes to show the other plan being built or carried out.', 'The child has now seen two plans in the town, one after the other, and decides which one to keep. This sample child goes back to the first plan. This path is drawn for this level only, and it would work in the same way in every level.'],
+    result2: ['The town shows the other plan', 'The town changes to show the other plan being built or carried out.', 'The child has now seen two plans in the town, one after the other, and decides which one to keep. This sample child goes back to the first plan.'],
     result: ['The town shows the choice', 'The town shows the chosen plan being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right. The child can go back and try another plan before moving on.'],
   };
 
@@ -192,7 +192,7 @@
   D.towns.forEach((t, ti) => {
     slides.push({ kind: 'town', ti });
     t.levels.forEach((v, li) => {
-      const steps = ['job', 'ask', 'offers', ...(v.lens ? ['lenses'] : []), 'compare', ...(v.again ? ['add', 'offers2', 'compare2'] : []), 'choose', ...(v.reasons ? ['reason'] : []), ...(v.hands ? ['hands'] : []), 'result', ...(v.retry ? ['choose2', 'result2'] : []), ...(v.recap ? ['recap'] : [])];
+      const steps = ['job', 'ask', 'offers', ...(v.lens ? ['lenses'] : []), 'compare', ...(v.again ? ['add', 'offers2', 'compare2'] : []), 'choose', ...(v.reasons ? ['reason'] : []), ...(v.hands ? ['hands'] : []), 'result', 'choose2', 'result2', ...(v.recap ? ['recap'] : [])];
       steps.forEach((step, si) => slides.push({ kind: 'step', ti, li, step, si, of: steps.length }));
     });
     slides.push({ kind: 'jobs', ti });
@@ -223,12 +223,13 @@
     if (s.step === 'reason') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div></div><p class="how">${esc(U.reasonHow)}</p><div class="opts">${v.reasons.map((r, i) => `<span class="wb${i === v.reason ? ' on' : ''}" style="border-radius:10px">${esc(r)}</span>`).join('')}</div>`; marks = sol.length; pick = v.pick; }
     const chosen = (full) => `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div>${full ? `<span>${esc(sol[v.pick][1])}</span>` : ''}</div>`;
     if (s.step === 'hands') { p = `${chosen(false)}${say(v.hands)}<span class="btn">${esc(U.done)}</span>`; marks = 1; pick = 0; }
-    if (s.step === 'choose2') { p = `<p><b>${esc(U.tried)} ${ABC[v.pick]}.</b></p><p class="how">${esc(U.chooseAgain)}</p>${cards(t, sol, { labels: v.labels, res, use: true, pick: v.retry.pick })}`; marks = sol.length; pick = v.retry.pick; wide = true; }
-    if (s.step === 'result2') { const k = v.retry.pick; p = `<p class="lab">${esc(U.otherPlan)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[k]}</span>${esc(sol[k][0])}</div><span>${esc(sol[k][1])}</span></div>${say(v.retry.after)}${say(U.whichKeep)}<span class="btn sec">${esc(U.keepThis)}</span><span class="btn">${esc(U.keepFirst)}</span>`; }
+    const rt = v.retry || { pick: (v.pick + 1) % sol.length };
+    if (s.step === 'choose2') { p = `<p><b>${esc(U.tried)} ${ABC[v.pick]}.</b></p><p class="how">${esc(U.chooseAgain)}</p>${cards(t, sol, { labels: v.labels, res, use: true, pick: rt.pick })}`; marks = sol.length; pick = rt.pick; wide = true; }
+    if (s.step === 'result2') { const k = rt.pick; p = `<p class="lab">${esc(U.otherPlan)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[k]}</span>${esc(sol[k][0])}</div><span>${esc(sol[k][1])}</span>${rt.after ? '' : res.map((r) => `<div class="res"><div class="ln">${esc((v.labels && v.labels[r[0]]) || t.lenses.find((l) => l[0] === r[0])[1])} ${rate(r[k + 1][0])}</div>${esc(r[k + 1][1])}</div>`).join('')}</div>${rt.after ? say(rt.after) : ''}${say(U.whichKeep)}<span class="btn sec">${esc(U.keepThis)}</span><span class="btn">${esc(U.keepFirst)}</span>`; }
     if (s.step === 'result') { p = `${chosen(true)}${say(v.after)}${say(U.retry)}<span class="btn sec">${esc(U.tryOther)}</span><span class="btn">${esc(v.recap ? U.onward : s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
     if (s.step === 'recap') { p = `<h2>${esc(U.recapTitle)}</h2>${say(v.recap[0])}<p class="lab">${esc(U.recapAnswer)}</p><div class="cardx on"><span>${esc(v.recap[1])}</span></div><span class="btn">${esc(s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
     const one = ['result', 'hands', 'recap', 'result2'].includes(s.step), cap = (s.step === 'compare' || s.step === 'compare2') && v.watch ? esc(v.watch) : st[1];
-    const mk = one ? `<div class="marks"><span class="mark on">${ABC[s.step === 'result2' ? v.retry.pick : v.pick]}</span></div>` : '';
+    const mk = one ? `<div class="marks"><span class="mark on">${ABC[s.step === 'result2' ? rt.pick : v.pick]}</span></div>` : '';
     const vw = one ? view(cap, 0).replace('<p class="cap">', `${mk}<p class="cap">`) : view(cap, marks, pick);
     const note = s.step === 'job' ? LADDER[s.li] : st[2];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>Level ${s.li + 1} of 6: ${esc(v.name)}</span><span>Screen ${s.si + 1} of ${s.of}: ${st[0]}</span>`, steps: [s.si, s.of], colour: t.colour,
