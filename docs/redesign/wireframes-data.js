@@ -38,7 +38,7 @@ export default {
       talk: 'Which choice was the hardest to make in Eco Town, and what did you give up when you made it?',
       levels: [
         { name: 'Land', job: 'Choose where to build Eco Town. Ask Florence to suggest three places.',
-          s: ['Find land for the town that stays safe when the river rises because it is', [2, 'high above the river', 'far away from the river', 'high up and far away']],
+          s: ['Find land for the town that stays safe when the river rises because it is', [2, 'land higher than the river', 'far away from the river', 'high up and far away']],
           watch: 'Rain falls and the river rises. Water spreads across the low land and pulls at the river bank.',
           hands: 'Now place the town yourself. Drag the town onto the land that you chose.',
           recap: ['What keeps a town safe when the river rises?', 'Building on high land, a long way from the river.'],
