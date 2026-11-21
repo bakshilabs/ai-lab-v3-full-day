@@ -33,7 +33,7 @@ export default {
     { id: 'eco', name: 'Eco Town', colour: '#c8643f',
       intro: 'Welcome to Eco Town. This is a small town with homes, farms and a river. We are going to plan it together so that it is a good place to live.',
       helper: 'Florence is a computer helper. She can suggest ideas, but you must check whether they work.',
-      lenses: [['flood', 'Flood', 'This check shows what happens when the river rises.'], ['walk', 'Walking distance', 'This check shows how far people have to walk.'], ['carbon', 'Clean air', 'This check shows whether the air is clean to breathe.'], ['nature', 'Nature', 'This check shows what happens to plants and animals.'], ['winter', 'Staying warm', 'This check shows whether homes stay warm on a cold day.'], ['fair', 'Sharing', 'This check shows whether everyone gets a share.']],
+      lenses: [['flood', 'Flood', 'This check shows what happens when the river rises.'], ['walk', 'Walking distance', 'This check shows how far people have to walk.'], ['carbon', 'Clean air', 'This check shows if the town will add pollution to the atmosphere.'], ['nature', 'Nature', 'This check shows what happens to plants and animals.'], ['winter', 'Staying warm', 'This check shows whether homes stay warm on a cold day.'], ['fair', 'Sharing', 'This check shows whether everyone gets a share.']],
       jobsLine: 'People do this kind of work every day when they plan real towns.', jobs: ['Town planner', 'Environmental scientist', 'Data analyst'],
       talk: 'Which choice was the hardest to make in Eco Town, and what did you give up when you made it?',
       levels: [
