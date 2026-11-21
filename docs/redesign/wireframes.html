@@ -77,7 +77,9 @@
   /* the panel of proposed changes, beside the whiteboard */
   .boardrow { display: flex; gap: 12px; align-items: stretch; } .boardrow .surface { flex: 1; min-width: 0; }
   .props { flex: none; width: 400px; height: max(420px, calc(100vh - 210px)); overflow: auto; overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-  .props h3 { margin-top: 10px; padding-top: 12px; border-top: 2px solid var(--fg); } .props .pintro, .props .pwhy, .props .pby { color: var(--muted); font-size: 0.92rem; }
+  .props h3 { margin-top: 6px; }
+  .round { border-top: 2px solid var(--fg); padding-top: 10px; } .round > summary { cursor: pointer; font-weight: 700; font-size: 1.05rem; } .round > summary span { display: block; font-weight: 400; font-size: 0.92rem; color: var(--muted); }
+  .round > div { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; } .props .pintro, .props .pwhy, .props .pby { color: var(--muted); font-size: 0.92rem; }
   .prop { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; } .prop.done { border-color: var(--fg); }
   .prop .pl { display: inline-block; min-width: 54px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
   .prop .pa { display: flex; gap: 6px; } .prop .pa button { flex: 1; min-height: 38px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; font-weight: 600; }
@@ -111,16 +113,15 @@
     <button class="nav" id="zout" aria-label="Zoom out">−</button>
     <button class="nav" id="zin" aria-label="Zoom in">+</button>
     <select id="jump" aria-label="Go to a level on the board"></select>
-    <button class="nav on" id="proptog">Hide the proposed changes</button>
+    <button class="nav on" id="proptog">Hide the feedback panel</button>
     <span class="count" id="zlabel"></span>
   </div>
   <p class="help" id="boardhelp" hidden><b>How to use the whiteboard.</b> Scroll in any direction to move around. Press <b>Add a note card</b> to drop a note in the middle of your view, then drag it by its top edge to where it belongs. Every screen also has its own <b>Note</b> button and a <b>Comment</b> button. To ask Claude for a change, write a comment on a screen and send it to Claude.</p>
   <div class="boardrow" id="boardrow" hidden>
     <div class="surface" id="surface" hidden><div id="sizer"><div class="board" id="board"></div></div></div>
     <aside class="props" id="props" data-uncommentable>
-      <h2>Proposed changes to Eco Town</h2>
-      <p>These changes come from Oliver’s feedback. Nothing has been changed yet. For each one, press <b>Yes</b>, <b>No</b> or <b>Other</b>. If you press Other, write what you would like in the box. You can also add a note to a Yes or a No.</p>
-      <p class="pby" id="propcount"></p>
+      <h2>Feedback and decisions</h2>
+      <p>Each set of feedback has its own section below, with the newest at the top. Press a section’s title to open or close it. For each proposed change, press <b>Yes</b>, <b>No</b> or <b>Other</b>. If you press Other, write what you would like in the box. You can also add a note to a Yes or a No. Your answers are kept as a record.</p>
       <div id="proplist" style="display:flex;flex-direction:column;gap:10px"></div>
     </aside>
   </div>
@@ -363,15 +364,21 @@
     }, () => { clearTimeout(slow); status('The note cards could not be loaded.'); });
   })();
   // ---- the panel of proposed changes (answers are kept in the shared database, collection "decisions") ---------
-  const answers = new Map(), allProps = P.flatMap((g) => g.items);
-  $('proplist').innerHTML = P.map((g) => `<h3>${esc(g.title)}</h3>${g.intro ? `<p class="pintro">${esc(g.intro)}</p>` : ''}${g.items.map((it) => `<div class="prop" data-id="${it.id}"><p><b>${esc(it.what)}</b></p>${it.before ? `<p><span class="pl">Before</span> ${esc(it.before)}</p>` : ''}<p><span class="pl">After</span> ${esc(it.after)}</p>${it.why ? `<p class="pwhy">${esc(it.why)}</p>` : ''}${it.screen ? `<p><button class="mini" data-goto="${it.screen}">Show screen ${it.screen} on the board</button></p>` : ''}<div class="pa"><button data-a="yes">Yes</button><button data-a="no">No</button><button data-a="other">Other</button></div><textarea rows="2" maxlength="1000" placeholder="Write a note or your own wording here." aria-label="A note or your own wording"></textarea><p class="pby"></p></div>`).join('')}`).join('');
+  const answers = new Map(), allProps = P.flatMap((r) => r.groups.flatMap((g) => g.items));
+  const propItem = (it) => `<div class="prop" data-id="${it.id}"><p><b>${esc(it.what)}</b></p>${it.before ? `<p><span class="pl">Before</span> ${esc(it.before)}</p>` : ''}<p><span class="pl">After</span> ${esc(it.after)}</p>${it.why ? `<p class="pwhy">${esc(it.why)}</p>` : ''}${it.screen ? `<p><button class="mini" data-goto="${it.screen}">Show screen ${it.screen} on the board</button></p>` : ''}<div class="pa"><button data-a="yes">Yes</button><button data-a="no">No</button><button data-a="other">Other</button></div><textarea rows="2" maxlength="1000" placeholder="Write a note or your own wording here." aria-label="A note or your own wording"></textarea><p class="pby"></p></div>`;
+  const openRounds = () => { try { return JSON.parse(store.get('wf-rounds', 'null')) || {}; } catch (e) { return {}; } };
+  $('proplist').innerHTML = P.map((r, i) => `<details class="round" data-round="${esc(r.id)}"${(openRounds()[r.id] ?? i === 0) ? ' open' : ''}><summary>${esc(r.title)}<span>${esc(r.date)}. <i class="rcount"></i>${r.applied ? ` These changes were made on ${esc(r.applied)}.` : ''}</span></summary><div>${r.intro ? `<p class="pintro">${esc(r.intro)}</p>` : ''}${r.groups.map((g) => `<h3>${esc(g.title)}</h3>${g.intro ? `<p class="pintro">${esc(g.intro)}</p>` : ''}${g.items.map(propItem).join('')}`).join('')}</div></details>`).join('');
+  for (const d of $('proplist').querySelectorAll('.round')) d.addEventListener('toggle', () => { const o = openRounds(); o[d.dataset.round] = d.open; store.set('wf-rounds', JSON.stringify(o)); });
   function paintProp(id) {
     const el = $('proplist').querySelector(`[data-id="${id}"]`); if (!el) return; const a = answers.get(id) || {}, ta = el.querySelector('textarea');
     for (const b of el.querySelectorAll('[data-a]')) { b.classList.toggle('on', a.answer === b.dataset.a); b.setAttribute('aria-pressed', a.answer === b.dataset.a); b.disabled = !canWrite; }
     if (document.activeElement !== ta) ta.value = a.note || ''; ta.readOnly = !canWrite; el.classList.toggle('done', !!a.answer);
     el.querySelector('.pby').textContent = a.answer ? `Answered${people && a.by && people[a.by] && people[a.by].name ? ` by ${people[a.by].name}` : ''}.` : '';
   }
-  function paintProps() { for (const it of allProps) paintProp(it.id); const n = allProps.filter((it) => (answers.get(it.id) || {}).answer).length; $('propcount').textContent = `${n} of ${allProps.length} changes have an answer.`; }
+  function paintProps() {
+    for (const it of allProps) paintProp(it.id);
+    for (const r of P) { const items = r.groups.flatMap((g) => g.items), n = items.filter((it) => (answers.get(it.id) || {}).answer).length, el = $('proplist').querySelector(`[data-round="${r.id}"] .rcount`); if (el) el.textContent = `${n} of ${items.length} changes have an answer.`; }
+  }
   async function saveAns(id, patch) {
     if (!db) return status('Your answers cannot be saved in this view. You may need to sign in.'); if (!canWrite) return status('Your access lets you read the answers but not change them.');
     let by = null; try { by = me ? await me.id() : null; } catch (e) { /* stays unnamed */ }
@@ -384,7 +391,8 @@
     saveAns(id, { answer: cur === b.dataset.a ? null : b.dataset.a }); if (b.dataset.a === 'other' && cur !== 'other') el.querySelector('textarea').focus();
   });
   $('proplist').addEventListener('change', (e) => { if (e.target.tagName !== 'TEXTAREA') return; const id = e.target.closest('.prop').dataset.id; if ((e.target.value || '') !== ((answers.get(id) || {}).note || '')) saveAns(id, { note: e.target.value }); });
-  $('proptog').onclick = () => { const hide = !$('props').hidden; $('props').hidden = hide; $('proptog').classList.toggle('on', !hide); $('proptog').textContent = hide ? 'Show the proposed changes' : 'Hide the proposed changes'; fit(); };
+  $('proptog').onclick = () => { const hide = !$('props').hidden; $('props').hidden = hide; $('proptog').classList.toggle('on', !hide); $('proptog').textContent = hide ? 'Show the feedback panel' : 'Hide the feedback panel'; store.set('wf-props', hide ? 'hidden' : 'shown'); fit(); };
+  if (store.get('wf-props', 'shown') === 'hidden') $('proptog').onclick();
   paintProps();
   function watchAnswers() {
     db.collection('decisions').onSnapshot(async (snap) => {
