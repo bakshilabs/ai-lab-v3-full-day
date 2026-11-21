@@ -216,7 +216,7 @@
   $('prev').onclick = () => show(at - 1); $('next').onclick = () => show(at + 1);
   $('town').onchange = (e) => { if (e.target.value !== '') show(slides.findIndex((s) => s.kind === 'town' && s.ti === +e.target.value)); };
   $('level').onchange = (e) => { if (e.target.value !== '') show(slides.findIndex((s) => s.kind === 'step' && s.ti === slides[at].ti && s.li === +e.target.value)); };
-  addEventListener('keydown', (e) => { if (e.target.tagName === 'SELECT') return; if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(at + 1); } if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(at - 1); } });
+  addEventListener('keydown', (e) => { if (/^(SELECT|TEXTAREA|INPUT)$/.test(e.target.tagName) || e.target.isContentEditable) return; if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(at + 1); } if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(at - 1); } });
   let tx = null; stage.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', (e) => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 70) show(at + (dx < 0 ? 1 : -1)); }, { passive: true });
   // ---- the whiteboard --------------------------------------------------------------------------------------------
@@ -268,6 +268,7 @@
     grip.addEventListener('click', (e) => { const act = e.target.dataset.act, n = notes.get(id); if (!act || !n) return;
       if (act === 'colour') write(id, { colour: ((n.colour || 0) + 1) % 4 });
       if (act === 'del') { if (e.target.dataset.sure) db.collection('notes').doc(id).delete().catch(() => status('The note card could not be deleted.')); else { e.target.dataset.sure = '1'; e.target.textContent = 'Really delete?'; setTimeout(() => { delete e.target.dataset.sure; e.target.textContent = 'Delete'; }, 3000); } } });
+    ta.addEventListener('keydown', (e) => e.stopPropagation());
     let drag = null;
     grip.addEventListener('pointerdown', (e) => { if (e.target.tagName === 'BUTTON' || !canWrite) return; drag = { x: e.clientX, y: e.clientY, l: parseFloat(el.style.left) || 0, t: parseFloat(el.style.top) || 0 }; grip.setPointerCapture(e.pointerId); e.preventDefault(); });
     grip.addEventListener('pointermove', (e) => { if (!drag) return; el.style.left = `${drag.l + (e.clientX - drag.x) / z}px`; el.style.top = `${drag.t + (e.clientY - drag.y) / z}px`; drag.moved = true; });
