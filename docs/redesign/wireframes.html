@@ -138,9 +138,9 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // notes for the reader: what is new at each level
   const LADDER = [
-    'At level 1, Florence starts the sentence, offers two solutions, and gives the child one check.',
-    'At level 2, the child fills two gaps. The two solutions are each better in a different check.',
-    'At level 3, the child builds the whole sentence. Florence offers three solutions, and there are two checks.',
+    'At level 1, Florence starts the sentence, offers two plans, and gives the child one check.',
+    'At level 2, the child fills two gaps. The two plans are each better in a different check.',
+    'At level 3, the child builds the whole sentence. Florence offers three plans, and there are two checks.',
     'At level 4, there are three checks. After comparing, the child adds to the sentence and asks again.',
     'At level 5, the child also chooses which three checks to use.',
     'At level 6, the child chooses the checks and also gives a reason for the choice. The teacher uses that reason in the talk afterwards.',
@@ -148,15 +148,17 @@
   const STEP = {
     job: ['The job', 'The town is shown here, with the place for this job marked.', ''],
     ask: ['The child asks', 'The town stays on the screen while the child builds the sentence.', 'The filled buttons are the ones that this sample child tapped. The sentence at the top changes as each button is tapped.'],
-    offers: ['Florence offers', 'Each solution is drawn on the town and marked with its letter.', 'Florence shows her solutions. All of them would work, and none of them is marked as the right answer.'],
-    lenses: ['The child picks checks', 'Each solution is drawn on the town and marked with its letter.', 'The child picks three checks from the town’s list. The ticked checks are the ones that this sample child picked.'],
-    compare: ['The child compares', 'Tapping a check colours the town to show that result for each solution.', 'Each result has a rating in words, and a short phrase that says what the child would see in the town.'],
+    offers: ['Florence offers', 'Each plan is drawn on the town and marked with its letter.', 'Florence shows her plans. None of them is marked as the right answer, because the child is going to test them.'],
+    lenses: ['The child picks checks', 'Each plan is drawn on the town and marked with its letter.', 'The child picks three checks from the town’s list. The ticked checks are the ones that this sample child picked.'],
+    compare: ['The child tests the plans', 'The town shows each test as it happens, for each plan.', 'The child watches each test happen in the town. The rating in words and the short phrase sit underneath what the child has seen.'],
     add: ['The child adds to the sentence', 'The town stays on the screen while the child adds to the sentence.', 'The child cannot choose yet. The game asks for one more part of the sentence first. The new part has a dashed outline.'],
-    offers2: ['Florence offers again', 'The new solutions are drawn on the town and marked with their letters.', 'The fuller sentence brings three new solutions that fit the job more closely.'],
-    compare2: ['The child compares again', 'Tapping a check colours the town to show that result for each solution.', 'The new results are better overall than the first ones, and there is still a real choice to make.'],
-    choose: ['The child chooses', 'Each solution is drawn on the town and marked with its letter.', 'The child may choose any solution, or go back and change the sentence. The outlined card is the one that this sample child chose.'],
-    reason: ['The child gives a reason', 'The chosen solution stays marked on the town.', 'The chosen reason is saved for the teacher’s talk at the end of the hour.'],
-    result: ['The town shows the choice', 'The town shows the chosen solution being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right.'],
+    offers2: ['Florence offers again', 'The new plans are drawn on the town and marked with their letters.', 'The fuller sentence brings three new plans that fit the job more closely.'],
+    compare2: ['The child tests the new plans', 'The town shows each test as it happens, for each new plan.', 'The new plans are better, but the child should test them again.'],
+    choose: ['The child chooses', 'Each plan is drawn on the town and marked with its letter.', 'The child may choose any plan, or go back and change the sentence. The outlined card is the one that this sample child chose.'],
+    reason: ['The child gives a reason', 'The chosen plan stays marked on the town.', 'The chosen reason is saved for the teacher’s talk at the end of the hour.'],
+    hands: ['The child does it by hand', 'The child drags or taps on the town itself to carry out the plan.', 'This is a short step that the child does by hand. It carries out the plan that the child chose, and it has no wrong answer.'],
+    recap: ['A quick recap', 'The town shows the finished job.', 'The child sees the question first. The answer appears when the child taps the screen. This makes the lesson of the level plain.'],
+    result: ['The town shows the choice', 'The town shows the chosen plan being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right. The child can go back and try another plan before moving on.'],
   };
 
   // ---- words that a reader can change on the page ---------------------------------------------------------------
@@ -188,7 +190,7 @@
   D.towns.forEach((t, ti) => {
     slides.push({ kind: 'town', ti });
     t.levels.forEach((v, li) => {
-      const steps = ['job', 'ask', 'offers', ...(v.lens ? ['lenses'] : []), 'compare', ...(v.again ? ['add', 'offers2', 'compare2'] : []), 'choose', ...(v.reasons ? ['reason'] : []), 'result'];
+      const steps = ['job', 'ask', 'offers', ...(v.lens ? ['lenses'] : []), 'compare', ...(v.again ? ['add', 'offers2', 'compare2'] : []), 'choose', ...(v.reasons ? ['reason'] : []), ...(v.hands ? ['hands'] : []), 'result', ...(v.recap ? ['recap'] : [])];
       steps.forEach((step, si) => slides.push({ kind: 'step', ti, li, step, si, of: steps.length }));
     });
     slides.push({ kind: 'jobs', ti });
@@ -206,20 +208,24 @@
   const view = (cap, n, pick, tag = 'Town view') => `<div class="view"><svg preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true"><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg><span class="tag">${tag}</span><div class="col">${n ? `<div class="marks">${[...Array(n)].map((_, i) => `<span class="mark${pick === i ? ' on' : ''}">${ABC[i]}</span>`).join('')}</div>` : ''}<p class="cap">${cap}</p></div></div>`;
 
   function stepScreen(s) {
-    const t = D.towns[s.ti], v = t.levels[s.li], st = STEP[s.step], sol = v.again && ['offers2', 'compare2', 'choose', 'result'].includes(s.step) ? v.again.sol : v.sol, res = v.again && s.step !== 'compare' ? v.again.res : v.res;
+    const t = D.towns[s.ti], v = t.levels[s.li], st = STEP[s.step], sol = v.again && ['offers2', 'compare2', 'choose', 'hands', 'result', 'recap'].includes(s.step) ? v.again.sol : v.sol, res = v.again && s.step !== 'compare' ? v.again.res : v.res;
     const head = `<p class="lv">${esc(t.name)} · Level ${s.li + 1} of 6 · ${esc(v.name)}</p>`;
     let p = '', marks = 0, pick = -1, wide = false;
     if (s.step === 'job') p = `<h2>${esc(v.name)}</h2>${say(v.job)}<span class="btn">${esc(U.start)}</span>`;
     if (s.step === 'ask') p = `<p class="how">${esc(s.li === 0 ? U.askHowOne : U.askHow)}</p>${sentence(v)}${v.s.filter(Array.isArray).map(buttons).join('')}<span class="btn">${esc(U.ask)}</span>`;
     if (s.step === 'offers' || s.step === 'offers2') { p = `${say(s.step === 'offers' ? U.offers : U.better)}${cards(t, sol)}`; marks = sol.length; }
-    if (s.step === 'lenses') { const used = v.res.map((r) => r[0]); p = `<p class="how">${esc(U.lensHow)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog${used.includes(l[0]) ? ' on' : ''}"><b class="tick">${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.lensesDone)}</span>`; marks = sol.length; wide = true; }
-    if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(U.compareHow)}</p>${cards(t, sol, { res })}`; marks = sol.length; wide = true; }
+    if (s.step === 'lenses') { const used = v.res.map((r) => r[0]); p = `<p class="how">${esc(v.lensHow || U.lensHow)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog${used.includes(l[0]) ? ' on' : ''}"><b class="tick">${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.lensesDone)}</span>`; marks = sol.length; wide = true; }
+    if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(s.step === 'compare2' ? U.compareAgain : v.how || U.compareHow)}</p>${cards(t, sol, { res })}`; marks = sol.length; wide = true; }
     if (s.step === 'add') p = `<p class="how">${esc(U.addHow)}</p>${sentence(v, true)}${buttons(v.again.add)}<span class="btn">${esc(U.ask)}</span>`;
     if (s.step === 'choose') { p = `<p class="how">${esc(U.chooseHow)}</p>${cards(t, sol, { res, use: true, pick: v.pick })}<span class="btn sec">${esc(U.again)}</span>`; marks = sol.length; pick = v.pick; wide = true; }
     if (s.step === 'reason') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div></div><p class="how">${esc(U.reasonHow)}</p><div class="opts">${v.reasons.map((r, i) => `<span class="wb${i === v.reason ? ' on' : ''}" style="border-radius:10px">${esc(r)}</span>`).join('')}</div>`; marks = sol.length; pick = v.pick; }
-    if (s.step === 'result') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div><span>${esc(sol[v.pick][1])}</span></div>${say(v.after)}<span class="btn">${esc(s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
-    const mk = s.step === 'result' ? `<div class="marks"><span class="mark on">${ABC[v.pick]}</span></div>` : '';
-    const vw = s.step === 'result' ? view(st[1], 0).replace('<p class="cap">', `${mk}<p class="cap">`) : view(st[1], marks, pick);
+    const chosen = (full) => `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div>${full ? `<span>${esc(sol[v.pick][1])}</span>` : ''}</div>`;
+    if (s.step === 'hands') { p = `${chosen(false)}${say(v.hands)}<span class="btn">${esc(U.done)}</span>`; marks = 1; pick = 0; }
+    if (s.step === 'result') { p = `${chosen(true)}${say(v.after)}${say(U.retry)}<span class="btn sec">${esc(U.tryOther)}</span><span class="btn">${esc(v.recap ? U.onward : s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
+    if (s.step === 'recap') { p = `<h2>${esc(U.recapTitle)}</h2>${say(v.recap[0])}<p class="lab">${esc(U.recapAnswer)}</p><div class="cardx on"><span>${esc(v.recap[1])}</span></div><span class="btn">${esc(s.li === 5 ? U.finish : U.next)}</span>`; marks = 1; pick = 0; }
+    const one = ['result', 'hands', 'recap'].includes(s.step), cap = (s.step === 'compare' || s.step === 'compare2') && v.watch ? esc(v.watch) : st[1];
+    const mk = one ? `<div class="marks"><span class="mark on">${ABC[v.pick]}</span></div>` : '';
+    const vw = one ? view(cap, 0).replace('<p class="cap">', `${mk}<p class="cap">`) : view(cap, marks, pick);
     const note = s.step === 'job' ? LADDER[s.li] : st[2];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>Level ${s.li + 1} of 6: ${esc(v.name)}</span><span>Screen ${s.si + 1} of ${s.of}: ${st[0]}</span>`, steps: [s.si, s.of], colour: t.colour,
       html: `<div class="screen${wide ? ' wide' : ''}">${vw}<div class="panel">${head}${p}</div></div><p class="note"><b>Note for the reader.</b> ${note}</p>` };
@@ -227,7 +233,7 @@
   function townScreen(s) {
     const t = D.towns[s.ti];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>The town opens</span>`, colour: t.colour,
-      html: `<div class="screen">${view('The whole world is shown here. This week’s town is lit up, and the towns from earlier weeks show what the child chose in them.', 0, -1, 'World map')}<div class="panel"><h2>${esc(t.name)}</h2>${say(t.intro)}<p class="lab">${esc(U.lensesTitle.replace('{n}', ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][t.lenses.length]))}</p><div class="togs">${t.lenses.map((l) => `<div class="tog"><b>${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.enter)}</span></div></div><p class="note"><b>Note for the reader.</b> This is the first screen of week ${s.ti + 1}. The six levels of ${esc(t.name)} follow, and each level is shown one screen at a time.</p>` };
+      html: `<div class="screen">${view('The whole world is shown here. This week’s town is lit up, and the towns from earlier weeks show what the child chose in them.', 0, -1, 'World map')}<div class="panel"><h2>${esc(t.name)}</h2>${t.helper ? `<p>${esc(t.helper)}</p>` : ''}${say(t.intro)}<p class="lab">${esc(U.lensesTitle.replace('{n}', ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][t.lenses.length]))}</p><div class="togs">${t.lenses.map((l) => `<div class="tog"><b>${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.enter)}</span></div></div><p class="note"><b>Note for the reader.</b> This is the first screen of week ${s.ti + 1}. The six levels of ${esc(t.name)} follow, and each level is shown one screen at a time.</p>` };
   }
   function jobsScreen(s) {
     const t = D.towns[s.ti];
@@ -244,9 +250,10 @@
     <p>The <b>Whiteboard</b> button at the top shows every screen on one large board. That is the place to leave note cards and comments.</p>
     <p>I wrote the sample words on these screens myself, as you asked. They show how each level would read. They are not final.</p></div>` });
   const end = () => ({ colour: '#2f7d4f', html: `<div class="cover"><p class="lab">The end of the deck</p><h1>That is all six towns and all 36 levels.</h1>
-    <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered solutions, the child compared their results with checks, and the child chose one.</p>
-    <p>Three questions are still open from the earlier diagram.</p>
-    <ol class="list"><li>Should some levels keep a short part that the child does by hand, such as flying the last few seconds of the route they chose?</li><li>Should a child be allowed to choose a weaker solution and see what happens? These wireframes allow it.</li><li>Should every town start again at the easy first level, as it does in these wireframes, or should later towns start harder?</li></ol></div>` });
+    <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered plans, the child tested them with checks, and the child chose one.</p>
+    <p>In Eco Town, each level now also has a short step that the child does by hand, a chance to go back and try another plan, and a quick recap. The other five towns do not have these yet.</p>
+    <p>Two questions are still open from the earlier diagram.</p>
+    <ol class="list"><li>Should a child be allowed to choose a weaker plan and see what happens? These wireframes allow it.</li><li>Should every town start again at the easy first level, as it does in these wireframes, or should later towns start harder?</li></ol></div>` });
 
   // ---- moving between screens -------------------------------------------------------------------------------------
   const $ = (id) => document.getElementById(id), stage = $('stage');
@@ -365,9 +372,9 @@
   })();
   // ---- the panel of proposed changes (answers are kept in the shared database, collection "decisions") ---------
   const answers = new Map(), allProps = P.flatMap((r) => r.groups.flatMap((g) => g.items));
-  const propItem = (it) => `<div class="prop" data-id="${it.id}"><p><b>${esc(it.what)}</b></p>${it.before ? `<p><span class="pl">Before</span> ${esc(it.before)}</p>` : ''}<p><span class="pl">After</span> ${esc(it.after)}</p>${it.why ? `<p class="pwhy">${esc(it.why)}</p>` : ''}${it.screen ? `<p><button class="mini" data-goto="${it.screen}">Show screen ${it.screen} on the board</button></p>` : ''}<div class="pa"><button data-a="yes">Yes</button><button data-a="no">No</button><button data-a="other">Other</button></div><textarea rows="2" maxlength="1000" placeholder="Write a note or your own wording here." aria-label="A note or your own wording"></textarea><p class="pby"></p></div>`;
+  const propItem = (it, r) => `<div class="prop" data-id="${it.id}"><p><b>${esc(it.what)}</b></p>${it.before ? `<p><span class="pl">Before</span> ${esc(it.before)}</p>` : ''}<p><span class="pl">After</span> ${esc(it.after)}</p>${it.why ? `<p class="pwhy">${esc(it.why)}</p>` : ''}${it.screen && !r.applied ? `<p><button class="mini" data-goto="${it.screen}">Show screen ${it.screen} on the board</button></p>` : ''}<div class="pa"><button data-a="yes">Yes</button><button data-a="no">No</button><button data-a="other">Other</button></div><textarea rows="2" maxlength="1000" placeholder="Write a note or your own wording here." aria-label="A note or your own wording"></textarea><p class="pby"></p></div>`;
   const openRounds = () => { try { return JSON.parse(store.get('wf-rounds', 'null')) || {}; } catch (e) { return {}; } };
-  $('proplist').innerHTML = P.map((r, i) => `<details class="round" data-round="${esc(r.id)}"${(openRounds()[r.id] ?? i === 0) ? ' open' : ''}><summary>${esc(r.title)}<span>${esc(r.date)}. <i class="rcount"></i>${r.applied ? ` These changes were made on ${esc(r.applied)}.` : ''}</span></summary><div>${r.intro ? `<p class="pintro">${esc(r.intro)}</p>` : ''}${r.groups.map((g) => `<h3>${esc(g.title)}</h3>${g.intro ? `<p class="pintro">${esc(g.intro)}</p>` : ''}${g.items.map(propItem).join('')}`).join('')}</div></details>`).join('');
+  $('proplist').innerHTML = P.map((r, i) => `<details class="round" data-round="${esc(r.id)}"${(openRounds()[r.id] ?? i === 0) ? ' open' : ''}><summary>${esc(r.title)}<span>${esc(r.date)}. <i class="rcount"></i>${r.applied ? ` These changes were made on ${esc(r.applied)}.` : ''}</span></summary><div>${r.intro ? `<p class="pintro">${esc(r.intro)}</p>` : ''}${r.groups.map((g) => `<h3>${esc(g.title)}</h3>${g.intro ? `<p class="pintro">${esc(g.intro)}</p>` : ''}${g.items.map((it) => propItem(it, r)).join('')}`).join('')}</div></details>`).join('');
   for (const d of $('proplist').querySelectorAll('.round')) d.addEventListener('toggle', () => { const o = openRounds(); o[d.dataset.round] = d.open; store.set('wf-rounds', JSON.stringify(o)); });
   function paintProp(id) {
     const el = $('proplist').querySelector(`[data-id="${id}"]`); if (!el) return; const a = answers.get(id) || {}, ta = el.querySelector('textarea');

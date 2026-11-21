@@ -5,8 +5,8 @@
 // A round can have  applied: 'a date'  once its answers have been carried out; the panel then shows it as finished.
 // screen is the number of the screen on the whiteboard that the item belongs to, where there is one.
 export default [
-  { id: '2026-11-21-oliver', title: 'Oliver’s feedback on Eco Town', date: '21 November 2026',
-    intro: 'These changes come from Oliver’s feedback on the Eco Town screens. Nothing has been changed yet.',
+  { id: '2026-11-21-oliver', title: 'Oliver’s feedback on Eco Town', date: '21 November 2026', applied: '21 November 2026',
+    intro: 'These changes come from Oliver’s feedback on the Eco Town screens. The answers below have been carried out. Where the answer was Other, the note was followed. The screen numbers in this section are the numbers from before the changes, because new screens have since been added.',
     groups: [
       { title: 'Four decisions to make first',
         intro: 'These four points from Oliver touch things that you have already decided, so they need your answer before anything else.',
