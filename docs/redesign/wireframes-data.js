@@ -37,7 +37,7 @@ export default {
       intro: 'Welcome to Eco Town. This is a small town with homes, farms and a river. We are going to plan it together so that it is a good place to live.',
       helper: 'Florence is a computer helper. She can suggest ideas, but you must check whether they work.',
       lenses: [['flood', 'Flood', 'This check shows what happens when the river rises.'], ['walk', 'Promote walking', 'This check shows whether people can easily walk to the places they need.'], ['carbon', 'Clean air', 'This check shows if the town will add pollution to the atmosphere.'], ['nature', 'Nature', 'This check shows what happens to plants and animals.'], ['winter', 'Staying warm', 'This check shows whether homes stay warm on a cold day.'], ['fair', 'Sharing', 'This check shows whether everyone gets a share.']],
-      jobsLine: 'People do this kind of work every day when they plan real towns.', jobs: ['Town planner', 'Environmental scientist', 'Data analyst'],
+      jobsLine: 'People do this kind of work every day when they plan real towns.', jobs: ['A town planner decides where homes, streets and parks should go.', 'An architect designs homes and schools.', 'An engineer designs roads, bridges and power lines.'],
       talk: 'Which choice was the hardest to make in Eco Town, and what did you give up when you made it?',
       levels: [
         { name: 'Land', job: 'Choose where to build Eco Town. Ask Florence to suggest three places for the town. Then test her plans, so that you can make a good decision.',
@@ -103,7 +103,7 @@ export default {
     { id: 'drone', name: 'Drone City', colour: '#3f78b5',
       intro: 'Welcome to Drone City. The towers here are tall and the sky is busy. We are going to plan flights that help all six towns.',
       lenses: [['safety', 'Safety', 'This check shows whether people on the ground are kept safe.'], ['battery', 'Battery', 'This check shows how much power the drone has left.'], ['wind', 'Wind', 'This check shows how the drone copes when the wind blows.'], ['coverage', 'Coverage', 'This check shows how much of the ground the drone has seen.']],
-      jobsLine: 'People plan flights like these every day in real jobs.', jobs: ['Drone pilot', 'Survey and mapping technician', 'Infrastructure inspector', 'Search and rescue drone operator'],
+      jobsLine: 'People plan flights like these every day in real jobs.', jobs: ['A drone pilot flies drones safely.', 'A map maker uses photographs from the air to draw maps.', 'A bridge inspector checks bridges and towers for damage.', 'A rescue worker searches for people who are lost.'],
       talk: 'When two flight plans were both good, how did you decide which check mattered most?',
       levels: [
         { name: 'Ground school', job: 'Before any drone flies, the pilot checks the weather and the map. Ask Florence to suggest plans for today’s flight. Then test her plans, so that you can make a good decision.',
@@ -159,7 +159,7 @@ export default {
     { id: 'robot', name: 'Robot Farm', colour: '#6f9a3a',
       intro: 'Welcome to Robot Farm. Robots work in the fields, the greenhouse and the barns here. We are going to decide how they should do their jobs.',
       lenses: [['accuracy', 'Accuracy', 'This check shows how often the robot gets the job right.'], ['people', 'Near people', 'This check shows how safe the robot is when people are close.'], ['speed', 'Speed', 'This check shows how long the job takes.'], ['damage', 'Damage', 'This check shows what gets spoiled if the robot slips up once.']],
-      jobsLine: 'People design and look after robots like these in real jobs.', jobs: ['Robotics engineer', 'Robot technician', 'Agricultural engineer', 'Test engineer'],
+      jobsLine: 'People design and look after robots like these in real jobs.', jobs: ['A robot engineer designs and builds robots.', 'A robot mechanic keeps robots working and mends them.', 'A farmer grows food, sometimes with the help of machines.', 'A tester checks that a machine does its job properly.'],
       talk: 'When is it better for a robot to be slow and careful, and when is it better for it to be quick?',
       levels: [
         { name: 'How a robot works', job: 'A robot has to pick only the ripe tomatoes in the greenhouse. Ask Florence to suggest plans for the sensor that the robot could use. Then test her plans, so that you can make a good decision.',
@@ -215,7 +215,7 @@ export default {
     { id: 'roads', name: 'Crossways', colour: '#8d6f9c',
       intro: 'Welcome to Crossways. Roads from every town meet here, and the cars drive themselves. We are going to decide how they should behave.',
       lenses: [['safety', 'Safety', 'This check shows whether everyone on the street is kept safe.'], ['waiting', 'Waiting time', 'This check shows how long people have to wait.'], ['fair', 'Sharing', 'This check shows whether everyone gets a share of the street.'], ['weather', 'Weather', 'This check shows what happens in rain, fog and darkness.']],
-      jobsLine: 'People make decisions like these in real jobs.', jobs: ['Autonomous vehicle engineer', 'Transport planner', 'Safety test driver', 'Traffic data analyst'],
+      jobsLine: 'People make decisions like these in real jobs.', jobs: ['A car engineer designs cars and the parts that help them see.', 'A transport planner decides how streets, buses and crossings should work.', 'A test driver tries out new cars to check that they are safe.', 'A road safety officer looks for ways to make streets safer.'],
       talk: 'Who uses a street, and whose needs were the easiest to forget when you chose?',
       levels: [
         { name: 'How the car sees', job: 'The self-driving car has to see the street in fog. Ask Florence to suggest plans for the sensors that the car could have. Then test her plans, so that you can make a good decision.',
@@ -271,7 +271,7 @@ export default {
     { id: 'film', name: 'Studio Bay', colour: '#d0558a',
       intro: 'Welcome to Studio Bay. This is where the towns make their films. We are going to make films that people enjoy and can trust.',
       lenses: [['story', 'Story', 'This check shows whether the film tells a clear story.'], ['feeling', 'Feeling', 'This check shows how the film makes people feel.'], ['follow', 'Easy to follow', 'This check shows whether people can keep up with the film.'], ['honest', 'Honesty', 'This check shows whether the film is truthful with the people watching.']],
-      jobsLine: 'People make choices like these in real jobs.', jobs: ['Director', 'Video editor', 'Content producer', 'Accessibility producer'],
+      jobsLine: 'People make choices like these in real jobs.', jobs: ['A director decides how a film tells its story.', 'A film editor chooses which shots to keep and puts them in order.', 'A camera operator films the shots.', 'A caption writer adds words to a film for people who cannot hear it.'],
       talk: 'Is it ever fair to show something in a film that did not really happen, and what should the audience be told?',
       levels: [
         { name: 'Crew language', job: 'The film opens with a child finding a lost puppy. Ask Florence to suggest plans for the camera shot. Then test her plans, so that you can make a good decision.',
@@ -327,7 +327,7 @@ export default {
     { id: 'power', name: 'Power Ridge', colour: '#c79a2e',
       intro: 'Welcome to Power Ridge. The turbines, the dam and the control room up here send power to all six towns. We are going to keep the lights on.',
       lenses: [['lights', 'Lights on', 'This check shows whether every town has enough power.'], ['clean', 'Clean power', 'This check shows how much of the power comes from wind, sun and water.'], ['needs', 'People’s needs', 'This check shows whether people get power when they need it most.'], ['risk', 'Risk', 'This check shows what could go badly if something breaks.']],
-      jobsLine: 'People keep the lights on like this in real jobs.', jobs: ['Grid control engineer', 'Energy analyst', 'Renewable energy technician', 'Emergency planner'],
+      jobsLine: 'People keep the lights on like this in real jobs.', jobs: ['A power engineer keeps electricity flowing to homes.', 'A wind turbine technician looks after wind turbines.', 'A solar panel fitter puts solar panels on roofs.', 'An emergency planner decides what to do when something breaks.'],
       talk: 'When there is not enough power for everyone at once, how should a town decide who gets it first?',
       levels: [
         { name: 'Balance', job: 'It is early morning and the towns are waking up. Kettles and lights are switching on. Ask Florence to suggest plans for supplying enough power. Then test her plans, so that you can make a good decision.',
