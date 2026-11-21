@@ -8,6 +8,7 @@
 //           res  results: [lens id, [rating, words] for each plan]. Ratings: g good, f fair, p poor.
 //           again (level 4)  add: one more gap; then new solutions and results.
 //           helper (town)  a line that explains Florence.  watch  what the town shows during the tests.  how, lensHow  instructions for this level only.
+//           labels  a different name for a check in this level only, by check id.
 //           scene  one line shown above the word buttons, so the child knows what the choices are for.
 //           hands  the short step that the child does by hand.  recap  [question, answer] shown after the result.
 //           lens (levels 5 and 6)  the child picks the lenses, so the screen offers the whole town list.
@@ -58,6 +59,7 @@ export default {
           pick: 2, after: 'The paths through the park are built. Everyone has a short walk to the shops and the park stays, and cars have to drive the long way round.' },
         { name: 'Homes', job: 'Forty families are moving to Eco Town. Ask Florence how to build their homes.',
           scene: 'Eco Town has cold winters, so its homes need to hold their heat.',
+          labels: { carbon: 'Pollution from making the materials' },
           s: ['Build homes', [1, 'on the shady side of the hill', 'on the sunny side of the hill', 'on top of the windy hill'], 'with', [2, 'windows facing the wind', 'windows facing the shade', 'windows facing the sun'], 'so that they stay warm, use little energy and last a long time'],
           sol: [['Timber homes', 'The homes have wooden frames and thick wool in the walls.'], ['Brick homes', 'The homes are built from fired clay bricks.'], ['Concrete homes', 'The homes are made from concrete.']],
           watch: 'The pollution from making each kind of home is shown. Then a cold night falls, and some homes stay warmer than others.',
