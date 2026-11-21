@@ -177,7 +177,7 @@
   function townScreen(s) {
     const t = D.towns[s.ti];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>The town opens</span>`, colour: t.colour,
-      html: `<div class="screen">${view('The whole world is shown here. This week’s town is lit up, and the towns from earlier weeks show what the child chose in them.', 0, -1, 'World map')}<div class="panel"><h2>${esc(t.name)}</h2>${say(t.intro)}<p class="lab">${esc(U.lensesTitle)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog"><b>${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.enter)}</span></div></div><p class="note"><b>Note for the reader.</b> This is the first screen of week ${s.ti + 1}. The six levels of ${esc(t.name)} follow, and each level is shown one screen at a time.</p>` };
+      html: `<div class="screen">${view('The whole world is shown here. This week’s town is lit up, and the towns from earlier weeks show what the child chose in them.', 0, -1, 'World map')}<div class="panel"><h2>${esc(t.name)}</h2>${say(t.intro)}<p class="lab">${esc(U.lensesTitle.replace('{n}', ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][t.lenses.length]))}</p><div class="togs">${t.lenses.map((l) => `<div class="tog"><b>${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.enter)}</span></div></div><p class="note"><b>Note for the reader.</b> This is the first screen of week ${s.ti + 1}. The six levels of ${esc(t.name)} follow, and each level is shown one screen at a time.</p>` };
   }
   function jobsScreen(s) {
     const t = D.towns[s.ti];

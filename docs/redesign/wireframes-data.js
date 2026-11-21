@@ -21,7 +21,7 @@ export default {
     addHow: 'Add one more part to your sentence, and then ask Florence again.',
     better: 'You told me more, so I could fit the job more closely. Here are three new solutions.',
     reasonHow: 'Choose the reason that is closest to your own.',
-    good: 'Good', fair: 'Fair', poor: 'Poor', yourSentence: 'Your sentence', yourChoice: 'Your choice', lensesTitle: 'The checks in this town',
+    good: 'Good', fair: 'Fair', poor: 'Poor', yourSentence: 'Your sentence', yourChoice: 'Your choice', lensesTitle: 'Check this town for {n} things',
     jobsTitle: 'Real jobs that use these skills', talkTitle: 'Talk about it together', breakLine: 'It is time for a break. The next town opens next week.', lastLine: 'It is time for a break. You have finished all six towns.',
   },
   towns: [
