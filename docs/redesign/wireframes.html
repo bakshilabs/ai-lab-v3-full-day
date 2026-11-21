@@ -53,6 +53,10 @@
   .togs { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .tog { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 0.93rem; } .tog b { display: block; }
   .list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
   .note { border-left: 4px solid var(--line); padding: 2px 0 2px 12px; color: var(--muted); max-width: 90ch; } .note b { color: var(--fg); }
+  .fl { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px 4px; } .fl .ar { align-self: center; color: var(--muted); font-size: 1.3rem; padding: 0 2px; }
+  .fb { flex: 1 1 150px; max-width: 230px; border: 1.5px solid var(--fg); border-radius: 10px; padding: 10px 12px; background: var(--panel); font-size: 0.95rem; } .fb b { display: block; margin-bottom: 4px; }
+  .fb.kid { background: color-mix(in srgb, var(--c) 16%, var(--panel)); border-color: var(--c); } .fb.town { background: var(--soft); } .fb.side { border-style: dashed; }
+  .fb .btn { display: inline-block; font-size: 0.85rem; padding: 4px 10px; margin-top: 6px; line-height: 1.25; } .flkey { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.9rem; color: var(--muted); } .flkey i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--fg); vertical-align: -2px; margin-right: 6px; }
   .cover { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(18px, 4vw, 40px); display: flex; flex-direction: column; gap: 14px; } .cover p, .cover li { max-width: 72ch; }
   .key { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } .key div { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
   @media (max-width: 760px) { .deck .screen, .deck .screen.wide { grid-template-columns: minmax(0, 1fr); } .deck .view { border-right: 0; border-bottom: 2px solid var(--fg); min-height: 150px; } .count { margin-left: 0; width: 100%; } }
@@ -191,7 +195,7 @@
   }
 
   // ---- the list of screens ----------------------------------------------------------------------------------------
-  const slides = [{ kind: 'cover' }];
+  const slides = [{ kind: 'cover' }, { kind: 'flow', ti: 0 }];
   D.towns.forEach((t, ti) => {
     slides.push({ kind: 'town', ti });
     t.levels.forEach((v, li) => {
@@ -241,6 +245,19 @@
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>Level ${s.li + 1} of 6: ${esc(v.name)}</span><span>Screen ${s.si + 1} of ${s.of}: ${st[0]}</span>`, steps: [s.si, s.of], colour: t.colour,
       html: `<div class="screen${wide ? ' wide' : ''}">${vw}<div class="panel">${head}${p}</div></div><p class="note"><b>Note for the reader.</b> ${note}</p>` };
   }
+  function flowScreen() {
+    const t = D.towns[0], F = U.flow, ar = '<span class="ar" aria-hidden="true">→</span>';
+    const box = (cls, n, head, text, extra = '') => `<div class="fb ${cls}"><b>${n ? `${n}. ` : ''}${esc(head)}</b>${esc(text)}${extra}</div>`;
+    const hour = [box('town', '', F.open[0], F.open[1]), ...t.levels.map((v, i) => box('', '', `Level ${i + 1}: ${v.name}`, F.testIs, `<span class="btn">${esc(v.test || '')}</span>`)), box('town', '', F.close[0], F.close[1])].join(ar);
+    const kinds = ['', 'kid', '', 'kid', 'kid', 'town', 'kid'];
+    const level = F.steps.map((x, i) => box(kinds[i], i + 1, x[0], x[1])).join(ar);
+    const side = F.other.map((x, i) => box(`side ${i === 2 ? '' : 'kid'}`, '', x[0], x[1])).join(ar);
+    return { crumbs: `<b>Week 1: ${esc(t.name)}</b><span>${esc(F.crumb)}</span>`, colour: t.colour,
+      html: `<div class="cover"><p class="lab">${esc(F.lab)}</p><h1>${esc(F.title)}</h1><p>${esc(F.intro)}</p>
+      <h3>${esc(F.hourTitle)}</h3><div class="fl">${hour}</div>
+      <h3>${esc(F.levelTitle)}</h3><div class="flkey"><span><i style="background:color-mix(in srgb, var(--c) 16%, var(--panel));border-color:var(--c)"></i>${esc(F.keyKid)}</span><span><i style="background:var(--panel)"></i>${esc(F.keyF)}</span><span><i style="background:var(--soft)"></i>${esc(F.keyTown)}</span></div><div class="fl">${level}</div>
+      <h3>${esc(F.otherTitle)}</h3><p>${esc(F.otherIntro)}</p><div class="fl">${side}</div><p>${esc(F.askAgain)}</p></div>` };
+  }
   function townScreen(s) {
     const t = D.towns[s.ti];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>The town opens</span>`, colour: t.colour,
@@ -272,7 +289,7 @@
   $('town').innerHTML = `<option value="">Go to a town</option>${D.towns.map((t, i) => `<option value="${i}">Week ${i + 1}: ${esc(t.name)}</option>`).join('')}`;
   function show(n, push = true) {
     at = Math.max(0, Math.min(slides.length - 1, n)); const s = slides[at];
-    const r = s.kind === 'cover' ? cover() : s.kind === 'end' ? end() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s);
+    const r = s.kind === 'cover' ? cover() : s.kind === 'end' ? end() : s.kind === 'flow' ? flowScreen() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s);
     document.documentElement.style.setProperty('--c', r.colour);
     stage.innerHTML = `${r.crumbs ? `<div class="crumbs">${r.crumbs}</div>` : ''}${r.steps ? `<div class="steps" style="margin:8px 0">${[...Array(r.steps[1])].map((_, i) => `<i class="${i <= r.steps[0] ? 'on' : ''}"></i>`).join('')}</div>` : '<div style="height:8px"></div>'}${r.html}`;
     mark(stage, s);
@@ -292,11 +309,11 @@
   const board = $('board'), surface = $('surface'), sizer = $('sizer');
   const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage may be blocked */ } } };
   let z = Math.min(1, Math.max(0.2, parseFloat(store.get('wf-zoom', innerWidth < 760 ? '0.3' : '0.5')) || 0.5)), built = false;
-  const whereOf = (n) => { const s = slides[n]; if (!s) return 'The board'; const t = D.towns[s.ti]; return s.kind === 'town' ? `Week ${s.ti + 1}, ${t.name}: the town opens` : s.kind === 'jobs' ? `Week ${s.ti + 1}, ${t.name}: the end of the hour` : `Week ${s.ti + 1}, ${t.name}, level ${s.li + 1} (${t.levels[s.li].name}), screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`; };
+  const whereOf = (n) => { const s = slides[n]; if (!s) return 'The board'; const t = D.towns[s.ti]; return s.kind === 'flow' ? `Week 1, ${t.name}: the flow chart` : s.kind === 'town' ? `Week ${s.ti + 1}, ${t.name}: the town opens` : s.kind === 'jobs' ? `Week ${s.ti + 1}, ${t.name}: the end of the hour` : `Week ${s.ti + 1}, ${t.name}, level ${s.li + 1} (${t.levels[s.li].name}), screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`; };
   function buildBoard() {
     if (built) return; built = true;
-    const card = (n, title) => { const s = slides[n], r = s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); return `<section class="cardw" id="s${n + 1}" data-n="${n}" data-comment-target style="--c:${r.colour}"><header><span>${title}</span><button class="mini" data-note="${n}">Note</button><button class="mini" data-comment="${n}" hidden>Comment</button><button class="mini" data-open="${n}">Open</button></header>${r.html}</section>`; };
-    let h = '';
+    const card = (n, title) => { const s = slides[n], r = s.kind === 'flow' ? flowScreen() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); return `<section class="cardw" id="s${n + 1}" data-n="${n}" data-comment-target style="--c:${r.colour}"><header><span>${title}</span><button class="mini" data-note="${n}">Note</button><button class="mini" data-comment="${n}" hidden>Comment</button><button class="mini" data-open="${n}">Open</button></header>${r.html}</section>`; };
+    let h = `<div class="townrow" style="--c:${D.towns[0].colour}">${esc(U.flow.title)}</div><div class="lane" style="--c:${D.towns[0].colour}"><div class="lanehead">Flow chart<span>${esc(U.flow.crumb)}</span></div>${card(1, U.flow.crumb)}</div>`;
     D.towns.forEach((t, ti) => {
       const first = slides.findIndex((s) => s.kind === 'town' && s.ti === ti), last = slides.findIndex((s) => s.kind === 'jobs' && s.ti === ti);
       h += `<div class="townrow" style="--c:${t.colour}">Week ${ti + 1}: ${esc(t.name)}</div><div class="lane" style="--c:${t.colour}"><div class="lanehead">Start and end<span>The first and last screens of the hour</span></div>${card(first, 'The town opens')}${card(last, 'The end of the hour')}</div>`;
@@ -424,7 +441,7 @@
   const editingNow = () => { const a = document.activeElement; return !!(a && a.classList && a.classList.contains('ed') && a.isContentEditable); };
   function refresh() { // draw every screen again from the current words
     if (editingNow()) { stale = true; return; } stale = false; reindex(); show(at, false);
-    if (built) for (const c of board.querySelectorAll('.cardw')) { const s = slides[+c.dataset.n], r = s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); while (c.lastChild && c.lastChild !== c.firstElementChild) c.lastChild.remove(); c.insertAdjacentHTML('beforeend', r.html); mark(c, s); }
+    if (built) for (const c of board.querySelectorAll('.cardw')) { const s = slides[+c.dataset.n], r = s.kind === 'flow' ? flowScreen() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); while (c.lastChild && c.lastChild !== c.firstElementChild) c.lastChild.remove(); c.insertAdjacentHTML('beforeend', r.html); mark(c, s); }
   }
   const setEditing = (on) => { document.documentElement.classList.toggle('editing', on); $('edit').textContent = on ? 'Finish editing' : 'Edit the words'; $('edit').classList.toggle('on', on); $('edithelp').hidden = !on; if (on && !db) status('You can try the editing here, but your changes cannot be saved in this view.'); else if (on && !canWrite) status('Your access lets you read this page but not change its words.'); };
   $('edit').onclick = () => setEditing(!document.documentElement.classList.contains('editing'));
