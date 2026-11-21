@@ -112,22 +112,22 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // notes for the reader: what is new at each level
   const LADDER = [
-    'At level 1, Florence starts the sentence, offers two solutions, and gives the child one lens.',
-    'At level 2, the child fills two gaps. The two solutions are each better under a different lens.',
-    'At level 3, the child builds the whole sentence. Florence offers three solutions, and there are two lenses.',
-    'At level 4, there are three lenses. After comparing, the child adds to the sentence and asks again.',
-    'At level 5, the child also chooses which three lenses to use.',
-    'At level 6, the child chooses the lenses and also gives a reason for the choice. The teacher uses that reason in the talk afterwards.',
+    'At level 1, Florence starts the sentence, offers two solutions, and gives the child one check.',
+    'At level 2, the child fills two gaps. The two solutions are each better in a different check.',
+    'At level 3, the child builds the whole sentence. Florence offers three solutions, and there are two checks.',
+    'At level 4, there are three checks. After comparing, the child adds to the sentence and asks again.',
+    'At level 5, the child also chooses which three checks to use.',
+    'At level 6, the child chooses the checks and also gives a reason for the choice. The teacher uses that reason in the talk afterwards.',
   ];
   const STEP = {
     job: ['The job', 'The town is shown here, with the place for this job marked.', ''],
     ask: ['The child asks', 'The town stays on the screen while the child builds the sentence.', 'The filled buttons are the ones that this sample child tapped. The sentence at the top changes as each button is tapped.'],
     offers: ['Florence offers', 'Each solution is drawn on the town and marked with its letter.', 'Florence shows her solutions. All of them would work, and none of them is marked as the right answer.'],
-    lenses: ['The child picks lenses', 'Each solution is drawn on the town and marked with its letter.', 'The child picks three lenses from the town’s list. The ticked lenses are the ones that this sample child picked.'],
-    compare: ['The child compares', 'Tapping a lens colours the town to show that result for each solution.', 'Each result has a rating in words, and a short phrase that says what the child would see in the town.'],
+    lenses: ['The child picks checks', 'Each solution is drawn on the town and marked with its letter.', 'The child picks three checks from the town’s list. The ticked checks are the ones that this sample child picked.'],
+    compare: ['The child compares', 'Tapping a check colours the town to show that result for each solution.', 'Each result has a rating in words, and a short phrase that says what the child would see in the town.'],
     add: ['The child adds to the sentence', 'The town stays on the screen while the child adds to the sentence.', 'The child cannot choose yet. The game asks for one more part of the sentence first. The new part has a dashed outline.'],
     offers2: ['Florence offers again', 'The new solutions are drawn on the town and marked with their letters.', 'The fuller sentence brings three new solutions that fit the job more closely.'],
-    compare2: ['The child compares again', 'Tapping a lens colours the town to show that result for each solution.', 'The new results are better overall than the first ones, and there is still a real choice to make.'],
+    compare2: ['The child compares again', 'Tapping a check colours the town to show that result for each solution.', 'The new results are better overall than the first ones, and there is still a real choice to make.'],
     choose: ['The child chooses', 'Each solution is drawn on the town and marked with its letter.', 'The child may choose any solution, or go back and change the sentence. The outlined card is the one that this sample child chose.'],
     reason: ['The child gives a reason', 'The chosen solution stays marked on the town.', 'The chosen reason is saved for the teacher’s talk at the end of the hour.'],
     result: ['The town shows the choice', 'The town shows the chosen solution being built or carried out.', 'Florence says what the choice did well and what it gave up. She does not say whether the child was right.'],
@@ -194,7 +194,7 @@
     <p>The <b>Whiteboard</b> button at the top shows every screen on one large board. That is the place to leave note cards and comments.</p>
     <p>I wrote the sample words on these screens myself, as you asked. They show how each level would read. They are not final.</p></div>` });
   const end = () => ({ colour: '#2f7d4f', html: `<div class="cover"><p class="lab">The end of the deck</p><h1>That is all six towns and all 36 levels.</h1>
-    <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered solutions, the child compared their results through lenses, and the child chose one.</p>
+    <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered solutions, the child compared their results with checks, and the child chose one.</p>
     <p>Three questions are still open from the earlier diagram.</p>
     <ol class="list"><li>Should some levels keep a short part that the child does by hand, such as flying the last few seconds of the route they chose?</li><li>Should a child be allowed to choose a weaker solution and see what happens? These wireframes allow it.</li><li>Should every town start again at the easy first level, as it does in these wireframes, or should later towns start harder?</li></ol></div>` });
 
