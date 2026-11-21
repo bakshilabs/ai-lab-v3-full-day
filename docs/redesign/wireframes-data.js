@@ -94,7 +94,7 @@ export default {
           how: 'Watch children walk to each school and see what happens when the river rises.',
           watch: 'Children from the centre and from the farms walk to each school. Then the river rises.',
           hands: 'Now inspect your town yourself. Tap the land, the streets, the homes, the farms, the power and the school to look at each one.',
-          recap: ['Who decides what matters most in the town?', 'The people in the town. Florence can help compare the choices.', 'Florence decides, and the people in the town follow her.', 'Whoever lives closest to the river.'],
+          recap: ['What makes a good place for a school?', 'Every child can walk there, and it stays dry when the river rises.', 'It is as far from the homes as it can be.', 'It is on the lowest land, beside the river.'],
           sol: [['In the town centre', 'The school stands in the middle of town, next to the shops.'], ['Beside the park', 'The school stands at the edge of town, with the park next door.'], ['Between town and farms', 'The school stands halfway between the centre and the farm houses.']],
           res: [['fair', ['p', 'Farm children get the longest walk'], ['f', 'Some families are far away'], ['g', 'Every family has a similar walk']], ['walk', ['g', 'Most children walk five minutes'], ['f', 'A medium walk for most children'], ['g', 'Every child can walk there']], ['flood', ['f', 'Low streets can get wet'], ['g', 'Higher ground stays dry'], ['g', 'Built above the stream']]],
           reasons: ['I chose it because every family has a similar walk to school.', 'I chose it because it stays dry when it rains hard.', 'I chose it because most children can walk there quickly.'], reason: 0,
