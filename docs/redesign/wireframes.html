@@ -8,7 +8,7 @@
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #151915; --panel: #1d231d; --fg: #e7ece3; --muted: #a3ae9d; --line: #3a4438; --soft: #262e25; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; } }
   :root[data-theme="dark"] { --bg: #151915; --panel: #1d231d; --fg: #e7ece3; --muted: #a3ae9d; --line: #3a4438; --soft: #262e25; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; } [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
   .wrap { max-width: 1180px; margin: 0 auto; padding-block: 14px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 12px; }
   h1, h2, h3, p { margin: 0; } h1 { font-size: clamp(1.5rem, 3.6vw, 2.2rem); line-height: 1.15; } h2 { font-size: 1.15rem; line-height: 1.25; } h3 { font-size: 1rem; }
@@ -55,18 +55,50 @@
   .note { border-left: 4px solid var(--line); padding: 2px 0 2px 12px; color: var(--muted); max-width: 90ch; } .note b { color: var(--fg); }
   .cover { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(18px, 4vw, 40px); display: flex; flex-direction: column; gap: 14px; } .cover p, .cover li { max-width: 72ch; }
   .key { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } .key div { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
-  @media (max-width: 760px) { .screen, .screen.wide { grid-template-columns: minmax(0, 1fr); } .view { border-right: 0; border-bottom: 2px solid var(--fg); min-height: 150px; } .count { margin-left: 0; width: 100%; } }
+  @media (max-width: 760px) { .deck .screen, .deck .screen.wide { grid-template-columns: minmax(0, 1fr); } .deck .view { border-right: 0; border-bottom: 2px solid var(--fg); min-height: 150px; } .count { margin-left: 0; width: 100%; } }
+  /* the whiteboard: every screen laid out on one big surface, with note cards on top */
+  .nav.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .help { color: var(--muted); max-width: 100ch; } .help b { color: var(--fg); }
+  .surface { overflow: auto; height: max(420px, calc(100vh - 210px)); border: 1px solid var(--line); border-radius: 12px; background-color: var(--soft); background-image: radial-gradient(var(--line) 1.2px, transparent 1.2px); background-size: 22px 22px; overscroll-behavior: contain; }
+  .board { position: relative; transform-origin: 0 0; width: max-content; padding: 60px; display: flex; flex-direction: column; gap: 44px; }
+  .townrow { font-size: 2.6rem; font-weight: 700; border-left: 14px solid var(--c); padding-left: 18px; margin-top: 40px; }
+  .lane { display: flex; gap: 36px; align-items: flex-start; }
+  .lanehead { flex: none; width: 230px; font-size: 1.5rem; font-weight: 700; line-height: 1.25; border-top: 6px solid var(--c); padding-top: 10px; } .lanehead span { display: block; font-size: 1rem; font-weight: 400; color: var(--muted); }
+  .cardw { flex: none; width: 840px; display: flex; flex-direction: column; gap: 8px; }
+  .cardw > header { display: flex; gap: 10px; align-items: center; font-weight: 600; } .cardw > header span { margin-right: auto; }
+  .mini { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem; }
+  .cardw .note { font-size: 0.9rem; }
+  .sticky { position: absolute; width: 250px; background: #fff3a6; color: #26240f; border-radius: 4px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; z-index: 5; }
+  .sticky.c1 { background: #ffd0dc; } .sticky.c2 { background: #cfe6ff; } .sticky.c3 { background: #d3f2cf; }
+  .sticky .grip { display: flex; gap: 6px; align-items: center; padding: 6px 8px; cursor: grab; touch-action: none; font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid rgba(0, 0, 0, 0.15); user-select: none; } .sticky .grip span { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sticky .grip button { border: 0; background: rgba(0, 0, 0, 0.1); color: inherit; border-radius: 6px; padding: 2px 7px; cursor: pointer; font-size: 0.8rem; }
+  .sticky textarea { border: 0; background: transparent; color: inherit; font: 15px/1.4 var(--body); padding: 8px; min-height: 110px; resize: vertical; width: 100%; } .sticky textarea:focus { outline: 2px solid #26240f; outline-offset: -2px; }
+  .status { color: var(--muted); font-size: 0.92rem; }
 </style>
 
 <div class="wrap">
   <div class="bar">
+    <button class="nav" id="vboard">Whiteboard</button>
+    <button class="nav" id="vdeck">One screen at a time</button>
+    <span class="status" id="status"></span>
+  </div>
+  <div class="bar" id="deckbar">
     <button class="nav" id="prev">← Back</button>
     <button class="nav go" id="next">Next →</button>
     <select id="town" aria-label="Go to a town"></select>
     <select id="level" aria-label="Go to a level"></select>
     <span class="count" id="count"></span>
   </div>
-  <div id="stage"></div>
+  <div id="stage" class="deck" data-uncommentable></div>
+  <div class="bar" id="boardbar" hidden>
+    <button class="nav go" id="addnote">Add a note card</button>
+    <button class="nav" id="zout" aria-label="Zoom out">−</button>
+    <button class="nav" id="zin" aria-label="Zoom in">+</button>
+    <select id="jump" aria-label="Go to a level on the board"></select>
+    <span class="count" id="zlabel"></span>
+  </div>
+  <p class="help" id="boardhelp" hidden><b>How to use the whiteboard.</b> Scroll in any direction to move around. Press <b>Add a note card</b> to drop a note in the middle of your view, then drag it by its top edge to where it belongs. Every screen also has its own <b>Note</b> button and a <b>Comment</b> button. To ask Claude for a change, write a comment on a screen and send it to Claude.</p>
+  <div class="surface" id="surface" hidden><div id="sizer"><div class="board" id="board"></div></div></div>
 </div>
 
 <script type="module">
@@ -154,6 +186,7 @@
     <div><h3>The box with a cross</h3><p>This box stands for the 3D town. A short caption says what the town would show at that moment.</p></div>
     <div><h3>Outlined buttons with a tick</h3><p>These are the buttons that a sample child tapped. They show one way through the level.</p></div>
     <div><h3>The note below the frame</h3><p>The note is written for you. The child does not see it.</p></div></div>
+    <p>The <b>Whiteboard</b> button at the top shows every screen on one large board. That is the place to leave note cards and comments.</p>
     <p>I wrote the sample words on these screens myself, as you asked. They show how each level would read. They are not final.</p></div>` });
   const end = () => ({ colour: '#2f7d4f', html: `<div class="cover"><p class="lab">The end of the deck</p><h1>That is all six towns and all 36 levels.</h1>
     <p>Every level used the same steps. The child asked Florence with a sentence, Florence offered solutions, the child compared their results through lenses, and the child chose one.</p>
@@ -181,6 +214,97 @@
   addEventListener('keydown', (e) => { if (e.target.tagName === 'SELECT') return; if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(at + 1); } if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(at - 1); } });
   let tx = null; stage.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', (e) => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 70) show(at + (dx < 0 ? 1 : -1)); }, { passive: true });
+  // ---- the whiteboard --------------------------------------------------------------------------------------------
+  const board = $('board'), surface = $('surface'), sizer = $('sizer');
+  const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage may be blocked */ } } };
+  let z = Math.min(1, Math.max(0.2, parseFloat(store.get('wf-zoom', innerWidth < 760 ? '0.3' : '0.5')) || 0.5)), built = false;
+  const whereOf = (n) => { const s = slides[n]; if (!s) return 'The board'; const t = D.towns[s.ti]; return s.kind === 'town' ? `Week ${s.ti + 1}, ${t.name}: the town opens` : s.kind === 'jobs' ? `Week ${s.ti + 1}, ${t.name}: the end of the hour` : `Week ${s.ti + 1}, ${t.name}, level ${s.li + 1} (${t.levels[s.li].name}), screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`; };
+  function buildBoard() {
+    if (built) return; built = true;
+    const card = (n, title) => { const s = slides[n], r = s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); return `<section class="cardw" id="s${n + 1}" data-n="${n}" data-comment-target style="--c:${r.colour}"><header><span>${title}</span><button class="mini" data-note="${n}">Note</button><button class="mini" data-comment="${n}" hidden>Comment</button><button class="mini" data-open="${n}">Open</button></header>${r.html}</section>`; };
+    let h = '';
+    D.towns.forEach((t, ti) => {
+      const first = slides.findIndex((s) => s.kind === 'town' && s.ti === ti), last = slides.findIndex((s) => s.kind === 'jobs' && s.ti === ti);
+      h += `<div class="townrow" style="--c:${t.colour}">Week ${ti + 1}: ${esc(t.name)}</div><div class="lane" style="--c:${t.colour}"><div class="lanehead">Start and end<span>The first and last screens of the hour</span></div>${card(first, 'The town opens')}${card(last, 'The end of the hour')}</div>`;
+      t.levels.forEach((v, li) => { h += `<div class="lane" id="lane-${ti}-${li}" style="--c:${t.colour}"><div class="lanehead">Level ${li + 1} of 6<span>${esc(v.name)}</span></div>${slides.map((s, n) => (s.kind === 'step' && s.ti === ti && s.li === li ? card(n, `Screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`) : '')).join('')}</div>`; });
+    });
+    board.insertAdjacentHTML('afterbegin', h);
+    $('jump').innerHTML = `<option value="">Go to a level</option>${D.towns.map((t, ti) => `<optgroup label="Week ${ti + 1}: ${esc(t.name)}">${t.levels.map((v, li) => `<option value="${ti}-${li}">Level ${li + 1}: ${esc(v.name)}</option>`).join('')}</optgroup>`).join('')}`;
+    new ResizeObserver(() => { fit(); placeAll(); }).observe(board); fit(); for (const id of notes.keys()) paint(id); lightComments();
+  }
+  function fit() { board.style.transform = `scale(${z})`; sizer.style.width = `${board.offsetWidth * z}px`; sizer.style.height = `${board.offsetHeight * z}px`; $('zlabel').textContent = `Zoom ${Math.round(z * 100)} per cent`; }
+  function zoom(f) { const cx = (surface.scrollLeft + surface.clientWidth / 2) / z, cy = (surface.scrollTop + surface.clientHeight / 2) / z; z = Math.min(1, Math.max(0.2, Math.round(z * f * 100) / 100)); store.set('wf-zoom', String(z)); fit(); surface.scrollLeft = cx * z - surface.clientWidth / 2; surface.scrollTop = cy * z - surface.clientHeight / 2; }
+  $('zin').onclick = () => zoom(1.25); $('zout').onclick = () => zoom(0.8);
+  const pt = (el) => { const b = board.getBoundingClientRect(), r = el.getBoundingClientRect(); return [(r.left - b.left) / z, (r.top - b.top) / z]; }; // a place on the board, in the board's own units
+  $('jump').onchange = (e) => { const el = document.getElementById(`lane-${e.target.value}`); if (el) { const p = pt(el); surface.scrollTo({ left: Math.max(0, p[0] * z - 20), top: Math.max(0, p[1] * z - 20) }); } e.target.value = ''; };
+  function setView(v) {
+    const b = v === 'board'; store.set('wf-view', v);
+    $('vboard').classList.toggle('on', b); $('vdeck').classList.toggle('on', !b);
+    for (const id of ['boardbar', 'boardhelp', 'surface']) $(id).hidden = !b; for (const id of ['deckbar', 'stage']) $(id).hidden = b;
+    if (b) buildBoard();
+  }
+  $('vboard').onclick = () => setView('board'); $('vdeck').onclick = () => setView('deck');
+
+  // ---- note cards (kept in the artifact's shared database, so everyone sees the same cards) ----------------------
+  const notes = new Map(), els = new Map(); let db = null, me = null, people = null, canWrite = true, commentsApi = null;
+  const status = (t) => { $('status').textContent = t; };
+  function anchorAt(x, y) { // which screen is under this point of the board?
+    for (const c of board.querySelectorAll('.cardw')) { const [cx, cy] = pt(c); if (x >= cx - 40 && x <= cx + c.offsetWidth && y >= cy - 40 && y <= cy + c.offsetHeight) return { slide: +c.dataset.n, dx: Math.round(x - cx), dy: Math.round(y - cy) }; }
+    return { slide: null, dx: 0, dy: 0 };
+  }
+  function place(id) { const n = notes.get(id), el = els.get(id); if (!n || !el) return; const c = n.slide === null || n.slide === undefined ? null : document.getElementById(`s${n.slide + 1}`); const [x, y] = c ? pt(c).map((v, i) => v + (i ? n.dy : n.dx)) : [n.x || 0, n.y || 0]; el.style.left = `${x}px`; el.style.top = `${y}px`; }
+  const placeAll = () => { if (built) for (const id of notes.keys()) place(id); };
+  function noteEl(id) {
+    let el = els.get(id); if (el) return el;
+    el = document.createElement('div'); el.className = 'sticky'; el.setAttribute('data-uncommentable', '');
+    el.innerHTML = '<div class="grip"><span></span><button data-act="colour" aria-label="Change the colour">Colour</button><button data-act="del">Delete</button></div><textarea placeholder="Write your note here." maxlength="2000"></textarea>';
+    const ta = el.querySelector('textarea'), grip = el.querySelector('.grip');
+    ta.addEventListener('change', () => { const n = notes.get(id); if (n && ta.value !== n.text) write(id, { text: ta.value }); });
+    grip.addEventListener('click', (e) => { const act = e.target.dataset.act, n = notes.get(id); if (!act || !n) return;
+      if (act === 'colour') write(id, { colour: ((n.colour || 0) + 1) % 4 });
+      if (act === 'del') { if (e.target.dataset.sure) db.collection('notes').doc(id).delete().catch(() => status('The note card could not be deleted.')); else { e.target.dataset.sure = '1'; e.target.textContent = 'Really delete?'; setTimeout(() => { delete e.target.dataset.sure; e.target.textContent = 'Delete'; }, 3000); } } });
+    let drag = null;
+    grip.addEventListener('pointerdown', (e) => { if (e.target.tagName === 'BUTTON' || !canWrite) return; drag = { x: e.clientX, y: e.clientY, l: parseFloat(el.style.left) || 0, t: parseFloat(el.style.top) || 0 }; grip.setPointerCapture(e.pointerId); e.preventDefault(); });
+    grip.addEventListener('pointermove', (e) => { if (!drag) return; el.style.left = `${drag.l + (e.clientX - drag.x) / z}px`; el.style.top = `${drag.t + (e.clientY - drag.y) / z}px`; drag.moved = true; });
+    grip.addEventListener('pointerup', () => { if (!drag) return; const moved = drag.moved; drag = null; if (!moved) return; const x = parseFloat(el.style.left), y = parseFloat(el.style.top), a = anchorAt(x, y); write(id, { ...a, x: Math.round(x), y: Math.round(y), where: whereOf(a.slide) }); });
+    els.set(id, el); board.appendChild(el); return el;
+  }
+  function write(id, patch) { const n = notes.get(id); if (n) Object.assign(n, patch); paint(id); db.collection('notes').doc(id).update(patch).catch(() => status('That change to the note card could not be saved.')); }
+  function paint(id) {
+    const n = notes.get(id), el = noteEl(id), ta = el.querySelector('textarea');
+    el.className = `sticky c${(n.colour || 0) % 4}`; if (document.activeElement !== ta) ta.value = n.text || ''; ta.readOnly = !canWrite;
+    for (const b of el.querySelectorAll('button')) b.hidden = !canWrite;
+    el.querySelector('.grip span').textContent = (people && n.by && people[n.by] && people[n.by].name) || 'Note card'; place(id);
+  }
+  async function names() { if (!me) return; const ids = [...new Set([...notes.values()].map((n) => n.by).filter(Boolean))]; if (!ids.length) return; try { people = await me.profiles(ids); for (const id of notes.keys()) paint(id); } catch (e) { /* names are optional */ } }
+  async function addNote(x, y) {
+    if (!db) return status('Note cards are not available in this view.'); if (!canWrite) return status('You can read the note cards, but your access does not let you add one.');
+    const a = anchorAt(x, y); let by = null; try { by = me ? await me.id() : null; } catch (e) { /* stays unnamed */ }
+    try { await db.collection('notes').add({ text: '', colour: 0, ...a, x: Math.round(x), y: Math.round(y), where: whereOf(a.slide), by, at: new Date().toISOString() }); } catch (e) { status('The note card could not be added. Your access may not allow it.'); }
+  }
+  $('addnote').onclick = () => addNote((surface.scrollLeft + surface.clientWidth / 2) / z - 125, (surface.scrollTop + surface.clientHeight / 3) / z);
+  board.addEventListener('click', (e) => {
+    const b = e.target.closest('button.mini'); if (!b) return; const c = b.closest('.cardw');
+    if (b.dataset.note) { const [cx, cy] = pt(c); addNote(cx + c.offsetWidth - 150 + Math.random() * 40, cy + 30 + Math.random() * 40); }
+    if (b.dataset.open) { setView('deck'); show(+b.dataset.open); }
+    if (b.dataset.comment && commentsApi) commentsApi.openComposer({ element: c }).catch(() => status('The comment box could not be opened here. You can use the comment tool of the page itself.'));
+  });
+  function lightComments() { if (commentsApi && built) for (const b of board.querySelectorAll('[data-comment]')) b.hidden = false; }
+  (async () => {
+    const use = (n) => (window.claude && window.claude.use ? window.claude.use(n).catch(() => null) : Promise.resolve(null));
+    use('comments').then((c) => { commentsApi = c; lightComments(); });
+    status('The note cards are loading.'); const slow = setTimeout(() => status('The note cards are taking a long time to load.'), 10000);
+    [db, me] = await Promise.all([use('db'), use('user')]);
+    if (!db) { clearTimeout(slow); return status('Note cards are not available in this view. You may need to sign in.'); }
+    try { const w = me ? await me.can('data.write') : null; canWrite = w !== false; } catch (e) { /* a refused write will say so */ }
+    db.collection('notes').onSnapshot((snap) => {
+      clearTimeout(slow); const seen = new Set();
+      for (const d of snap.docs) { seen.add(d.id); notes.set(d.id, d.data() || {}); if (built) paint(d.id); }
+      for (const id of [...notes.keys()]) if (!seen.has(id)) { notes.delete(id); const el = els.get(id); if (el) { el.remove(); els.delete(id); } }
+      status(`${snap.size === 1 ? 'There is 1 note card' : `There are ${snap.size} note cards`} on the whiteboard.${canWrite ? '' : ' Your access lets you read them but not change them.'}`); names();
+    }, () => { clearTimeout(slow); status('The note cards could not be loaded.'); });
+  })();
   show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
-  window.deck = { slides, show, get at() { return at; } };
+  setView(/^#\d+$/.test(location.hash) ? 'deck' : store.get('wf-view', 'board'));
+  window.deck = { slides, show, setView, get at() { return at; } };
 </script>
