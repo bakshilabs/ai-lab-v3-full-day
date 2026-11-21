@@ -5,6 +5,22 @@
 // A round can have  applied: 'a date'  once its answers have been carried out; the panel then shows it as finished.
 // screen is the number of the screen on the whiteboard that the item belongs to, where there is one.
 export default [
+  { id: '2026-11-21-astra-2', title: 'Astra’s further feedback: context, results, second tries and recaps', date: '21 November 2026', applied: '21 November 2026',
+    intro: 'Astra sent six further points. The owner agreed five of them in conversation, and they have been carried out in Eco Town. The owner decided not to add optional challenges for now.',
+    groups: [
+      { title: 'Carried out in Eco Town',
+        items: [
+          { id: 'b1', what: 'Show the context as a short invitation before the choice.', before: 'The line above the word buttons stated a fact, such as “The river beside Eco Town rises after heavy rain.”', after: 'The line invites the child to think, such as “Heavy rain is coming. Where could we put the homes?”' },
+          { id: 'b2', what: 'Keep the school lesson about walking.', before: 'The test was called “A school for everyone”, and it showed whether every child had a similar walk.', after: 'The button is “Ring the school bell”. Children either walk to school or go by car. Florence says, “These children can walk instead of going by car. That means fewer car trips.” The Sharing check is no longer used in Eco Town.' },
+          { id: 'b3', what: 'Say what happened, in place of a bare rating.', before: 'Each result showed “Good”, “Fair” or “Poor” with a short phrase.', after: 'Each result is a sentence about what happened, such as “The water reached these homes.” A small tick, dash or cross sits beside it.' },
+          { id: 'b4', what: 'Keep the first result in view during a second try, and ask what changed.', before: 'After “Try another plan”, the screen showed only the other plan.', after: 'The same test runs for the other plan. A small picture of the first result stays on the screen, and Florence asks, “What changed?”' },
+          { id: 'b5', what: 'Make the recap a tap on the town.', before: 'The child tapped one of three written answers.', after: 'Florence asks the child to point, for example “Point to the place that stayed dry”, and the child taps the town. If a child is unsure, the game plays the test again or gives a hint. Two levels ask a question about Florence: “Did Florence include everything you asked for?” and “Did Florence leave space for the flowers?”' },
+        ] },
+      { title: 'Not done',
+        items: [
+          { id: 'b6', what: 'Offer optional extra challenges.', after: 'This has not been done. The owner decided on 21 November 2026 not to add optional challenges for now.' },
+        ] },
+    ] },
   { id: '2026-11-21-astra', title: 'Astra’s feedback: a different activity in each level', date: '21 November 2026', applied: '21 November 2026',
     intro: 'Astra asked for each level to have one clear goal and its own activity, so that the idea is learned through play. The owner agreed these six tests in conversation, and they have been carried out in Eco Town. In each level the child presses a button to start the test, and that takes the place of the hands-on step that used to come after the choice.',
     groups: [
