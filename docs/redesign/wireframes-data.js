@@ -61,7 +61,7 @@ export default {
           scene: 'Eco Town has cold winters, so its homes need to hold their heat.',
           labels: { carbon: 'Pollution from making the materials' },
           s: ['Build homes', [1, 'on the shady side of the hill', 'on the sunny side of the hill', 'on top of the windy hill'], 'with', [2, 'windows facing the wind', 'windows facing the shade', 'windows facing the sun'], 'so that they stay warm, use little energy and last a long time'],
-          sol: [['Timber homes', 'The homes have wooden frames and thick wool in the walls.'], ['Brick homes', 'The homes are built from fired clay bricks.'], ['Concrete homes', 'The homes are made from concrete.']],
+          sol: [['Timber homes', 'The homes have wooden frames and thick wool in the walls.'], ['Brick homes', 'The homes are built from clay bricks that are baked in a hot oven. The thick brick walls keep heat in.'], ['Concrete homes', 'The homes are made from concrete. The heavy walls warm up slowly and stay warm for a long time.']],
           watch: 'The pollution from making each kind of home is shown. Then a cold night falls, and some homes stay warmer than others.',
           hands: 'Now build the homes yourself. Tap each empty plot to put a home on it.',
           recap: ['What can change how much energy a home needs?', 'Its materials and how well it keeps heat in.'],
