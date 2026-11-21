@@ -65,7 +65,7 @@ export default {
           watch: 'The pollution from making each kind of home is shown. Then a cold night falls, and some homes stay warmer than others.',
           hands: 'Now build the homes yourself. Tap each empty plot to put a home on it.',
           recap: ['What can change how much energy a home needs?', 'Its materials and how well it keeps heat in.'],
-          res: [['carbon', ['g', 'Making timber homes causes the least pollution'], ['f', 'Making bricks causes some pollution'], ['p', 'Making concrete causes more pollution']], ['winter', ['f', 'Needs some heating on cold nights'], ['g', 'Thick walls hold the heat'], ['g', 'Heavy walls stay warm for hours']]],
+          res: [['carbon', ['g', 'Making timber homes causes the least pollution'], ['f', 'Making bricks causes some pollution'], ['p', 'Making concrete causes the most pollution']], ['winter', ['f', 'Needs some heating on cold nights'], ['g', 'Thick walls hold the heat'], ['g', 'Heavy walls stay warm for hours']]],
           pick: 0, after: 'The timber homes are going up. Making timber homes causes the least pollution, and they will need a little more heating on the coldest nights.' },
         { name: 'Food', job: 'The town needs fresh food grown close by. Ask Florence where the farms should go.',
           scene: 'Bees, birds and frogs live in the wild places around Eco Town.',
