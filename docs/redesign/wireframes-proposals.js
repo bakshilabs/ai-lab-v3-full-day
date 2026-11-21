@@ -5,6 +5,19 @@
 // A round can have  applied: 'a date'  once its answers have been carried out; the panel then shows it as finished.
 // screen is the number of the screen on the whiteboard that the item belongs to, where there is one.
 export default [
+  { id: '2026-11-21-astra', title: 'Astra’s feedback: a different activity in each level', date: '21 November 2026', applied: '21 November 2026',
+    intro: 'Astra asked for each level to have one clear goal and its own activity, so that the idea is learned through play. The owner agreed these six tests in conversation, and they have been carried out in Eco Town. In each level the child presses a button to start the test, and that takes the place of the hands-on step that used to come after the choice.',
+    groups: [
+      { title: 'One test button in each Eco Town level',
+        items: [
+          { id: 'a1', what: 'Level 1, Land: the child starts the test.', before: 'The child tapped the name of a check. Later, the child dragged the town onto the land.', after: 'The button is “Make it rain”. The river rises, and each place is wet or dry.' },
+          { id: 'a2', what: 'Level 2, Getting around: the child starts the test.', before: 'A child, a grandparent and a parent with a pram each walked to the shops. Later, the child drew a route.', after: 'The button is “Open the shops”. People from every home set off, and they either walk or take their cars.' },
+          { id: 'a3', what: 'Level 3, Homes: the child starts the test.', before: 'The pollution was described in words, and then a cold night fell. Later, the child tapped plots to build homes.', after: 'The button is “Make the materials”. The electric sawmill gives off no smoke, the brick oven gives off some, and the cement works gives off a large cloud.', why: 'The owner said that pollution is hard to understand from words alone.' },
+          { id: 'a4', what: 'Level 4, Food: the child starts the test.', before: 'The test showed wildlife, the walk to the farms, and fields in heavy rain. Later, the child tapped fields to plant them.', after: 'The button is “Take the food to market”. Fresh food goes by cart from the close farms. Food from the far farms is boxed, kept cold and driven a long way. The Flood check is no longer used in this level.' },
+          { id: 'a5', what: 'Level 5, Power: the child starts the test.', before: 'It was a winter night with no wind. Later, the child tapped turbines and roofs to switch them on.', after: 'The button is “Keep the lights on”. It is a dark, cold winter night, every home switches everything on, and the lights stay on or go dark.' },
+          { id: 'a6', what: 'Level 6, A school for everyone: the level is about travel distance only.', before: 'The sentence ended “and stays safe when the river rises”, and the level used the Flood check. Later, the child inspected the town.', after: 'The button is “A school for everyone”. Children leave every home at the same moment, and they all arrive together or some are still on the road. The sentence, the checks, the reasons and the recap no longer mention flooding.', why: 'The owner said that rain was already covered in the Land level.' },
+        ] },
+    ] },
   { id: '2026-11-21-oliver', title: 'Oliver’s feedback on Eco Town', date: '21 November 2026', applied: '21 November 2026',
     intro: 'These changes come from Oliver’s feedback on the Eco Town screens. The answers below have been carried out. Where the answer was Other, the note was followed. The screen numbers in this section are the numbers from before the changes, because new screens have since been added.',
     groups: [

@@ -141,7 +141,7 @@
     'At level 1, Florence starts the sentence, offers two or three plans, and gives the child one check.',
     'At level 2, the child fills two gaps and there are two checks. Two of the plans are each better in a different check. In Eco Town there is also a third plan that is good in both.',
     'At level 3, the child fills more of the sentence, and every word button has a reason behind it. Florence offers three plans, and there are two checks.',
-    'At level 4, there are three checks for the first time.',
+    'At level 4, there are three checks for the first time. In Eco Town this level has two checks.',
     'At level 5, there are three plans and three checks, as in level 4. The job is harder.',
     'At level 6, the child also gives a reason for the choice. The teacher uses that reason in the talk afterwards.',
   ];
@@ -151,6 +151,7 @@
     offers: ['Florence offers', 'Each plan is drawn on the town and marked with its letter.', 'Florence shows her plans. None of them is marked as the right answer, because the child is going to test them.'],
     lenses: ['The child picks checks', 'Each plan is drawn on the town and marked with its letter.', 'The child picks three checks from the town’s list. The ticked checks are the ones that this sample child picked.'],
     compare: ['The child tests the plans', 'The town shows each test as it happens, for each plan.', 'The child watches each test happen in the town. The rating in words and the short phrase sit underneath what the child has seen.'],
+    press: ['The child starts the test', '', 'The child presses the button to start the test, and the town shows what happens to each plan. This is the part of the level that the child does by hand, so there is no separate hands-on step later. The rating in words and the short phrase sit underneath what the town has shown.'],
     add: ['The child adds to the sentence', 'The town stays on the screen while the child adds to the sentence.', 'The child cannot choose yet. The game asks for one more part of the sentence first. The new part has a dashed outline.'],
     offers2: ['Florence offers again', 'The new plans are drawn on the town and marked with their letters.', 'The fuller sentence brings three new plans that fit the job more closely.'],
     compare2: ['The child tests the new plans', 'The town shows each test as it happens, for each new plan.', 'The new plans fit the extra details. The game does not say that they are better, so the child tests them again to find out.'],
@@ -217,7 +218,7 @@
     if (s.step === 'ask') p = `${v.scene ? `<p><b>${esc(v.scene)}</b></p>` : ''}<p class="how">${esc(s.li === 0 ? U.askHowOne : U.askHow)}</p>${sentence(v)}${v.s.filter(Array.isArray).map(buttons).join('')}<span class="btn">${esc(U.ask)}</span>`;
     if (s.step === 'offers' || s.step === 'offers2') { p = `${say(s.step === 'offers' ? U.offers : U.better)}${cards(t, sol)}`; marks = sol.length; }
     if (s.step === 'lenses') { const used = v.res.map((r) => r[0]); p = `<p class="how">${esc(v.lensHow || U.lensHow)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog${used.includes(l[0]) ? ' on' : ''}"><b class="tick">${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.lensesDone)}</span>`; marks = sol.length; wide = true; }
-    if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(s.step === 'compare2' ? U.compareAgain : v.how || U.compareHow)}</p>${cards(t, sol, { labels: v.labels, res })}`; marks = sol.length; wide = true; }
+    if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(s.step === 'compare2' ? U.compareAgain : v.how || (v.test ? U.testHow : U.compareHow))}</p>${v.test ? `<span class="btn">${esc(v.test)}</span>` : ''}${cards(t, sol, { labels: v.labels, res })}`; marks = sol.length; wide = true; }
     if (s.step === 'add') p = `<p class="how">${esc(U.addHow)}</p>${sentence(v, true)}${buttons(v.again.add)}<span class="btn">${esc(U.ask)}</span>`;
     if (s.step === 'choose') { p = `<p class="how">${esc(U.chooseHow)}</p>${cards(t, sol, { labels: v.labels, res, use: true, pick: v.pick })}<span class="btn sec">${esc(U.again)}</span>`; marks = sol.length; pick = v.pick; wide = true; }
     if (s.step === 'reason') { p = `<p class="lab">${esc(U.yourChoice)}</p><div class="cardx on"><div class="top"><span class="let on">${ABC[v.pick]}</span>${esc(sol[v.pick][0])}</div></div><p class="how">${esc(U.reasonHow)}</p><div class="opts">${v.reasons.map((r, i) => `<span class="wb${i === v.reason ? ' on' : ''}" style="border-radius:10px">${esc(r)}</span>`).join('')}</div>`; marks = sol.length; pick = v.pick; }
@@ -231,7 +232,7 @@
     const one = ['result', 'hands', 'recap', 'result2'].includes(s.step), cap = (s.step === 'compare' || s.step === 'compare2') && v.watch ? esc(v.watch) : st[1];
     const mk = one ? `<div class="marks"><span class="mark on">${ABC[s.step === 'result2' ? rt.pick : v.pick]}</span></div>` : '';
     const vw = one ? view(cap, 0).replace('<p class="cap">', `${mk}<p class="cap">`) : view(cap, marks, pick);
-    const note = s.step === 'job' ? LADDER[s.li] : st[2];
+    const note = s.step === 'job' ? LADDER[s.li] : s.step === 'compare' && v.test ? STEP.press[2] : st[2];
     return { crumbs: `<b>Week ${s.ti + 1}: ${esc(t.name)}</b><span>Level ${s.li + 1} of 6: ${esc(v.name)}</span><span>Screen ${s.si + 1} of ${s.of}: ${st[0]}</span>`, steps: [s.si, s.of], colour: t.colour,
       html: `<div class="screen${wide ? ' wide' : ''}">${vw}<div class="panel">${head}${p}</div></div><p class="note"><b>Note for the reader.</b> ${note}</p>` };
   }
