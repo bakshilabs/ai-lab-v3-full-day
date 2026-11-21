@@ -8,6 +8,7 @@
 //           res  results: [lens id, [rating, words] for each plan]. Ratings: g good, f fair, p poor.
 //           again (level 4)  add: one more gap; then new solutions and results.
 //           helper (town)  a line that explains Florence.  watch  what the town shows during the tests.  how, lensHow  instructions for this level only.
+//           scene  one line shown above the word buttons, so the child knows what the choices are for.
 //           hands  the short step that the child does by hand.  recap  [question, answer] shown after the result.
 //           lens (levels 5 and 6)  the child picks the lenses, so the screen offers the whole town list.
 //           reasons, reason (level 6), pick (the plan the sample child chooses), after (what Florence says).
@@ -38,6 +39,7 @@ export default {
       talk: 'Which choice was the hardest to make in Eco Town, and what did you give up when you made it?',
       levels: [
         { name: 'Land', job: 'Choose where to build Eco Town. Ask Florence to suggest three places.',
+          scene: 'The river beside Eco Town rises after heavy rain.',
           s: ['Find land for the town that stays safe when the river rises because it is', [2, 'on a bank beside the river', 'far away from the river', 'high up and far away']],
           watch: 'Rain falls and the river rises. Water spreads across the low land and pulls at the river bank.',
           hands: 'Now place the town yourself. Drag the town onto the land that you chose.',
@@ -46,6 +48,7 @@ export default {
           res: [['flood', ['f', 'The river can wear the bank away'], ['p', 'A big flood spreads across flat land'], ['g', 'Homes stay dry in a storm']]],
           pick: 2, after: 'The town now stands on the far hill. It stays dry when the river rises, and people have a longer walk down to the water.' },
         { name: 'Getting around', job: 'People need to get to the shops, the school and the park. Ask Florence to suggest paths and streets.',
+          scene: 'Some people in Eco Town walk slowly, and some push a pram.',
           s: ['Plan the streets so', [2, 'children', 'older people', 'people'], 'can reach', [1, 'the school', 'the shops', 'the park'], 'on foot and leave space for nature'],
           watch: 'A child, a grandparent and a parent pushing a pram each walk to the shops. The space that is left for trees is shown in green.',
           hands: 'Now draw the route yourself. Drag a path from the homes to the shops.',
@@ -54,6 +57,7 @@ export default {
           res: [['walk', ['g', 'A short walk to every shop'], ['p', 'A long walk for grandparents and prams'], ['g', 'A short walk across the park']], ['nature', ['p', 'Little room is left for trees'], ['g', 'A wide park in the middle'], ['g', 'The park stays in the middle']]],
           pick: 2, after: 'The paths through the park are built. Everyone has a short walk to the shops and the park stays, and cars have to drive the long way round.' },
         { name: 'Homes', job: 'Forty families are moving to Eco Town. Ask Florence how to build their homes.',
+          scene: 'Eco Town has cold winters, so its homes need to hold their heat.',
           s: ['Build homes', [1, 'on the shady side of the hill', 'on the sunny side of the hill', 'on top of the windy hill'], 'with', [2, 'windows facing the wind', 'windows facing the shade', 'windows facing the sun'], 'so that they stay warm, use little energy and last a long time'],
           sol: [['Timber homes', 'The homes have wooden frames and thick wool in the walls.'], ['Brick homes', 'The homes are built from fired clay bricks.'], ['Concrete homes', 'The homes are made from concrete.']],
           watch: 'The pollution from making each kind of home is shown. Then a cold night falls, and some homes stay warmer than others.',
@@ -62,6 +66,7 @@ export default {
           res: [['carbon', ['g', 'Making homes from trees captures pollution from the air'], ['f', 'Making bricks causes some pollution'], ['p', 'Making concrete causes more pollution']], ['winter', ['f', 'Needs some heating on cold nights'], ['g', 'Thick walls hold the heat'], ['g', 'Heavy walls stay warm for hours']]],
           pick: 0, after: 'The timber homes are going up. Timber causes less pollution, and the trees it comes from have cleaned the air. The homes will need a little more heating on the coldest nights.' },
         { name: 'Food', job: 'The town needs fresh food grown close by. Ask Florence where the farms should go.',
+          scene: 'Bees, birds and frogs live in the wild places around Eco Town.',
           s: ['Place farms close enough for people to reach while protecting wildlife. Choose', [2, 'the wild meadow next to the town', 'open land far from the town', 'open land near the town'], 'and keep', [0, 'all of the trees and flowers', 'only the biggest trees', 'only the flowers by the path']],
           how: 'Watch the bees and birds, the walk to the farms, and the fields in heavy rain as you test each plan.',
           watch: 'Bees and birds move to the places where they can live. People walk to the farms. Then heavy rain falls on the fields.',
@@ -74,6 +79,7 @@ export default {
             res: [['nature', ['g', 'Hedges shelter birds and insects'], ['f', 'A few flowers for bees'], ['g', 'Meadow flowers and bees stay']], ['walk', ['g', 'Food is a short walk away'], ['g', 'Food grows on your street'], ['f', 'A medium walk to the orchard']], ['flood', ['f', 'Some fields get muddy'], ['g', 'Roof plots soak up rain'], ['g', 'Tree roots hold the soil']]] },
           pick: 2, after: 'The orchard meadow is planted. The flowers and the bees stay, and people have a slightly longer walk to pick their fruit.' },
         { name: 'Power', job: 'Eco Town needs power for its homes all year round. Ask Florence how to make it.',
+          scene: 'In winter the sun is low and the days are short, but the wind still blows on the hill.',
           s: ['Power the town with clean energy that works when there is less sun in the winter. Use', [2, 'only the sun on every roof', 'only the wind on the hill', 'both the wind and the sun'], 'then', [1, 'leave spare power unused', 'store spare power in a battery', 'make only as much power as is needed'], 'and put the turbines', [0, 'away from where the birds fly', 'beside the cliffs where birds nest', 'in the middle of the forest']],
           watch: 'It is a winter night and there is no wind. Some homes keep their lights and heating, and others go dark.',
           hands: 'Now switch on the power yourself. Tap each turbine, each solar roof and the battery to turn it on.',
@@ -82,6 +88,7 @@ export default {
           lens: true, res: [['winter', ['p', 'Little power for heating in winter'], ['g', 'Winter winds turn the blades'], ['g', 'The battery stores power for when it is not windy']], ['nature', ['g', 'No land is taken from wildlife'], ['f', 'Birds must fly around the turbines'], ['f', 'Fewer turbines near the birds']], ['carbon', ['g', 'No smoke from the roofs'], ['g', 'No smoke from the turbines'], ['f', 'Making a big battery causes some pollution']]],
           pick: 2, after: 'The turbines, the solar roofs and the battery are working together. Homes stay warm through the winter, and making the battery caused some pollution.' },
         { name: 'A school for everyone', job: 'Every child in Eco Town needs a school. Some families live in the centre, and some live far out by the farms. Ask Florence where to build it.',
+          scene: 'Some children live in the town, and some live far out by the farms. The river runs through the low land.',
           s: ['Build a school that is easy to walk to for everyone and safe from the river water rising. Put it', [1, 'in the middle of the town', 'halfway between the town and the farms', 'out by the farms'], [2, 'on the flat land by the river', 'at the bottom of the valley', 'on ground above the river'], 'with', [0, 'a footpath from every street', 'a footpath from the main street only', 'one road and no footpaths'], 'and measure the walk for', [1, 'the children who live nearest', 'every child', 'the children in the town']],
           lensHow: 'Choose three things to test before you decide where to build the school.',
           how: 'Watch children walk to each school and see what happens when the river rises.',

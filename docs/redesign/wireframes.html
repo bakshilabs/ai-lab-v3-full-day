@@ -212,7 +212,7 @@
     const head = `<p class="lv">${esc(t.name)} · Level ${s.li + 1} of 6 · ${esc(v.name)}</p>`;
     let p = '', marks = 0, pick = -1, wide = false;
     if (s.step === 'job') p = `<h2>${esc(v.name)}</h2>${say(v.job)}<span class="btn">${esc(U.start)}</span>`;
-    if (s.step === 'ask') p = `<p class="how">${esc(s.li === 0 ? U.askHowOne : U.askHow)}</p>${sentence(v)}${v.s.filter(Array.isArray).map(buttons).join('')}<span class="btn">${esc(U.ask)}</span>`;
+    if (s.step === 'ask') p = `${v.scene ? `<p><b>${esc(v.scene)}</b></p>` : ''}<p class="how">${esc(s.li === 0 ? U.askHowOne : U.askHow)}</p>${sentence(v)}${v.s.filter(Array.isArray).map(buttons).join('')}<span class="btn">${esc(U.ask)}</span>`;
     if (s.step === 'offers' || s.step === 'offers2') { p = `${say(s.step === 'offers' ? U.offers : U.better)}${cards(t, sol)}`; marks = sol.length; }
     if (s.step === 'lenses') { const used = v.res.map((r) => r[0]); p = `<p class="how">${esc(v.lensHow || U.lensHow)}</p><div class="togs">${t.lenses.map((l) => `<div class="tog${used.includes(l[0]) ? ' on' : ''}"><b class="tick">${esc(l[1])}</b>${esc(l[2])}</div>`).join('')}</div><span class="btn">${esc(U.lensesDone)}</span>`; marks = sol.length; wide = true; }
     if (s.step === 'compare' || s.step === 'compare2') { p = `<p class="how">${esc(s.step === 'compare2' ? U.compareAgain : v.how || U.compareHow)}</p>${cards(t, sol, { res })}`; marks = sol.length; wide = true; }
