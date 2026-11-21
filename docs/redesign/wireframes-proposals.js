@@ -80,7 +80,7 @@ export default [
           { id: 'l3a', screen: 17, what: 'Simplify the description of the concrete homes.', before: 'The homes are made from poured concrete blocks.', after: 'The homes are made from concrete.' },
           { id: 'l3b', screen: 18, what: 'Say what the child watches during the test.', before: 'Tapping a check colours the town to show that result for each solution.', after: 'A cold night falls. The child watches which homes stay warm and how much energy they use.' },
           { id: 'l3c', screen: 18, what: 'Change the “Clean air” result for timber homes.', before: 'Growing trees clean the air', after: 'Making them causes the least pollution', why: 'Oliver’s wording was longer. This is shortened so that it fits on a card.' },
-          { id: 'l3d', screen: 18, what: 'Change the “Clean air” result for brick homes.', before: 'Brick ovens give off some smoke', after: 'Making bricks causes some pollution' },
+          { id: 'l3d', screen: 18, what: 'Change the “Clean air” result for brick homes.', before: 'The earlier wording described what comes out of brick ovens.', after: 'Making bricks causes some pollution' },
           { id: 'l3e', screen: 18, what: 'Change the “Clean air” result for concrete homes.', before: 'Cement works give off many fumes', after: 'Making concrete causes more pollution' },
           { id: 'l3f', screen: 20, what: 'Change what Florence says about the timber homes.', before: 'They keep the air the cleanest.', after: 'They cause the least air pollution in this town.' },
           { id: 'l3g', screen: 20, what: 'Add this recap question.', after: 'The question is “What can change how much energy a home needs?” The answer is “Its materials and how well it keeps heat in.”' },
