@@ -79,7 +79,7 @@ export default {
           pick: 1, after: 'The farms are on open land close to the town. No wild land was used, and the food is a short walk away.' },
         { name: 'Power', job: 'Eco Town needs power for its homes all year round. Ask Florence to suggest plans for making that power. Then test her plans, so that you can make a good decision.',
           scene: 'In winter the sun is low and the days are short, but the wind still blows on the hill.',
-          s: ['Power the town with clean energy that works when there is less sun in the winter. Use', [2, 'only the sun on every roof', 'only the wind on the hill', 'both the wind and the sun'], 'then', [1, 'leave spare power unused', 'store spare power in a battery', 'make only as much power as is needed'], 'and put the turbines', [0, 'away from where the birds fly', 'beside the cliffs where birds nest', 'in the middle of the forest']],
+          s: ['Power the town with clean energy that works when there is less sun in the winter. Use', [2, 'only the sun', 'only the wind', 'the sun and the wind together'], 'and', [1, 'waste the spare power', 'save the spare power in a battery', 'switch the power off at night']],
           watch: 'It is a winter night and there is no wind. Some homes keep their lights and heating, and others go dark.',
           hands: 'Now switch on the power yourself. Tap each turbine, each solar roof and the battery to turn it on.',
           recap: ['Why should we test power on a winter day?', 'There is less sun in winter, so the town needs wind power as well.'],
