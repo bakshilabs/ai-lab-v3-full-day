@@ -74,6 +74,16 @@
   .sticky .grip button { border: 0; background: rgba(0, 0, 0, 0.1); color: inherit; border-radius: 6px; padding: 2px 7px; cursor: pointer; font-size: 0.8rem; }
   .sticky textarea { border: 0; background: transparent; color: inherit; font: 15px/1.4 var(--body); padding: 8px; min-height: 110px; resize: vertical; width: 100%; } .sticky textarea:focus { outline: 2px solid #26240f; outline-offset: -2px; }
   .status { color: var(--muted); font-size: 0.92rem; }
+  /* the panel of proposed changes, beside the whiteboard */
+  .boardrow { display: flex; gap: 12px; align-items: stretch; } .boardrow .surface { flex: 1; min-width: 0; }
+  .props { flex: none; width: 400px; height: max(420px, calc(100vh - 210px)); overflow: auto; overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .props h3 { margin-top: 10px; padding-top: 12px; border-top: 2px solid var(--fg); } .props .pintro, .props .pwhy, .props .pby { color: var(--muted); font-size: 0.92rem; }
+  .prop { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; } .prop.done { border-color: var(--fg); }
+  .prop .pl { display: inline-block; min-width: 54px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .prop .pa { display: flex; gap: 6px; } .prop .pa button { flex: 1; min-height: 38px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; font-weight: 600; }
+  .prop .pa button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); } .prop .pa button:disabled { cursor: default; opacity: 0.6; }
+  .prop textarea { font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; resize: vertical; }
+  @media (max-width: 900px) { .boardrow { flex-direction: column-reverse; } .props { width: auto; height: auto; max-height: 60vh; } }
   .editing .ed { outline: 1px dashed currentColor; outline-offset: 2px; border-radius: 3px; cursor: text; }
   .editing .ed:hover { background: #fff3a8; color: #17160a; }
   .ed[contenteditable] { background: #fff3a8; color: #17160a; outline: 2px solid #26240f; outline-offset: 2px; border-radius: 3px; }
@@ -101,14 +111,24 @@
     <button class="nav" id="zout" aria-label="Zoom out">−</button>
     <button class="nav" id="zin" aria-label="Zoom in">+</button>
     <select id="jump" aria-label="Go to a level on the board"></select>
+    <button class="nav on" id="proptog">Hide the proposed changes</button>
     <span class="count" id="zlabel"></span>
   </div>
   <p class="help" id="boardhelp" hidden><b>How to use the whiteboard.</b> Scroll in any direction to move around. Press <b>Add a note card</b> to drop a note in the middle of your view, then drag it by its top edge to where it belongs. Every screen also has its own <b>Note</b> button and a <b>Comment</b> button. To ask Claude for a change, write a comment on a screen and send it to Claude.</p>
-  <div class="surface" id="surface" hidden><div id="sizer"><div class="board" id="board"></div></div></div>
+  <div class="boardrow" id="boardrow" hidden>
+    <div class="surface" id="surface" hidden><div id="sizer"><div class="board" id="board"></div></div></div>
+    <aside class="props" id="props" data-uncommentable>
+      <h2>Proposed changes to Eco Town</h2>
+      <p>These changes come from Oliver’s feedback. Nothing has been changed yet. For each one, press <b>Yes</b>, <b>No</b> or <b>Other</b>. If you press Other, write what you would like in the box. You can also add a note to a Yes or a No.</p>
+      <p class="pby" id="propcount"></p>
+      <div id="proplist" style="display:flex;flex-direction:column;gap:10px"></div>
+    </aside>
+  </div>
 </div>
 
 <script type="module">
   import D from './wireframes-data.js';
+  import P from './wireframes-proposals.js';
   const U = D.ui, ABC = 'ABC';
   // the page is light unless the reader asks for dark
   const setTheme = (t) => { document.documentElement.dataset.theme = t; document.getElementById('theme').textContent = t === 'dark' ? 'Light' : 'Dark'; try { localStorage.setItem('wf-theme', t); } catch (e) { /* storage may be blocked */ } };
@@ -276,7 +296,7 @@
   function setView(v) {
     const b = v === 'board'; store.set('wf-view', v);
     $('vboard').classList.toggle('on', b); $('vdeck').classList.toggle('on', !b);
-    for (const id of ['boardbar', 'boardhelp', 'surface']) $(id).hidden = !b; for (const id of ['deckbar', 'stage']) $(id).hidden = b;
+    for (const id of ['boardbar', 'boardhelp', 'boardrow', 'surface']) $(id).hidden = !b; for (const id of ['deckbar', 'stage']) $(id).hidden = b;
     if (b) buildBoard();
   }
   $('vboard').onclick = () => setView('board'); $('vdeck').onclick = () => setView('deck');
@@ -334,7 +354,7 @@
     [db, me] = await Promise.all([use('db'), use('user')]);
     if (!db) { clearTimeout(slow); return status('Note cards are not available in this view. You may need to sign in.'); }
     try { const w = me ? await me.can('data.write') : null; canWrite = w !== false; } catch (e) { /* a refused write will say so */ }
-    watchWords();
+    watchWords(); watchAnswers(); paintProps();
     db.collection('notes').onSnapshot((snap) => {
       clearTimeout(slow); const seen = new Set();
       for (const d of snap.docs) { seen.add(d.id); notes.set(d.id, d.data() || {}); if (built) paint(d.id); }
@@ -342,6 +362,37 @@
       status(`${snap.size === 1 ? 'There is 1 note card' : `There are ${snap.size} note cards`} on the whiteboard.${canWrite ? '' : ' Your access lets you read them but not change them.'}`); names();
     }, () => { clearTimeout(slow); status('The note cards could not be loaded.'); });
   })();
+  // ---- the panel of proposed changes (answers are kept in the shared database, collection "decisions") ---------
+  const answers = new Map(), allProps = P.flatMap((g) => g.items);
+  $('proplist').innerHTML = P.map((g) => `<h3>${esc(g.title)}</h3>${g.intro ? `<p class="pintro">${esc(g.intro)}</p>` : ''}${g.items.map((it) => `<div class="prop" data-id="${it.id}"><p><b>${esc(it.what)}</b></p>${it.before ? `<p><span class="pl">Before</span> ${esc(it.before)}</p>` : ''}<p><span class="pl">After</span> ${esc(it.after)}</p>${it.why ? `<p class="pwhy">${esc(it.why)}</p>` : ''}${it.screen ? `<p><button class="mini" data-goto="${it.screen}">Show screen ${it.screen} on the board</button></p>` : ''}<div class="pa"><button data-a="yes">Yes</button><button data-a="no">No</button><button data-a="other">Other</button></div><textarea rows="2" maxlength="1000" placeholder="Write a note or your own wording here." aria-label="A note or your own wording"></textarea><p class="pby"></p></div>`).join('')}`).join('');
+  function paintProp(id) {
+    const el = $('proplist').querySelector(`[data-id="${id}"]`); if (!el) return; const a = answers.get(id) || {}, ta = el.querySelector('textarea');
+    for (const b of el.querySelectorAll('[data-a]')) { b.classList.toggle('on', a.answer === b.dataset.a); b.setAttribute('aria-pressed', a.answer === b.dataset.a); b.disabled = !canWrite; }
+    if (document.activeElement !== ta) ta.value = a.note || ''; ta.readOnly = !canWrite; el.classList.toggle('done', !!a.answer);
+    el.querySelector('.pby').textContent = a.answer ? `Answered${people && a.by && people[a.by] && people[a.by].name ? ` by ${people[a.by].name}` : ''}.` : '';
+  }
+  function paintProps() { for (const it of allProps) paintProp(it.id); const n = allProps.filter((it) => (answers.get(it.id) || {}).answer).length; $('propcount').textContent = `${n} of ${allProps.length} changes have an answer.`; }
+  async function saveAns(id, patch) {
+    if (!db) return status('Your answers cannot be saved in this view. You may need to sign in.'); if (!canWrite) return status('Your access lets you read the answers but not change them.');
+    let by = null; try { by = me ? await me.id() : null; } catch (e) { /* stays unnamed */ }
+    const a = { answer: null, note: '', ...(answers.get(id) || {}), ...patch, by, at: new Date().toISOString() }; answers.set(id, a); paintProps();
+    try { await db.collection('decisions').doc(id).set(a); status('Your answer has been saved.'); } catch (e) { status('That answer could not be saved. Your access may not allow it.'); }
+  }
+  $('proplist').addEventListener('click', (e) => {
+    const g = e.target.closest('[data-goto]'); if (g) { const el = $(`s${g.dataset.goto}`); if (el) { const q = pt(el); surface.scrollTo({ left: Math.max(0, q[0] * z - 20), top: Math.max(0, q[1] * z - 20), behavior: 'smooth' }); } return; }
+    const b = e.target.closest('[data-a]'); if (!b) return; const el = b.closest('.prop'), id = el.dataset.id, cur = (answers.get(id) || {}).answer;
+    saveAns(id, { answer: cur === b.dataset.a ? null : b.dataset.a }); if (b.dataset.a === 'other' && cur !== 'other') el.querySelector('textarea').focus();
+  });
+  $('proplist').addEventListener('change', (e) => { if (e.target.tagName !== 'TEXTAREA') return; const id = e.target.closest('.prop').dataset.id; if ((e.target.value || '') !== ((answers.get(id) || {}).note || '')) saveAns(id, { note: e.target.value }); });
+  $('proptog').onclick = () => { const hide = !$('props').hidden; $('props').hidden = hide; $('proptog').classList.toggle('on', !hide); $('proptog').textContent = hide ? 'Show the proposed changes' : 'Hide the proposed changes'; fit(); };
+  paintProps();
+  function watchAnswers() {
+    db.collection('decisions').onSnapshot(async (snap) => {
+      answers.clear(); for (const d of snap.docs) answers.set(d.id, d.data() || {});
+      const ids = [...new Set([...answers.values()].map((a) => a.by).filter(Boolean))]; if (me && ids.length) try { people = { ...(people || {}), ...(await me.profiles(ids)) }; } catch (e) { /* names are optional */ }
+      paintProps();
+    }, () => { /* the panel still shows the proposals */ });
+  }
   // ---- editing the words ----------------------------------------------------------------------------------------
   let stale = false;
   const editingNow = () => { const a = document.activeElement; return !!(a && a.classList && a.classList.contains('ed') && a.isContentEditable); };
