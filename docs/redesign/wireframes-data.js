@@ -54,7 +54,7 @@ export default {
           res: [['walk', ['g', 'A short walk to every shop'], ['p', 'A long walk for grandparents and prams'], ['g', 'A short walk across the park']], ['nature', ['p', 'Little room is left for trees'], ['g', 'A wide park in the middle'], ['g', 'The park stays in the middle']]],
           pick: 2, after: 'The paths through the park are built. Everyone has a short walk to the shops and the park stays, and cars have to drive the long way round.' },
         { name: 'Homes', job: 'Forty families are moving to Eco Town. Ask Florence how to build their homes.',
-          s: [[0, 'Build', 'Design', 'Plan'], 'homes', [0, 'near the centre', 'by the park', 'along the main street'], 'that', [0, 'stay warm in winter', 'use little energy', 'last a long time']],
+          s: ['Build homes', [0, 'on the sunny side of the hill', 'in the shelter of the trees', 'close to the centre of town'], 'with', [0, 'big windows that face the sun', 'small windows that keep heat in', 'shutters to close on cold nights'], 'so that they stay warm, use little energy and last a long time'],
           sol: [['Timber homes', 'The homes have wooden frames and thick wool in the walls.'], ['Brick homes', 'The homes are built from fired clay bricks.'], ['Concrete homes', 'The homes are made from concrete.']],
           watch: 'The pollution from making each kind of home is shown. Then a cold night falls, and some homes stay warmer than others.',
           hands: 'Now build the homes yourself. Tap each empty plot to put a home on it.',
