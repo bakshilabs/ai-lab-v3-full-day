@@ -80,6 +80,7 @@
   <div class="bar">
     <button class="nav" id="vboard">Whiteboard</button>
     <button class="nav" id="vdeck">One screen at a time</button>
+    <button class="nav" id="theme">Dark</button>
     <span class="status" id="status"></span>
   </div>
   <div class="bar" id="deckbar">
@@ -104,6 +105,10 @@
 <script type="module">
   import D from './wireframes-data.js';
   const U = D.ui, ABC = 'ABC';
+  // the page is light unless the reader asks for dark
+  const setTheme = (t) => { document.documentElement.dataset.theme = t; document.getElementById('theme').textContent = t === 'dark' ? 'Light' : 'Dark'; try { localStorage.setItem('wf-theme', t); } catch (e) { /* storage may be blocked */ } };
+  { let t = 'light'; try { t = localStorage.getItem('wf-theme') || 'light'; } catch (e) { /* storage may be blocked */ } setTheme(t === 'dark' ? 'dark' : 'light'); }
+  document.getElementById('theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // notes for the reader: what is new at each level
   const LADDER = [
