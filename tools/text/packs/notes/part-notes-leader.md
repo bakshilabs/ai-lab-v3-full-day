@@ -142,9 +142,9 @@
 - Eco Town is already one hour and is unchanged.
 - It teaches planning a town with an AI that can be confidently wrong, and checking the plan with evidence.
 - Jobs named:
-  - Town planner
-  - Environmental scientist
-  - Data analyst
+  - Town planner: decides where homes, streets and parks should go.
+  - Architect: designs homes and schools.
+  - Engineer: designs roads, bridges and power lines.
 
 ## What children do
 
@@ -164,10 +164,10 @@
 - Final title: **Drones at work**.
 - The timetable still says “Drone delivery”, and the module contract example uses “Drone delivery”, but the curriculum says the decided title is **Drones at work**.
 - Jobs that use this:
-  - Drone pilot
-  - Survey and mapping technician
-  - Infrastructure inspector
-  - Search and rescue drone operator
+  - Drone pilot: flies drones safely.
+  - Map maker: uses photographs from the air to draw maps.
+  - Bridge inspector: checks bridges and towers for damage.
+  - Rescue worker: searches for people who are lost.
 
 ## Overall teaching aim
 
@@ -287,10 +287,10 @@
 
 - Final title: **Robots at work**.
 - Jobs that use this:
-  - Robotics engineer
-  - Robot technician
-  - Agricultural engineer
-  - Test engineer
+  - Robot engineer: designs and builds robots.
+  - Robot mechanic: keeps robots working and mends them.
+  - Farmer: grows food, sometimes with the help of machines.
+  - Tester: checks that a machine does its job properly.
 
 ## Overall teaching aim
 
@@ -402,10 +402,10 @@
 
 - Final title: **Self-driving cars**.
 - Jobs that use this:
-  - Autonomous vehicle engineer
-  - Transport planner
-  - Safety test driver
-  - Traffic data analyst
+  - Car engineer: designs cars and the parts that help them see.
+  - Transport planner: decides how streets, buses and crossings should work.
+  - Test driver: tries out new cars to check that they are safe.
+  - Road safety officer: looks for ways to make streets safer.
 
 ## Overall teaching aim
 
@@ -515,10 +515,10 @@
 
 - Final title: **Town film studio**.
 - Jobs that use this:
-  - Director
-  - Video editor
-  - Content producer
-  - Accessibility producer
+  - Director: decides how a film tells its story.
+  - Film editor: chooses which shots to keep and puts them in order.
+  - Camera operator: films the shots.
+  - Caption writer: adds words to a film for people who cannot hear it.
 
 ## Overall teaching aim
 
@@ -611,10 +611,10 @@
 
 - Final title: **Power control room**.
 - Jobs that use this:
-  - Grid control engineer
-  - Energy analyst
-  - Renewable energy technician
-  - Emergency planner
+  - Power engineer: keeps electricity flowing to homes.
+  - Wind turbine technician: looks after wind turbines.
+  - Solar panel fitter: puts solar panels on roofs.
+  - Emergency planner: decides what to do when something breaks.
 
 ## Overall teaching aim
 
