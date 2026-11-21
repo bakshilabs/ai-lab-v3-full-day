@@ -5,6 +5,18 @@
 // A round can have  applied: 'a date'  once its answers have been carried out; the panel then shows it as finished.
 // screen is the number of the screen on the whiteboard that the item belongs to, where there is one.
 export default [
+  { id: '2026-11-21-astra-3', title: 'Astra’s changes carried into the other five towns', date: '21 November 2026', applied: '21 November 2026',
+    intro: 'The owner asked for the changes that were made in Eco Town to be made in the other five towns. Every level now has one button that starts the test, a context line that invites the child to think, results that say what happened, a second try that keeps the first result in view, and a recap that is answered by tapping the town. The old hands-on step after the choice is gone. Optional challenges were not added.',
+    groups: [
+      { title: 'The test buttons in each town',
+        items: [
+          { id: 'c1', what: 'Drone City.', after: 'The six buttons are “Launch the drone”, “Make the wind gust”, “Send the parcel”, “Take the photos”, “Photograph the blade” and “Start the search”.' },
+          { id: 'c2', what: 'Robot Farm.', after: 'The six buttons are “Start picking”, “Pack the tray”, “Send the robot”, “Empty the bin”, “Start weeding” and “Send the supplies”.' },
+          { id: 'c3', what: 'Crossways.', after: 'The six buttons are “Bring in the fog”, “Send people across”, “Open the school gates”, “Send the cyclist across”, “Call a car” and “Open the street”.' },
+          { id: 'c4', what: 'Studio Bay.', after: 'The six buttons are “Roll the camera”, “Play the film”, “Show the first version”, “Play it to an audience”, “Show it to everyone” and “Show the festival film”.' },
+          { id: 'c5', what: 'Power Ridge.', after: 'The six buttons are “Wake the towns”, “Bring on tomorrow”, “Run one whole day”, “Leave the control room”, “Plug in the cars” and “Restore the power”.' },
+        ] },
+    ] },
   { id: '2026-11-21-astra-2', title: 'Astra’s further feedback: context, results, second tries and recaps', date: '21 November 2026', applied: '21 November 2026',
     intro: 'Astra sent six further points. The owner agreed five of them in conversation, and they have been carried out in Eco Town. The owner decided not to add optional challenges for now.',
     groups: [
