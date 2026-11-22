@@ -7,8 +7,8 @@ const { THREE, PAL, blk, group } = V, TOP = TW.TOP, W = 1280, H = 720;
 const G = group(MAP.world), kit = TW.makeKit(G);
 const soft = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o }), SUN = new THREE.MeshBasicMaterial({ color: '#ffd257' }), SUN_SOFT = soft('#ffd257', 0.85), WHITE_SOFT = soft('#ffffff', 0.55);
 const cell = (x, z, y, m = SUN_SOFT, s = 0.9) => blk(G, x + 0.5, z + 0.5, s, s, y + 0.02, 0.05, '#ffd257', { shadow: false, mat: m });
-const plot = (x, z, m = SUN_SOFT) => { for (let a = -1; a <= 0; a++) for (let b = -1; b <= 0; b++) cell(Math.floor(x) + a, Math.floor(z) + b, TOP, m, 1.02); };
-const home = (x, z, face = 1, roof = PAL.roof[0]) => kit.home(x, z, TOP, PAL.wall[0], face, roof);
+const plot = (x, z, y = TOP, m = SUN_SOFT) => blk(G, x, z, 2.5, 2.5, y + 0.03, 0.06, '#ffd257', { shadow: false, mat: m });
+const home = (x, z, face = 1, y = TOP, roof = PAL.roof[0]) => kit.home(x, z, y, PAL.wall[0], face, roof);
 
 const css = `
 .cx { position: absolute; inset: 0; z-index: 6; font-family: var(--ui-body); color: var(--ui-ink); overflow: hidden; }
@@ -41,6 +41,10 @@ const css = `
 .cx .sw { width: 62px; height: 34px; border: 3px solid var(--ui-ink); border-radius: 999px; background: var(--ui-paper-dim); position: relative; } .cx .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--ui-ink); }
 .cx .sw.on { background: var(--ui-good); } .cx .sw.on::after { left: 30px; background: #fff; }
 .cx .seasons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .cx .sea { display: grid; place-items: center; height: 46px; background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 12px; box-shadow: 0 4px 0 var(--ui-ink); font: 700 17px/1 var(--ui-body); } .cx .sea.on { background: var(--ui-sun); }
+.cx .led { position: absolute; transform: translate(-50%, -50%); font: 800 44px/1 var(--ui-display); color: #7dffa8; text-shadow: 0 0 12px rgba(125,255,168,.7); letter-spacing: 1px; z-index: 2; }
+.cx .led.y { color: #ffd257; text-shadow: 0 0 12px rgba(255,210,87,.7); } .cx .led.b { color: #9fd0f5; text-shadow: 0 0 12px rgba(159,208,245,.7); }
+.cx .plate { position: absolute; transform: translate(-50%, -50%); padding: 5px 14px 6px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 10px; font: 800 20px/1 var(--ui-display); white-space: nowrap; z-index: 2; }
+.cx .plate.on { background: var(--ui-sun); }
 .cx .frame { position: absolute; left: 0; right: 0; top: 0; height: 428px; border: 22px solid #2b3a55; border-bottom-width: 0; z-index: 1; } .cx .frame i { position: absolute; top: 0; bottom: 0; width: 16px; background: #2b3a55; }
 `;
 const I = {
@@ -79,26 +83,7 @@ const r = (x, y, w, h, c, sh = 0) => `${sh ? `<rect x="${x + sh}" y="${y + sh}" 
 const d = (x, y, w, h, on = true) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on ? '#ffd257' : '#ffffff'}" fill-opacity="${on ? 0.55 : 0.35}" stroke="${on ? '#1f2a44' : '#4a556e'}" stroke-width="4" stroke-dasharray="14 10"/>`;
 const kid = (x, y, c, s = 1) => r(x, y - 34 * s, 20 * s, 22 * s, c) + r(x + 2 * s, y - 50 * s, 16 * s, 16 * s, '#f1c9a0') + r(x + 2 * s, y - 12 * s, 6 * s, 12 * s, '#2b3a55') + r(x + 12 * s, y - 12 * s, 6 * s, 12 * s, '#2b3a55');
 
-// ---- the flat drawings ------------------------------------------------------------------------------------------------
-function factory() {
-  let s = r(0, 0, 1280, 720, '#efe6d2') + r(0, 560, 1280, 160, '#c9c2b4') + r(0, 560, 1280, 8, '#a9a294');
-  for (let k = 0; k < 4; k++) s += r(330 + k * 150, 96, 120, 100, '#bfe3f5') + r(330 + k * 150, 96, 120, 8, '#fff') + r(386 + k * 150, 96, 8, 100, '#efe6d2');
-  for (let k = 0; k < 9; k++) s += r(k * 160 - 20, 0, 14, 62, '#2b3a55'); s += r(0, 56, 1280, 16, '#2b3a55');
-  // the crane and the wall panel it carries
-  s += r(858, 48, 90, 30, '#ffd257', 5) + r(900, 78, 6, 150, '#1f2a44') + r(884, 224, 38, 12, '#1f2a44');
-  s += r(804, 236, 196, 150, '#c9925a', 8) + r(804, 286, 196, 8, '#a9743f') + r(804, 336, 196, 8, '#a9743f') + r(858, 262, 84, 60, '#9fd0f5') + r(858, 262, 84, 6, '#fff');
-  // the building bay: a foundation, one wall in place, and dashed places for the rest
-  s += r(310, 532, 520, 28, '#8d8378', 6) + r(350, 500, 440, 32, '#bdbcb6', 6);
-  s += r(370, 350, 200, 150, '#c9925a', 6) + r(370, 400, 200, 8, '#a9743f') + r(370, 450, 200, 8, '#a9743f') + r(430, 412, 60, 88, '#7a5a33') + r(476, 452, 8, 8, '#ffd257');
-  s += d(570, 350, 200, 150) + d(350, 300, 440, 50, false) + d(400, 254, 340, 46, false) + d(460, 212, 220, 42, false);
-  // the diagram on the wall
-  s += r(40, 120, 250, 300, '#2b3a55', 8) + `<g fill="none" stroke="#dff1f7" stroke-width="4"><rect x="80" y="330" width="170" height="20"/><rect x="90" y="250" width="75" height="80"/><rect x="165" y="250" width="75" height="80"/><path d="M76 250h178v-22H76zM100 228h130v-22H100zM124 206h82v-20h-82z"/></g>`;
-  for (const [n, x, y] of [[1, 62, 340], [2, 128, 290], [3, 202, 290], [4, 165, 174]]) s += `<circle cx="${x}" cy="${y}" r="15" fill="${n === 3 ? '#ffd257' : '#dff1f7'}"/><text x="${x}" y="${y + 7}" text-anchor="middle" font="800 20px Bricolage" style="font:800 20px Bricolage,Inter" fill="#1f2a44">${n}</text>`;
-  // finished kits waiting on the floor
-  for (let k = 0; k < 3; k++) s += r(170 + k * 42, 480, 34, 80, '#c9925a', 5) + r(170 + k * 42, 506, 34, 6, '#a9743f');
-  s += r(40, 520, 110, 40, '#bdbcb6', 5) + r(52, 496, 86, 24, '#bdbcb6');
-  return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
-}
+// ---- the flat drawing of the indoor farm (a platform game is flat by nature) --------------------------------------------
 function farm() {
   const u = 40; let s = r(0, 0, 1280, 720, '#dff1f7');
   // the town on top: a block with a glass greenhouse on its roof, and the street
@@ -120,72 +105,152 @@ function farm() {
   s += kid(566, 520, '#e0503a', 1.25) + r(556, 470, 44, 8, '#e0503a');
   return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
 }
-function school() {
-  let s = r(0, 0, 1280, 720, '#dff1f7') + r(0, 560, 1280, 160, '#86c86b') + r(0, 560, 1280, 10, '#6fb257') + r(0, 600, 1280, 30, '#ecd29a');
-  // the school cut open: two floors of three rooms, a roof of steps, and a bell
-  s += r(250, 196, 740, 372, '#2b3a55') + r(230, 150, 780, 46, '#c8643f', 6) + r(290, 108, 660, 42, '#c8643f') + r(350, 70, 540, 38, '#d0774a') + r(585, 14, 70, 56, '#fff4dc') + r(605, 30, 30, 28, '#ffd257');
-  const room = (c, f, col) => r(262 + c * 242, 208 + f * 180, 230, 168, col);
-  s += room(0, 0, '#fff4dc') + room(1, 0, '#fbecd0') + room(0, 1, '#fbecd0') + room(1, 1, '#fff4dc');
-  // a classroom with desks, a library, a hall, and another classroom
-  s += r(282, 228, 120, 60, '#2f4f8f') + r(292, 330, 44, 12, '#c9925a') + r(310, 342, 8, 34, '#7a5a33') + r(366, 330, 44, 12, '#c9925a') + r(384, 342, 8, 34, '#7a5a33') + kid(440, 376, '#2e9b5a');
-  for (let k = 0; k < 2; k++) { s += r(524, 236 + k * 62, 190, 8, '#7a5a33'); for (let b = 0; b < 9; b++) s += r(530 + b * 20, 208 + k * 62 + (b % 3) * 3, 14, 28 - (b % 3) * 3, ['#e0503a', '#3f78b5', '#ffd257', '#2e9b5a', '#8a5fc2'][(b + k) % 5]); } s += kid(660, 376, '#f08ab8');
-  s += r(524, 408, 110, 70, '#9fd0f5') + r(540, 520, 60, 12, '#c9925a') + kid(690, 556, '#3f78b5');
-  s += r(282, 420, 90, 50, '#2f4f8f');
-  // the places for the part that is chosen (a ramp at each way in), and the places for the other parts
-  s += `<path d="M112 568 L262 568 L262 500 Z" fill="#ffd257" fill-opacity=".55" stroke="#1f2a44" stroke-width="4" stroke-dasharray="14 10"/>`;
-  s += d(746, 208, 232, 168, false) + d(746, 388, 232, 168, false) + d(262, 478, 70, 78, false) + d(1000, 480, 66, 80, false);
-  // children arriving, one in a wheelchair, and a tree
-  s += kid(60, 600, '#e0503a') + kid(1080, 604, '#8a5fc2') + kid(1180, 600, '#ffd257');
-  s += r(150, 566, 26, 22, '#3f78b5') + r(154, 550, 18, 16, '#f1c9a0') + `<circle cx="160" cy="596" r="14" fill="none" stroke="#1f2a44" stroke-width="5"/>` + r(176, 588, 14, 5, '#1f2a44');
-  s += r(1206, 470, 12, 90, '#7a5a33') + r(1170, 400, 84, 70, '#5fa35a', 5) + r(1186, 366, 52, 36, '#74b56a');
-  return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
+// ---- rooms of their own: a factory, a control room and a school, built from the same blocks as the town -----------------
+const GL = (c) => new THREE.MeshBasicMaterial({ color: c });
+const ghost = (g, x, z, w, d, y, h, on = true) => blk(g, x, z, w, d, y, h, '#ffd257', { shadow: false, mat: on ? soft('#ffd257', 0.62) : soft('#ffffff', 0.42) });
+const who = (g, x, z, c, y = 0, k = 1.5, hat = null, turn = 0) => { const p = V.person(g, c); p.position.set(x, y, z); p.scale.setScalar(k); p.rotation.y = turn; if (hat) blk(p, 0, 0, 0.44, 0.44, 0.98, 0.14, hat); return p; };
+const wheelchair = (g, x, z, y, c) => { const p = group(g, x, y, z); blk(p, 0, 0, 0.7, 0.7, 0.35, 0.12, '#2b3a55'); blk(p, -0.32, 0, 0.1, 0.7, 0.47, 0.7, '#2b3a55'); for (const zz of [-0.4, 0.4]) blk(p, 0, zz, 0.7, 0.1, 0, 0.7, '#1f2a44', { shadow: false }); blk(p, 0.05, 0, 0.5, 0.42, 0.47, 0.6, c); blk(p, 0.05, 0, 0.44, 0.44, 1.07, 0.44, '#f1c9a0'); return p; };
+const panel = (g, x, z, y, alongX = true) => { const w = alongX ? 1.9 : 0.16, dd = alongX ? 0.16 : 1.9; blk(g, x, z, w, dd, y, 1.45, PAL.timber); for (const yy of [0.5, 1.0]) blk(g, x, z, w + 0.04, dd + 0.04, y + yy, 0.07, '#a9743f', { shadow: false }); blk(g, x, z, alongX ? 0.7 : 0.2, alongX ? 0.2 : 0.7, y + 0.6, 0.5, PAL.glass, { shadow: false }); };
+
+function factory3d(g) {
+  blk(g, 0, 0, 27, 16, -0.4, 0.4, '#dcd5c5'); for (const x of [-6.2, 5.6]) blk(g, x, 0, 0.18, 16, 0, 0.02, '#ffd257', { shadow: false }); blk(g, 30, 0, 34, 40, -0.42, 0.4, '#86c86b', { shadow: false });
+  // the walls: the back wall has windows, the right wall has a wide open door, and the front wall is left out
+  blk(g, 0, -7.9, 27, 0.4, 0, 7.2, '#efe6d2'); for (let k = 0; k < 6; k++) blk(g, -10.6 + k * 4.2, -7.66, 2.8, 0.1, 3.6, 2.4, '#cfeaf8', { shadow: false, mat: GL('#cfeaf8') });
+  blk(g, -13.4, 0, 0.4, 16, 0, 7.2, '#e6dcc6'); blk(g, 13.4, -5.4, 0.4, 5.2, 0, 7.2, '#e6dcc6'); blk(g, 13.4, 6.2, 0.4, 3.6, 0, 7.2, '#e6dcc6'); blk(g, 13.4, 0.8, 0.4, 7.2, 5.2, 2, '#e6dcc6');
+  for (const x of [-10.5, 10.5]) { blk(g, x, -0.1, 0.3, 15.6, 7.2, 0.35, '#2b3a55'); blk(g, x, -3, 0.5, 0.5, 6.7, 0.4, '#ffd257', { shadow: false, mat: GL('#fff3c4') }); blk(g, x, 3, 0.5, 0.5, 6.7, 0.4, '#ffd257', { shadow: false, mat: GL('#fff3c4') }); }
+  // the crane: two rails, a yellow bridge, and a wall panel on the hook
+  blk(g, 0, -7.2, 27, 0.3, 6.1, 0.3, '#2b3a55'); blk(g, 0, 7.4, 27, 0.3, 6.1, 0.3, '#2b3a55'); blk(g, 1.3, 0.1, 0.8, 14.8, 5.7, 0.55, '#ffd257'); blk(g, 1.3, 1, 1.2, 1.2, 5.2, 0.5, '#e9ad1c'); blk(g, 1.3, 1, 0.08, 0.08, 4.25, 0.95, '#1f2a44', { shadow: false }); blk(g, 1.3, 1, 0.5, 0.2, 4.1, 0.16, '#1f2a44', { shadow: false });
+  panel(g, 1.3, 1, 2.65, false);
+  // the building bay: a home half made, with yellow places for the parts that are missing
+  blk(g, -2.2, 1, 5.2, 5.2, 0, 0.16, '#8d8378'); blk(g, -2.2, 1, 2.5, 2.5, 0.16, 0.2, PAL.concrete);
+  panel(g, -2.2, 0.13, 0.36, true); panel(g, -3.07, 1, 0.36, false); ghost(g, -1.33, 1, 0.2, 1.9, 0.36, 1.45); ghost(g, -2.2, 1.87, 1.9, 0.2, 0.36, 1.45, false);
+  ghost(g, -2.2, 1, 2.2, 2.2, 1.85, 0.24, false); ghost(g, -2.2, 1, 1.6, 2.2, 2.09, 0.24, false); ghost(g, -2.2, 1, 1.0, 2.2, 2.33, 0.22, false);
+  // racks of parts along the back wall: walls, roofs, foundations, doors and windows
+  for (let k = 0; k < 7; k++) { blk(g, -12 + k * 0.26, -6.6, 0.16, 1.9, 0, 1.45, k % 2 ? '#c08a52' : PAL.timber); }
+  blk(g, -10.9, -6.6, 2.6, 2.3, 0, 0.1, '#4a556e'); for (let k = 0; k < 5; k++) { blk(g, -7.4, -6.3, 2.15, 2.15, k * 0.52, 0.22, PAL.roof[k % 3]); blk(g, -7.4, -6.3, 1.65, 2.15, k * 0.52 + 0.22, 0.22, PAL.roof[k % 3]); }
+  for (let k = 0; k < 6; k++) blk(g, -4, -6.3, 2.5, 2.5, k * 0.24, 0.2, k % 2 ? '#b0afa8' : PAL.concrete);
+  for (let k = 0; k < 5; k++) blk(g, -0.9 + k * 0.3, -6.9, 0.12, 0.9, 0, 1.5, PAL.trunk); for (let k = 0; k < 5; k++) blk(g, 1.6 + k * 0.3, -6.9, 0.12, 0.9, 0, 0.9, PAL.glass, { mat: GL('#9fd0f5') });
+  // the diagram on the back wall: the parts of a home, with the wall that comes next in yellow
+  blk(g, 7.4, -7.62, 5.2, 0.12, 2.6, 3.6, '#2b3a55'); const W1 = GL('#dff1f7'), Y1 = GL('#ffd257');
+  blk(g, 7.4, -7.5, 3.2, 0.06, 3.0, 0.22, '#fff', { shadow: false, mat: W1 }); blk(g, 6.75, -7.5, 1.2, 0.06, 3.3, 1.1, '#fff', { shadow: false, mat: W1 }); blk(g, 8.05, -7.5, 1.2, 0.06, 3.3, 1.1, '#fff', { shadow: false, mat: Y1 });
+  blk(g, 7.4, -7.5, 3.0, 0.06, 4.5, 0.3, '#fff', { shadow: false, mat: W1 }); blk(g, 7.4, -7.5, 2.2, 0.06, 4.85, 0.3, '#fff', { shadow: false, mat: W1 }); blk(g, 7.4, -7.5, 1.3, 0.06, 5.2, 0.3, '#fff', { shadow: false, mat: W1 });
+  // the saw bench and the logs on the left, and the roller belt that carries panels to the bay
+  for (let k = 0; k < 5; k++) blk(g, -11.6, -2.6 + k * 0.5, 2.6, 0.42, (k % 2) * 0.42, 0.42, k % 2 ? '#a9743f' : PAL.timber); blk(g, -11.2, 1.6, 2.6, 1.6, 0, 0.9, '#4a556e'); blk(g, -11.2, 1.6, 0.1, 1.1, 0.9, 0.7, '#c9d2da'); blk(g, -11.2, 1.6, 2.2, 0.5, 0.9, 0.2, PAL.timber);
+  blk(g, -8.4, 5.2, 8.4, 1.5, 0, 0.6, '#4a556e'); for (let k = 0; k < 16; k++) blk(g, -12.3 + k * 0.52, 5.2, 0.28, 1.3, 0.6, 0.14, '#c9d2da', { shadow: false }); blk(g, -9.4, 5.2, 1.9, 1.45, 0.74, 0.16, PAL.timber); blk(g, -6.6, 5.2, 1.9, 1.45, 0.74, 0.16, PAL.timber);
+  // a fork-lift carrying a roof, a finished home on a trailer by the door, and the people who work here
+  blk(g, 6.2, 4.6, 2, 1.3, 0.3, 0.9, '#ffd257'); blk(g, 5.9, 4.6, 0.9, 1.1, 1.2, 0.9, '#2b3a55'); blk(g, 7.25, 4.6, 0.16, 1.2, 0.2, 2.6, '#1f2a44'); blk(g, 7.9, 4.6, 1.3, 1.1, 0.5, 0.1, '#c9d2da'); for (const [a, b] of [[5.6, 3.95], [6.9, 3.95], [5.6, 5.25], [6.9, 5.25]]) blk(g, a, b, 0.5, 0.2, 0, 0.5, '#1f2a44');
+  blk(g, 8.2, 4.6, 1.9, 1.9, 0.6, 0.22, PAL.roof[0]); blk(g, 8.2, 4.6, 1.4, 1.9, 0.82, 0.22, PAL.roof[0]);
+  blk(g, 10.2, 0.8, 4.2, 2.8, 0.45, 0.25, '#2b3a55'); for (const [a, b] of [[8.8, -0.6], [11.6, -0.6], [8.8, 2.2], [11.6, 2.2]]) blk(g, a, b, 0.7, 0.24, 0, 0.7, '#1f2a44'); TW.makeKit(g).home(10.2, 0.8, 0.7, PAL.timber, 1, PAL.roof[0]);
+  who(g, -0.2, 3.6, '#3f78b5', 0, 1.5, '#ffd257'); who(g, -9.6, 2.9, '#e0503a', 0, 1.5, '#ffd257'); who(g, 4.6, -3.4, '#2e9b5a', 0, 1.5, '#ffd257'); who(g, 9.6, 5.8, '#8a5fc2', 0, 1.5, '#ffd257');
+  return { hook: [1.3, 3.4, 1], yes: [-1.33, 1.1, 1] };
 }
-const chart = () => { const sun = 'M0 96 L40 96 C70 96 90 30 150 30 C210 30 230 96 260 96 L400 96 Z', wind = 'M0 70 C60 50 110 84 170 70 C230 54 300 30 400 44'; return `<svg viewBox="0 0 400 118" style="width:100%;height:118px"><rect width="400" height="100" fill="#efe6d2"/><rect x="290" width="110" height="100" fill="#2b3a55" opacity=".25"/><path d="${sun}" fill="#ffd257" stroke="#1f2a44" stroke-width="2.5"/><path d="${wind}" fill="none" stroke="#3f78b5" stroke-width="5"/><rect x="262" y="60" width="130" height="36" fill="#1c7a45" opacity=".8"/><rect x="298" y="0" width="5" height="100" fill="#b3243a"/><g style="font:700 13px Inter" fill="#1f2a44"><text x="4" y="114">Morning</text><text x="150" y="114" text-anchor="middle">Midday</text><text x="300" y="114" text-anchor="middle">Evening</text><text x="396" y="114" text-anchor="end">Night</text></g></svg>`; };
-const src = (icon, name, pct, col, on) => `<div class="src">${icon}<b>${name}</b><div class="bar"><i style="width:${pct}%;background:${col}"></i></div><i class="sw${on ? ' on' : ''}"></i></div>`;
+
+function control3d(g, view) {
+  blk(g, 0, 0, 18, 14, -0.4, 0.4, '#2b3350');
+  // the back wall with one wide window, and what is seen through it
+  blk(g, 0, -5.2, 15.4, 0.1, 1.4, 4.6, '#fff', { shadow: false, mat: new THREE.MeshBasicMaterial({ map: view }) });
+  blk(g, 0, -5, 18, 0.5, 0, 1.4, '#3a4668'); blk(g, 0, -5, 18, 0.5, 6, 1.6, '#3a4668'); for (const x of [-8.35, 8.35]) blk(g, x, -5, 1.3, 0.5, 1.4, 4.6, '#3a4668'); for (const x of [-2.6, 2.6]) blk(g, x, -4.9, 0.22, 0.3, 1.4, 4.6, '#2b3350');
+  blk(g, -9.1, 0, 0.4, 14, 0, 7.6, '#333e5e'); blk(g, 9.1, 0, 0.4, 14, 0, 7.6, '#333e5e');
+  // the time of day: a row of lamps over the window, with the sun where the day has reached and the moon at the end
+  for (let k = 0; k < 13; k++) blk(g, -7.2 + k * 1.2, -4.7, 0.5, 0.2, 6.5, 0.5, '#fff', { shadow: false, mat: GL(k < 9 ? '#ffd257' : '#59648a') });
+  blk(g, 2.4, -4.5, 0.95, 0.3, 6.28, 0.95, '#fff', { shadow: false, mat: GL('#ffb070') }); blk(g, 7.2, -4.5, 0.8, 0.3, 6.35, 0.8, '#fff', { shadow: false, mat: GL('#dff1f7') });
+  // the desk: three stations (sun, wind, battery) and the wheel of seasons
+  blk(g, 0, -1.9, 16, 2.6, 0, 1.25, '#4a556e'); blk(g, 0, -1.9, 16.3, 2.9, 1.25, 0.16, '#fffaf0');
+  const lamps = (x, n, c) => { for (let k = 0; k < 8; k++) blk(g, x - 1.05 + k * 0.3, -1.25, 0.22, 0.22, 1.41, 0.2, '#fff', { shadow: false, mat: GL(k < n ? c : '#8d95a8') }); };
+  const station = (x, n, c, btn) => { blk(g, x, -2.75, 2.5, 0.3, 1.41, 1.25, '#1f2a44'); lamps(x, n, c); blk(g, x, -0.85, 0.75, 0.5, 1.41, 0.26, '#fff', { mat: GL(btn) }); blk(g, x, -0.85, 0.95, 0.7, 1.41, 0.08, '#1f2a44', { shadow: false }); };
+  station(-5.9, 1, '#ffd257', '#7dffa8'); station(-2.7, 6, '#9fd0f5', '#7dffa8'); station(0.5, 5, '#7dffa8', '#e0503a');
+  // small models on top of each screen: a solar panel, a wind turbine and a battery
+  const sp = blk(g, -5.9, -2.75, 1.5, 0.9, 2.78, 0.08, PAL.solar); sp.rotation.x = 0.5; blk(g, -5.9, -2.85, 0.1, 0.1, 2.66, 0.2, '#c9d2da');
+  blk(g, -2.7, -2.75, 0.12, 0.12, 2.66, 1.1, PAL.white); for (let k = 0; k < 3; k++) { const b = blk(g, -2.7, -2.66, 0.1, 0.05, 3.72, 0.62, PAL.white, { shadow: false }); b.position.y = 3.72; b.geometry; b.rotation.z = k * 2.094 + 0.3; b.translateY(0.31); }
+  blk(g, 0.5, -2.75, 1.2, 0.5, 2.66, 0.62, PAL.white); blk(g, 1.2, -2.75, 0.14, 0.24, 2.84, 0.26, '#1f2a44'); blk(g, 0.25, -2.72, 0.6, 0.5, 2.7, 0.54, '#1c7a45', { shadow: false, mat: GL('#2aa35e') });
+  // the battery as a tall glass tank of ten blocks, six of them full
+  for (let k = 0; k < 10; k++) blk(g, 7.4, 1.2, 0.95, 0.95, 0.08 + k * 0.5, 0.42, '#fff', { shadow: false, mat: k < 6 ? GL('#2aa35e') : soft('#ffffff', 0.18) }); blk(g, 7.4, 1.2, 1.3, 1.3, 0, 0.08, '#1f2a44'); blk(g, 7.4, 1.2, 1.3, 1.3, 5.08, 0.14, '#1f2a44');
+  // the wheel of seasons: four big keys, with winter pressed and lit
+  const SEA = [['#7cc04a', -0.55, -0.55], ['#ffd257', 0.55, -0.55], ['#e08a3a', -0.55, 0.55], ['#dff1f7', 0.55, 0.55]]; SEA.forEach(([c, a, b], k) => blk(g, 4.9 + a, -1.75 + b, 0.95, 0.95, 1.41, k === 3 ? 0.12 : 0.34, '#fff', { mat: GL(c) })); blk(g, 4.9, -1.75, 2.4, 2.4, 1.41, 0.06, '#1f2a44', { shadow: false });
+  // the child's own figure at the desk, seen from behind
+  who(g, -1.1, 0.9, '#e0503a', 0, 2.1); blk(g, 3.4, 1.6, 1.1, 1.1, 0, 0.9, '#4a556e');
+  return { n0: [-5.9, 2.05, -2.58], n1: [-2.7, 2.05, -2.58], n2: [0.5, 2.05, -2.58], l0: [-5.9, 1.2, -0.3], l1: [-2.7, 1.2, -0.3], l2: [0.5, 1.2, -0.3], sea: [4.9, 1.2, -0.3], tank: [7.4, 5.75, 1.2], day: [2.4, 7.5, -4.5], btn: [0.5, 1.7, -0.85] };
+}
+
+function school3d(g) {
+  blk(g, 0, 2, 44, 34, -0.4, 0.4, '#86c86b'); blk(g, 0, 7.2, 44, 2, 0, 0.03, PAL.sand, { shadow: false }); blk(g, -13.6, 3.6, 2, 5.4, 0, 0.03, PAL.sand, { shadow: false });
+  const X0 = -7.5, Z0 = -3, Z1 = 2.4, P = 0.9, FL = 3.3;   // the school stands on a base, so the way in needs a ramp
+  blk(g, 0, -0.3, 15.6, 5.8, 0, P, '#d9d2c2');
+  blk(g, 0, Z0, 15.6, 0.3, P, FL * 2, '#fff4dc'); for (const x of [X0 - 0.05, -X0 + 0.05]) blk(g, x, -0.3, 0.3, 5.8, P, FL * 2, '#fbecd0'); blk(g, 0, -0.3, 15.6, 5.8, P + FL - 0.2, 0.2, '#e6dcc6');
+  for (const x of [-2.5, 2.5]) blk(g, x, -0.9, 0.22, 4.2, P, FL * 2, '#f6e1bd');
+  for (let f = 0; f < 2; f++) for (const x of [-5, 0, 5]) blk(g, x, Z0 + 0.18, 2.2, 0.08, P + f * FL + 1.2, 1.3, '#fff', { shadow: false, mat: GL('#bfe3f5') });
+  // the roof of steps and the bell
+  blk(g, 0, -0.3, 16.8, 6.8, P + FL * 2, 0.5, PAL.roof[0]); blk(g, 0, -0.3, 14.4, 5, P + FL * 2 + 0.5, 0.5, PAL.roof[2]); blk(g, 0, -0.3, 12, 3.2, P + FL * 2 + 1, 0.5, PAL.roof[0]); blk(g, 0, -0.3, 1.6, 1.6, P + FL * 2 + 1.5, 1.6, PAL.wall[0]); blk(g, 0, 0.55, 0.7, 0.2, P + FL * 2 + 1.9, 0.7, '#ffd257', { mat: GL('#ffd257') }); blk(g, 0, -0.3, 2, 2, P + FL * 2 + 3.1, 0.3, PAL.roof[0]);
+  const desk = (x, z, y) => { blk(g, x, z, 1.1, 0.7, y + 0.55, 0.1, PAL.timber); blk(g, x - 0.4, z, 0.1, 0.5, y, 0.55, PAL.trunk); blk(g, x + 0.4, z, 0.1, 0.5, y, 0.55, PAL.trunk); };
+  // upstairs left: a classroom. upstairs middle: the library
+  const U = P + FL; blk(g, -5, Z0 + 0.2, 2.6, 0.08, U + 0.9, 0.5, PAL.solar, { shadow: false }); for (const [x, z] of [[-6.2, -0.8], [-4.4, -0.8], [-6.2, 0.9], [-4.4, 0.9]]) desk(x, z, U); who(g, -6.2, -0.1, '#2e9b5a', U, 1.15); who(g, -4.4, 1.6, '#ffd257', U, 1.15); who(g, -3.3, -2, '#8a5fc2', U, 1.5);
+  for (let k = 0; k < 2; k++) { blk(g, 0, Z0 + 0.5, 4, 0.6, U + 0.1 + k * 1.1, 0.12, PAL.trunk); for (let b = 0; b < 12; b++) blk(g, -1.75 + b * 0.32, Z0 + 0.5, 0.24, 0.5, U + 0.22 + k * 1.1, 0.6 + (b % 3) * 0.1, CLR[(b + k) % 6]); } blk(g, 0.2, 0.6, 2.4, 1.8, U, 0.05, '#f08ab8', { shadow: false }); who(g, 0.4, 0.7, '#3f78b5', U + 0.05, 1.15);
+  // downstairs left: the hall. downstairs middle: a classroom
+  blk(g, -5.6, Z0 + 0.6, 1.4, 0.5, P, 1.6, '#3f78b5'); blk(g, -3.6, Z0 + 0.6, 1.4, 0.5, P, 1.6, '#e0503a'); who(g, -5, 0.8, '#f08ab8', P, 1.15);
+  blk(g, 0, Z0 + 0.2, 2.6, 0.08, P + 0.9, 0.5, PAL.solar, { shadow: false }); for (const [x, z] of [[-1, -0.6], [1, -0.6], [0, 1.1]]) desk(x, z, P); who(g, -1, 0.1, '#e0503a', P, 1.15); who(g, 1.5, -1.8, '#2e9b5a', P, 1.5);
+  // the places: yellow for the ramp that is chosen, white for the lift, the quiet room, the wide door and the playground
+  for (let k = 0; k < 6; k++) ghost(g, X0 - 0.6 - k * 0.9, 1.2, 0.9, 1.8, 0, P * (1 - k / 6));
+  ghost(g, 5, 0.6, 2.2, 2.2, P, FL * 2 - 0.3, false); ghost(g, 5.1, -1.6, 4.4, 1.9, U, 2.4, false); ghost(g, X0, 1.2, 0.5, 1.9, P, 2.4, false); ghost(g, 13.5, 2.2, 6, 5, 0, 0.5, false);
+  // the ramp being carried by the mouse
+  const rp = group(g, -5.4, 2.4, 6.4); for (let k = 0; k < 6; k++) blk(rp, 2.25 - k * 0.9, 0, 0.9, 1.8, 0, P * (1 - k / 6) + 0.06, '#bdbcb6');
+  // children arriving, and trees
+  wheelchair(g, -13.6, 2.4, 0, '#3f78b5'); who(g, -12.4, 6.8, '#e0503a', 0, 1.2); who(g, -8, 7.3, '#ffd257', 0, 1.2); who(g, 2, 7.1, '#8a5fc2', 0, 1.2); who(g, 6.5, 7.4, '#2e9b5a', 0, 1.2);
+  for (const [x, z] of [[-17, -3], [-15.5, 9], [11, -5], [18, 6.5], [16.5, -6], [-10.5, -6]]) V.tree(g, x, z, 2.1, 0);
+  return { ramp: [-5.4, 3.1, 6.4], yes: [-10.2, 0.9, 1.2] };
+}
+const CLR = TW.CLOTHES;
 
 // ---- the scenes -------------------------------------------------------------------------------------------------------
-// li and phase choose the state of the town, cam is [x, y, z, distance, tilt, turn], build() adds blocks and returns points
-// to project, html(p) returns the interface. A scene with flat: true hides the town behind its drawing.
-const S = TW.SPOTS, ABOVE = [8.4, 2, 0.2, 33, 1.5, TW.YAW];
+// li and phase choose the state of the town, cam is [x, y, z, distance, tilt, turn], build() adds blocks to the town and
+// returns points to project, html(p) returns the interface. A scene with room() is drawn in a room of its own.
+const S = TW.SPOTS, MAPVIEW = [4.6, 0, -0.2, 58, 1.5, 0], hAt = (x, z) => TW.heightAt(x, z);
+const LOW = [[1.4, -8.6], [1.4, -5.6], [-6.4, -6.2], [-5.6, -9]];
+const road = (cells, m) => { for (const [x, z] of cells) { const y = hAt(x + 0.5, z + 0.5); if (m) cell(x, z, y, m); else blk(G, x + 0.5, z + 0.5, 1, 1, y, 0.08, PAL.sand, { shadow: false }); } };
+const run = (x0, z0, x1, z1) => { const o = []; for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x++) for (let z = Math.min(z0, z1); z <= Math.max(z0, z1); z++) o.push([x, z]); return o; };
 export const SCENES = [
-  { id: 'land-map', li: 0, cam: [7.6, 2, 0.4, 37, 1.5, TW.YAW], build() { home(S[0][0], S[0][1]); home(S[1][0], S[1][1]); plot(S[2][0], S[2][1]); plot(S[3][0], S[3][1]);
-      for (const [x, z] of [[8, -1], [9, 1], [7, 1]]) cell(x, z, TOP, WHITE_SOFT, 0.7);
-      return { a: [S[2][0], TOP + 1, S[2][1]] }; },
-    html: (p) => top('Land', 'Build your plan', count(I.home(), '2 of 4')) + drag(p.a[0] - 20, p.a[1] - 46, I.roofTop()) + mouse(p.a[0] - 6, p.a[1] - 30) + florence + hint('Drag each part to a yellow place.')
-      + pal('Parts', tok(I.home(), 'Home', 'on', '2 left') + tok(I.tree(), 'Tree', '', '3 left') + tok(I.shop(), 'Shop', '', '1 left')) },
+  { id: 'land-map', li: 0, cam: MAPVIEW, build() { home(S[0][0], S[0][1]); home(S[1][0], S[1][1]); home(S[4][0], S[4][1]); home(LOW[0][0], LOW[0][1], 1, 0); home(LOW[2][0], LOW[2][1], 1, 0);
+      for (const k of [2, 3, 5]) plot(S[k][0], S[k][1]); plot(LOW[1][0], LOW[1][1], 0); plot(LOW[3][0], LOW[3][1], 0); plot(-7.2, 2.4, 0); plot(1.6, 6.2, 0);
+      plot(8.6, 0.4, TOP, WHITE_SOFT); plot(1.4, -1.6, 0, WHITE_SOFT); plot(-6.6, -2.6, 0, WHITE_SOFT);
+      return { a: [S[3][0], TOP + 1, S[3][1]] }; },
+    html: (p) => top('Land', 'Build your plan', count(I.home(), '5 of 12')) + drag(p.a[0] - 16, p.a[1] - 30, I.roofTop().replace('width="96" height="96"', 'width="64" height="64"')) + mouse(p.a[0] - 6, p.a[1] - 18) + florence + hint('Choose a part. Drag it to a yellow place.')
+      + pal('Parts', tok(I.home(), 'Home', 'on', '7 left') + tok(I.shop(), 'Shop', '', '2 left') + tok(I.tree(), 'Park', '', '3 left')) },
 
-  { id: 'paths-map', li: 1, cam: ABOVE, build() { const done = [[6, -1], [6, 0], [7, 0], [8, 0], [9, 0]]; for (const [x, z] of done) blk(G, x + 0.5, z + 0.5, 1, 1, TOP, 0.07, PAL.sand, { shadow: false });
-      for (const [x, z] of [[10, 0], [11, 0], [11, -1], [6, 1], [6, 2], [11, 1], [11, 2]]) cell(x, z, TOP);
-      return { a: [10.5, TOP, 0.5] }; },
-    html: (p) => top('Getting around', 'Build your plan', count(I.path(), '1 of 4')) + mouse(p.a[0] - 4, p.a[1] - 4) + florence + hint('Hold the mouse button and draw the path.')
-      + pal('Parts', tok(I.path(), 'Path', 'on') + tok(I.bench(), 'Bench', '', '2 left') + tok(I.lamp(), 'Lamp', '', '4 left')) },
+  { id: 'paths-map', li: 1, cam: MAPVIEW, build() { home(S[4][0], S[4][1]); home(S[5][0], S[5][1], -1); for (const [x, z] of LOW) home(x, z, 1, 0); home(-7.2, 2.4, 1, 0); kit.stall(TW.STALL[0], TOP, TW.STALL[1]);
+      road([...run(5, 0, 11, 0), ...run(6, -1, 6, -1), ...run(11, -1, 11, -1), ...run(8, 1, 8, 1), ...run(2, 0, 4, 0), ...run(2, -4, 2, -1)]);
+      road([...run(2, -7, 2, -5), ...run(6, 1, 6, 2), ...run(11, 1, 11, 2), ...run(-5, -5, 1, -5), ...run(-6, -4, -6, 1)], SUN_SOFT);
+      return { a: [2.5, 0.1, -4.4] }; },
+    html: (p) => top('Getting around', 'Build your plan', count(I.path(), '5 of 11')) + mouse(p.a[0] - 4, p.a[1] - 4) + florence + hint('Hold the mouse button and draw a path to every home.')
+      + pal('Parts', tok(I.path(), 'Path', 'on') + tok(I.wide().replace('#7a5a33', '#c9925a').replace('#7a5a33', '#c9925a'), 'Bridge', '', '1 left') + tok(I.bench(), 'Bench', '', '4 left') + tok(I.lamp(), 'Lamp', '', '6 left')) },
 
-  { id: 'paths-walk', li: 2, cam: [8.6, 2.5, 0.4, 13, 0.2, -0.35], build() { return {}; },
-    html: () => top('Getting around', 'Walk your path') + florence + `<div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i></div>` },
+  { id: 'paths-walk', li: 2, cam: [9.5, TOP + 1.25, 0.5, 7.5, 0.17, 0], build() { who(G, 9.5, 0.9, '#e0503a', TOP + 0.08, 1.3, null, 0); who(G, 9.2, -2.6, '#3f78b5', TOP + 0.08, 1.2); who(G, 9.9, -4.4, '#ffd257', TOP + 0.08, 1.2); return { me: [9.5, TOP + 1.75, 0.9] }; },
+    html: (p) => top('Getting around', 'Walk your path') + `<i class="plate on" style="left:${p.me[0]}px;top:${p.me[1] - 22}px">You</i>` + florence + `<div class="keys"><i class="key">&larr;</i><i class="key">&uarr;</i><i class="key">&rarr;</i></div>` },
 
-  { id: 'factory', flat: true, li: 2, cam: ABOVE, build() { return {}; },
-    html: () => factory() + top('Homes', 'Build your plan', count(I.home('#c8643f', '#c9925a'), '1 of 6')) + mouse(900, 316) + florence + hint('Drag each part to its place on the diagram.')
-      + pal('Home parts', tok(I.base(), 'Foundation', 'used', 'Placed') + tok(I.wall(), 'Wall', 'on', '1 left') + tok(I.roof(), 'Roof', '', '1 left') + tok(I.door(), 'Door', 'used', 'Placed')) },
+  { id: 'factory', li: 2, cam: [-0.2, 2.0, 0.6, 37, 0.46, 0.42], room: factory3d,
+    html: (p) => top('Homes', 'Build your plan', count(I.home('#c8643f', '#c9925a'), '1 of 6')) + mouse(p.hook[0] + 6, p.hook[1] + 4) + florence + hint('Drag each part to its yellow place.')
+      + pal('Home parts', tok(I.base(), 'Foundation', 'used', 'Placed') + tok(I.wall(), 'Wall', 'on', '2 left') + tok(I.roof(), 'Roof', '', '1 left') + tok(I.door(), 'Door', '', '1 left')) },
 
-  { id: 'farm', flat: true, li: 3, cam: ABOVE, build() { return {}; },
+  { id: 'farm', flat: true, li: 3, cam: MAPVIEW, build() { return {}; },
     html: () => farm() + top('Food', 'Pick the food', count(I.lettuce(), '7 of 16')) + `<div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i><i class="key">&uarr;</i><i class="key wide">Space to jump</i></div>` },
 
-  { id: 'control', li: 4, time: (m) => m.after0 + 0.75, cam: [7.5, 2, 0.5, 44, 0.42, TW.YAW], off: -150, build() { return {}; },
-    html: () => `<div class="frame"><i style="left:33%"></i><i style="left:66%"></i></div>` + top('Power', 'Keep the lights on') + florence + mouse(336, 598)
-      + `<div class="desk"><div class="card"><h3>Power coming in</h3>${src(I.sun(), 'Solar', 8, '#ffd257', true)}${src(I.wind(), 'Wind', 64, '#3f78b5', true)}${src(I.batt(), 'Battery', 42, '#1c7a45', false)}<div class="src" style="grid-template-columns:1fr auto"><b>Stored in the battery</b><b>62%</b></div></div>
-      <div class="card"><h3>Today</h3>${chart()}</div>
-      <div class="card"><h3>Season</h3><div class="seasons"><i class="sea">Spring</i><i class="sea">Summer</i><i class="sea">Autumn</i><i class="sea on">Winter</i></div></div></div>` },
+  { id: 'control', li: 4, time: (m) => m.after0 + 1.1, view: [8, 2, 1.4, 36, 0.62, TW.YAW], cam: [0.6, 3.0, -1.6, 25, 0.33, 0.08], room: control3d, night: 0.55,
+    html: (p) => top('Power', 'Keep the lights on') + florence + mouse(p.btn[0], p.btn[1] - 6)
+      + `<b class="led y" style="left:${p.n0[0]}px;top:${p.n0[1]}px">1</b><b class="led b" style="left:${p.n1[0]}px;top:${p.n1[1]}px">6</b><b class="led" style="left:${p.n2[0]}px;top:${p.n2[1]}px">5</b>`
+      + `<i class="plate" style="left:${p.l0[0]}px;top:${p.l0[1]}px">Solar</i><i class="plate" style="left:${p.l1[0]}px;top:${p.l1[1]}px">Wind</i><i class="plate on" style="left:${p.l2[0]}px;top:${p.l2[1]}px">Battery</i><i class="plate on" style="left:${p.sea[0]}px;top:${p.sea[1]}px">Winter</i><i class="plate" style="left:${p.tank[0]}px;top:${p.tank[1]}px">6 of 10</i><i class="plate" style="left:${p.day[0] + 190}px;top:${p.day[1] + 44}px">Evening</i>` },
 
-  { id: 'school', flat: true, li: 5, cam: ABOVE, build() { return {}; },
-    html: () => school() + top('A school for everyone', 'Build your plan', count(I.ramp(), '1 of 6')) + drag(230, 440, `<svg viewBox="0 0 160 80" width="160" height="80"><path d="M4 76h152V8z" fill="#bdbcb6" stroke="#1f2a44" stroke-width="4" stroke-linejoin="round"/></svg>`) + mouse(244, 440) + florence + hint('Choose a part. Its places turn yellow.')
+  { id: 'school', li: 5, cam: [-3.2, 3.0, 1.6, 36, 0.4, 0.5], room: school3d,
+    html: (p) => top('A school for everyone', 'Build your plan', count(I.ramp(), '1 of 6')) + mouse(p.ramp[0] + 4, p.ramp[1] + 6) + florence + hint('Choose a part. Its places turn yellow.')
       + pal('Parts', tok(I.books(), 'Library', 'used', 'Placed') + tok(I.ramp(), 'Ramp', 'on', '1 left') + tok(I.lift(), 'Lift', '', '1 left') + tok(I.wide(), 'Wide door', '', '1 left') + tok(I.quiet(), 'Quiet room', '', '1 left') + tok(I.swing(), 'Playground', '', '1 left')) },
 ];
 
 let ui = null;
 export function show(i) {
-  const s = SCENES[i], m = film.segs[s.li + 1]; film.seek(m.start + (s.time ? s.time(m) : s.phase === 'after' ? m.inter[0] + 0.2 : m.askTap - 0.5));
-  G.clear(); const pts = s.build() || {};
-  const st = film.dbg; st.camera.setViewOffset(W, H, 0, s.off ?? 0, W, H); st.look(...s.cam); st.camera.updateMatrixWorld(); st.draw(MAP.scene);
+  const s = SCENES[i], m = film.segs[s.li + 1], st = film.dbg; film.seek(m.start + (s.time ? s.time(m) : s.phase === 'after' ? m.inter[0] + 0.2 : m.askTap - 0.5));
+  G.clear(); let pts = {}, scene = MAP.scene;
+  if (s.room) { let view = null;
+    if (s.view) { st.camera.clearViewOffset(); st.look(...s.view); st.camera.updateMatrixWorld(); st.draw(MAP.scene); const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(st.renderer.domElement, 0, 0, W, H); view = new THREE.CanvasTexture(c); view.colorSpace = THREE.SRGBColorSpace; }
+    const n = st.newScene(26); n.light(s.night || 0); scene = n.scene; pts = s.room(group(scene), view) || {}; }
+  else pts = s.build() || {};
+  st.camera.setViewOffset(W, H, 0, s.off ?? 0, W, H); st.look(...s.cam); st.camera.updateMatrixWorld(); st.draw(scene);
   const p = Object.fromEntries(Object.entries(pts).map(([k, v]) => [k, st.screen(new THREE.Vector3(...v))]));
   if (!ui) { const stage = document.querySelector('.stage'); document.head.insertAdjacentHTML('beforeend', `<style>${css} .stage > .ui:not(.cx), .stage > canvas.fx { visibility: hidden; }</style>`); ui = document.createElement('div'); ui.className = 'ui cx'; ui.style.setProperty('--ui-florence-sprite', `url(${new URL('../animation/florence-sprite.webp', import.meta.url)})`); stage.append(ui); }
   ui.innerHTML = s.html(p); return s.id;
