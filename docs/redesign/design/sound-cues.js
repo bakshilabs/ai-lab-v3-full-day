@@ -10,7 +10,7 @@
 //   import { makeCues, registerSongs, bedPlan, BED } from '../design/sound-cues.js';
 //   const cues = makeCues({ note }, SE);          // SE is createEngine(ctx), or anything with { ctx, fx: { ctx, dest } }
 //   cues.wordLand(12.4, 0);                       // every cue takes the time to play at as its first argument
-//   cues.tests[2](40, 10.5);                      // the test scene of level 3, starting at 40 s, 10.5 s long
+//   cues.tests[2](40, 4, ['p', 'g']);             // the test of level 3 for one plan: starts at 40 s, 4 s long, ratings on the two checks
 //   registerSongs(SONGS);                         // adds the six beds 'eco1' … 'eco6' to the game's song list
 //   renderSong(ME, BED[li].song, seconds);        // then play one like any other song
 //
@@ -36,56 +36,57 @@ export function makeCues({ note }, EN, { trim = 1 } = {}) {
   const putt = (t, len, m = 43, vol = 0.03, rate = 9) => { for (let i = 0; i < len * rate; i++) N({ midi: m + (i % 4 === 3 ? 1 : 0), t: t + i / rate, dur: 0.035, vol, duty: 0.5, env: [0.003, 0.03, 0.3, 0.02] }); };
   const walkers = (t0, t1, steps, r, vol = 0.02, f0 = 650) => steps.forEach((gap, w) => { for (let t = t0 + w * 0.23; t < t1 - w * 0.2; t += gap * (0.94 + r() * 0.12)) stepTick(t, f0 + w * 70 + r() * 60, vol); });
 
-  // the six tests, each a short scene with a beginning, a middle and an end: (start time, length in seconds) -------------
+  // the six tests, each a short scene with a beginning, a middle and an end: (start time, length in seconds, ratings).
+  // `r` is the list of ratings ('g' good, 'f' fair, 'p' poor) that the plan being tested gets on the level's checks, in order.
+  // The scene then tells what happened before the tick, dash or cross appears: for example, cars are heard only when the
+  // walk is too long. Without `r` the scene plays everything (for a test of three plans at once). A length of 3 to 11 seconds works.
   const tests = [
-    // 1. Make it rain: far thunder, single drops that thicken into rain, the river rising, then three last drips
-    (t, d) => { const r = rnd(11);
+    // 1. Make it rain [flood]: far thunder and drops that thicken into rain. Good: the river stays quiet. Otherwise: the water rises.
+    (t, d, r) => { const R = rnd(11), wet = !r || r[0] !== 'g', deep = !r || r[0] === 'p';
       N({ ch: 't', midi: 48, t: t + 0.1, dur: 0.9, vol: 0.06, slide: 0.6, env: [0.03, 0.3, 0.5, 0.6] }); N({ ch: 'n', f: 420, t: t + 0.1, dur: 1.1, vol: 0.06, slide: 0.5, env: [0.05, 0.4, 0.5, 0.6], filter: { f0: 900, f1: 350 } });
-      for (let u = 0.08; u < 0.9;) { const dens = 1.5 + 12 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 0.8); N({ midi: PENTA[5 + Math.floor(r() * 6)], t: t + u * d, dur: 0.018, vol: 0.02 + r() * 0.014, duty: 0.125, env: [0.002, 0.035, 0.15, 0.03] }); u += (0.6 + r() * 0.8) / dens / d; }
+      for (let u = 0.08; u < 0.9;) { const dens = 1.5 + 12 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 0.8); N({ midi: PENTA[5 + Math.floor(R() * 6)], t: t + u * d, dur: 0.018, vol: 0.02 + R() * 0.014, duty: 0.125, env: [0.002, 0.035, 0.15, 0.03] }); u += (0.6 + R() * 0.8) / dens / Math.max(4, d); }
       N({ ch: 'n', f: 3000, t: t + d * 0.12, dur: d * 0.62, vol: 0.01, env: [d * 0.2, 0.5, 0.9, d * 0.2], filter: { type: 'highpass', f0: 1800 } });
-      N({ ch: 'n', f: 700, t: t + d * 0.3, dur: d * 0.45, vol: 0.03, env: [1.5, 0.8, 0.9, 1.4], filter: { f0: 400, f1: 1000 } });
-      N({ ch: 't', midi: 60, t: t + d * 0.34, dur: d * 0.38, vol: 0.04, slide: 1.5, env: [0.8, 0.5, 0.8, 0.8] });
+      if (wet) { N({ ch: 'n', f: 700, t: t + d * 0.3, dur: d * 0.45, vol: deep ? 0.034 : 0.022, env: [d * 0.14, d * 0.08, 0.9, d * 0.13], filter: { f0: 400, f1: 1000 } });
+        N({ ch: 't', midi: 60, t: t + d * 0.34, dur: d * 0.38, vol: 0.04, slide: deep ? 1.5 : 1.19, env: [d * 0.08, d * 0.05, 0.8, d * 0.08] }); }
       [[1.05, 91], [0.65, 88], [0.2, 84]].forEach(([b, m]) => ping(t + d - b, m, 0.05, 0.125, 0.12)); },
-    // 2. Open the shops: the shop bell, doors, many feet setting off, one car from the far homes, birds in the kept trees
-    (t, d) => { const r = rnd(22);
+    // 2. Open the shops [walk, nature]: the shop bell, doors and many feet. Walk not good: a car from the far homes. Nature good: birds.
+    (t, d, r) => { const R = rnd(22), cars = !r || r[0] !== 'g', birds = !r || r[1] === 'g';
       bell(t + 0.1, 93); bell(t + 0.34, 88);
       [0.8, 1.0, 1.3].forEach((b) => thock(t + b, 0.05, 57));
-      walkers(t + 1.1, t + d * 0.78, [0.42, 0.47, 0.38, 0.5], r);
-      N({ midi: 77, t: t + d * 0.45, dur: 0.1, vol: 0.03, duty: 0.25 }); N({ midi: 81, t: t + d * 0.45, dur: 0.1, vol: 0.03, duty: 0.25 }); putt(t + d * 0.45 + 0.2, d * 0.22);
-      [0.3, 0.62, 0.8].forEach((u, i) => chirp(t + u * d, 2 + (i % 2)));
+      walkers(t + 1.1, t + d * 0.8, r && r[0] === 'p' ? [0.42, 0.47] : [0.42, 0.47, 0.38, 0.5], R);
+      if (cars) { N({ midi: 77, t: t + d * 0.45, dur: 0.1, vol: 0.03, duty: 0.25 }); N({ midi: 81, t: t + d * 0.45, dur: 0.1, vol: 0.03, duty: 0.25 }); putt(t + d * 0.45 + 0.2, d * (r && r[0] === 'p' ? 0.32 : 0.2)); }
+      if (birds) [0.3, 0.62, 0.8].forEach((u, i) => chirp(t + u * d, 2 + (i % 2)));
       bell(t + d - 0.6, 93, 0.045); },
-    // 3. Make the materials: three machines start one after another: the clean electric sawmill, the brick oven, the cement works
-    (t, d) => {
-      N({ ch: 't', f: 220, t: t + 0.2, dur: 0.6, vol: 0.05, slide: 2, env: [0.05, 0.2, 0.8, 0.1] });
-      for (let b = 0.9, i = 0; b < d * 0.86; b += 0.72, i++) N({ f: 330, t: t + b, dur: 0.26, vol: i < 4 ? 0.034 : 0.02, duty: 0.25, slide: 1.6, env: [0.03, 0.1, 0.7, 0.05] });
-      const o = t + d * 0.27; thock(o, 0.08, 55); N({ ch: 'n', f: 500, t: o, dur: d * 0.6, vol: 0.028, env: [0.8, 0.5, 0.8, 0.9], filter: { f0: 650 } });
-      for (let b = 0.5; b < d * 0.56; b += 0.9) N({ ch: 'n', f: 900, t: o + b, dur: 0.12, vol: 0.035, env: [0.02, 0.08, 0.4, 0.1], filter: { f0: 900 } });
-      const c = t + d * 0.5; thock(c, 0.1, 50); N({ ch: 'n', f: 300, t: c, dur: d * 0.38, vol: 0.04, env: [0.6, 0.4, 0.9, 0.7], filter: { f0: 480 } });
-      for (let b = 0.45; b < d * 0.36; b += 1.0) { N({ ch: 't', midi: 45, t: c + b, dur: 0.14, vol: 0.09, slide: 0.6 }); N({ f: 110, t: c + b, dur: 0.09, vol: 0.03, duty: 0.125, env: [0.004, 0.06, 0.3, 0.04] }); N({ ch: 'n', f: 500, t: c + b + 0.5, dur: 0.3, vol: 0.04, env: [0.05, 0.15, 0.5, 0.2], filter: { f0: 500, f1: 900 } }); }
-      N({ ch: 't', f: 330, t: t + d - 0.9, dur: 0.7, vol: 0.045, slide: 0.33, env: [0.05, 0.2, 0.7, 0.15] }); },
-    // 4. Take the food to market: a trotting cart that arrives early, a lorry that drives for much longer, bees and birds
-    (t, d) => {
-      for (let b = 0.5; b < d * 0.42; b += 0.5) { N({ f: 900, t: t + b, dur: 0.016, vol: 0.04, duty: 0.5, env: [0.001, 0.02, 0.2, 0.02] }); N({ f: 680, t: t + b + 0.16, dur: 0.016, vol: 0.035, duty: 0.5, env: [0.001, 0.02, 0.2, 0.02] }); }
-      bell(t + d * 0.44, 91);
-      putt(t + d * 0.2, d * 0.64, 36, 0.028, 12);
-      N({ midi: 72, t: t + d * 0.86, dur: 0.09, vol: 0.035, duty: 0.25 }); N({ midi: 76, t: t + d * 0.86, dur: 0.09, vol: 0.035, duty: 0.25 }); bell(t + d * 0.9, 88, 0.045);
-      [0.3, 0.66].forEach((u) => { N({ f: 233, t: t + u * d, dur: 0.3, vol: 0.02, duty: 0.125, slide: 1.1, env: [0.08, 0.1, 0.8, 0.05] }); N({ f: 256, t: t + u * d + 0.33, dur: 0.3, vol: 0.02, duty: 0.125, slide: 0.9, env: [0.03, 0.1, 0.8, 0.12] }); });
-      [0.12, 0.52, 0.76].forEach((u, i) => chirp(t + u * d, 2 + (i % 2))); },
-    // 5. Keep the lights on: dusk falls, the wind blows, lights click on one by one, one plan's lights droop, the rest hold steady
-    (t, d) => {
-      N({ ch: 't', midi: 67, t: t + 0.2, dur: 1.6, vol: 0.06, slide: 0.6, env: [0.3, 0.5, 0.7, 0.6] });
-      N({ ch: 'n', f: 450, t: t + 0.6, dur: d * 0.34, vol: 0.03, env: [1.2, 0.6, 0.8, 1.2], filter: { f0: 300, f1: 900 } }); N({ ch: 'n', f: 450, t: t + d * 0.5, dur: d * 0.34, vol: 0.026, env: [1.2, 0.6, 0.8, 1.2], filter: { f0: 800, f1: 320 } });
+    // 3. Make the materials [clean air, staying warm]: good is the clean electric sawmill, fair is the brick oven, poor is the cement works.
+    //    Without `r` the three machines start one after another.
+    (t, d, r) => {
+      const saw = (a, len) => { N({ ch: 't', f: 220, t: a, dur: 0.6, vol: 0.05, slide: 2, env: [0.05, 0.2, 0.8, 0.1] }); for (let b = 0.7, i = 0; b < len - 1; b += 0.72, i++) N({ f: 330, t: a + b, dur: 0.26, vol: !r && i > 3 ? 0.02 : 0.034, duty: 0.25, slide: 1.6, env: [0.03, 0.1, 0.7, 0.05] }); N({ ch: 't', f: 330, t: a + len - 0.8, dur: 0.6, vol: 0.045, slide: 0.33, env: [0.05, 0.2, 0.7, 0.15] }); };
+      const oven = (a, len) => { thock(a, 0.08, 55); N({ ch: 'n', f: 600, t: a, dur: len - 0.9, vol: 0.06, env: [0.5, 0.4, 0.8, 0.8], filter: { f0: 800 } }); for (let b = 0.5; b < len - 0.8; b += 0.9) N({ ch: 'n', f: 900, t: a + b, dur: 0.12, vol: 0.08, env: [0.02, 0.08, 0.4, 0.1], filter: { f0: 900 } }); };
+      const cement = (a, len) => { thock(a, 0.1, 50); N({ ch: 'n', f: 450, t: a, dur: len - 0.8, vol: 0.055, env: [0.5, 0.4, 0.9, 0.7], filter: { f0: 800 } });
+        for (let b = 0.45; b < len - 1; b += 1.0) { N({ ch: 't', midi: 45, t: a + b, dur: 0.14, vol: 0.09, slide: 0.6 }); N({ f: 110, t: a + b, dur: 0.09, vol: 0.065, duty: 0.125, env: [0.004, 0.06, 0.3, 0.04] }); N({ ch: 'n', f: 500, t: a + b + 0.5, dur: 0.3, vol: 0.04, env: [0.05, 0.15, 0.5, 0.2], filter: { f0: 500, f1: 900 } }); } };
+      if (r) ({ g: saw, f: oven, p: cement })[r[0]](t + 0.15, d - 0.15);
+      else { saw(t + 0.2, d - 0.2); oven(t + d * 0.27, d * 0.68); cement(t + d * 0.5, d * 0.46); } },
+    // 4. Take the food to market [nature, walk]: close farms send a trotting cart that soon arrives; far farms send a lorry that drives
+    //    for much longer. Nature good: bees and birds.
+    (t, d, r) => { const cart = !r || r[1] === 'g', lorry = !r || r[1] !== 'g', wild = !r || r[0] === 'g', stop = r && cart ? 0.8 : 0.42;
+      if (cart) { for (let b = 0.4; b < d * stop; b += 0.5) { N({ f: 900, t: t + b, dur: 0.016, vol: 0.04, duty: 0.5, env: [0.001, 0.02, 0.2, 0.02] }); N({ f: 680, t: t + b + 0.16, dur: 0.016, vol: 0.035, duty: 0.5, env: [0.001, 0.02, 0.2, 0.02] }); } bell(t + d * stop + 0.2, 91); }
+      if (lorry) { const a = r ? 0.05 : 0.2; putt(t + d * a, d * (0.84 - a), 36, 0.028, 12); N({ midi: 72, t: t + d * 0.86, dur: 0.09, vol: 0.035, duty: 0.25 }); N({ midi: 76, t: t + d * 0.86, dur: 0.09, vol: 0.035, duty: 0.25 }); bell(t + d * 0.9, 88, 0.045); }
+      if (wild) { [0.3, 0.66].forEach((u) => { N({ f: 233, t: t + u * d, dur: 0.3, vol: 0.02, duty: 0.125, slide: 1.1, env: [0.08, 0.1, 0.8, 0.05] }); N({ f: 256, t: t + u * d + 0.33, dur: 0.3, vol: 0.02, duty: 0.125, slide: 0.9, env: [0.03, 0.1, 0.8, 0.12] }); }); [0.12, 0.52, 0.76].forEach((u, i) => chirp(t + u * d, 2 + (i % 2))); } },
+    // 5. Keep the lights on [staying warm, nature, clean air]: dusk falls, the wind blows and lights click on one by one.
+    //    Staying warm good: the lights hold on a steady pair of notes. Otherwise: they droop and go quiet.
+    (t, d, r) => { const hold = !r || r[0] === 'g', dark = !r || r[0] !== 'g', w = Math.min(1.2, d * 0.12);
+      N({ ch: 't', midi: 67, t: t + 0.2, dur: Math.min(1.6, d * 0.25), vol: 0.06, slide: 0.6, env: [0.3, 0.5, 0.7, 0.6] });
+      N({ ch: 'n', f: 450, t: t + 0.6, dur: d * 0.34, vol: 0.03, env: [w, w / 2, 0.8, w], filter: { f0: 300, f1: 900 } }); N({ ch: 'n', f: 450, t: t + d * 0.5, dur: d * 0.34, vol: 0.026, env: [w, w / 2, 0.8, w], filter: { f0: 800, f1: 320 } });
       for (let b = d * 0.2; b < d * 0.9; b += 0.9) N({ ch: 'n', f: 1200, t: t + b, dur: 0.22, vol: 0.013, env: [0.08, 0.08, 0.5, 0.1], filter: { f0: 600, f1: 1800 } });
       for (let i = 0; i < 10; i++) { const b = t + d * (0.25 + 0.26 * Math.pow(i / 10, 0.75)); stepTick(b, 1500, 0.03); ping(b + 0.03, PENTA[i % 6 + (i > 5 ? 2 : 0)], 0.04, 0.25, 0.1); }
-      N({ midi: 64, t: t + d * 0.58, dur: 0.55, vol: 0.055, duty: 0.5, slide: 0.4, env: [0.01, 0.2, 0.7, 0.1] });
-      N({ ch: 't', midi: 60, t: t + d * 0.66, dur: d * 0.24, vol: 0.05, env: [0.5, 0.4, 0.8, 0.6] }); N({ ch: 't', midi: 67, t: t + d * 0.66, dur: d * 0.24, vol: 0.04, env: [0.5, 0.4, 0.8, 0.6] });
-      ping(t + d - 0.55, 84, 0.04); ping(t + d - 0.4, 88, 0.04); },
-    // 6. Ring the school bell: a hand bell rung three times, many light quick feet, one car from the far homes, a last bell
-    (t, d) => { const r = rnd(66);
-      for (let k = 0; k < 6; k++) bell(t + 0.15 + k * 0.4, k % 2 ? 88 : 93, 0.06);
-      walkers(t + 2.5, t + d * 0.86, [0.3, 0.34, 0.27, 0.36, 0.31], r, 0.018, 800);
-      putt(t + d * 0.55, d * 0.16, 43, 0.028);
-      chirp(t + d * 0.42, 2);
+      if (dark) N({ midi: 64, t: t + d * 0.58, dur: 0.55, vol: 0.055, duty: 0.5, slide: 0.4, env: [0.01, 0.2, 0.7, 0.1] });
+      if (hold) { const a = t + d * (r ? 0.56 : 0.66), len = d * (r ? 0.32 : 0.24), e = Math.min(0.5, len / 3); N({ ch: 't', midi: 60, t: a, dur: len, vol: 0.035, env: [e, e, 0.8, e] }); N({ ch: 't', midi: 67, t: a, dur: len, vol: 0.028, env: [e, e, 0.8, e] }); ping(t + d - 0.55, 84, 0.04); ping(t + d - 0.4, 88, 0.04); } },
+    // 6. Ring the school bell [walk]: a hand bell and many light quick feet. Fair: one car as well. Poor: fewer feet and a longer drive.
+    (t, d, r) => { const R = rnd(66), far = !r || r[0] !== 'g', rings = d < 6 ? 4 : 6;
+      for (let k = 0; k < rings; k++) bell(t + 0.15 + k * 0.4, k % 2 ? 88 : 93, 0.06);
+      walkers(t + rings * 0.4 + 0.1, t + d * 0.86, r && r[0] === 'p' ? [0.3, 0.34] : [0.3, 0.34, 0.27, 0.36, 0.31], R, 0.018, 800);
+      if (far) putt(t + d * 0.5, d * (r && r[0] === 'p' ? 0.3 : 0.16), 43, 0.028);
+      if (!far) chirp(t + d * 0.45, 2);
       bell(t + d - 0.6, 93, 0.05); },
   ];
 
@@ -154,7 +155,7 @@ export function makeCues({ note }, EN, { trim = 1 } = {}) {
     // ---- the pictures between the parts -----------------------------------------------------------------------------
     // the level's title card slides in
     title(t) { t = at(t); N({ ch: 'n', f: 300, t, dur: 0.28, vol: 0.022, slide: 5, filter: { f0: 400, f1: 2400 } }); ping(t + 0.22, 79, 0.06, 0.25, 0.1); ping(t + 0.31, 84, 0.06, 0.25, 0.22); },
-    // a wipe between the town and the table: much quieter than the game's whoosh, because it happens four times in a level
+    // a soft move of the camera or a panel sliding in (optional: the striped wipes were dropped from the film)
     wipe(t, up = true) { N({ ch: 'n', f: up ? 300 : 1400, t: at(t), dur: 0.3, vol: 0.022, slide: up ? 5 : 0.2, env: [0.06, 0.1, 0.7, 0.1], filter: { f0: up ? 400 : 2400, f1: up ? 2400 : 400 } }); },
   };
 }
@@ -188,25 +189,27 @@ export const PART = { title: 1, invite: 0.5, sentence: 0.8, think: 0.3, plans: 0
 export function bedPlan(m, start = 0, level = BED_LEVEL) {
   const k = (name) => PART[name] * level, s = (t) => start + t;
   return [[s(0), k('title'), 0.4], [s(m.inv[0]), k('invite'), 0.15], [s(m.ask), k('sentence'), 0.4], [s(m.think[0] - 0.2), k('think'), 0.12], [s(m.offers[0]), k('plans'), 0.15], [s(m.offers[1]), k('testWait'), 0.3],
-    [s(m.testTap), k('test'), 0.12], [s(m.res[1]), k('choose'), 0.5], [s(m.w2 - 0.3), k('build'), 0.4], [s(m.after[0] + 1.5), k('invite'), 0.3], [s(m.recap[0]), k('recap'), 0.3], [s(m.yes[0] - 0.1), k('yes'), 0.08], [s(m.yes[0] + 1.3), k('after'), 0.4]];
+    [s(m.testTap), k('test'), 0.12], [s(m.res[1]), k('choose'), 0.5], [s(m.build[0] - 0.8), k('build'), 0.4], [s(m.after[0] + 1.5), k('invite'), 0.3], [s(m.recap[0]), k('recap'), 0.3], [s(m.yes[0] - 0.1), k('yes'), 0.08], [s(m.yes[0] + 1.3), k('after'), 0.4]];
 }
 
 // ---- the film's whole sound track, as an example of the design in use ---------------------------------------------------
 // filmEvents(m) turns one part of the film (a segment made in docs/redesign/animation/film.js) into a list of
 // [time in the part, cue name, ...what the cue needs]. A level part needs these fields from film.js:
-// kind, li, gaps, askTap, think, w1, offers, testTap, test, res, chooseTap, w2, build, recapTap, yes, and
+// kind, li, gaps, askTap, think, offers, testTap, test (or tests: a [start, end] for each plan, when the plans are tested one
+// after another in the town; each test then gets that plan's ratings), res, chooseTap, build, recapTap, yes, and
 // pick (the chosen plan) and rows (for each check, the rating 'g', 'f' or 'p' of each plan: v.res.map((r) => r.slice(1).map((x) => x[0]))).
 export function filmEvents(m) {
-  if (m.kind === 'lead') return m.dur ? [[0.3, 'wipe'], [3.2, 'wipe', false], [5.2, 'title']] : [];
-  if (m.kind === 'welcome') return [[0.2, 'wipe'], [0.8, 'hello']];
-  if (m.kind === 'end') return [[0.2, 'wipe'], [1, 'hourComplete']];
+  if (m.kind === 'lead') return m.dur ? [[5.2, 'title']] : [];
+  if (m.kind === 'welcome') return [[0.8, 'hello']];
+  if (m.kind === 'end') return [[1, 'hourComplete']];
   const ev = [[0.2, 'title']], n = m.rows[0].length, name = { g: 'tick', f: 'dash', p: 'cross' };
   m.gaps.forEach((g, k) => ev.push([g + 1.4, 'wordPick'], [g + 1.85, 'wordLand', k]));
-  ev.push([m.gaps[m.gaps.length - 1] + 2.25, 'sentenceReady', m.gaps.length], [m.askTap, 'ask'], [m.think[0], 'think', m.think[1] - m.think[0]], [m.w1 - 0.4, 'wipe']);
+  ev.push([m.gaps[m.gaps.length - 1] + 2.25, 'sentenceReady', m.gaps.length], [m.askTap, 'ask'], [m.think[0], 'think', m.think[1] - m.think[0]]);
   for (let i = 0; i < n; i++) ev.push([m.offers[0] + 1.25 + i * 0.5, 'planArrive', i]);
-  ev.push([m.testTap, 'testPress'], [m.test[0], 'test', m.test[1] - m.test[0]]);
+  ev.push([m.testTap, 'testPress']);
+  if (m.tests) m.tests.forEach(([a, b], i) => ev.push([a, 'test', b - a, m.rows.map((r) => r[i])])); else ev.push([m.test[0], 'test', m.test[1] - m.test[0]]);
   for (let i = 0; i < n; i++) { m.rows.forEach((r, k) => ev.push([m.res[0] + i * 0.5 + k * 0.25 + 0.15, name[r[i]], k])); if (m.rows.every((r) => r[i] === 'g')) ev.push([m.res[0] + i * 0.5 + m.rows.length * 0.25 + 0.2, 'allGood']); }
-  ev.push([m.chooseTap, 'choose', m.pick], [m.w2 - 0.4, 'wipe', false], [m.build[0], 'build', m.build[1] - m.build[0], m.li], [m.recapTap, 'recapRight'], [m.yes[0], 'levelComplete', m.li]);
+  ev.push([m.chooseTap, 'choose', m.pick], [m.build[0], 'build', m.build[1] - m.build[0], m.li], [m.recapTap, 'recapRight'], [m.yes[0], 'levelComplete', m.li]);
   return ev;
 }
 // renderFilmAudio(deps, parts, duration, lead) does the job of renderAudio in docs/redesign/animation/sound.js with this design.
