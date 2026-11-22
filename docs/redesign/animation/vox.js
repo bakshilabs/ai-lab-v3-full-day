@@ -79,17 +79,19 @@ export function makeStage(canvas, W, H) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap;
-  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(26, W / H, 1, 400);
-  const hemi = new THREE.HemisphereLight('#fff6e8', '#8a7a5a', 1.55); scene.add(hemi);
-  const sun = new THREE.DirectionalLight('#fff0d0', 2.1); sun.position.set(-16, 30, 18); sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 22, bottom: -22, near: 1, far: 100 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun);
-  const day = new THREE.Color('#dff1f7'), night = new THREE.Color('#27365c'); scene.background = day.clone();
-  const st = { renderer, scene, camera, plates: [], root: null,
-    // night is 0 in daylight and 1 after dark
-    light(n) { hemi.intensity = lerp(1.55, 1.05, n); sun.intensity = lerp(2.1, 0.35, n); hemi.color.set(n > 0.5 ? '#8fa6d8' : '#fff6e8'); scene.background.copy(day).lerp(night, n); },
-    reset(n) { if (st.root) scene.remove(st.root); st.root = group(scene); st.plates = [...Array(n)].map((_, i) => group(st.root, (i - (n - 1) / 2) * 14.5, 0, 0)); return st.plates; },
-    look(x, y, z, dist, tilt = 0.62) { camera.position.set(x, y + Math.sin(tilt) * dist, z + Math.cos(tilt) * dist); camera.lookAt(x, y, z); },
+  const camera = new THREE.PerspectiveCamera(26, W / H, 1, 400), day = new THREE.Color('#dff1f7'), dusk = new THREE.Color('#27365c');
+  // a scene with its own sky and sun. light(n) makes it night: n is 0 in daylight and 1 after dark.
+  const newScene = (half = 30) => {
+    const scene = new THREE.Scene(), hemi = new THREE.HemisphereLight('#fff6e8', '#8a7a5a', 1.55), sun = new THREE.DirectionalLight('#fff0d0', 2.1);
+    scene.add(hemi); sun.position.set(-16, 30, 18); sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
+    Object.assign(sun.shadow.camera, { left: -half, right: half, top: half * 0.75, bottom: -half * 0.75, near: 1, far: 100 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun); scene.background = day.clone();
+    return { scene, light(n) { hemi.intensity = lerp(1.55, 1.05, n); sun.intensity = lerp(2.1, 0.35, n); hemi.color.set(n > 0.5 ? '#8fa6d8' : '#fff6e8'); scene.background.copy(day).lerp(dusk, n); } };
+  };
+  const table = newScene(30), st = { renderer, camera, newScene, scene: table.scene, light: table.light, plates: [], root: null,
+    reset(n) { if (st.root) table.scene.remove(st.root); st.root = group(table.scene); st.plates = [...Array(n)].map((_, i) => group(st.root, (i - (n - 1) / 2) * 14.5, 0, 0)); return st.plates; },
+    // look at a point from a distance, tilted down by tilt and turned by yaw
+    look(x, y, z, dist, tilt = 0.62, yaw = 0) { const f = Math.cos(tilt) * dist; camera.position.set(x + Math.sin(yaw) * f, y + Math.sin(tilt) * dist, z + Math.cos(yaw) * f); camera.lookAt(x, y, z); },
     screen(v) { const p = v.clone().project(camera); return [(p.x + 1) / 2 * W, (1 - p.y) / 2 * H]; },
-    draw() { renderer.render(scene, camera); } };
+    draw(scene = table.scene) { renderer.render(scene, camera); } };
   return st;
 }

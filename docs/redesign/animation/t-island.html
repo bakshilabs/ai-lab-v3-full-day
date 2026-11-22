@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0"><canvas id="c" width="1280" height="720"></canvas>
+<script type="module">
+import { makeStage } from './vox.js'; import { makeIsland, makeScene, VIEWS } from './town.js';
+const st = makeStage(document.getElementById('c'), 1280, 720), isle = makeScene(), up = makeIsland();
+window.shot = (stage, t, v, night = 0) => { up({ stage, t, night }); isle.light(night); const V = v < 0 ? [-2, 0, -3, 190] : VIEWS[v]; st.look(V[0], V[1], V[2], V[3], 0.66, 0.34); st.draw(isle.scene); }; window.ready = true;
+</script>

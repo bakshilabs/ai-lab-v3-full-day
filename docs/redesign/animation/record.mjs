@@ -2,7 +2,7 @@
 import { createRequire } from 'module'; const require = createRequire('/'); import fs from 'fs'; import http from 'http'; import path from 'path'; import { spawn } from 'child_process'; import { fileURLToPath } from 'url';
 const { chromium } = require('playwright'); const dir = path.dirname(fileURLToPath(import.meta.url)), out = process.argv[2], fps = +(process.argv[3] || 30), page = process.argv[4] || 'index.html';
 fs.mkdirSync(out, { recursive: true });
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.woff2': 'font/woff2' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.woff2': 'font/woff2', '.webp': 'image/webp' };
 const srv = http.createServer((q, r) => { const u = q.url.split('?')[0], f = path.join(dir, u === '/' ? page : u); if (!fs.existsSync(f)) { r.statusCode = 404; return r.end(); } r.setHeader('content-type', types[path.extname(f)] || 'application/octet-stream'); r.end(fs.readFileSync(f)); }).listen(0);
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
 await p.goto(`http://localhost:${srv.address().port}/?rec=1`); await p.waitForFunction(() => window.film);

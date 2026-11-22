@@ -4,7 +4,9 @@ import { createRequire } from 'module'; const require = createRequire('/'); impo
 const { chromium } = require('playwright'); const here = path.dirname(fileURLToPath(import.meta.url)), root = path.join(here, '../../../games/ecotown/game');
 const [file, town = 'eco', title = 'Week 1: Eco Town', fpsArg = '30'] = process.argv.slice(2), fps = +fpsArg, secs = 9.5;
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.woff2': 'font/woff2', '.css': 'text/css' };
-const srv = http.createServer((q, r) => { const f = path.join(root, q.url.split('?')[0]); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end(); } r.setHeader('content-type', types[path.extname(f)] || 'application/octet-stream'); r.end(fs.readFileSync(f)); }).listen(0);
+// the map's code is served with one change, so that this script can reach its 3D objects
+const srv = http.createServer((q, r) => { const f = path.join(root, q.url.split('?')[0]); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end(); } r.setHeader('content-type', types[path.extname(f)] || 'application/octet-stream');
+  r.end(f.endsWith('worldmap.js') ? fs.readFileSync(f, 'utf8').replace('window.worldmap = { setView,', 'window.worldmap = { world, setView,') : fs.readFileSync(f)); }).listen(0);
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
 await p.clock.install({ time: 0 }); await p.goto(`http://localhost:${srv.address().port}/tests/visual/worldmap.html`); await p.clock.runFor(200); await p.waitForFunction(() => window.worldmap);
 await p.addStyleTag({ content: `body > *:not(.filmkeep) { visibility: hidden; } #map { visibility: visible !important; position: fixed !important; inset: 0 !important; width: 1280px !important; height: 720px !important; z-index: 5; border-radius: 0 !important; }
@@ -12,6 +14,9 @@ await p.addStyleTag({ content: `body > *:not(.filmkeep) { visibility: hidden; } 
   #filmtitle { visibility: visible; position: fixed; z-index: 7; left: 50%; bottom: 46px; transform: translateX(-50%); background: #fffaf0; color: #3b2a1e; border: 3px solid #3b2a1e; border-radius: 22px; padding: 14px 34px; font: 800 44px Bricolage, Inter, system-ui, sans-serif; box-shadow: 0 8px 0 #3b2a1e; opacity: 0; }
   html, body { background: #dff1f7 !important; overflow: hidden; }` });
 await p.evaluate((title) => { const d = document.createElement('div'); d.id = 'filmtitle'; d.textContent = title; document.body.appendChild(d); dispatchEvent(new Event('resize')); }, title);
+// the town in the film starts as empty land, so the homes of that town are hidden on the map
+const HOMES = { eco: [[4, -5.5], [7.2, -5.5], [10, -5], [4, -2.2], [7.5, -2], [4.2, 1.6], [7.3, 2], [10, 1.2], [10.2, -2.3]] };
+const hidden = await p.evaluate((homes) => { let n = 0; for (const g of worldmap.world.children) if (homes.some(([x, z]) => Math.abs(g.position.x - x) < 0.05 && Math.abs(g.position.z - z) < 0.05)) { g.visible = false; n++; } return n; }, HOMES[town] || []); console.log('homes hidden', hidden);
 await p.clock.runFor(100); await p.evaluate(() => { worldmap.snap(); });
 const ff = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-movflags', '+faststart', file]);
 const n = Math.floor(secs * fps); let flown = false;
