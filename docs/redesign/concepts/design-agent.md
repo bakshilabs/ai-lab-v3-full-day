@@ -6,7 +6,7 @@ This file describes the design agent that produced the second version of the pla
 
 The designer is a subagent of the general-purpose type, started from the main Claude session with the Agent tool. It was given the role of a senior game designer for children aged 8 to 12 who can also build 3D mock-ups in three.js. It is independent, which means it did not make the first version of the screens and was told to treat that work as a starting point and not as something to defend.
 
-The designer keeps its memory only inside the session that started it. In that session it can be sent more work with the SendMessage tool. In a new session it no longer exists, so a new designer has to be started with the brief at the end of this file, and it should be told to read this file and the files listed below first.
+The designer keeps its memory only inside the session that started it. In that session it can be sent more work with the SendMessage tool. Its memory of the conversation does not carry into a new session. The designer itself is saved as a reusable agent in `.claude/agents/play-break-designer.md`, so a later session can start it by name (`play-break-designer`) with the same role, standards and rules, and it reads this file first to learn what has been done.
 
 ## What it works from
 
