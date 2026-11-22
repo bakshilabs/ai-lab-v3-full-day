@@ -8,18 +8,78 @@ The ready-made curves are in `motion-curves.js` in this folder. Every function i
 
 I read `film.js`, `town.js`, `eco.js`, `fx.js` and `vox.js`, and I took about 250 pictures of the film at chosen moments: the opening, the whole of level 1, twelve moments of each of the six tests, the building of each level, and the results and the choice in level 5. I also made a copy of the film in a temporary folder and changed only the camera in the copy, to try the framing that is recommended below. Nothing in `docs/redesign/animation/` was changed.
 
+## Decisions made after the first draft, and what they change
+
+Three decisions were made while this report was being written. The layout in `docs/redesign/ui/DESIGN.md` replaces the interface of the first film. The tests will happen in Eco Town itself, with a lettered flag on the place of each plan, and not on three separate pieces of land. The striped curtains and the confetti are being dropped. I agree with all three, and each of them removes a weakness that this report had listed.
+
+The report has been brought into line as follows.
+
+- The section "Tests in the town, with flags" below is new, and it is the part to follow for the tests. The section "The six tests, second by second" still gives what each test must show and in what order, and those beats carry over. Wherever it says "plate", read "the place under the flag".
+- In "The beats of one level", steps 5, 8, 9 and 10 described the table, the three plates and the flight of the chosen plate into the town. Those steps are replaced by the steps in `DESIGN.md` and by the notes that now stand under each of them.
+- Where a length in this report differs from a length in `DESIGN.md`, the two differences that I would keep are named in the new section. In every other case `DESIGN.md` decides.
+- The curves in `motion-curves.js` do not depend on the layout and are all still usable.
+
 ## The ten most important recommendations
 
-1. Make every test end on a picture that is different for each plan and that stays until the child has chosen. At the moment the walkers, the carts, the lorry and the school children disappear or stop, and the three plates look the same as before the test.
-2. Give each test three parts: a cause that the child sees start (about one second), the event (about five seconds), and one clear moment for each plan in turn (about one second each), followed by a still second. All six tests can keep their length of 10.5 seconds.
-3. Bring the camera much closer when the town is being built, tilt it more steeply and look from the other side. The distance should be about 21 to 26 squares instead of 34 to 50, the tilt 0.82 radians instead of 0.66, and the turn minus 0.30 radians instead of plus 0.34. This removes the neighbouring towns from the picture and makes a new home about three times as large.
-4. Let a building drop into place with weight: a fall of 300 milliseconds, a squash, a rebound, dust and a shadow that grows. At the moment it swells up from nothing, like a balloon.
-5. Remove the two full-screen curtains inside each level. Carry the chosen plan from the table into the town in one movement, so that the child sees that their choice is what gets built.
-6. Make the small actors large enough to read. People, cars, carts, bees and the school bell should be between 1.6 and 2 times their present size during a test, and lit windows need a pool of light on the ground.
+1. Make every test end on a picture that is different for each plan and that stays until the child has chosen. In the town this means trails, rows of people, parked cars, standing water, clouds and lit or dark windows that remain, the mark on each flag, and a small picture of the end of the test on the card of any plan that had to be cleared away.
+2. Decide for each level whether the three plans can be tested at the same moment. Levels 1, 3 and 4 have three different places, so one press tests all three together. Levels 2, 5 and 6 use the same ground or the same people, so the town must play the three plans one after another, about 3.5 seconds each, with a quick rewind between them.
+3. Give each test three parts: a cause that the child sees start (about one second), the event, and one clear moment for each plan at which its flag receives its mark. Keep the whole test to 10.5 seconds.
+4. Keep the camera close, steep and looking from the south, as `DESIGN.md` now says and as my own trial confirmed. Hold it still while a test runs and while the child must tap. Move it only between steps, for 800 to 1,800 milliseconds, slowly at both ends.
+5. Show a plan that is only being tried as pale blocks that land lightly, and show the plan that is built as full-coloured blocks that land with weight: a fall of 300 milliseconds, a squash, a rebound, dust and a shadow that grows. The difference between trying and building is then visible in the movement itself.
+6. Make the small actors large enough to read. People, cars, carts, bees and the school bell should be between 1.5 and 2 times their true size during a test, and lit windows need a pool of light on the ground.
 7. Show each cause before its effect: a rain cloud slides in before the rain, the shop opens before people leave home, the sun goes down before the lights come on, and the bell swings and sends out rings before the children set off.
-8. Reveal the results one plan at a time, 1.2 seconds apart, with the mark stamped after the sentence. At the moment nine sentences arrive in about two seconds in level 5.
-9. Keep to a small set of curves and lengths, given below. Nothing that matters should last less than 400 milliseconds, and nothing should stand still for more than 1.2 seconds unless the child is reading.
-10. Use effects sparingly: no confetti over the whole screen until the end of the hour, no shake stronger than 3 pixels, and no light that flashes more than three times in a second.
+8. Reveal the results one plan at a time. With one check, 400 milliseconds between plans is enough. With two or three checks the plans should be 1,200 milliseconds apart, because up to nine sentences arrive.
+9. Keep to a small set of curves and lengths. Nothing that the child must notice should last less than 400 milliseconds, and nothing should stand still for more than 1.2 seconds unless the child is reading.
+10. Now that the curtains and the confetti are gone, let the town itself mark each change: the camera move carries the child from step to step, and the new buildings hopping one after another is the celebration. Keep shakes to 3 pixels, and let nothing flash more than three times in a second.
+
+## Tests in the town, with flags
+
+### Which tests can run at once
+
+`DESIGN.md` asks the owner whether plans that share the same ground should be played one after another. From the point of view of movement the answer is yes, and it applies to three levels, not one.
+
+- **Level 1, Land.** The three plans are three places beside one river. One press tests all three together, and this is better than the three plates were, because the child watches one flood reach three places in turn.
+- **Level 3, Homes.** The three works can stand at three flags. One press starts all three together. The flags must stand at least six squares apart so that the clouds do not join.
+- **Level 4, Food.** The three farms are three places and they share one market. One press sends all the food at once, and the child sees the two carts arrive at the same stall long before the lorry.
+- **Level 2, Getting around.** The three plans are three street layouts on the same hill, so they are played one after another.
+- **Level 5, Power.** The three plans power the same homes, so they are played one after another through one night.
+- **Level 6, A school for everyone.** The three schools are three places, but the same children cannot walk to three schools at once, so the plans are played one after another.
+
+### A test that plays the three plans one after another
+
+The whole test still lasts 10.5 seconds. Each plan has 3.5 seconds, and in level 5 the sunset takes the first 2 seconds and each plan has 2.8 seconds.
+
+1. **The plan appears, 500 milliseconds.** Its pale pieces land under its flag, as described under "Trying and building" below. The flag hops, and the card with the same letter is lifted while the other two cards are pale.
+2. **The event, about 2,200 milliseconds.** People walk about twice as fast as they would in a test that had the full time, at about three squares a second, and their trails are drawn behind them.
+3. **The moment that decides it, 500 milliseconds.** Nothing new starts. The mark is stamped onto the flag as `DESIGN.md` describes, and the people or the cars that have arrived hop once.
+4. **The rewind, 300 milliseconds.** The people run backwards along their trails to their homes at three times the speed, the trails are rolled up behind them, and the pale pieces lift away. A rewind tells the child that the same test is about to be run again on another plan, which a fade would not.
+
+A plan that has been cleared away leaves nothing in the town, so its end must be kept somewhere else. `DESIGN.md` already keeps a small picture of the town at the end of the test for the plan that was tried first. I recommend the same small picture on each of the three cards after any test of this kind. The picture should be taken at the end of step 3 and should fly from the town to its card in 400 milliseconds.
+
+### A test that runs the three plans together
+
+The camera stays on the framing that holds the three flags. It does not push in on one plan, because the child should be able to look from flag to flag. The moments that decide the three plans come at different times, at least one second apart, and the mark is stamped onto each flag at its own moment. When a flag receives its mark, it hops 0.4 squares, and for 500 milliseconds nothing else in the town begins.
+
+### Trying and building
+
+In the town a plan appears twice: once when it is offered and tested, and once when it is built. The two must look and move differently, or the child will think that all three plans have been built.
+
+- A plan that is offered lands as pale blocks, mixed halfway towards white. They fall 3 squares in 220 milliseconds, squash only to 92 per cent, and raise no dust. This reads as light and temporary.
+- When the child chooses, the pieces of the other two plans fold flat in 250 milliseconds, one after another, and their flags leave.
+- The pieces of the chosen plan then become real one at a time. Each one lifts 0.6 squares, takes its full colour, and comes down with the full weight described under "How a building arrives". The gaps between them shorten like a drum roll.
+- In the levels that are played one after another, the chosen plan has already been cleared away, so it is built from nothing with the same full drop.
+
+### The camera, the flags and the lengths in `DESIGN.md`
+
+My trial and the mock-ups reached the same answer by different routes: look at Eco Town from the south, steeply, from 24 to 31 squares away, and Studio Bay and Drone City leave the picture. The values in `DESIGN.md` should be used, and the working distances in `CAMERA.levels` are a starting point for the close view of each building site.
+
+A flag should drop like a small building: a fall of 220 milliseconds, a squash, and then its cloth swings to rest (`ring`, at 3.5 swings a second). After that it sways gently, and it stands still while a test runs so that it does not compete with the test.
+
+There are two lengths in `DESIGN.md` that I would change, and one that I would watch.
+
+- The word flies to its gap in 320 milliseconds. I would give it 400, because this is the child's own action and it is the only time the word is seen moving.
+- The results arrive 400 milliseconds apart from card to card. That suits one check. With three checks I would use 1,200 milliseconds, as recommendation 8 says.
+- The stamps and bounces of 220 milliseconds are short, and they are right only if each one is followed by about 200 milliseconds in which nothing else starts.
 
 ## Ground rules
 
@@ -74,6 +134,8 @@ When the button is pressed, the sentence panel shrinks towards Florence's chest 
 
 ### 5. The three plans arrive (about 5.6 seconds)
 
+*This step described the table of the first film. It is replaced by "Three plans are offered" in `DESIGN.md` and by "Trying and building" above. The weight of a landing and the half-second between one plan and the next still apply to the flags and their pale pieces.*
+
 A plain panel in the colour of the sky slides up over the town in 350 milliseconds and becomes the table. This replaces the three-coloured curtain, which at present covers the whole picture with plain cream for about half a second.
 
 The three plates of land drop from above, 350 milliseconds apart, from left to right. Each one falls 9 squares in 380 milliseconds, squashes to 86 per cent of its height for 90 milliseconds, rebounds and settles (`drop`). Eight pieces of dust fly out from under it. The picture shakes by 2 pixels for 180 milliseconds on each landing in the film. At the moment the plates rise from below and overshoot upwards, which makes them look light.
@@ -81,6 +143,8 @@ The three plates of land drop from above, 350 milliseconds apart, from left to r
 The plan itself, which means the homes, the paths or the school, pops onto its plate 600 milliseconds after the plate lands. The three plans therefore appear 500 milliseconds apart, and the child's eye can go from A to B to C. The name of each plan snaps up from under its plate at the same moment, with the ordinary spring. Florence turns to her pointing pose while this happens.
 
 ### 6. The test button and the press (about 2 seconds)
+
+*In the new layout Florence keeps her size, the test button stays down while the test runs, and there is no bar. The spring, the wait of 1.6 seconds and the two light rings from the press still apply. The rings should now spread across the town from the button, and each flag should hop as a ring reaches it.*
 
 Florence shrinks and steps to the corner, as she does now, but she first leans towards the corner for 120 milliseconds. The test button pops in with the lively spring and then swells gently, 1.2 times a second by 3.5 per cent (`breathe`).
 
@@ -94,6 +158,8 @@ The six tests are described second by second in their own section below.
 
 ### 8. What happened (about 7 seconds)
 
+*The results now open in the cards of the dock. Read "the place under the flag" for "plate": while the results of a plan appear, its flag hops and its place repeats the last movement of its test once.*
+
 The results appear one plan at a time: plan A at once, plan B after 1.2 seconds and plan C after 2.4 seconds. Within a plan the sentences are 200 milliseconds apart. While the results of a plan appear, its plate rises 0.5 squares and repeats the last movement of its test once, for example the water lapping at the homes. This ties each sentence to what the child saw.
 
 Each sentence slides up 12 pixels and fades in over 220 milliseconds. Its mark is stamped 120 milliseconds later. A tick shrinks from 160 per cent to its size in 260 milliseconds with a slight overshoot. A cross is stamped in the same way and then shudders 3 pixels to each side for 160 milliseconds. A dash fades in over 200 milliseconds and does not bounce.
@@ -101,6 +167,8 @@ Each sentence slides up 12 pixels and fades in over 220 milliseconds. Its mark i
 In the film the results should then stay for at least four seconds. In the game the child sets the pace.
 
 ### 9. The choice (about 3.5 seconds)
+
+*Replaced by "Choosing" in `DESIGN.md`. What should be kept from this step is the quiet half second after the choice, before anything is built, in which only the yellow flag and the yellow card move.*
 
 The pointer should go to the plate or to the name of the plan. In the present film it presses in the middle of the result sentences and the sparks cover the words.
 
@@ -110,6 +178,8 @@ The pointer should go to the plate or to the name of the plan. In the present fi
 - The chosen plate moves to the middle of the screen in 600 milliseconds and grows by one quarter. It stays there for 500 milliseconds. This quiet moment is missing at present, and it is the moment at which the child owns the choice.
 
 ### 10. The plan goes into the town (0.7 seconds)
+
+*This step is no longer needed, because the plans are already in the town. The camera move of 1,200 milliseconds in `DESIGN.md` and the change from pale pieces to real ones do its work.*
 
 The chosen plate shrinks and flies towards the place in the town where it will be built, in 700 milliseconds, speeding up as it goes. The table panel slides down at the same time and shows the town, with the camera already close to the building site. When the plate reaches the site it disappears in a burst of twelve pieces of dust, and the first building drops at that moment.
 
@@ -125,7 +195,7 @@ The town should then show the result of the choice at once, for 1.5 seconds: peo
 
 The camera pulls back to its working distance in 900 milliseconds and then stands still. The child must never be asked to tap while the camera is moving, because the thing to tap would move under the finger.
 
-The dashed ring that appears on the right place before the tap should go, because it gives the answer away. Instead the pointer travels to the place, presses, and the thing that was tapped answers: it hops 0.4 squares with a squash, and a ring spreads from it. Florence waves, and about 40 pieces of confetti burst from the place that was tapped and are gone in 1.6 seconds. The level's dot at the top fills with its tick, as it does now.
+In the first film a dashed ring appeared on the right place before the tap and gave the answer away. `DESIGN.md` now puts a ring on every place that can be tapped, which solves this. When the child taps, the thing that was tapped should answer: it hops 0.4 squares with a squash. There is no confetti. The new buildings of the level hop one after another, and the level's square at the top receives its tick.
 
 ## The camera
 
@@ -200,7 +270,7 @@ The times below are in seconds after the press. Four changes apply to all six te
 - **A lasting difference.** Whatever moves must leave something behind, and it must still be there when the child chooses.
 - **One moment for each plan.** The event runs on all three plates together, because one press started it. The decisive moment of each plate is then given its own beat, and at that beat the plate rises 0.5 squares for 500 milliseconds.
 - **Larger actors.** A person is about 12 pixels wide at present. People, cars and carts are signs and not models, so they can be 1.6 to 2 times as large during a test.
-- **Larger plates.** The three plates fill the width of the picture but only the top 40 per cent of its height, and the lower half is empty. A tilt of 0.85 radians instead of 0.68 makes each plate about a quarter taller. Moving the plates 60 pixels down leaves room above them for clouds and turbines, which at present run into the bar and the level dots.
+- **Room above the action.** In the first film the clouds and the turbines ran into the bar and the level dots. In the town the camera must leave about 80 pixels of clear sky above the tallest thing that a test will produce, inside the safe window that `DESIGN.md` defines.
 
 ### Level 1: the button that makes it rain
 
@@ -287,7 +357,6 @@ At the end the child counts children standing at the school and cars parked at t
 - Pools of light at night, and pulses that travel from a source of power to the homes.
 - Hard-edged puffs of pollution that gather into a cloud with a shadow.
 - A burst of six squares when a word lands in its gap or a shop opens.
-- Small confetti from the place that was tapped at the end of a level.
 
 ### The limits
 
@@ -295,7 +364,7 @@ At the end the child counts children standing at the school and cars parked at t
 - No more than about 150 flat particles and 40 pieces of dust are on the screen at one time.
 - A shake is never stronger than 3 pixels or longer than 200 milliseconds, and there are no more than two in a row. The game should have a setting that turns shakes off.
 - Nothing flashes more than three times in a second, and the whole picture never flashes.
-- Confetti over the whole screen is kept for the end of the hour. At present it falls after every level, which makes the end feel ordinary.
+- There is no confetti, as `DESIGN.md` says. The hop of the new buildings, one after another, takes its place.
 - No effect plays over words while the child is reading them.
 
 ## How the child's taps are shown
@@ -331,7 +400,9 @@ The film shows a round pointer, and the game will show the same answers under th
 
 Something that the child must notice lasts at least 400 milliseconds. Something that the child must understand, such as the moment that decides a plan, lasts at least 1,000 milliseconds and is followed by 400 milliseconds in which nothing else starts. No picture stays the same for more than 1.2 seconds unless there are words to read. Words stay for the time they take to appear and then for 600 milliseconds and 400 milliseconds a word.
 
-## The weakest moments of the present film, in order
+## The weakest moments of the first film, in order
+
+This list is about the first film. The decisions described near the top of this report already deal with items 5, 12 and 13 and with part of items 2 and 10. The other items are about how things move in the town, and they apply to the new film just as they did to the first.
 
 1. **The tests of levels 2, 4 and 6 end with nothing to see.** The people, the carts and the children vanish or stop, and the plates look as they did before the press. The fix is the trails, the rows of people and parked cars, and the beat for each plan.
 2. **The town is too small and too crowded while it is being built.** Level 1 is the worst, at 50 squares away. The fix is the closer, steeper camera that looks from the south-west.
@@ -353,4 +424,4 @@ Two things that I noticed belong to the designer of the screen and not to this r
 
 ## Using this in the film
 
-The film already draws each frame from a time, so each beat above can be added as a start time and one of the functions in `motion-curves.js`. A sensible order of work is the camera numbers first, because they change three constants and one table. The drop of the buildings comes next, because it replaces one line in `town.js`. The six tests come after that, one at a time, starting with levels 2 and 6, which gain the most. The flight of the chosen plan into the town comes last, because it is the only change that needs two scenes in one picture.
+The film already draws each frame from a time, so each beat above can be added as a start time and one of the functions in `motion-curves.js`. A sensible order of work is the camera first, using the values in `DESIGN.md`. The drop of the buildings comes next, because it replaces one line in `town.js`, and the pale pieces of a plan that is only being tried use the same function with a lower fall and a smaller squash. The six tests come after that, one at a time. Levels 1, 3 and 4 are the simpler ones, because their three plans run together. Levels 2, 5 and 6 need the rewind and the small picture that is kept on each card.

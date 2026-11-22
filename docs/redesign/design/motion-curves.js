@@ -83,16 +83,21 @@ export function flyWord(k, a, b, lift = 34) { const e = inOutCubic(k); return { 
 // y is the height above the ground in units, sx and sy are the scales across and up (the base stays on the ground),
 // shadow goes from 0.3 to 1 as it comes down, and landed is true from the moment it touches.
 // The whole arrival lasts fallMs + 520 ms. With the defaults that is 820 ms.
-export function drop(t, height = 6, fallMs = 300) {
+export function drop(t, height = 6, fallMs = 300, squash = 0.80) {
   const f = fallMs / 1000; if (t <= 0) return { y: height, sx: 0.96, sy: 1.08, shadow: 0.3, landed: false };
   if (t < f) { const k = inQuad(t / f); return { y: height * (1 - k), sx: 0.96, sy: 1.08, shadow: lerp(0.3, 1, k), landed: false }; }
   const a = t - f; let sy;
-  if (a < 0.09) sy = lerp(1.08, 0.80, outCubic(a / 0.09));                 // the squash, 90 ms
-  else if (a < 0.26) sy = lerp(0.80, 1.06, inOutSine((a - 0.09) / 0.17));  // the rebound, 170 ms
-  else sy = 1 + 0.06 * Math.exp(-(a - 0.26) * 14) * Math.cos((a - 0.26) * 24); // the settle, 260 ms
+  if (a < 0.09) sy = lerp(1.08, squash, outCubic(a / 0.09));                 // the squash, 90 ms
+  else if (a < 0.26) sy = lerp(squash, 1 + (1 - squash) * 0.3, inOutSine((a - 0.09) / 0.17));  // the rebound, 170 ms
+  else sy = 1 + (1 - squash) * 0.3 * Math.exp(-(a - 0.26) * 14) * Math.cos((a - 0.26) * 24); // the settle, 260 ms
   return { y: 0, sx: 1 / Math.sqrt(sy), sy, shadow: 1, landed: true };
 }
 export const DROP_MS = 820;
+// a plan that is only being tried lands lightly: pale pieces fall 3 squares in 220 ms, squash to 92 per cent and raise no dust
+export const trialDrop = (t) => drop(t, 3, 220, 0.92);
+// the rewind between two plans that are tested on the same ground: k from 0 to 1 over 300 ms.
+// Returns how far along its path a walker is, given how far it had got (1 is the end of its path).
+export const rewind = (k, reached = 1) => reached * (1 - inOutCubic(k));
 // when building number i of n should start to drop, in seconds after the first: the gaps shorten like a drum roll
 export function dropStart(i, firstGapMs = 420, lastGapMs = 200, n = 8) { let t = 0; for (let k = 0; k < i; k++) t += lerp(firstGapMs, lastGapMs, n > 1 ? Math.min(1, k / (n - 2 || 1)) : 0); return t / 1000; }
 // a flat tile (a road, a path, a field square) that is laid: returns the height above its place, with a small bounce

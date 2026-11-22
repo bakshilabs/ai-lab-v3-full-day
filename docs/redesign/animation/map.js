@@ -77,7 +77,7 @@ const LAKE = [-21, -5.2, 2.6, 2], LAGOON = [24, 20, 5, 3];
 const inEll = ([cx, cz, rx, rz], x, z, k = 1) => ((x - cx) / (rx * k)) ** 2 + ((z - cz) / (rz * k)) ** 2 < 1;
 const wet = (x, z, w) => (z > -4.5 && Math.abs(x - riverX(z)) < w) || (Math.abs(z + 4.5) < w && x > -19 && x < riverX(-4.5) + w);
 // the ridge rises in three steps
-const tier = (x, z) => { const o = owner(x, z); if (o.id === 'eco') return x >= 13.6 ? 1 : x >= 6 ? 2 : x >= 5 ? 1 : 0; if (o.id !== 'power') return 0; const e = ell(o, x, z) + wob(x, z); return e < 0.42 ? 3 : e < 0.62 ? 2 : e < 0.82 ? 1 : 0; };
+const tier = (x, z) => { const o = owner(x, z); if (o.id === 'eco') return x >= 13.6 ? 1 : x >= 4 ? 2 : 0; if (o.id !== 'power') return 0; const e = ell(o, x, z) + wob(x, z); return e < 0.42 ? 3 : e < 0.62 ? 2 : e < 0.82 ? 1 : 0; };
 const inRect = (x, z, x1, z1, x2, z2) => x >= x1 && x <= x2 && z >= z1 && z <= z2;
 
 const top = new Map(); // square -> height of its top (for walking and for standing things on)
@@ -272,6 +272,7 @@ for (const [x, z] of [[-28.6, -8.2], [-28.6, -6.6], [-30.8, -8.2], [-30.8, -6.6]
 const pylon = (x, z) => { const g = grp(x, z); for (const k of [-0.3, 0.3]) box(g, 0.12, 4.8, 0.12, k, 2.4, 0, '#6b7785').rotation.z = -k * 0.1; box(g, 2, 0.12, 0.12, 0, 4.2, 0, '#6b7785'); box(g, 1.3, 0.12, 0.12, 0, 4.8, 0, '#6b7785'); bake(g); posts.push([x, z, 0.4]); return new THREE.Vector3(x, g.position.y + 4.2, z); };
 const wire = (a, b) => { for (const k of [-0.9, 0.9]) { const p = a.clone().add(b).multiplyScalar(0.5), m = box(world, 0.05, 0.05, a.distanceTo(b), p.x + k, p.y, p.z, '#4a5568', false); m.receiveShadow = false; m.lookAt(b.x + k, b.y, b.z); } };
 const LINES = [[[-20.4, -8.2], [-14, -2.2], [-7, -2.2], [-0.6, -1.8]], [[-20.4, -8.2], [-9.6, -17.4], [-2, -21.6]], [[-20.4, -8.2], [-26.8, 2.4], [-27, 8.8]], [[-0.6, -1.8], [14.2, -4.2], [20, -4.2]], [[-0.6, -1.8], [8.2, 10], [14, 12.6]]];
+LINES.splice(4, 1); LINES.splice(3, 1); LINES.splice(0, 1);
 const pyl = new Map(); for (const line of LINES) line.map(([x, z]) => { const k = key(x, z); if (!pyl.has(k)) pyl.set(k, pylon(x, z)); return pyl.get(k); }).forEach((p, i, a) => { if (i) wire(a[i - 1], p); });
 
 // ---------- the high bridge, the waterfalls, clouds
@@ -331,4 +332,4 @@ export function animate(t) {
   for (let i = 0; i < dropSeed.length; i++) { const [ox, ph0, s] = dropSeed[i], F = FALLS[i % 2], f = (ph0 + t * 0.45) % 1, len = i % 2 ? 2.6 : 9; m4.compose(wp.set(F[0] + (F[4] ? ox : f * 0.5), F[1] - 0.5 - f * len, F[2] + (F[4] ? f * 0.6 : ox * 1.6)), q0, tmp.setScalar(s * (1 - f * 0.6))); drops.setMatrixAt(i, m4); }
   drops.instanceMatrix.needsUpdate = true;
 }
-export { THREE, PAL, scene, world, hemi, sun, H, riverX, cars, clouds, ecoHomes, ecoTrees, box, bake, stepRoof };
+export { THREE, PAL, scene, world, hemi, sun, H, riverX, cars, drones, clouds, ecoHomes, ecoTrees, box, bake, stepRoof, tree, grp };
