@@ -93,5 +93,5 @@ export function makeFilm(stageEl, D) {
     const fx = []; ui.draw(m, t, TT, fx, night); drawFx(fxc, W, H, fx, t, night);
   }
   function seek(TT) { TT = clamp(TT, 0, duration - 0.001); const m = segs.find((x) => TT < x.start + x.dur) || segs[segs.length - 1]; if (m !== cur) enter(m); frame(m, TT - m.start, TT); }
-  return { duration, segs, seek, name: (m) => (m.kind === 'open' ? T.name : m.kind === 'end' ? D.ui.jobsTitle : `${m.li + 1}. ${m.v.name}`) };
+  return { st, duration, segs, seek, name: (m) => (m.kind === 'open' ? T.name : m.kind === 'end' ? D.ui.jobsTitle : `${m.li + 1}. ${m.v.name}`) };
 }

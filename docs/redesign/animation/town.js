@@ -19,7 +19,24 @@ export const VIEWS = [ // where the camera looks in each level: [x, y, z, distan
 ];
 // the map's own scene, with a sky that can turn to night: n is 0 in daylight and 1 after dark, and the sky passes
 // through a warm peach on the way. dim is 0 to 1 under a rain cloud.
+// The map draws its ground as about ten thousand copies of one box. The software renderer that records the film draws
+// such copies very slowly, so the ground is turned once into a single fixed shape with the same boxes and colours.
+function bakeGround() {
+  let big = null; MAP.scene.traverse((o) => { if (o.isInstancedMesh && o.instanceColor && (!big || o.count > big.count)) big = o; }); if (!big || big.count < 2000) return;
+  const src = big.geometry, P = src.attributes.position, Nn = src.attributes.normal, I = src.index, n = big.count, m = new THREE.Matrix4(), v = new THREE.Vector3(), c = new THREE.Color(), p0 = new THREE.Vector3(), q0 = new THREE.Quaternion(), s0 = new THREE.Vector3();
+  // the top of the highest box in each column, so that the faces nobody can see (undersides, and sides against a neighbour) are left out
+  const key = (x, z) => `${Math.round(x * 2)},${Math.round(z * 2)}`, tops = new Map(), boxes = [];
+  for (let k = 0; k < n; k++) { big.getMatrixAt(k, m); m.decompose(p0, q0, s0); const top = p0.y + s0.y / 2, kk = key(p0.x, p0.z); boxes.push([p0.x, p0.z, s0.x, s0.z, top]); tops.set(kk, Math.max(tops.get(kk) ?? -99, top)); }
+  const pos = [], nor = [], col = [], idx = [], DIR = [[1, 0], [-1, 0], null, null, [0, 1], [0, -1]];
+  for (let k = 0; k < n; k++) { const [bx, bz, sx, sz, top] = boxes[k]; big.getMatrixAt(k, m); big.getColorAt(k, c);
+    for (let f = 0; f < 6; f++) { if (f === 3) continue; if (f !== 2) { const d = DIR[f], nt = tops.get(key(bx + d[0] * sx, bz + d[1] * sz)); if (nt !== undefined && nt >= top - 0.01) continue; }
+      const base = pos.length / 3; for (let j = 0; j < 4; j++) { const vi = f * 4 + j; v.fromBufferAttribute(P, vi).applyMatrix4(m); pos.push(v.x, v.y, v.z); nor.push(Nn.getX(vi), Nn.getY(vi), Nn.getZ(vi)); col.push(c.r, c.g, c.b); }
+      for (let j = 0; j < 6; j++) idx.push(base + I.getX(f * 6 + j) - f * 4); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx);
+  const mat = big.material.clone(); mat.vertexColors = true; const mesh = new THREE.Mesh(g, mat); mesh.castShadow = big.castShadow; mesh.receiveShadow = big.receiveShadow; mesh.position.copy(big.position); big.parent.add(mesh); big.parent.remove(big);
+}
 export function makeScene() {
+  bakeGround();
   const day = new THREE.Color('#dff1f7'), dark = new THREE.Color('#1c2647'), peach = new THREE.Color('#f6c9a0'), grey = new THREE.Color('#b9c6d2'), hd = new THREE.Color('#fff6e8'), hn = new THREE.Color('#7f95d6'), sd = new THREE.Color('#fff0d0'), sn = new THREE.Color('#9fb4ff'), sw = new THREE.Color('#ffb070');
   MAP.scene.background = day.clone();
   return { scene: MAP.scene, light(n, dim = 0) { const w = Math.sin(clamp(n) * Math.PI) * 0.8; MAP.hemi.intensity = lerp(1.55, 0.62, n) * (1 - dim * 0.3); MAP.sun.intensity = lerp(2.1, 0.5, n) * (1 - dim * 0.45); MAP.hemi.color.copy(hd).lerp(hn, n); MAP.sun.color.copy(sd).lerp(sn, n).lerp(sw, w * 0.6); MAP.scene.background.copy(day).lerp(dark, n).lerp(peach, w * 0.7).lerp(grey, dim * 0.55); } };

@@ -19,7 +19,7 @@ if (process.env.AUDIO) {
 } else for (const [i, m] of info.l.entries()) { if (only && !only.includes(i)) continue;
   const file = path.join(out, `part-${i}.mp4`), ff = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', process.env.CRF || '23', '-preset', 'medium', '-movflags', '+faststart', file]);
   const n = Math.round(m.dur * fps), t0 = Date.now();
-  for (let k = 0; k < n; k++) { await p.evaluate((T) => film.seek(T), m.start + k / fps); const buf = await p.screenshot({ type: 'jpeg', quality: 92 }); if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once('drain', r)); if (k % 500 === 0) console.log(`part ${i}: frame ${k} of ${n}, ${Math.round((Date.now() - t0) / 1000)} s`); }
+  for (let k = 0; k < n; k++) { await p.evaluate((T) => film.seek(T), m.start + k / fps); const buf = await p.screenshot({ type: 'jpeg', quality: 92 }); if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once('drain', r)); if (k % 100 === 0) console.log(`part ${i}: frame ${k} of ${n}, ${Math.round((Date.now() - t0) / 1000)} s`); }
   ff.stdin.end(); await new Promise((r) => ff.on('close', r)); console.log(`part ${i} ${m.name}: ${n} frames in ${Math.round((Date.now() - t0) / 1000)} s`);
 }
 await b.close(); srv.close();

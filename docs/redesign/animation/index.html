@@ -66,7 +66,7 @@
   $('play').onclick = () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Play'; if (playing) { if (T >= film.duration - 0.1) T = 0; last = performance.now(); requestAnimationFrame(tick); } };
   $('scrub').oninput = (e) => { T = e.target.value / 2000 * film.duration; paint(); }; $('lev').onchange = (e) => { T = film.segs[+e.target.value].start; paint(); };
   // for the recorder: the parts of the film, a way to draw any moment, and the sound track
-  window.film = { duration: film.duration, segs: film.segs, levels: film.segs.map((m) => ({ start: m.start, dur: m.dur, name: film.name(m), kind: m.kind, li: m.li })), seek: (t) => { T = t; film.seek(t); },
+  window.film = { dbg: film.st, duration: film.duration, segs: film.segs, levels: film.segs.map((m) => ({ start: m.start, dur: m.dur, name: film.name(m), kind: m.kind, li: m.li })), seek: (t) => { T = t; film.seek(t); },
     // audio() makes the whole sound track and returns its length in bytes; audioPart(i, size) returns one piece of it as text
     async audio() { const { renderAudio } = await import('./sound.js'); const pcm = await renderAudio(film.segs, film.duration); window.film.pcm = new Uint8Array(pcm.buffer); return window.film.pcm.length; },
     audioPart(i, size) { const u8 = window.film.pcm.subarray(i * size, (i + 1) * size); let s = ''; for (let k = 0; k < u8.length; k += 0x8000) s += String.fromCharCode(...u8.subarray(k, k + 0x8000)); return btoa(s); } };

@@ -76,7 +76,7 @@ export function place(o, pts, u, y = 0, show = true) { const p = along(pts, u); 
 
 // the stage: a row of plates, one for each plan
 export function makeStage(canvas, W, H) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  const QS = new URLSearchParams(location.search), renderer = new THREE.WebGLRenderer({ canvas, antialias: !QS.has('noaa'), preserveDrawingBuffer: true });
   renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap;
   const camera = new THREE.PerspectiveCamera(26, W / H, 1, 400), day = new THREE.Color('#dff1f7'), dusk = new THREE.Color('#27365c');
