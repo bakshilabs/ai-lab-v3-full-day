@@ -1,7 +1,7 @@
 // The four indoor play breaks of the second version: the home factory, the indoor farm, the control room and the school.
 // Each one is a room of its own, made of plain blocks. room(g) builds it and returns points to label; html(p) is the
 // sketch of the interface. The words are placeholders.
-import { THREE, PAL, blk, group, hash, W, H, GL, soft, INK, SKIN, HAIR, ROOFS, place, frame, fig, wheelchair, walkingFrame, cottage, shade, tree, pine, dust, tomato, lettuce, strawberry, I, florence, top, row, tok, pal, sws, mouse, hint, plate } from './kit-v2.js';
+import { THREE, PAL, blk, group, hash, W, H, GL, soft, INK, SKIN, HAIR, ROOFS, place, frame, fig, wheelchair, walkingFrame, cottage, shade, tree, pine, dust, tomato, lettuce, strawberry, I, band, florence, top, row, tok, pal, sws, mouse, hint, plate } from './kit-v2.js';
 
 // ---- 4. the prefab home factory -----------------------------------------------------------------------------------------
 const DOORS = ['#d2553a', '#3f78b5', '#2e9b5a', '#e9ad1c'];
@@ -41,18 +41,21 @@ export const factory = {
       for (const [a, b] of [[-4.4, -1.4], [-4.4, 1.4], [-0.6, -1.4], [-0.6, 1.4], [3.4, -1.4], [3.4, 1.4]]) blk(l, a, b, 0.95, 0.34, 0, 0.95, INK); for (const b of [-1.3, 1.3]) blk(l, 1, b, 7.4, 0.1, 1.0, 0.18, '#ffd257'); }
     fig(g, -7.4, 0, -1.7, { k: 1.22, shirt: '#3f78b5', hair: HAIR[2], cap: '#e0503a', arms: ['up', 'down'], turn: -0.2 });
     // the people who work here
-    fig(g, 4.6, 0, 4.4, { k: 1.22, shirt: '#ffd257', legs: '#3f78b5', skin: SKIN[1], hair: HAIR[3], hat: '#ffd257', arms: ['down', 'up'], turn: -0.6 });
+    fig(g, -4.9, 0, 5.0, { k: 1.25, shirt: '#ffd257', legs: '#3f78b5', skin: SKIN[1], hair: HAIR[3], hat: '#ffd257', arms: ['up', 'down'], turn: -0.2 });
+    // the family this home is for, watching from the visitors' line: the child points at the place they would like
+    fig(g, 6.3, 0, 4.6, { k: 1.3, shirt: '#8a5fc2', skin: SKIN[3], hair: HAIR[4], long: true, arms: ['down', 'down'], turn: -1.1 }); fig(g, 7.4, 0, 3.4, { k: 1.35, shirt: '#2e9b5a', legs: '#4a556e', skin: SKIN[0], hair: HAIR[0], arms: ['down', 'up'], turn: -1.2 });
+    fig(g, 5.5, 0, 3.6, { k: 0.95, shirt: '#e0503a', skin: SKIN[0], hair: HAIR[1], cap: '#3f78b5', arms: ['up', 'down'], turn: -1.2 }); for (let k = 0; k < 8; k++) blk(g, 4.4, 1.2 + k * 0.7, 0.14, 0.4, 0, 0.03, '#e0503a', { shadow: false });
     fig(g, 10.6, 0, 1.6, { k: 1.22, shirt: '#e0503a', skin: SKIN[3], hair: HAIR[4], hat: '#ffd257', arms: ['fwd', 'fwd'], turn: 1.4 });
     fig(g, 3.4, 0, -7.4, { k: 1.22, shirt: '#2e9b5a', skin: SKIN[2], hair: HAIR[0], hat: '#ffd257', turn: -0.3 });
-    return { win: [HX - 1.6, 2.5, HZ + R + 2.7], lorry: [-8.2, 2.3, -4.4] };
+    return { win: [HX - 1.6, 2.5, HZ + R + 2.7], lorry: [-8.2, 2.3, -4.4], fam: [6.4, 2.9, 4] };
   },
   html(p) {
     const on = '#ffd257', done = '#c9925a', later = '#efe6d2', D = 'stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"', L = 'stroke="#8a93a8" stroke-width="2.5" stroke-dasharray="6 5" stroke-linejoin="round"';
     const dia = `<div class="diagram"><svg viewBox="0 0 220 168"><path d="M40 60L110 14l70 46z" fill="${later}" ${L}/><rect x="50" y="78" width="120" height="62" fill="${done}" ${D}/><rect x="97" y="96" width="26" height="44" fill="#fffaf0" ${D}/>
       <rect x="60" y="92" width="26" height="24" fill="${on}" stroke="#1f2a44" stroke-width="4"/><rect x="134" y="92" width="26" height="24" fill="${on}" stroke="#1f2a44" stroke-width="4"/><rect x="186" y="96" width="22" height="42" fill="${later}" ${L}/>
       <rect x="40" y="146" width="140" height="12" fill="#bdbcb6" ${D}/><path d="M22 150l6 6 11-13" fill="none" stroke="#1c7a45" stroke-width="5"/><path d="M22 106l6 6 11-13" fill="none" stroke="#1c7a45" stroke-width="5"/></svg></div>`;
-    return top('Homes', 'Build a home') + mouse(p.win[0] - 4, p.win[1] - 6) + florence + hint('You have two windows. Choose two yellow places.') + plate(p.lorry, 'To your town', 'tip', 0, -8)
-      + pal('Your home', dia + tok(I.win(), 'Window', 'on', '2 left') + tok(I.roof('#2e9b5a'), 'Roof', '', '1 left') + tok(I.door('#3f78b5'), 'Door', '', '1 left') + '<h4>Door colour</h4>' + sws(DOORS, 1), 'wide');
+    return top('Homes', 'Build a home') + mouse(p.win[0] - 4, p.win[1] - 6) + plate(p.lorry, 'To your town', 'tip', 0, -8) + plate(p.fam, 'Your family', 'on tip', 0, -8)
+      + band('You have two windows. Drag each one to a yellow place.', dia + `<div class="grp">${tok(I.win(), 'Window', 'on', '2 left')}${tok(I.roof('#2e9b5a'), 'Roof', '', '1 left')}${tok(I.door('#3f78b5'), 'Door', '', '1 left')}</div><div class="grp"><h4>Door colour</h4>${sws(DOORS.slice(0, 2), 1)}${sws(DOORS.slice(2), 9)}</div>`);
   },
 };
 
@@ -83,13 +86,16 @@ export const farm = {
     // tomato vines on strings, growing out of a second channel on the floor: the fruit hangs high, so it is worth a jump
     channel(g, -9.2, 4.1, 0.42, -3.1, false); const TX = [-8.2, -5.9, -3.6, -1.3, 1.0, 3.3];
     TX.forEach((x, k) => { blk(g, x, -3.1, 0.03, 0.03, 0.4, TOPY - 0.4, '#e9e2d0', NO); blk(g, x, -3.1, 0.2, 0.2, 0.4, 3.5, '#3f9a4f'); for (const [a, y, w] of [[-0.35, 1.2, 0.6], [0.35, 1.9, 0.6], [-0.3, 2.9, 0.5], [0.32, 3.6, 0.55], [0, 3.9, 0.7]]) blk(g, x + a, -3.1, w, 0.4, y, 0.24, '#4fae58');
-      roots(g, x, 0.42, -3.1); if (k >= 2) { tomato(g, x + 0.34, 2.72, -2.95, 1.55); tomato(g, x - 0.12, 2.5, -2.8, 1.25); } });
+      roots(g, x, 0.42, -3.1); if (k >= 2) { tomato(g, x + 0.34, 2.5, -2.95, 1.55); tomato(g, x - 0.12, 2.28, -2.8, 1.25); } });
     // the water tank, and the pipe that carries water to both farms
     blk(g, 5.3, -3.3, 1.5, 1.5, 0, 0.5, '#9aa3b2'); blk(g, 5.3, -3.3, 1.4, 1.4, 0.5, 2.5, '#bfe3f5', { mat: soft('#bfe9fb', 0.75) }); blk(g, 5.3, -3.3, 1.2, 1.2, 0.55, 1.8, PAL.water, { shadow: false, mat: GL('#49b4ea') }); blk(g, 5.3, -3.3, 1.6, 1.6, 3.0, 0.14, '#fbfbf7');
     const PIPE = GL('#2f8fd0'); blk(g, 4.5, -2.2, 0.16, 2.2, 0.62, 0.16, PAL.water, { shadow: false, mat: PIPE }); blk(g, 4.5, -1.1, 0.16, 0.16, -1.7, 2.4, PAL.water, { shadow: false, mat: PIPE }); blk(g, 4.5, 0.05, 0.3, 0.04, -1, 1, PAL.water, { shadow: false, mat: PIPE });
     blk(g, -3.6, -1.1, 16.4, 0.16, -1.7, 0.16, PAL.water, { shadow: false, mat: PIPE }); for (const x of [-11.6, -7.6, -3.6, 0.4]) blk(g, x, -1.1, 0.12, 0.12, -2.55, 0.9, PAL.water, { shadow: false, mat: PIPE });
     // ---- the street to the right of the greenhouse
     blk(g, 11.6, -1.6, 0.16, 0.16, 0, 3.4, '#2b3a55'); blk(g, 11.6, -1.6, 0.5, 0.5, 3.4, 0.4, '#ffd257', { mat: GL('#ffe27a') }); fig(g, 10.4, 0, -0.8, { k: 1.05, shirt: '#8a5fc2', skin: SKIN[1], hair: HAIR[3], turn: -0.5, arms: ['down', 'up'] });
+    // the market stall on the street, waiting for the food, and a farmer in the greenhouse with an empty crate
+    blk(g, 12.6, -1.6, 1.8, 1.2, 0, 0.9, '#c9925a'); for (let k = 0; k < 4; k++) blk(g, 11.9 + k * 0.46, -1.6, 0.46, 1.5, 2.2, 0.14, k % 2 ? '#fbfbf7' : '#e0503a'); for (const a of [-0.8, 0.8]) blk(g, 12.6 + a, -1.1, 0.1, 0.1, 0.9, 1.3, '#7a5a33');
+    fig(g, -11.4, 0, -0.9, { k: 1.25, shirt: '#2e9b5a', skin: SKIN[3], hair: HAIR[4], long: true, cap: '#ffd257', arms: ['fwd', 'fwd'], turn: 0.9 }); blk(g, -10.75, -0.35, 0.8, 0.6, 1.0, 0.4, '#b9824a');
     // ---- the tunnel farm: old brick, pink growing lamps, two rows of channels
     blk(g, 0, -4.6, 34, 0.4, -6, 5, '#4a3f66', NO); for (let k = 0; k < 40; k++) blk(g, -16 + hash(k, 1) * 32, -4.38, 1.1, 0.04, -5.8 + Math.floor(hash(k, 2) * 9) * 0.5, 0.42, hash(k, 3) > 0.5 ? '#574a78' : '#3f3558', NO);
     for (const [z, y, d] of [[-4.1, -1.7, 0.7], [-3.6, -1.35, 0.5]]) blk(g, 0, z, 34, d, y, -1 - y, '#4a3f66', NO);
@@ -108,16 +114,15 @@ export const farm = {
     blk(g, LXc, -1.3, 2.2, 2.3, 3.5, 0.2, '#e9ad1c'); blk(g, LXc, -1.3, 2.0, 2.2, 0, 0.16, '#ffd257'); for (let k = 0; k < 5; k++) blk(g, LXc - 0.8 + k * 0.4, 0.04, 0.2, 0.04, 0, 0.16, k % 2 ? INK : '#ffd257', { shadow: false, mat: GL(k % 2 ? INK : '#ffd257') });
     blk(g, LXc, -2.3, 2.0, 0.08, 1.1, 0.1, '#ffd257'); blk(g, LXc, -2.3, 2.0, 0.08, 0.6, 0.08, '#ffd257'); blk(g, LXc, -1.3, 0.1, 0.1, 0.16, 3.4, '#9aa3b2', NO);
     // ---- the child's figure, in the middle of a jump, with a basket on its back
-    const me = fig(g, -3.8, 0.42, -0.5, { k: 1.32, shirt: '#e0503a', legs: '#3f78b5', skin: SKIN[0], hair: HAIR[1], pack: '#c9925a', turn: 0.5, arms: ['down', 'up'], step: 0.12 });
+    const me = fig(g, -3.8, 0.42, -0.5, { k: 1.32, shirt: '#e0503a', legs: '#3f78b5', skin: SKIN[0], hair: HAIR[1], pack: '#c9925a', turn: 0.5, arms: ['down', 'up'], step: 0.12 }); me.position.y = 0.2;
     lettuce(me, -0.1, 1.2, -0.3, 0.75); tomato(me, 0.13, 1.2, -0.36, 0.7);
-    tomato(g, -3.2, 2.78, -0.5, 1.55); tomato(g, -3.9, 2.9, -2.9, 1.3);
+    tomato(g, -3.2, 2.56, -0.5, 1.55); tomato(g, -3.9, 2.6, -2.9, 1.3);
     return { lift: [LXc, 2.5, -0.2], tank: [5.3, 3.6, -2.5] };
   },
   html(p) {
     const n = (i, t) => `${i}<b>${t}</b>`;
-    return top('Food', 'Pick the food', `<div class="count">${I.basket()}<span></span>${n(I.lettuce(), 4)}${n(I.tomato(), 2)}${n(I.straw().replace('<svg ', '<svg class="off" '), 0)}</div>`)
-      + plate(p.lift, 'Lift', 'on', 0, 0) + plate(p.tank, 'Water', '', 0, 0) + florence + hint('Jump to pick the tomatoes.')
-      + `<div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i><i class="key on">Space <em>Jump</em></i></div>`;
+    return top('Food', 'Pick the food') + plate(p.lift, 'Lift', 'on', 0, 0) + plate(p.tank, 'Water', '', 0, 0)
+      + band('Jump to pick the tomatoes. The lift takes you down.', `<div class="grp"><h4>In your basket</h4><div class="count">${I.basket()}<span></span>${n(I.lettuce(), 4)}${n(I.tomato(), 2)}${n(I.straw().replace('<svg ', '<svg class="off" '), 0)}</div></div><div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i><i class="key on">Space <em>Jump</em></i></div>`);
   },
 };
 
@@ -126,11 +131,11 @@ const sg = (x0, z0, x1, z1) => { const o = []; for (let x = Math.min(x0, x1); x 
 const PATHS = [...sg(-5, -4, 17, -4), ...sg(9, -3, 9, 8), ...sg(6, 1, 8, 1), ...sg(6, 8, 11, 8), ...sg(-19, -4, -9, -4), ...sg(-16, -3, -16, 0)];
 const SRC = ['#ffd84a', '#7fd0ff', '#4fe08a'], DIM = ['#8a7a3a', '#4f7fa8', '#3f8a5e'];
 export const control = {
-  eye: [31, 5.4, 20], at: [0, 5.9, -4],
+  eye: [31, 5.2, 18], at: [4, 4.6, -3],
   // what is outside the window: the child's own town in the evening, with ten homes, eight of them lit
-  outside(g, world) {
-    const dark = ['A3', 'A6'], hs = [['A1', 'red'], ['A2', 'blue'], ['A3', 'yellow'], ['A4', 'green'], ['A6', 'blue'], ['C1', 'green'], ['B1', 'red'], ['B2', 'blue'], ['B4', 'green'], ['B6', 'red']].map(([at, roof]) => ({ at, roof, awake: !dark.includes(at), asleep: dark.includes(at) }));
-    world(g, { homes: hs, parks: ['A5', 'B5'], shop: 'C2', solar: true, evening: true, path: PATHS, bridges: [[-8, -4, 3]] });
+  outside(g, world, town) {
+    const dark = ['A3', 'C1'], hs = [['A1', 'red'], ['A2', 'blue'], ['A3', 'yellow'], ['A4', 'green'], ['B3', 'blue'], ['C1', 'green'], ['B1', 'red'], ['B2', 'blue'], ['B4', 'green'], ['B6', 'red']].map(([at, roof], k) => ({ at, roof, awake: !dark.includes(at), asleep: dark.includes(at), shirt: ['#e0503a', '#3f78b5', '#8a5fc2', '#ffd257'][k % 4], skin: k % 3, hair: k % 4 }));
+    world(g, { homes: hs, parks: ['A5', 'B5'], shop: 'C2', solar: true, evening: true, pk: 1.15, ...town });
     for (const [x, z] of [[4.2, -8.2], [12.6, -9.4]]) { const t = group(g, x, 2, z); blk(t, 0, 0, 0.5, 0.5, 0, 6.4, '#fbfbf7'); const hub = group(t, 0.3, 6.4, 0.3); hub.rotation.y = 0.9; for (let i = 0; i < 3; i++) { const b = group(hub); b.rotation.z = i * 2.094 + 0.4; blk(b, 0, 0, 0.42, 0.12, 0.2, 2.7, '#fbfbf7'); } }
     blk(g, 3.6, 3.4, 1.6, 2.4, 2, 1.7, '#fbfbf7'); blk(g, 3.6, 3.4, 1.7, 2.5, 3.7, 0.16, '#5aa35a'); for (let k = 0; k < 3; k++) blk(g, 4.42, 3.4, 0.04, 1.8, 2.25 + k * 0.45, 0.32, '#7dffa8', { shadow: false, mat: GL('#7dffa8') });
     // the low winter sun, close to the hills
@@ -172,14 +177,18 @@ export const control = {
     c.updateMatrixWorld(true); const P = (x, y, z = 0.3) => c.localToWorld(new THREE.Vector3(x, y, z)).toArray();
     // a plant and a noticeboard, so that the room is a place and not only a machine
     
+    // the engineer who works here, beside the desk, pointing at the lever
+    fig(g, 10.3, 0, -2.4, { k: 3.0, shirt: '#3f78b5', legs: '#2b3a55', skin: SKIN[1], hair: HAIR[3], long: true, hat: '#ffd257', arms: ['up', 'down'], turn: -0.35 });
+    blk(g, -11.4, -4.6, 1.5, 1.5, 0, 1.6, '#c8643f'); tree(g, -11.4, 1.6, -4.6, 2.2, '#5fa35a');
     return { n0: P(SX[0], 3.35), n1: P(SX[1], 3.35), n2: P(SX[2], 3.35), k0: P(-8.15, 2.85), k1: P(-7.0, 2.85), k2: P(-8.15, 1.7), k3: P(-7.0, 1.7), save: P(6.72, 3.3), use: P(6.72, 1.1), knob: P(7.9, 0.8, 1.2), sea: P(-7.57, 0.35),
       l0: [SX[0], 4.1, -4.95], l1: [SX[1], 4.1, -4.95], l2: [SX[2], 4.1, -4.95], store: P(5.35, 0.1) };
   },
   html(p) {
     const num = (q, t, c, l) => `<b class="num" style="left:${q[0]}px;top:${q[1]}px;color:${c}"><small>${l}</small>${t}</b>`, ico = (q, s) => `<i class="ico" style="left:${q[0]}px;top:${q[1]}px">${s}</i>`;
-    return top('Power', 'Keep the lights on') + florence + hint('Eight homes have power. The battery is sending two more blocks.')
-      + num(p.n0, 1, SRC[0], 'Sun') + num(p.n1, 5, SRC[1], 'Wind') + num(p.n2, 4, SRC[2], 'Battery') + ico(p.k0, I.spring()) + ico(p.k1, I.summer()) + ico(p.k2, I.autumn()) + ico(p.k3, I.winter())
-      + plate(p.save, 'Save') + plate(p.use, 'Use', 'on') + mouse(p.knob[0] - 4, p.knob[1] - 2) + plate(p.sea, 'Winter', 'on');
+    const hs = [...Array(10)].map((_, k) => I.home(k < 1 ? '#ffd84a' : k < 6 ? '#7fd0ff' : k < 8 ? '#4fe08a' : '#8a93a8', k < 8 ? '#fff4dc' : '#56617d')).join('');
+    return top('Power', 'Keep the lights on') + num(p.n0, 1, SRC[0], 'Sun') + num(p.n1, 5, SRC[1], 'Wind') + num(p.n2, 4, SRC[2], 'Battery') + ico(p.k0, I.spring()) + ico(p.k1, I.summer()) + ico(p.k2, I.autumn()) + ico(p.k3, I.winter())
+      + plate(p.save, 'Save') + plate(p.use, 'Use', 'on') + mouse(p.knob[0] - 4, p.knob[1] - 2) + plate(p.sea, 'Winter', 'on')
+      + band('Two homes are dark. The battery is sending two more blocks.', `<div class="grp"><h4>Eight of ten homes have power.</h4><div class="count">${hs}</div></div>`);
   },
 };
 
@@ -225,14 +234,14 @@ export const school = {
     // two yellow places for the one lift: beside the stairs in the hall, or beside the stairs in the music room
     for (const x of [-4.5, 3.75]) for (const y of [P, U]) frame(g, x, y + 0.06, Z0 + 0.85, 1.6, FL - 0.5, true, { d: 1.3, fill: 0.92 });
     // the lift that the mouse is carrying
-    liftCar(g, 1.2, 0.9, 8.2, 1.05);
+    liftCar(g, -11.5, 0.3, 5.2, 1.0);
     // children arriving, and a few trees well away from the building
     fig(g, -20, 0, 1.6, { k: 0.95, shirt: CLR[0], hair: HAIR[2], arms: ['down', 'up'], turn: 1.2 }); fig(g, -6, 0, 9.2, { k: 0.95, shirt: CLR[4], skin: SKIN[3], hair: HAIR[4], turn: 1.2, step: 0.12 }); fig(g, 3.5, 0, 9, { k: 0.95, shirt: CLR[3], skin: SKIN[1], hair: HAIR[3], turn: -1.2, step: 0.12 });
     for (const [x, z, k] of [[-19, -7, 2.4], [-13, -9, 2.1], [13.5, -8, 2.3], [20, -4, 2.2], [-22, 7.5, 2.2]]) tree(g, x, 0, z, k);
-    return { lift: [1.6, 2.6, 8.6], notes: [5.3, P + 2.25, 0.6], a: [-3.75, U + FL - 0.2, Z0 + 1.3], b: [3.75, U + FL - 0.2, Z0 + 1.3] };
+    return { lift: [-11.2, 2.0, 5.6], notes: [5.3, P + 2.25, 0.6], a: [-3.75, U + FL - 0.2, Z0 + 1.3], b: [3.75, U + FL - 0.2, Z0 + 1.3] };
   },
   html(p) {
-    return top('A school for everyone', 'Make room for everyone', row([I.ramp(), I.lift(), I.quiet(), I.wide()], 1)) + mouse(p.lift[0], p.lift[1]) + `<b class="zz" style="left:${p.notes[0]}px;top:${p.notes[1]}px;font-size:30px">&#9834; &#9835;</b>` + florence + hint('You have one lift. Choose a yellow place for it.')
-      + pal('Parts', tok(I.ramp(), 'Ramp', 'used', 'Placed') + tok(I.lift(), 'Lift', 'on', '1 left') + tok(I.quiet(), 'Quiet room', '', '1 left') + tok(I.wide(), 'Wide door', '', '1 left'));
+    return top('A school for everyone', 'Make room for everyone') + mouse(p.lift[0], p.lift[1]) + `<b class="zz" style="left:${p.notes[0]}px;top:${p.notes[1]}px;font-size:30px">&#9834; &#9835;</b>`
+      + band('You have one lift. Drag it to a yellow place.', tok(I.ramp(), 'Ramp', 'used', 'Placed') + tok(I.lift(), 'Lift', 'on', '1 left') + tok(I.quiet(), 'Quiet room', '', '1 left') + tok(I.wide(), 'Wide door', '', '1 left'));
   },
 };

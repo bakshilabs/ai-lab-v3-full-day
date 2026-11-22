@@ -133,6 +133,16 @@ export const css = `
 .cx .diagram { background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 14px; padding: 4px 4px 0; margin-bottom: 4px; }
 .cx .diagram svg { display: block; width: 100%; height: auto; }
 .cx .pal.wide { width: 250px; }
+.cx .band { position: absolute; left: 0; right: 0; bottom: 0; height: 226px; background: var(--ui-paper); border-top: 6px solid var(--ui-ink); box-sizing: border-box; z-index: 1; }
+.cx .tray { position: absolute; left: 424px; right: 16px; bottom: 12px; height: 198px; display: flex; gap: 14px; align-items: center; justify-content: flex-end; z-index: 3; }
+.cx .tray .tok { width: 178px; margin: 0; box-sizing: border-box; }
+.cx .tray .grp { display: flex; flex-direction: column; gap: 9px; justify-content: center; }
+.cx .tray h4 { margin: 0; font: 700 16px/1.1 var(--ui-body); color: var(--ui-ink-soft); }
+.cx .tray .sws { margin: 0; }
+.cx .tray .diagram { width: 236px; margin: 0; box-sizing: border-box; }
+.cx .tray .keys { position: static; }
+.cx .tray .count { height: 56px; }
+.cx .tray .say { max-width: 250px; font: 700 19px/1.25 var(--ui-body); }
 `;
 const O = 'stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"';
 export const I = {
@@ -170,4 +180,6 @@ export const pal = (title, inner, cls = '') => `<div class="pal ${cls}"><h3>${ti
 export const sws = (cols, on) => `<div class="sws">${cols.map((c, k) => `<i class="${k === on ? 'on' : ''}" style="background:${c}"></i>`).join('')}</div>`;
 export const mouse = (x, y) => `<svg class="mouse" style="left:${x}px;top:${y}px" viewBox="0 0 40 48"><path d="M5 3l28 22-13 2 8 15-7 3-8-15-8 9z" fill="#fff" stroke="#1f2a44" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
 export const hint = (t) => `<div class="hint">${t}</div>`;
+// the paper band under the scene: Florence, one short instruction, and the helper panel, so that nothing covers the scene
+export const band = (t, tray) => `<i class="band"></i>${florence}<div class="hint" style="max-width:262px">${t}</div><div class="tray">${tray}</div>`;
 export const plate = (p, t, cls = '', dx = 0, dy = 0) => `<i class="plate ${cls}" style="left:${p[0] + dx}px;top:${p[1] + dy}px">${t}</i>`;
