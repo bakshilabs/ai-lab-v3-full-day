@@ -15,7 +15,7 @@ const W = 1280, H = 720;
 // the framing for each recap, which holds every place that can be tapped
 const RECAP_VIEW = [TEST_VIEW[0], VIEWS[2], VIEWS[3], VIEWS[4], VIEWS[5], [6.4, 2, -2.4, 36]];
 // whole-world framings: [x, y, z, distance, tilt, turn]. The first opens the film and the last closes it, facing Drone City.
-const WORLD = { world: [1, 0, 2, 205, 0.8, -1.2], world2: [1.5, 0, 1, 150, 0.86, -1.2], jobs: [3.5, 1, 6.5, 50, TILT, YAW] };
+const WORLD = { world: [1, 0, 2, 138, 0.8, -1.2], world2: [1.5, 0, 1, 112, 0.86, -1.2], jobs: [3.5, 1, 6.5, 50, TILT, YAW] };
 
 export function makeFilm(stageEl, D) {
   const st = makeStage(stageEl.querySelector('canvas.gl'), W, H), fxc = stageEl.querySelector('canvas.fx').getContext('2d');
@@ -48,7 +48,7 @@ export function makeFilm(stageEl, D) {
           const e = t - m.turn[d]; if (e >= 0 && e < TS.each) { p.a = e; p.e = e; p.f = since(e, TS.each - 0.4); }
         } else {
           p.a = since(t, m.land[s]); p.e = since(t, m.test0); p.f = since(t, d === pick ? m.build0 - 0.35 : m.fold + 0.15 + s * 0.12);
-          if (m.retry !== undefined && t >= m.try0) { if (d === m.retry) { p.a = since(t, m.land2); p.e = since(t, m.test2); p.f = since(t, m.keepTap + 0.2); } else p.a = -1; }
+          if (m.retry !== undefined && t >= m.try0) { if (d === m.retry) { p.a = since(t, m.land2); p.e = since(t, m.test2); p.f = since(t, m.keepTap + 0.2); } else { p.a = -1; p.e = -1; } }
         }
         return p; });
       S.clear = m.retry !== undefined && t >= m.try0 ? since(t, m.keepTap + 0.3) : since(t, li === 4 ? m.useTap + 0.3 : m.fold);
@@ -65,7 +65,7 @@ export function makeFilm(stageEl, D) {
     return { night, R };
   }
   // the last shot: the drone leaves a roof in Drone City and flies towards Eco Town
-  const flyDrone = (m, t, TT) => { drone.g.scale.setScalar(1); if (m.kind !== 'end' || t < m.back) return; const u = inOutSine(span(t, m.back + 0.6, m.dur + 2.5)), a = [3, 17, -20], b = [8.6, 6, -0.5]; drone.g.visible = true; drone.g.position.set(lerp(a[0], b[0], u), lerp(a[1], b[1], u) + Math.sin(u * Math.PI) * 5 + Math.sin(TT * 2.4) * 0.15, lerp(a[2], b[2], u)); drone.g.rotation.y = Math.atan2(b[0] - a[0], b[2] - a[2]); drone.g.scale.setScalar(2.2); };
+  const flyDrone = (m, t, TT) => { drone.g.scale.setScalar(1); if (m.kind !== 'end' || t < m.back) return; const u = inOutSine(span(t, m.back + 0.6, m.dur + 2.5)), a = [3, 17, -20], b = [8.6, 6, -0.5]; drone.g.visible = true; drone.g.position.set(lerp(a[0], b[0], u), lerp(a[1], b[1], u) + Math.sin(u * Math.PI) * 5 + Math.sin(TT * 2.4) * 0.15, lerp(a[2], b[2], u)); drone.g.rotation.y = Math.atan2(b[0] - a[0], b[2] - a[2]); drone.g.scale.setScalar(3.4); };
 
   // ---- getting a part ready: the dock is measured at the moments the camera must allow for, and the taps are found --------
   let cur = null;

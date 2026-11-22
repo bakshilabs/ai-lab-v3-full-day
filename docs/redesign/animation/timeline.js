@@ -77,7 +77,7 @@ export function planFilm(D, town, buildEnd) {
     const th = S.say(U.testHow, t + 0.3); m.btn.test = { a: th.typed }; S.cue(th.typed, 'sentenceReady', 1); t = th.b; m.probes.offers = t - 0.2; m.pause1 = [t, t + 3]; t += 3;
     m.testTap = t + 1.3; S.tap('test', m.testTap); th.b = m.testTap + 0.15; S.cue(m.testTap, 'testPress'); m.hops.push([m.testTap, 10]);
     // 7. the test in the town. A mark is stamped on a flag when the picture of its plan has settled.
-    m.test0 = m.testTap + 0.4; m.test1 = m.test0 + testLength(li); m.acts.push(['watch', m.testTap, m.test1 + 0.3]);
+    S.cam(m.testTap + 0.2, 1.0, TEST_VIEW[li], 'testing'); m.test0 = m.testTap + 1.4; m.probes.testing = m.test0 + 1; m.test1 = m.test0 + testLength(li); m.acts.push(['watch', m.testTap, m.test1 + 0.3]);
     m.turn = [0, 1, 2].map((d) => (seq ? m.test0 + TS.lead + slotOf[d] * TS.each : m.test0));
     m.stamp = [0, 1, 2].map((d) => (seq ? m.turn[d] + TS.stamp : m.test0 + TS.stamp[d]));
     if (seq) [0, 1, 2].forEach((d) => S.cue(m.turn[d] + 0.1, 'test', TS.each - 1.3, rate(d))); else S.cue(m.test0, 'test', TS.dur - 1.6);

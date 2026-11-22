@@ -32,15 +32,15 @@ export const TEST = [
 export const testLength = (li) => (TEST[li].together ? TEST[li].dur : TEST[li].lead + 3 * TEST[li].each);
 // where each plan's flag stands: [x, y, z] for each plan in the order of the data
 export const FLAGS = [
-  [[0.15, 2.7, 0.3], [1.75, 2.1, -7.65], [8.5, TOP + 2.2, 0.5]],
-  [[8.5, TOP + 0.6, -4.6], [8.5, TOP + 0.6, 5.6], [8.5, TOP + 0.6, 0.5]],
+  [[0.15, 2.7, 0.3], [1.75, 2.1, -7.65], [6.7, TOP + 2.3, 0.5]],
+  [[12.6, TOP + 0.4, 0.5], [12.6, TOP + 0.4, 4.3], [12.6, TOP + 0.4, -3.3]],
   [[MILL[0], 2.3, MILL[1]], [0.8, 3.4, -2.8], [0.8, 4.4, -7.6]],
   [[2, 1.3, 7.2], [0.5, 1.3, -5.5], [-7.2, 1.3, 0.2]],
   [[8, TOP + 2.3, -3], [10.2, TOP + 4.6, 6.9], [5.3, TOP + 2.3, 6.9]],
   [[9.7, TOP + 2.2, 0.4], [9.4, TOP + 2.2, -6.9], [SCHOOL[0], TOP + 2.4, SCHOOL[1]]],
 ];
 // the framing that holds every flag of a level, and the framing for the small picture of one plan: [x, y, z, distance]
-export const TEST_VIEW = [[3.2, 1, -2.2, 41], [8.4, 2, 0.2, 31], [3.4, 1, -2.4, 39], [-0.6, 0.5, 0.4, 46], [8, 2, 1.6, 34], [6.6, 1.5, -2.6, 37]];
+export const TEST_VIEW = [[4.3, 1, -3.3, 43], [8.4, 2, 0.2, 31], [3.4, 1, -2.4, 39], [-0.6, 0.5, 0.4, 46], [8, 2, 1.6, 34], [5.6, 1.5, -2.6, 39]];
 export const THUMB_VIEW = [
   [[-0.4, 0.5, 0.3, 17], [1.75, 0.5, -7.65, 17], [8.5, 2.5, 0.5, 21]],
   [[8.4, 2, 0.2, 27], [8.4, 2, 0.2, 27], [8.4, 2, 0.2, 27]], null, null,
@@ -83,7 +83,7 @@ export function makeTests() {
     SPOTS.slice(0, 4).forEach(([x, z, f], k) => hillHomes.push(reg(P.home(x, z, TOP, PAL.wall[k % 3], f, PAL.roof[k % 3]), k * 0.08)));
     // the squares of low land and of the river itself, with how far each is from the river
     const cells = []; for (let x = -15; x <= 3; x++) for (let z = -11; z <= 10; z++) { const cx = x + 0.5, cz = z + 0.5; if (!inside(cx, cz, 1.02) || MAP.H(cx, cz) > 0.01) continue; cells.push([cx, cz, riverDist(cx, cz)]); }
-    const cloud = group(root); for (let k = 0; k < 11; k++) blk(cloud, hash(k, 1) * 3, -17 + k * 3.4, 4.2 + hash(k, 2) * 2, 4.6, hash(k, 3) * 0.8, 1.3, k % 3 ? '#aeb8c3' : '#c3ccd5', { shadow: false });
+    const cloud = group(root); for (let k = 0; k < 11; k++) blk(cloud, hash(k, 1) * 1.2, -17 + k * 3.4, 2.4 + hash(k, 2) * 1.2, 4.6, hash(k, 3) * 0.8, 1.3, k % 3 ? '#aeb8c3' : '#c3ccd5', { shadow: false });
     const beam = blk(root, 8.5, 0.5, 8.4, 10, TOP, 9, '#fff3b0', { shadow: false, mat: new THREE.MeshBasicMaterial({ color: '#fff3b0', transparent: true, opacity: 0.2, depthWrite: false }) });
     const sunny = blk(root, 8.5, 0.5, 8.4, 10, TOP + 0.02, 0.03, '#fff3b0', { shadow: false, mat: new THREE.MeshBasicMaterial({ color: '#fff7c9', transparent: true, opacity: 0.45, depthWrite: false }) });
     const FULL = 0.58;
@@ -92,19 +92,19 @@ export function makeTests() {
       all(bank, A.a, A.f); all(bankHomes, A.a, A.f); all(meadowHomes, B.a, B.f); all(hillHomes, C.a, C.f);
       // the cause comes first: a flat grey cloud slides in, and the light dims by about a third
       const cin = live < 0 ? 0 : outBack(span(live, 0, 0.6), 0.04), cout = live < 0 ? 0 : inOutCubic(span(live, 8.4, 9.4)), ck = cin * (1 - cout);
-      cloud.visible = ck > 0.01; cloud.position.set(13.4, 5.2, (1 - cin) * -34 + cout * 36); R.dim = 0.33 * ck;
+      cloud.visible = ck > 0.01; cloud.position.set(12.8, 4.6, (1 - cin) * -34 + cout * 36); R.dim = 0.33 * ck;
       // blue rain, half as wide again as before, and a pale mark where each drop lands
       const rain = live < 0 ? 0 : span(live, 0.6, 1.4) * (1 - span(live, 8.4, 9.2));
-      for (let i = 0; i < 120 && rain > 0; i++) { if (hash(i, 7) > rain) continue; const ph = ((live * 0.95 + hash(i, 1) * 9) % 1), n = Math.floor(live * 0.95 + hash(i, 1) * 9), x = -8 + hash(i, n) * 22, z = -11.5 + hash(n, i + 3) * 23, g = Math.max(0, heightAt(x, z)); if (x >= 4 && Math.abs(z) > 9) continue;
-        if (ph < 0.86) mk(x - (1 - ph) * 0.8, g + (0.86 - ph) * 12 + 0.5, z, 0.11, 1.0, 0.11, '#2f7fd0'); else mk(x, g + 0.09, z, 0.42, 0.04, 0.42, '#eef8ff'); }
+      for (let i = 0; i < 170 && rain > 0; i++) { if (hash(i, 7) > rain) continue; const ph = ((live * 0.95 + hash(i, 1) * 9) % 1), n = Math.floor(live * 0.95 + hash(i, 1) * 9), x = -8 + hash(i, n) * 22, z = -11.5 + hash(n, i + 3) * 23, g = Math.max(0, heightAt(x, z)); if (x >= 4 && Math.abs(z) > 9) continue;
+        if (ph < 0.86) mk(x - (1 - ph) * 0.8, g + (0.86 - ph) * 12 + 0.5, z, 0.13, 1.0, 0.13, '#2f7fd0'); else mk(x, g + 0.09, z, 0.42, 0.04, 0.42, '#eef8ff'); }
       // the river rises first, and then the water travels outward from it at about 1.6 squares a second, with a bright edge
       const drain = clear >= 0 ? 1 - ease(span(clear, 0, 1.2)) : 1, level = (d) => { if (live < 0) return 0; const ta = d <= 0 ? 1.0 : 1.5 + d / 1.6; return FULL * ease(span(live, ta, ta + 0.35)) * drain; };
       for (const [x, z, d] of cells) { const l = level(d); if (l <= 0.01) continue; const ta = d <= 0 ? 1.0 : 1.5 + d / 1.6, edge = 1 - span(live, ta, ta + 0.7), bob = Math.sin(S.t * 1.7 + x * 0.9 + z * 0.6) * 0.012; COL.set('#58b6e8').lerp(V2.set('#ffffff'), edge * 0.85); put(water, x, (l + bob - 0.35) / 2, z, 1, l + bob + 0.35, 1, '#' + COL.getHexString()); }
       // plan A, the bank: the water wears it away in two steps, and the homes at its edge lean. They stay above the water.
-      const wA = A.e < 0 ? 0 : span(A.e, 5.0, 5.2) * 0.5 + span(A.e, 5.5, 5.7) * 0.5, wA2 = A.e < 0 ? 0 : span(A.e, 5.8, 6.0);
-      bank.forEach((b) => { if (!b.visible) return; if (b.col === -3) b.position.y -= wA * 0.7; if (b.col === -2) b.position.y -= wA2 * 0.34; });
-      bankHomes.forEach((h, k) => { h.rotation.z = 0; if (!h.visible || k > 1) return; const lean = wA2 * 0.17 + (A.e > 5.8 ? ring(A.e - 6.0, 1.6, 2.6, 0.05) : 0); h.rotation.z = lean; h.position.y -= wA2 * 0.14; h.position.x = (k ? -0.95 : -0.95) - wA2 * 0.12; });
-      if (A.e > 5 && A.e < 6.6 && A.a >= 0) for (let i = 0; i < 10; i++) { const a = A.e - 5.0 - (i % 2) * 0.5 - (i % 5) * 0.06, k2 = a / 0.6; if (k2 > 0 && k2 < 1) sol(-3.1 - k2 * 0.9 - hash(i, 2) * 0.4, 0.75 - k2 * k2 * 0.7, -1.6 + i * 0.42, 0.26, 0.26, 0.26, pale(PAL.sand)); }
+      const wA = A.e < 0 ? 0 : span(A.e, 4.6, 4.8) * 0.5 + span(A.e, 5.1, 5.3) * 0.5, wA2 = A.e < 0 ? 0 : span(A.e, 5.6, 5.8) * 0.5 + span(A.e, 6.0, 6.2) * 0.5;
+      bank.forEach((b) => { if (!b.visible) return; if (b.col === -3) b.position.y -= wA * 0.75; if (b.col === -2) b.position.y -= wA2 * 0.62; });
+      bankHomes.forEach((h, k) => { h.rotation.z = 0; if (!h.visible || k > 1) return; const lean = wA2 * 0.3 + (A.e > 6.2 ? ring(A.e - 6.2, 1.6, 2.6, 0.06) : 0); h.rotation.z = lean; h.position.y -= wA2 * 0.3; h.position.x = -0.95 - wA2 * 0.3; });
+      if (A.e > 4.6 && A.e < 7 && A.a >= 0) for (let i = 0; i < 20; i++) { const a = A.e - 4.6 - (i % 4) * 0.5 - (i % 5) * 0.06, k2 = a / 0.6; if (k2 > 0 && k2 < 1) sol(-3.1 - k2 * 0.9 - hash(i, 2) * 0.4 + (i % 4 > 1 ? 0.9 : 0), 0.75 - k2 * k2 * 0.7, -1.9 + (i % 10) * 0.42, 0.3, 0.3, 0.3, pale(PAL.sand)); }
       // plan B, the far meadow: the homes stand in the water, their walls are wet to the door, and square ripples spread from them
       const lB = level(riverDist(1.75, -7.6)), deep = B.a >= 0 && B.f < 0 ? lB / FULL : 0;
       wet.forEach((w, k) => { w.visible = deep > 0.05 && meadowHomes[k].visible; w.scale.y = 0.62 * Math.max(0.05, deep) + 0.25; w.position.y = w.scale.y / 2; });
@@ -117,7 +117,7 @@ export function makeTests() {
 
   // ================= level 2, Getting around: the shops open and people leave every home ====================================
   const L2 = (() => {
-    const T = TEST[1], shop = reg(P.stall(STALL[0], TOP, STALL[1])), tile = (x, z, c, h = 0.06) => reg(P.tile(x, z, c, TOP, h), (x - 4) * 0.012 + (z + 5) * 0.012);
+    const T = TEST[1], shop = reg(P.stall(STALL[0], TOP, STALL[1])), tile = (x, z, c, h = 0.06) => reg(blk(root, x + 0.5, z + 0.5, 1, 1, TOP, h, c === PAL.road ? '#f3f0ea' : c === PAL.sand ? '#fff3d0' : pale(c), { shadow: false }), (x - 4) * 0.012 + (z + 5) * 0.012);
     const ring = []; for (let x = 4; x <= 12; x++) for (const z of [-5, 5]) ring.push([x, z]); for (let z = -4; z <= 4; z++) for (const x of [4, 12]) ring.push([x, z]);
     const grid = [...ring]; for (let x = 5; x <= 11; x++) grid.push([x, 0]); for (let z = -4; z <= 4; z++) if (z) grid.push([8, z]);
     // each plan in the order of the data: a grid of streets, one winding loop, paths through a park
@@ -174,7 +174,7 @@ export function makeTests() {
       fire.color.set(B.e >= 0 && run(B.e) > 0 ? (Math.sin(S.t * 5) > 0 ? '#ffb347' : '#ff8a3a') : '#7a4a3a');
       if (B.a >= 0 && B.e >= 0) { if (B.f < 0) pile(OV[0] - 2.2, OV[1] + 0.2, B.e, pale('#b5553a'), 0.5, 0.5, 0.3); cloud(OV[0], OV[1], 3.3, B.e, B.f, 1, 0.95, '#8b847d', 3); }
       works.position.x = CE[0] + (C.e >= 0 ? Math.sin(S.t * 31) * 0.035 * run(C.e) : 0);
-      if (C.a >= 0 && C.e >= 0) { if (C.f < 0) pile(CE[0] - 2.5, CE[1] + 0.2, C.e, pale(PAL.concrete), 0.55, 0.9, 0.22); cloud(CE[0], CE[1], 4.4, C.e, C.f, 3, 1.5, '#5d5852', 9); }
+      if (C.a >= 0 && C.e >= 0) { if (C.f < 0) pile(CE[0] - 2.5, CE[1] + 0.2, C.e, pale(PAL.concrete), 0.55, 0.9, 0.22); cloud(CE[0], CE[1], 4.4, C.e, C.f, 3, 1.3, '#5d5852', 9); }
     };
   })();
 

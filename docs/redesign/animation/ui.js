@@ -110,19 +110,18 @@ export function makeUI(stageEl, D, ctx) {
   }
   // the film's finger: it rests at the side, travels to a tap along a slight curve, arrives early and presses
   function pointer(m, t, fx, night) {
-    if (!fx) return; const taps = m.taps; let j = taps.findIndex((p) => p.t + 0.3 > t), pos = REST, down = false;
+    on(E.ptr, m.taps.length > 0); if (!fx || !m.taps.length) return; const taps = m.taps; let j = taps.findIndex((p) => p.t + 0.3 > t), pos = REST, down = false;
     if (j < 0) { const p = taps[taps.length - 1]; if (p) pos = pointerPath(span(t, p.t + 0.7, p.t + 1.3), p.xy, REST); }
     else { const nx = taps[j], pv = taps[j - 1], far = !pv || nx.t - pv.t > 4.2, from = far ? REST : pv.xy, dur = pointerMs(Math.hypot(nx.xy[0] - from[0], nx.xy[1] - from[1])) / 1000, s = nx.t - 0.15 - dur;
       if (t >= s) pos = pointerPath(span(t, s, s + dur), from, nx.xy); else if (far && pv) pos = pointerPath(span(t, pv.t + 0.7, pv.t + 1.3), pv.xy, REST); else pos = from; down = t >= nx.t && t < nx.t + 0.16; }
     E.ptr.style.left = `${pos[0]}px`; E.ptr.style.top = `${pos[1]}px`; cls(E.ptr, 'is-down', down);
     if (fx) for (const p of taps) if (t >= p.t && t < p.t + 0.6) fx.push([p.t, 'tap', p.xy[0], p.xy[1]]);
   }
-  const progress = (m, t, done, now) => E.prog.forEach((li, i) => { const fin = i < done, cur = i === now; cls(li, 'is-done', fin); cls(li, 'is-now', cur); li.style.transform = fin && i === done - 1 && m.done !== undefined ? `scale(${lerp(1.9, 1, outBack(span(t, m.done + 0.5, m.done + 0.72), 0.08))})` : cur && m.done !== undefined && t > m.done ? `scale(${pop(t, m.done + 0.8)})` : ''; });
+  const progress = (m, t, done, now) => E.prog.forEach((li, i) => { const fin = i < done, cur = i === now; cls(li, 'is-done', fin); cls(li, 'is-now', cur); li.style.transform = fin && i === m.li && t < m.done + 1.2 ? `scale(${lerp(1.9, 1, outBack(span(t, m.done + 0.5, m.done + 0.72), 0.08))})` : cur && m.done !== undefined && t > m.done && t < m.done + 1.6 ? `scale(${pop(t, m.done + 0.8)})` : ''; });
 
   function draw(m, t, TT, fx, night = 0) {
-    if (window.SAFE) { let s = q('.safe'); if (!s) { s = document.createElement('div'); s.className = 'safe'; s.style.cssText = 'position:absolute;left:0;right:0;top:80px;border:2px dashed #f0f;pointer-events:none'; root.appendChild(s); } requestAnimationFrame(() => {}); s.style.height = `${rect(E.dock).y - 24 - 80}px`; }
     root.classList.toggle('is-night', night > 0.5);
-    const typing = speech(m, t), any = buttons(m, t, TT); on(E.say, any || E.bub.style.display !== 'none'); flo(m, t, TT, typing);
+    const typing = speech(m, t), any = buttons(m, t, TT); on(E.say, any || (!!E.bub && E.bub.style.display !== 'none')); flo(m, t, TT, typing);
     if (m.kind === 'open') {
       const p = ctx.screen([1, 3.2, 0]), k = t - m.pin; on(E.pin, k > 0 && t < m.fly + 0.3); E.pin.style.left = `${p[0]}px`; E.pin.style.top = `${p[1] - (1 - inQuad(clamp(k / 0.22))) * 220}px`; E.pin.style.transform = `translate(-50%, -100%) scale(${1 + ring(k - 0.22, 3.5, 6, 0.12)}, ${1 - ring(k - 0.22, 3.5, 6, 0.16)})`; E.pin.style.opacity = 1 - span(t, m.fly, m.fly + 0.3);
       if (slide(E.checks, t, m.checks, m.checksOut)) E.check.forEach((c, i) => { const s = pop(t, m.checks + 0.4 + i * 0.08); c.style.transform = `scale(${s})`; c.style.opacity = t >= m.checks + 0.4 + i * 0.08 ? 1 : 0; });
