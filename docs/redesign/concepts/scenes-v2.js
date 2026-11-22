@@ -5,6 +5,7 @@
 // would need to be, and the real map (animation/map.js and the game's world map) would have to grow to match.
 import { THREE, PAL, blk, group, hash, W, H, GL, soft, INK, SKIN, HAIR, ROOFS, place, frame, fig, wheelchair, walkingFrame, cottage, shade, tree, pine, dust, tomato, lettuce, strawberry, css, I, florence, top, row, tok, pal, sws, mouse, hint, plate } from './kit-v2.js';
 import { factory, farm, control, school } from './rooms-v2.js';
+import { walk } from './walk-v2.js';
 
 // ---- the wider land ---------------------------------------------------------------------------------------------------
 const PATHC = '#fff7e6', CX = -3, CZ = -1;
@@ -92,12 +93,8 @@ export const SCENES = [
       + [p.z1, p.z2, p.z3].map((q) => `<b class="zz" style="left:${q[0] + 20}px;top:${q[1] - 4}px">z z</b>`).join('')
       + pal('Tools', tok(I.path(), 'Path', '', 'Draw it') + tok(I.bridge(), 'Bridge', 'on', '1 left') + tok(I.rub(), 'Rub out')) },
 
-  // 3. The walk: on rails along the child's own path, seen over the shoulder, with a letter for each door.
-  { id: 'paths-walk', half: 34, fov: 44, eye: [10.6, 4.3, 2.3], at: [-13, 1.5, -0.9],
-    room(g) { return street(g); },
-    html: (p) => top('Getting around', 'Deliver the letters', row([...Array(8)].map(() => I.letter()), 3)) + florence + hint('Walk to the yellow letter box.')
-      + `<i class="ring" style="left:${p.box[0]}px;top:${p.box[1]}px;width:74px;height:74px"></i>` + plate(p.bridge, 'Your bridge', 'tip', 0, -30)
-      + `<div class="keys"><i class="key on">&uarr; <em>Hold to walk</em></i><i class="key">Space <em>Post a letter</em></i></div>` },
+  // 3. The walk to school: a split screen. Eco Town on the left, car town on the right, and a map to follow (walk-v2.js).
+  walk,
 
   // 4. Homes: inside the prefab home factory, with the home large in the frame and a diagram that lights up.
   { id: 'factory', half: 24, cam: [-1.9, 2.3, 0.8, 31, 0.4, -0.5], off: [0, 0], room: factory.room, html: factory.html },
@@ -109,44 +106,25 @@ export const SCENES = [
   { id: 'school', half: 26, cam: [-2.2, 3.5, 1.2, 38, 0.36, 0.36], off: [55, 0], room: school.room, html: school.html },
 ];
 
-// ---- the street of the walk: the child's own homes and bridge, at the height of a person --------------------------------
-function street(g) {
-  for (let x = -64; x <= 18; x += 2) for (let z = -34; z <= 22; z += 2) { const riv = x >= -24 && x < -18; if (riv) { blk(g, x + 1, z + 1, 2, 2, -1.2, 0.7, hash(x, z) > 0.5 ? PAL.water : PAL.waterDeep, { shadow: false }); continue; }
-    const low = x >= -28 && x < -14; blk(g, x + 1, z + 1, 2, 2, -1.6, 1.6 + (low ? -0.25 : 0), low ? ['#b4e08f', '#a9d985'][Math.floor(hash(x, z) * 2)] : PAL.grass[Math.floor(hash(x, z) * 4)]); }
-  // the path the child drew, in its pale stone, running to the bridge and over it
-  for (let x = -62; x < 18; x++) { if (x >= -25 && x < -17) continue; const y = x >= -28 && x < -14 ? -0.25 : 0; for (const z of [-0.55, 0.55]) { blk(g, x + 0.5, z, 1.04, 1.14, y, 0.05, '#8a7d68', { shadow: false }); blk(g, x + 0.5, z, 0.9, 1.0, y, 0.09, PATHC); } }
-  for (let k = 0; k < 8; k++) { const x = -24.5 + k, a = Math.sin((k + 0.5) / 8 * Math.PI) * 0.7 - 0.2; blk(g, x, 0, 1.03, 2.5, a - 0.2, 0.24, '#c9925a'); for (const s of [-1, 1]) { blk(g, x, s * 1.2, 0.16, 0.14, a, 0.95, '#7a5a33'); blk(g, x, s * 1.2, 1.03, 0.1, a + 0.9, 0.12, '#7a5a33'); } }
-  // homes on both sides with the roof colours the child chose; a neighbour comes out when their letter arrives
-  const H2 = (x, z, f, roof, o = {}) => { const c = cottage(g, x, 0, z, { s: 4, d: 3.6, tall: 2.3, steps: 6, rise: 0.3, roof, face: f, garden: false, timber: true, wall: PAL.timber, ...o });
-    blk(g, x, z + f * 3.2, 5.6, 2.8, 0, 0.04, '#74b56a', { shadow: false }); blk(g, x, z + f * 3.3, 0.9, 3.0, 0.01, 0.06, PATHC, { shadow: false });
-    for (let k = -3; k <= 3; k++) if (k) { blk(g, x + k * 0.85, z + f * 4.55, 0.1, 0.1, 0, 0.6, '#fbfbf7'); } for (const s of [-1, 1]) blk(g, x + s * 1.75, z + f * 4.55, 1.9, 0.06, 0.36, 0.08, '#fbfbf7', { shadow: false });
-    for (const [a, b, col] of [[-1.6, 2.5, '#f08ab8'], [-2.1, 3.4, '#ffd257'], [1.7, 2.6, '#ffffff'], [2.2, 3.5, '#c98be0'], [1.4, 3.7, '#f08ab8']]) blk(g, x + a, z + f * b, 0.28, 0.28, 0, 0.34, col, { shadow: false, mat: GL(col) }); return c; };
-  // a letter box at the edge of the path; done = flag up and a letter showing
-  const box = (x, z, done, glow) => { blk(g, x, z, 0.14, 0.14, 0, 0.95, '#7a5a33'); blk(g, x, z, 0.5, 0.62, 0.95, 0.42, '#e0503a', glow ? { mat: GL('#ffdf3d') } : {}); if (done) { blk(g, x + 0.28, z, 0.06, 0.1, 1.1, 0.5, '#fbfbf7'); blk(g, x + 0.28, z + 0.12, 0.06, 0.26, 1.42, 0.18, '#ffd257', { mat: GL('#ffd257') }); blk(g, x, z + (z > 0 ? -0.34 : 0.34), 0.34, 0.05, 1.05, 0.22, '#fff', { mat: GL('#ffffff') }); } };
-  H2(-1.2, -8.2, 1, ROOFS.green, { awake: true, open: true }); box(-2.6, -1.75, true); fig(g, -1.1, 0, -2.9, { k: 1.25, shirt: '#ffd257', skin: SKIN[2], hair: HAIR[3], arms: ['up', 'fwd'], turn: 0.75 }); blk(g, -0.62, -2.42, 0.34, 0.04, 1.18, 0.24, '#fff', { mat: GL('#ffffff') });
-  H2(-6.5, 7.6, -1, ROOFS.red); box(-5.2, 1.75, false, true);
-  H2(-10.5, -8.2, 1, ROOFS.blue); box(-11.8, -1.75, false);
-  H2(-14.2, 7.6, -1, ROOFS.yellow); box(-13, 1.75, false);
-  // a bench, a lamp and trees along the way, kept low and to the side so that nothing hides the street
-  blk(g, -9.4, 1.9, 1.6, 0.5, 0.36, 0.1, '#c9925a'); blk(g, -9.4, 2.14, 1.6, 0.08, 0.46, 0.4, '#c9925a'); for (const s of [-0.65, 0.65]) blk(g, -9.4 + s, 1.9, 0.1, 0.4, 0, 0.36, INK);
-  for (const [x, z] of [[-7.4, -1.8], [-15.6, 1.8]]) { blk(g, x, z, 0.14, 0.14, 0, 2.4, '#2b3a55'); blk(g, x, z, 0.44, 0.44, 2.4, 0.36, '#ffd257', { mat: GL('#ffe27a') }); }
-  for (const [x, z, k] of [[-5.8, -12.5, 2.3], [4.5, -12, 2.5], [-10.4, 12.5, 2.3], [-17.5, -6, 1.8], [-18.5, 8.5, 1.9], [-15.5, -12, 2.4], [2, 11.5, 2.4]]) tree(g, x, 0, z, k);
-  // across the river: the homes of the other neighbourhood, pine woods, and the mountains
-  for (const [x, z, c] of [[-33, -7, ROOFS.red], [-39, -7.5, ROOFS.blue], [-36, 7.5, ROOFS.green]]) cottage(g, x, 0, z, { s: 4, d: 3.6, tall: 2.3, steps: 6, rise: 0.3, roof: c, face: z < 0 ? 1 : -1, garden: false, timber: true, wall: PAL.timber });
-  for (let k = 0; k < 26; k++) { const x = -30 - hash(k, 1) * 28, z = (hash(k, 2) - 0.5) * 44; if (Math.abs(z) < 3.4 || (x > -43 && Math.abs(Math.abs(z) - 7.4) < 4)) continue; pine(g, x, 0, z, 2 + hash(k, 3)); }
-  for (const [z, w, hh] of [[-34, 26, 10], [-12, 30, 15], [14, 28, 11], [36, 22, 8]]) for (let q = 0; q < 5; q++) blk(g, -78, z, 8, w * (1 - q * 0.19), q * hh / 5, hh / 5, q === 4 ? '#fbfbf7' : q === 3 ? '#d5dbe0' : ['#a9c6a0', '#b4c9b6', '#c2cfc9'][q], { shadow: false });
-  for (const [x, y, z] of [[-60, 20, -14], [-58, 23, 12]]) { blk(g, x, z, 2, 7, y, 1.2, '#fff', { shadow: false, mat: GL('#ffffff') }); blk(g, x, z + 1, 2, 4, y + 1.2, 0.9, '#fff', { shadow: false, mat: GL('#ffffff') }); }
-  // the child's own figure, with a face, a cap and a bag of letters, looking across at the next letter box
-  const me = fig(g, 0.6, 0, 0.3, { k: 1.35, shirt: '#e0503a', legs: '#2b3a55', skin: SKIN[0], hair: HAIR[1], cap: '#3f78b5', bag: '#c9925a', turn: 2.5, head: -0.5, arms: ['up', 'down'], step: 0.1 });
-  return { box: [-5.2, 1.2, 1.75], bridge: [-21, 1.9, 0] };
-}
-
 let ui = null;
+function setUi(html) {
+  if (!ui) { const stage = document.querySelector('.stage'); document.head.insertAdjacentHTML('beforeend', `<style>${css} .stage > .ui:not(.cx), .stage > canvas.fx { visibility: hidden; }</style>`); ui = document.createElement('div'); ui.className = 'ui cx'; ui.style.setProperty('--ui-florence-sprite', `url(${new URL('../animation/florence-sprite.webp', import.meta.url)})`); stage.append(ui); }
+  ui.innerHTML = html;
+}
+// two worlds side by side: each half is drawn with its own scene and camera into its own half of the picture
+function splitShow(s, st, cam) {
+  const r = st.renderer, sz = r.getSize(new THREE.Vector2()), hw = sz.x / 2, band = s.band || 0, vh = sz.y * (1 - band / H), p = {}; r.setScissorTest(false); r.setClearColor('#fffaf0'); r.clear(); cam.clearViewOffset(); r.setScissorTest(true);
+  s.split.forEach((h, i) => { const n = st.newScene(h.half || 30); n.light(h.night || 0); if (h.bg) n.scene.background.set(h.bg); const pts = h.room(group(n.scene)) || {};
+    cam.fov = h.fov; cam.aspect = hw / vh; cam.updateProjectionMatrix(); cam.position.set(...h.eye); cam.lookAt(...h.at); cam.updateMatrixWorld(); r.setViewport(i * hw, sz.y - vh, hw, vh); r.setScissor(i * hw, sz.y - vh, hw, vh); r.render(n.scene, cam);
+    for (const k in pts) { const v = new THREE.Vector3(...pts[k]).project(cam); p[k] = [i * W / 2 + (v.x + 1) / 4 * W, (1 - v.y) / 2 * (H - band)]; } });
+  r.setScissorTest(false); r.setViewport(0, 0, sz.x, sz.y); cam.aspect = W / H; cam.fov = 26; cam.updateProjectionMatrix(); setUi(s.html(p)); return s.id;
+}
 export function show(i) {
   const s = SCENES[i], st = film.dbg, cam = st.camera; film.seek(film.segs[1].start + 1);
   let view = null;
   if (s.view) { const n = st.newScene(36); n.light(0.45); n.scene.background.set('#fbd0a2'); control.outside(group(n.scene), world); cam.fov = 30; cam.clearViewOffset(); cam.updateProjectionMatrix(); cam.position.set(...control.eye); cam.lookAt(...control.at); cam.updateMatrixWorld(); st.draw(n.scene);
     const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(st.renderer.domElement, 0, 0, W, H); view = new THREE.CanvasTexture(c); view.colorSpace = THREE.SRGBColorSpace; }
+  if (s.split) return splitShow(s, st, cam);
   const n = st.newScene(s.half || 26); n.light(0); const pts = s.room(group(n.scene), view) || {};
   cam.fov = s.fov || 26; const off = s.off || [0, 0]; cam.setViewOffset(W, H, off[0], off[1], W, H); cam.updateProjectionMatrix();
   if (s.eye) { cam.position.set(...s.eye); cam.lookAt(...s.at); } else st.look(...s.cam); cam.updateMatrixWorld(); st.draw(n.scene);
