@@ -1,6 +1,9 @@
 <!doctype html><meta charset="utf-8"><body style="margin:0"><canvas id="c" width="1280" height="720"></canvas>
 <script type="module">
+// A test page for the town alone. shot(done, t, view, night, build, more) draws the town with `done` finished levels;
+// build is the number of seconds since the next level began to be built, and more holds any other fields for the town.
+// view is the number of a framing in VIEWS, -1 for the whole map, or -2 for a view from straight above.
 import { makeStage } from './vox.js'; import { makeIsland, makeScene, VIEWS, YAW, TILT } from './town.js';
 const st = makeStage(document.getElementById('c'), 1280, 720), isle = makeScene(), up = makeIsland();
-window.shot = (stage, t, v, night = 0) => { up({ stage, t, night }); isle.light(night); const V = v < 0 ? [-2, 0, -3, 190] : VIEWS[v]; st.look(V[0], V[1], V[2], V[3], v < 0 ? 0.74 : TILT, v < 0 ? 0.62 : YAW); st.draw(isle.scene); }; window.ready = true;
+window.shot = (done, t, v, night = 0, build = -1, more = {}) => { up({ done, t, night, build, ...more }); isle.light(night); const V = v === -1 ? [-2, 0, -3, 190] : v === -2 ? [1.5, 0, 0, 75] : VIEWS[v]; st.look(V[0], V[1], V[2], V[3], v === -1 ? 0.74 : v === -2 ? 1.5607 : TILT, v === -1 ? 0.62 : v === -2 ? -Math.PI / 2 : YAW); st.draw(isle.scene); return up.buildEnd; }; window.ready = true;
 </script>
