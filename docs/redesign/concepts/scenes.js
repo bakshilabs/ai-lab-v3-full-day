@@ -1,144 +1,191 @@
-// Concept screens for "the child builds the plan" and "the child collects supplies" (owner, 22 Nov 2026).
-// Each scene takes the film's real town at one moment, adds a few blocks to it, and lays a sketch of the interface on top.
-// These are proposals only. The few words on them are placeholders, not final wording.
+// Concept screens for the play breaks in Eco Town (owner, 22 Nov 2026): once or twice in each level the child leaves the
+// usual high camera and builds or collects something in a different view. The game is played with a mouse.
+// Each scene takes the film's real town at one moment (or hides it behind a flat drawing) and lays a sketch of the
+// interface on top. These are proposals only. The few words on them are placeholders, not final wording.
 import * as V from '../animation/vox.js'; import * as MAP from '../animation/map.js'; import * as TW from '../animation/town.js';
-const { THREE, PAL, blk, group, glow, clear } = V, TOP = TW.TOP, W = 1280, H = 720;
-const G = group(MAP.world), kit = TW.makeKit(G), paleKit = TW.makeKit(G, TW.pale);
-const SUN = glow('#ffd257'), SUN_SOFT = new THREE.MeshBasicMaterial({ color: '#ffd257', transparent: true, opacity: 0.55 }), WHITE_SOFT = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.6 });
+const { THREE, PAL, blk, group } = V, TOP = TW.TOP, W = 1280, H = 720;
+const G = group(MAP.world), kit = TW.makeKit(G);
+const soft = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o }), SUN = new THREE.MeshBasicMaterial({ color: '#ffd257' }), SUN_SOFT = soft('#ffd257', 0.85), WHITE_SOFT = soft('#ffffff', 0.55);
 const cell = (x, z, y, m = SUN_SOFT, s = 0.9) => blk(G, x + 0.5, z + 0.5, s, s, y + 0.02, 0.05, '#ffd257', { shadow: false, mat: m });
-const home = (x, z, o = {}) => { const g = (o.pale ? paleKit : kit).home(x, z, (o.y ?? TOP) + (o.lift || 0), o.wall || PAL.wall[0], o.face ?? 1, o.roof || PAL.roof[0]); return g; };
-const flag = (x, z, y) => { blk(G, x, z, 0.07, 0.07, y, 1.0, PAL.white, { shadow: false }); blk(G, x + 0.28, z, 0.5, 0.05, y + 0.66, 0.34, '#ffd257', { shadow: false, mat: SUN }); };
-const log = (x, z, y, r = 0) => { const m = blk(G, x, z, 0.8, 0.26, y, 0.26, PAL.timber); m.rotation.y = r; blk(G, x, z, 0.82, 0.2, y + 0.03, 0.2, '#a9743f', { shadow: false }).rotation.y = r; return m; };
-const stump = (x, z, y) => blk(G, x, z, 0.34, 0.34, y, 0.22, PAL.trunk);
-const cartBox = (x, z, y, n = 0) => { const g = group(G, x, y, z); blk(g, 0, 0, 1.5, 0.95, 0.24, 0.4, PAL.timber); for (const [a, b] of [[-0.45, 0.5], [0.45, 0.5], [-0.45, -0.5], [0.45, -0.5]]) blk(g, a, b, 0.34, 0.1, 0, 0.34, '#2a2a2a', { shadow: false }); for (let k = 0; k < n; k++) { const l = blk(g, -0.3 + (k % 2) * 0.6, 0, 0.5, 0.8, 0.64 + Math.floor(k / 2) * 0.24, 0.22, k % 2 ? '#a9743f' : PAL.timber); } return g; };
-const dust = (x, z, y) => { for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2; blk(G, x + Math.cos(a) * 1.5, z + Math.sin(a) * 1.5, 0.3, 0.3, y + 0.05 + (k % 3) * 0.12, 0.3, '#f6ecd8', { shadow: false, mat: glow('#fff6e4') }); } };
+const plot = (x, z, m = SUN_SOFT) => { for (let a = -1; a <= 0; a++) for (let b = -1; b <= 0; b++) cell(Math.floor(x) + a, Math.floor(z) + b, TOP, m, 1.02); };
+const home = (x, z, face = 1, roof = PAL.roof[0]) => kit.home(x, z, TOP, PAL.wall[0], face, roof);
 
-// ---- the interface sketch ---------------------------------------------------------------------------------------------
 const css = `
-.cx { position: absolute; inset: 0; z-index: 6; font-family: var(--ui-body); color: var(--ui-ink); }
-.cx .step { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); padding: 10px 22px 11px; background: var(--ui-sun); border: 3px solid var(--ui-ink); border-radius: 999px; font: 800 26px/1.1 var(--ui-display); box-shadow: 0 5px 0 var(--ui-shade); white-space: nowrap; }
+.cx { position: absolute; inset: 0; z-index: 6; font-family: var(--ui-body); color: var(--ui-ink); overflow: hidden; }
+.cx .art { position: absolute; inset: 0; width: 1280px; height: 720px; }
+.cx .step { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); padding: 10px 22px 11px; background: var(--ui-sun); border: 3px solid var(--ui-ink); border-radius: 999px; font: 800 26px/1.1 var(--ui-display); box-shadow: 0 5px 0 var(--ui-shade); white-space: nowrap; z-index: 3; }
+.cx .ui-top { z-index: 3; }
 .cx .count { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px 0 10px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ui-shade); font: 800 22px/1 var(--ui-display); }
-.cx .count svg { width: 34px; height: 34px; }
-.cx .tray { position: absolute; left: 132px; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 22px; box-shadow: 0 5px 0 var(--ui-shade); }
-.cx .tray .ui-btn { margin-left: auto; margin-top: 0; }
-.cx .tok { display: grid; justify-items: center; gap: 2px; min-width: 96px; padding: 8px 10px 7px; background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 16px; box-shadow: 0 6px 0 var(--ui-ink); margin-bottom: 6px; font: 700 16px/1.2 var(--ui-body); }
-.cx .tok svg { width: 56px; height: 48px; }
-.cx .tok.on { background: var(--ui-sun); transform: translateY(-6px); }
-.cx .tok.used { background: var(--ui-paper-dim); border-style: dashed; box-shadow: none; transform: translateY(6px); color: var(--ui-ink-soft); }
-.cx .tok.used svg { opacity: 0.35; }
-.cx .sw { width: 60px; height: 60px; border: 3px solid var(--ui-ink); border-radius: 16px; box-shadow: 0 6px 0 var(--ui-ink); margin-bottom: 6px; }
-.cx .sw.on { transform: translateY(-6px); box-shadow: 0 6px 0 var(--ui-ink), 0 0 0 5px var(--ui-sun); }
-.cx .lab { font: 700 16px/1.2 var(--ui-body); color: var(--ui-ink-soft); margin-right: 4px; }
-.cx .sep { width: 3px; align-self: stretch; background: rgba(31,42,68,.18); border-radius: 2px; margin: 0 6px; }
-.cx .badge { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid var(--ui-ink); background: var(--ui-paper); display: grid; place-items: center; box-shadow: 0 4px 0 var(--ui-shade); }
-.cx .badge.ok { background: var(--ui-good); } .cx .badge svg { width: 24px; height: 24px; }
-.cx .ring { position: absolute; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; border: 6px dashed var(--ui-paper); box-shadow: 0 0 0 4px var(--ui-ink), inset 0 0 0 4px var(--ui-ink); }
-.cx .ring.s { width: 70px; height: 70px; margin: -35px 0 0 -35px; }
-.cx .arrow { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 16px; background: var(--ui-white); border: 3px solid var(--ui-ink); box-shadow: 0 6px 0 var(--ui-ink); display: grid; place-items: center; }
-.cx .arrow svg { width: 34px; height: 34px; }
-.cx .plus { position: absolute; transform: translate(-50%, -50%); padding: 4px 12px 5px; background: var(--ui-sun); border: 3px solid var(--ui-ink); border-radius: 999px; font: 800 22px/1 var(--ui-display); }
-.cx .flo { z-index: 1; } .cx .bub { position: absolute; left: 132px; bottom: 150px; }
-.cx .ui-pointer { z-index: 9; }
+.cx .count svg { width: 34px; height: 30px; }
+.cx .pal { position: absolute; right: 16px; top: 80px; width: 200px; display: flex; flex-direction: column; gap: 9px; padding: 12px 12px 8px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 22px; box-shadow: 0 5px 0 var(--ui-shade); z-index: 3; }
+.cx .pal h3 { margin: 0 0 2px; font: 800 20px/1.1 var(--ui-display); }
+.cx .tok { display: grid; grid-template-columns: 48px 1fr; align-items: center; gap: 8px; padding: 6px 8px; background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: 0 5px 0 var(--ui-ink); margin-bottom: 5px; font: 700 17px/1.15 var(--ui-body); }
+.cx .tok svg { width: 48px; height: 42px; }
+.cx .tok small { display: block; font: 700 15px/1.2 var(--ui-body); color: var(--ui-ink-soft); }
+.cx .tok.on { background: var(--ui-sun); }
+.cx .tok.used { background: var(--ui-paper-dim); border-style: dashed; box-shadow: none; transform: translateY(5px); color: var(--ui-ink-soft); }
+.cx .tok.used svg { opacity: 0.4; }
+.cx .drag { position: absolute; transform: translate(-50%, -50%) rotate(-4deg); filter: drop-shadow(0 14px 0 rgba(31,42,68,.3)); z-index: 4; }
+.cx .mouse { position: absolute; width: 40px; height: 48px; z-index: 9; filter: drop-shadow(0 3px 0 rgba(31,42,68,.3)); }
+.cx .flo { z-index: 2; }
+.cx .hint { position: absolute; left: 132px; bottom: 22px; padding: 12px 20px 13px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 22px 22px 22px 6px; box-shadow: 0 5px 0 var(--ui-shade); font: 600 22px/1.3 var(--ui-body); z-index: 3; }
+.cx .keys { position: absolute; right: 16px; bottom: 18px; display: flex; gap: 8px; align-items: flex-end; z-index: 3; }
+.cx .key { display: grid; place-items: center; min-width: 56px; height: 56px; padding: 0 12px; background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 12px; box-shadow: 0 5px 0 var(--ui-ink); font: 800 20px/1 var(--ui-display); }
+.cx .key.wide { min-width: 190px; }
+.cx .desk { position: absolute; left: 0; right: 0; bottom: 0; height: 292px; background: #2b3a55; border-top: 10px solid #1f2a44; display: grid; grid-template-columns: 1.15fr 1.5fr 0.9fr; gap: 14px; padding: 16px 16px 16px 150px; z-index: 2; }
+.cx .card { background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 18px; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.cx .card h3 { margin: 0; font: 800 20px/1.1 var(--ui-display); }
+.cx .src { display: grid; grid-template-columns: 40px 70px 1fr 62px; align-items: center; gap: 10px; font: 700 18px/1.1 var(--ui-body); }
+.cx .src svg { width: 40px; height: 36px; }
+.cx .bar { height: 22px; border: 3px solid var(--ui-ink); border-radius: 8px; background: var(--ui-paper-dim); overflow: hidden; } .cx .bar i { display: block; height: 100%; }
+.cx .sw { width: 62px; height: 34px; border: 3px solid var(--ui-ink); border-radius: 999px; background: var(--ui-paper-dim); position: relative; } .cx .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--ui-ink); }
+.cx .sw.on { background: var(--ui-good); } .cx .sw.on::after { left: 30px; background: #fff; }
+.cx .seasons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .cx .sea { display: grid; place-items: center; height: 46px; background: var(--ui-white); border: 3px solid var(--ui-ink); border-radius: 12px; box-shadow: 0 4px 0 var(--ui-ink); font: 700 17px/1 var(--ui-body); } .cx .sea.on { background: var(--ui-sun); }
+.cx .frame { position: absolute; left: 0; right: 0; top: 0; height: 428px; border: 22px solid #2b3a55; border-bottom-width: 0; z-index: 1; } .cx .frame i { position: absolute; top: 0; bottom: 0; width: 16px; background: #2b3a55; }
 `;
-const tick = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const I = {
   home: (roof = '#c8643f', wall = '#fff4dc') => `<svg viewBox="0 0 56 48"><rect x="12" y="24" width="32" height="20" fill="${wall}" stroke="#1f2a44" stroke-width="3"/><rect x="8" y="17" width="40" height="8" fill="${roof}" stroke="#1f2a44" stroke-width="3"/><rect x="14" y="10" width="28" height="8" fill="${roof}" stroke="#1f2a44" stroke-width="3"/><rect x="20" y="3" width="16" height="8" fill="${roof}" stroke="#1f2a44" stroke-width="3"/><rect x="31" y="31" width="7" height="13" fill="#7a5a33"/><rect x="17" y="30" width="8" height="7" fill="#9fd0f5"/></svg>`,
-  roof: () => `<svg viewBox="0 0 56 48"><rect x="8" y="30" width="40" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/><rect x="14" y="20" width="28" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/><rect x="20" y="10" width="16" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  walls: (c = '#c9925a') => `<svg viewBox="0 0 56 48"><rect x="10" y="12" width="36" height="28" fill="${c}" stroke="#1f2a44" stroke-width="3"/><rect x="30" y="24" width="8" height="16" fill="#7a5a33"/><rect x="16" y="20" width="9" height="8" fill="#9fd0f5"/></svg>`,
-  base: () => `<svg viewBox="0 0 56 48"><rect x="6" y="26" width="44" height="10" fill="#bdbcb6" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  log: (c = '#c9925a') => `<svg viewBox="0 0 56 48"><rect x="6" y="16" width="44" height="16" rx="3" fill="${c}" stroke="#1f2a44" stroke-width="3"/><rect x="40" y="16" width="10" height="16" rx="3" fill="#f6e1bd" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  brick: () => `<svg viewBox="0 0 56 48"><rect x="6" y="24" width="20" height="12" fill="#b5553a" stroke="#1f2a44" stroke-width="3"/><rect x="28" y="24" width="20" height="12" fill="#b5553a" stroke="#1f2a44" stroke-width="3"/><rect x="17" y="11" width="20" height="12" fill="#b5553a" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  bag: () => `<svg viewBox="0 0 56 48"><rect x="14" y="10" width="28" height="30" rx="5" fill="#bdbcb6" stroke="#1f2a44" stroke-width="3"/><rect x="20" y="20" width="16" height="6" fill="#fbfbf7"/></svg>`,
+  roofTop: () => `<svg viewBox="0 0 96 96" width="96" height="96"><rect x="6" y="6" width="84" height="84" fill="#c8643f" stroke="#1f2a44" stroke-width="4"/><rect x="24" y="6" width="48" height="84" fill="#d0774a" stroke="#1f2a44" stroke-width="3"/><rect x="40" y="6" width="16" height="84" fill="#e08a5c"/></svg>`,
   tree: () => `<svg viewBox="0 0 56 48"><rect x="25" y="30" width="6" height="14" fill="#7a5a33"/><rect x="12" y="14" width="32" height="18" fill="#5fa35a" stroke="#1f2a44" stroke-width="3"/><rect x="19" y="4" width="18" height="11" fill="#5fa35a" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  flower: () => `<svg viewBox="0 0 56 48"><rect x="8" y="36" width="40" height="6" fill="#86c86b" stroke="#1f2a44" stroke-width="3"/><rect x="14" y="22" width="9" height="9" fill="#f08ab8" stroke="#1f2a44" stroke-width="3"/><rect x="26" y="16" width="9" height="9" fill="#ffd257" stroke="#1f2a44" stroke-width="3"/><rect x="36" y="24" width="9" height="9" fill="#ffffff" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  turbine: () => `<svg viewBox="0 0 56 48"><rect x="26" y="18" width="5" height="26" fill="#fbfbf7" stroke="#1f2a44" stroke-width="3"/><rect x="27" y="2" width="4" height="16" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2.5"/><rect x="12" y="20" width="16" height="4" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2.5" transform="rotate(-25 28 20)"/><rect x="29" y="20" width="16" height="4" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2.5" transform="rotate(25 29 20)"/></svg>`,
-  wire: () => `<svg viewBox="0 0 56 48"><path d="M6 34h14V16h16v18h14" fill="none" stroke="#1f2a44" stroke-width="9" stroke-linejoin="round"/><path d="M6 34h14V16h16v18h14" fill="none" stroke="#ffd257" stroke-width="4" stroke-linejoin="round"/></svg>`,
+  shop: () => `<svg viewBox="0 0 56 48"><rect x="10" y="22" width="36" height="22" fill="#fff4dc" stroke="#1f2a44" stroke-width="3"/><rect x="6" y="10" width="44" height="13" fill="#e0503a" stroke="#1f2a44" stroke-width="3"/><rect x="17" y="10" width="7" height="13" fill="#fff"/><rect x="32" y="10" width="7" height="13" fill="#fff"/></svg>`,
   path: () => `<svg viewBox="0 0 56 48"><path d="M6 34h14V16h16v18h14" fill="none" stroke="#1f2a44" stroke-width="13" stroke-linejoin="round"/><path d="M6 34h14V16h16v18h14" fill="none" stroke="#ecd29a" stroke-width="8" stroke-linejoin="round"/></svg>`,
-  crate: (c = '#e0503a') => `<svg viewBox="0 0 56 48"><rect x="12" y="14" width="32" height="24" fill="${c}" stroke="#1f2a44" stroke-width="3"/></svg>`,
-  arr: (r) => `<svg viewBox="0 0 24 24" style="transform:rotate(${r}deg)"><path d="M12 20V5M5 11l7-7 7 7" fill="none" stroke="#1f2a44" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  bench: () => `<svg viewBox="0 0 56 48"><rect x="8" y="22" width="40" height="7" fill="#c9925a" stroke="#1f2a44" stroke-width="3"/><rect x="8" y="12" width="40" height="7" fill="#c9925a" stroke="#1f2a44" stroke-width="3"/><rect x="12" y="29" width="5" height="12" fill="#1f2a44"/><rect x="39" y="29" width="5" height="12" fill="#1f2a44"/></svg>`,
+  lamp: () => `<svg viewBox="0 0 56 48"><rect x="26" y="14" width="5" height="30" fill="#2b3a55"/><rect x="19" y="4" width="19" height="12" fill="#ffd257" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  base: () => `<svg viewBox="0 0 56 48"><rect x="6" y="26" width="44" height="10" fill="#bdbcb6" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  wall: () => `<svg viewBox="0 0 56 48"><rect x="10" y="10" width="36" height="30" fill="#c9925a" stroke="#1f2a44" stroke-width="3"/><rect x="20" y="18" width="16" height="12" fill="#9fd0f5" stroke="#1f2a44" stroke-width="2.5"/></svg>`,
+  roof: () => `<svg viewBox="0 0 56 48"><rect x="8" y="30" width="40" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/><rect x="14" y="20" width="28" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/><rect x="20" y="10" width="16" height="10" fill="#c8643f" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  door: () => `<svg viewBox="0 0 56 48"><rect x="18" y="6" width="20" height="36" fill="#7a5a33" stroke="#1f2a44" stroke-width="3"/><rect x="31" y="23" width="4" height="4" fill="#ffd257"/></svg>`,
+  lettuce: () => `<svg viewBox="0 0 56 48"><rect x="14" y="16" width="28" height="20" fill="#5fa35a" stroke="#1f2a44" stroke-width="3"/><rect x="22" y="8" width="12" height="9" fill="#74b56a" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  sun: () => `<svg viewBox="0 0 40 36"><rect x="12" y="10" width="16" height="16" fill="#ffd257" stroke="#1f2a44" stroke-width="3"/><path d="M20 2v5M20 29v5M4 18h5M31 18h5" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  wind: () => `<svg viewBox="0 0 40 36"><rect x="18" y="14" width="4" height="20" fill="#1f2a44"/><rect x="18" y="1" width="4" height="13" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2"/><rect x="6" y="15" width="13" height="4" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2" transform="rotate(-25 19 15)"/><rect x="21" y="15" width="13" height="4" fill="#fbfbf7" stroke="#1f2a44" stroke-width="2" transform="rotate(25 21 15)"/></svg>`,
+  batt: () => `<svg viewBox="0 0 40 36"><rect x="5" y="9" width="27" height="18" fill="#fbfbf7" stroke="#1f2a44" stroke-width="3"/><rect x="32" y="14" width="4" height="8" fill="#1f2a44"/><rect x="8" y="12" width="14" height="12" fill="#1c7a45"/></svg>`,
+  ramp: () => `<svg viewBox="0 0 56 48"><path d="M6 40h44V16z" fill="#bdbcb6" stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"/></svg>`,
+  lift: () => `<svg viewBox="0 0 56 48"><rect x="16" y="6" width="24" height="36" fill="#9fd0f5" stroke="#1f2a44" stroke-width="3"/><path d="M28 12v8M24 16l4-4 4 4M28 36v-8M24 32l4 4 4-4" fill="none" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  wide: () => `<svg viewBox="0 0 56 48"><rect x="8" y="8" width="19" height="34" fill="#7a5a33" stroke="#1f2a44" stroke-width="3"/><rect x="29" y="8" width="19" height="34" fill="#7a5a33" stroke="#1f2a44" stroke-width="3"/></svg>`,
+  quiet: () => `<svg viewBox="0 0 56 48"><rect x="8" y="10" width="40" height="30" fill="#c98be0" stroke="#1f2a44" stroke-width="3"/><rect x="14" y="28" width="16" height="8" fill="#fff4dc" stroke="#1f2a44" stroke-width="2.5"/></svg>`,
+  books: () => `<svg viewBox="0 0 56 48"><rect x="8" y="10" width="40" height="30" fill="#fff4dc" stroke="#1f2a44" stroke-width="3"/><rect x="13" y="14" width="6" height="10" fill="#e0503a"/><rect x="21" y="14" width="6" height="10" fill="#3f78b5"/><rect x="29" y="14" width="6" height="10" fill="#2e9b5a"/><rect x="13" y="27" width="6" height="10" fill="#ffd257"/><rect x="21" y="27" width="6" height="10" fill="#8a5fc2"/></svg>`,
+  swing: () => `<svg viewBox="0 0 56 48"><path d="M8 42V8h40v34" fill="none" stroke="#1f2a44" stroke-width="4"/><path d="M22 8v20M34 8v20" stroke="#1f2a44" stroke-width="2.5"/><rect x="19" y="28" width="18" height="5" fill="#e0503a" stroke="#1f2a44" stroke-width="2.5"/></svg>`,
 };
 const florence = '<div class="flo"><i class="flo-shadow"></i><div class="flo-body"><i class="ui-florence"></i></div></div>';
-const dots = '<div class="ui-bubble ui-bubble--dots bub"><i></i><i></i><i></i></div>';
-const top = (level, n, step, count) => `<div class="ui-top"><div class="ui-place"><b>1</b>Eco Town <strong>${level}</strong></div>${count || ''}</div><div class="step">${step}</div>`;
+const top = (level, step, count = '') => `<div class="ui-top"><div class="ui-place"><b>1</b>Eco Town <strong>${level}</strong></div>${count}</div><div class="step">${step}</div>`;
 const count = (icon, text) => `<div class="count">${icon}${text}</div>`;
-const tok = (icon, label, cls = '') => `<div class="tok ${cls}">${icon}${label ? `<span>${label}</span>` : ''}</div>`;
-const tray = (inner, btn = 'Done', off = false) => `<div class="tray">${inner}<button class="ui-btn${off ? ' is-disabled' : ''}">${btn}</button></div>`;
-const at = (cls, p, inner = '') => `<i class="${cls}" style="left:${p[0]}px;top:${p[1]}px">${inner}</i>`;
-const finger = (p, down = true) => at(`ui-pointer${down ? ' is-down' : ''}`, [p[0] + 14, p[1] + 18]);
+const tok = (icon, label, cls = '', small = '') => `<div class="tok ${cls}">${icon}<span>${label}${small ? `<small>${small}</small>` : ''}</span></div>`;
+const pal = (title, inner) => `<div class="pal"><h3>${title}</h3>${inner}</div>`;
+const mouse = (x, y) => `<svg class="mouse" style="left:${x}px;top:${y}px" viewBox="0 0 40 48"><path d="M5 3l28 22-13 2 8 15-7 3-8-15-8 9z" fill="#fff" stroke="#1f2a44" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
+const drag = (x, y, inner) => `<div class="drag" style="left:${x}px;top:${y}px">${inner}</div>`;
+const hint = (t) => `<div class="hint">${t}</div>`;
+// flat drawings: r is a block with a hard shadow under it, d is a dashed place where a part belongs
+const r = (x, y, w, h, c, sh = 0) => `${sh ? `<rect x="${x + sh}" y="${y + sh}" width="${w}" height="${h}" fill="#1f2a44" opacity=".22"/>` : ''}<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+const d = (x, y, w, h, on = true) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${on ? '#ffd257' : '#ffffff'}" fill-opacity="${on ? 0.55 : 0.35}" stroke="${on ? '#1f2a44' : '#4a556e'}" stroke-width="4" stroke-dasharray="14 10"/>`;
+const kid = (x, y, c, s = 1) => r(x, y - 34 * s, 20 * s, 22 * s, c) + r(x + 2 * s, y - 50 * s, 16 * s, 16 * s, '#f1c9a0') + r(x + 2 * s, y - 12 * s, 6 * s, 12 * s, '#2b3a55') + r(x + 12 * s, y - 12 * s, 6 * s, 12 * s, '#2b3a55');
+
+// ---- the flat drawings ------------------------------------------------------------------------------------------------
+function factory() {
+  let s = r(0, 0, 1280, 720, '#efe6d2') + r(0, 560, 1280, 160, '#c9c2b4') + r(0, 560, 1280, 8, '#a9a294');
+  for (let k = 0; k < 4; k++) s += r(330 + k * 150, 96, 120, 100, '#bfe3f5') + r(330 + k * 150, 96, 120, 8, '#fff') + r(386 + k * 150, 96, 8, 100, '#efe6d2');
+  for (let k = 0; k < 9; k++) s += r(k * 160 - 20, 0, 14, 62, '#2b3a55'); s += r(0, 56, 1280, 16, '#2b3a55');
+  // the crane and the wall panel it carries
+  s += r(858, 48, 90, 30, '#ffd257', 5) + r(900, 78, 6, 150, '#1f2a44') + r(884, 224, 38, 12, '#1f2a44');
+  s += r(804, 236, 196, 150, '#c9925a', 8) + r(804, 286, 196, 8, '#a9743f') + r(804, 336, 196, 8, '#a9743f') + r(858, 262, 84, 60, '#9fd0f5') + r(858, 262, 84, 6, '#fff');
+  // the building bay: a foundation, one wall in place, and dashed places for the rest
+  s += r(310, 532, 520, 28, '#8d8378', 6) + r(350, 500, 440, 32, '#bdbcb6', 6);
+  s += r(370, 350, 200, 150, '#c9925a', 6) + r(370, 400, 200, 8, '#a9743f') + r(370, 450, 200, 8, '#a9743f') + r(430, 412, 60, 88, '#7a5a33') + r(476, 452, 8, 8, '#ffd257');
+  s += d(570, 350, 200, 150) + d(350, 300, 440, 50, false) + d(400, 254, 340, 46, false) + d(460, 212, 220, 42, false);
+  // the diagram on the wall
+  s += r(40, 120, 250, 300, '#2b3a55', 8) + `<g fill="none" stroke="#dff1f7" stroke-width="4"><rect x="80" y="330" width="170" height="20"/><rect x="90" y="250" width="75" height="80"/><rect x="165" y="250" width="75" height="80"/><path d="M76 250h178v-22H76zM100 228h130v-22H100zM124 206h82v-20h-82z"/></g>`;
+  for (const [n, x, y] of [[1, 62, 340], [2, 128, 290], [3, 202, 290], [4, 165, 174]]) s += `<circle cx="${x}" cy="${y}" r="15" fill="${n === 3 ? '#ffd257' : '#dff1f7'}"/><text x="${x}" y="${y + 7}" text-anchor="middle" font="800 20px Bricolage" style="font:800 20px Bricolage,Inter" fill="#1f2a44">${n}</text>`;
+  // finished kits waiting on the floor
+  for (let k = 0; k < 3; k++) s += r(170 + k * 42, 480, 34, 80, '#c9925a', 5) + r(170 + k * 42, 506, 34, 6, '#a9743f');
+  s += r(40, 520, 110, 40, '#bdbcb6', 5) + r(52, 496, 86, 24, '#bdbcb6');
+  return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
+}
+function farm() {
+  const u = 40; let s = r(0, 0, 1280, 720, '#dff1f7');
+  // the town on top: a block with a glass greenhouse on its roof, and the street
+  s += r(40, 200, 200, 160, '#f6e1bd') + r(1040, 160, 200, 200, '#fbecd0'); for (const [x, y] of [[70, 230], [150, 230], [70, 290], [150, 290], [1070, 190], [1150, 190], [1070, 260], [1150, 260]]) s += r(x, y, 50, 40, '#9fd0f5');
+  s += r(280, 240, 720, 120, '#fff4dc'); for (let k = 0; k < 7; k++) s += r(310 + k * 100, 270, 60, 60, '#9fd0f5');
+  s += r(280, 80, 720, 160, '#bfe3f5') + r(280, 80, 720, 10, '#fbfbf7'); for (let k = 0; k <= 9; k++) s += r(280 + k * 80 - (k === 9 ? 8 : 0), 80, 8, 160, '#fbfbf7');
+  s += r(280, 228, 720, 12, '#2b3a55');
+  for (const y of [150, 208]) { s += r(320, y, 560, 10, '#8d8378'); for (let k = 0; k < 13; k++) s += r(330 + k * 42, y - 26, 30, 26, k % 4 === 3 ? '#74b56a' : '#5fa35a') + (y === 150 && k % 3 === 1 ? r(340 + k * 42, y - 38, 12, 12, '#e0503a') : ''); }
+  s += r(0, 360, 1280, 40, '#8d8378') + r(0, 360, 1280, 8, '#c9c2b4') + r(0, 400, 1280, 320, '#a27443');
+  for (const [x, y, w] of [[60, 430, 80], [1100, 440, 120], [200, 660, 100], [960, 670, 140], [600, 420, 60]]) s += r(x, y, w, 20, '#b98a55');
+  // the tunnel farm under the street
+  s += r(120, 440, 1040, 220, '#2b3350') + r(120, 440, 1040, 12, '#c98be0') + r(120, 648, 1040, 12, '#4a556e');
+  for (const [x, y, w] of [[180, 540, 360], [640, 540, 280], [180, 600, 240], [520, 600, 520]]) { s += r(x, y, w, 10, '#b9c6d2'); const n = Math.floor(w / 42); for (let k = 0; k < n; k++) s += r(x + 8 + k * 42, y - 26, 30, 26, (k + x) % 3 ? '#5fa35a' : '#74b56a'); s += r(x, y - 60, w, 6, '#f08ab8'); }
+  s += r(1000, 452, 60, 196, '#3f78b5') + r(1012, 452, 36, 196, '#5cb8e6');
+  // ladders, and the things to pick
+  for (const [x, y0, y1] of [[930, 240, 648], [150, 540, 648]]) { s += r(x, y0, 6, y1 - y0, '#ffd257') + r(x + 34, y0, 6, y1 - y0, '#ffd257'); for (let y = y0 + 14; y < y1; y += 24) s += r(x, y, 40, 5, '#ffd257'); }
+  for (const [x, y] of [[420, 486], [470, 466], [520, 486], [720, 500], [770, 500], [300, 566], [640, 566], [600, 100], [660, 100]]) s += r(x, y, 20, 20, '#ffd257', 3) + r(x + 6, y + 6, 8, 8, '#fff6c8');
+  // the child's character, jumping between two shelves
+  s += kid(566, 520, '#e0503a', 1.25) + r(556, 470, 44, 8, '#e0503a');
+  return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
+}
+function school() {
+  let s = r(0, 0, 1280, 720, '#dff1f7') + r(0, 560, 1280, 160, '#86c86b') + r(0, 560, 1280, 10, '#6fb257') + r(0, 600, 1280, 30, '#ecd29a');
+  // the school cut open: two floors of three rooms, a roof of steps, and a bell
+  s += r(250, 196, 740, 372, '#2b3a55') + r(230, 150, 780, 46, '#c8643f', 6) + r(290, 108, 660, 42, '#c8643f') + r(350, 70, 540, 38, '#d0774a') + r(585, 14, 70, 56, '#fff4dc') + r(605, 30, 30, 28, '#ffd257');
+  const room = (c, f, col) => r(262 + c * 242, 208 + f * 180, 230, 168, col);
+  s += room(0, 0, '#fff4dc') + room(1, 0, '#fbecd0') + room(0, 1, '#fbecd0') + room(1, 1, '#fff4dc');
+  // a classroom with desks, a library, a hall, and another classroom
+  s += r(282, 228, 120, 60, '#2f4f8f') + r(292, 330, 44, 12, '#c9925a') + r(310, 342, 8, 34, '#7a5a33') + r(366, 330, 44, 12, '#c9925a') + r(384, 342, 8, 34, '#7a5a33') + kid(440, 376, '#2e9b5a');
+  for (let k = 0; k < 2; k++) { s += r(524, 236 + k * 62, 190, 8, '#7a5a33'); for (let b = 0; b < 9; b++) s += r(530 + b * 20, 208 + k * 62 + (b % 3) * 3, 14, 28 - (b % 3) * 3, ['#e0503a', '#3f78b5', '#ffd257', '#2e9b5a', '#8a5fc2'][(b + k) % 5]); } s += kid(660, 376, '#f08ab8');
+  s += r(524, 408, 110, 70, '#9fd0f5') + r(540, 520, 60, 12, '#c9925a') + kid(690, 556, '#3f78b5');
+  s += r(282, 420, 90, 50, '#2f4f8f');
+  // the places for the part that is chosen (a ramp at each way in), and the places for the other parts
+  s += `<path d="M112 568 L262 568 L262 500 Z" fill="#ffd257" fill-opacity=".55" stroke="#1f2a44" stroke-width="4" stroke-dasharray="14 10"/>`;
+  s += d(746, 208, 232, 168, false) + d(746, 388, 232, 168, false) + d(262, 478, 70, 78, false) + d(1000, 480, 66, 80, false);
+  // children arriving, one in a wheelchair, and a tree
+  s += kid(60, 600, '#e0503a') + kid(1080, 604, '#8a5fc2') + kid(1180, 600, '#ffd257');
+  s += r(150, 566, 26, 22, '#3f78b5') + r(154, 550, 18, 16, '#f1c9a0') + `<circle cx="160" cy="596" r="14" fill="none" stroke="#1f2a44" stroke-width="5"/>` + r(176, 588, 14, 5, '#1f2a44');
+  s += r(1206, 470, 12, 90, '#7a5a33') + r(1170, 400, 84, 70, '#5fa35a', 5) + r(1186, 366, 52, 36, '#74b56a');
+  return `<svg class="art" viewBox="0 0 1280 720">${s}</svg>`;
+}
+const chart = () => { const sun = 'M0 96 L40 96 C70 96 90 30 150 30 C210 30 230 96 260 96 L400 96 Z', wind = 'M0 70 C60 50 110 84 170 70 C230 54 300 30 400 44'; return `<svg viewBox="0 0 400 118" style="width:100%;height:118px"><rect width="400" height="100" fill="#efe6d2"/><rect x="290" width="110" height="100" fill="#2b3a55" opacity=".25"/><path d="${sun}" fill="#ffd257" stroke="#1f2a44" stroke-width="2.5"/><path d="${wind}" fill="none" stroke="#3f78b5" stroke-width="5"/><rect x="262" y="60" width="130" height="36" fill="#1c7a45" opacity=".8"/><rect x="298" y="0" width="5" height="100" fill="#b3243a"/><g style="font:700 13px Inter" fill="#1f2a44"><text x="4" y="114">Morning</text><text x="150" y="114" text-anchor="middle">Midday</text><text x="300" y="114" text-anchor="middle">Evening</text><text x="396" y="114" text-anchor="end">Night</text></g></svg>`; };
+const src = (icon, name, pct, col, on) => `<div class="src">${icon}<b>${name}</b><div class="bar"><i style="width:${pct}%;background:${col}"></i></div><i class="sw${on ? ' on' : ''}"></i></div>`;
 
 // ---- the scenes -------------------------------------------------------------------------------------------------------
-// each: li and phase choose the state of the town, cam is [x, y, z, distance], build(P) adds blocks and returns points to
-// project, html(p) returns the interface for those points
-const S = TW.SPOTS, HILL = [8.5, 2, 0.6, 31];
+// li and phase choose the state of the town, cam is [x, y, z, distance, tilt, turn], build() adds blocks and returns points
+// to project, html(p) returns the interface. A scene with flat: true hides the town behind its drawing.
+const S = TW.SPOTS, ABOVE = [8.4, 2, 0.2, 33, 1.5, TW.YAW];
 export const SCENES = [
-  { id: 'outlines', li: 0, cam: HILL, build() { home(S[0][0], S[0][1], { face: S[0][2] }); home(S[1][0], S[1][1], { face: S[1][2] }); dust(S[1][0], S[1][1], TOP);
-      for (const k of [2, 3]) { home(S[k][0], S[k][1], { face: S[k][2], pale: true }); for (let a = -1; a <= 0; a++) for (let b = -1; b <= 0; b++) cell(S[k][0] + a, S[k][1] + b, TOP, SUN_SOFT, 1.25); }
-      return { a: [S[2][0], TOP + 1.2, S[2][1]] }; },
-    html: (p) => top('Land', 1, 'Build your plan', count(I.home(), '2 of 4')) + at('ring', p.a) + finger(p.a) + florence + tray(`<span class="lab">Tap each outline</span>`, 'Done', true) },
+  { id: 'land-map', li: 0, cam: [7.6, 2, 0.4, 37, 1.5, TW.YAW], build() { home(S[0][0], S[0][1]); home(S[1][0], S[1][1]); plot(S[2][0], S[2][1]); plot(S[3][0], S[3][1]);
+      for (const [x, z] of [[8, -1], [9, 1], [7, 1]]) cell(x, z, TOP, WHITE_SOFT, 0.7);
+      return { a: [S[2][0], TOP + 1, S[2][1]] }; },
+    html: (p) => top('Land', 'Build your plan', count(I.home(), '2 of 4')) + drag(p.a[0] - 20, p.a[1] - 46, I.roofTop()) + mouse(p.a[0] - 6, p.a[1] - 30) + florence + hint('Drag each part to a yellow place.')
+      + pal('Parts', tok(I.home(), 'Home', 'on', '2 left') + tok(I.tree(), 'Tree', '', '3 left') + tok(I.shop(), 'Shop', '', '1 left')) },
 
-  { id: 'area', li: 0, cam: HILL, build() { for (let x = 5; x <= 12; x++) for (let z = -5; z <= 5; z++) cell(x, z, TOP);
-      home(6.5, -3.5); home(11.5, 2.5, { face: -1 }); home(9, 0, { lift: 1.5 }); for (let a = -1; a <= 0; a++) for (let b = -1; b <= 0; b++) cell(9 + a, 0 + b, TOP, SUN, 1);
-      return { a: [9, TOP + 2.6, 0] }; },
-    html: (p) => top('Land', 1, 'Build your plan', count(I.home(), '2 of 4')) + finger(p.a) + florence + tray(tok(I.home(), '', 'used') + tok(I.home(), '', 'used') + tok(I.home(), '', 'on') + tok(I.home(), ''), 'Done', true) },
+  { id: 'paths-map', li: 1, cam: ABOVE, build() { const done = [[6, -1], [6, 0], [7, 0], [8, 0], [9, 0]]; for (const [x, z] of done) blk(G, x + 0.5, z + 0.5, 1, 1, TOP, 0.07, PAL.sand, { shadow: false });
+      for (const [x, z] of [[10, 0], [11, 0], [11, -1], [6, 1], [6, 2], [11, 1], [11, 2]]) cell(x, z, TOP);
+      return { a: [10.5, TOP, 0.5] }; },
+    html: (p) => top('Getting around', 'Build your plan', count(I.path(), '1 of 4')) + mouse(p.a[0] - 4, p.a[1] - 4) + florence + hint('Hold the mouse button and draw the path.')
+      + pal('Parts', tok(I.path(), 'Path', 'on') + tok(I.bench(), 'Bench', '', '2 left') + tok(I.lamp(), 'Lamp', '', '4 left')) },
 
-  { id: 'draw', li: 1, cam: [8.5, 2, 0.4, 29], build() { const cells = [[6, -1], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [10, 1]]; for (const [x, z] of cells) blk(G, x + 0.5, z + 0.5, 1, 1, TOP, 0.07, PAL.sand, { shadow: false });
-      for (const [x, z] of [[10, 2], [10, 3], [11, 3]]) cell(x, z, TOP, WHITE_SOFT, 0.5);
-      return { f: [10.5, TOP, 1.5], h0: [S[0][0], TOP + 2.6, S[0][1]], h1: [S[1][0], TOP + 2.6, S[1][1]], h2: [S[2][0], TOP + 2.6, S[2][1]], h3: [S[3][0], TOP + 2.6, S[3][1]] }; },
-    html: (p) => top('Getting around', 2, 'Build your plan', count(I.path(), '1 of 4')) + at('badge ok', p.h0, tick) + at('badge', p.h1) + at('badge', p.h2) + at('badge', p.h3) + finger(p.f) + florence + tray(`<span class="lab">Draw a path to every home</span>`, 'Done', true) },
+  { id: 'paths-walk', li: 2, cam: [8.6, 2.5, 0.4, 13, 0.2, -0.35], build() { return {}; },
+    html: () => top('Getting around', 'Walk your path') + florence + `<div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i></div>` },
 
-  { id: 'stack', li: 0, cam: [8.2, 2.6, -2.2, 15], build() { const x = 8, z = -3; blk(G, x, z, 2.3, 2.3, TOP, 0.12, PAL.concrete); blk(G, x, z, 1.9, 1.9, TOP + 0.12, 1.45, PAL.timber); for (const yy of [0.5, 1.0]) blk(G, x, z, 1.94, 1.94, TOP + 0.12 + yy, 0.07, '#a9743f', { shadow: false });
-      blk(G, x + 0.4, z + 0.97, 0.42, 0.06, TOP + 0.12, 0.75, PAL.trunk, { shadow: false }); blk(G, x - 0.42, z + 0.97, 0.5, 0.06, TOP + 0.74, 0.45, PAL.glass, { shadow: false });
-      const r = group(G, x, TOP + 0.12 + 1.1, z); MAP.stepRoof(r, 1.9, 1.9, 1.45, PAL.roof[0], PAL.timber, { tiles: true });
-      home(12, -3, { pale: true }); home(4.6, -3.4, { pale: true });
-      return { a: [x, TOP + 3.9, z] }; },
-    html: (p) => top('Homes', 3, 'Build your plan', count(I.home('#c8643f', '#c9925a'), '1 of 6')) + finger(p.a) + florence + tray(tok(I.base(), 'Base', 'used') + tok(I.walls(), 'Walls', 'used') + tok(I.roof(), 'Roof', 'on'), 'Done', true) },
+  { id: 'factory', flat: true, li: 2, cam: ABOVE, build() { return {}; },
+    html: () => factory() + top('Homes', 'Build your plan', count(I.home('#c8643f', '#c9925a'), '1 of 6')) + mouse(900, 316) + florence + hint('Drag each part to its place on the diagram.')
+      + pal('Home parts', tok(I.base(), 'Foundation', 'used', 'Placed') + tok(I.wall(), 'Wall', 'on', '1 left') + tok(I.roof(), 'Roof', '', '1 left') + tok(I.door(), 'Door', 'used', 'Placed')) },
 
-  { id: 'together', li: 0, cam: HILL, build() { for (const [x, z, f] of [[6.5, -3.5, 1], [9.5, -3, 1], [6.2, 3.6, -1]]) { home(x, z, { face: f }); flag(x + 1.25, z + 1.2 * f, TOP); }
-      home(12, -3, { face: 1 }); dust(12, -3, TOP); home(9.3, 4, { face: -1, lift: 2.2 }); home(12, 3.6, { face: -1, pale: true });
-      return {}; },
-    html: () => top('Land', 1, 'Build your plan', count(I.home(), '4 of 6')) + florence + dots + tray(tok(I.home(), '', 'used') + tok(I.home(), '', 'used') + tok(I.home(), '', 'used') + `<i class="sep"></i><span class="lab">Florence builds the rest</span>`, 'Done', true) },
+  { id: 'farm', flat: true, li: 3, cam: ABOVE, build() { return {}; },
+    html: () => farm() + top('Food', 'Pick the food', count(I.lettuce(), '7 of 16')) + `<div class="keys"><i class="key">&larr;</i><i class="key">&rarr;</i><i class="key">&uarr;</i><i class="key wide">Space to jump</i></div>` },
 
-  { id: 'look', li: 0, cam: HILL, build() { home(S[0][0], S[0][1], { face: 1, roof: PAL.solar }); home(S[1][0], S[1][1], { face: 1 }); home(S[2][0], S[2][1], { face: -1, roof: '#2e9b5a' }); home(S[3][0], S[3][1], { face: -1, roof: '#e2c04a' });
-      V.tree(G, S[2][0] + 1.7, S[2][1] - 0.6, 1.15, TOP); for (const [a, b, c] of [[-1.5, -0.8, '#f08ab8'], [-1.5, -0.2, '#ffd257'], [-1.5, 0.4, '#ffffff'], [-1.9, 0.1, '#c98be0']]) blk(G, S[2][0] + a, S[2][1] + b, 0.26, 0.26, TOP, 0.36, c, { shadow: false });
-      return { a: [S[2][0], TOP + 1.4, S[2][1]] }; },
-    html: (p) => top('Land', 1, 'Make it yours', '') + at('ring', p.a) + florence + tray(`<span class="lab">Roof</span><i class="sw" style="background:#c8643f"></i><i class="sw on" style="background:#2e9b5a"></i><i class="sw" style="background:#e2c04a"></i><i class="sw" style="background:#2f4f8f"></i><i class="sep"></i><span class="lab">Garden</span>` + tok(I.tree(), '', 'on') + tok(I.flower(), ''), 'Done') },
+  { id: 'control', li: 4, time: (m) => m.after0 + 0.75, cam: [7.5, 2, 0.5, 44, 0.42, TW.YAW], off: -150, build() { return {}; },
+    html: () => `<div class="frame"><i style="left:33%"></i><i style="left:66%"></i></div>` + top('Power', 'Keep the lights on') + florence + mouse(336, 598)
+      + `<div class="desk"><div class="card"><h3>Power coming in</h3>${src(I.sun(), 'Solar', 8, '#ffd257', true)}${src(I.wind(), 'Wind', 64, '#3f78b5', true)}${src(I.batt(), 'Battery', 42, '#1c7a45', false)}<div class="src" style="grid-template-columns:1fr auto"><b>Stored in the battery</b><b>62%</b></div></div>
+      <div class="card"><h3>Today</h3>${chart()}</div>
+      <div class="card"><h3>Season</h3><div class="seasons"><i class="sea">Spring</i><i class="sea">Summer</i><i class="sea">Autumn</i><i class="sea on">Winter</i></div></div></div>` },
 
-  { id: 'harvest', li: 2, cam: [-6.4, 0, 3.6, 22], build() { const y = 0; for (const [x, z] of [[-9.2, 1.2], [-9.6, 3.4], [-7.6, 0.4], [-6.2, 2.2], [-5.4, 5.4], [-9.2, 6.2]]) V.tree(G, x, z, 1.35, y); for (const [x, z] of [[-7.2, 3], [-6.4, 4.6], [-8.2, 4.8]]) stump(x, z, y);
-      log(-6.9, 3.5, y, 0.4); log(-6.2, 4.1, y + 1.4, 0.9); log(-5.6, 4.6, y + 2.0, 1.3); cartBox(-4.4, 6.4, y, 3);
-      return { t: [-7.6, 1.4, 0.4], l: [-6.2, 1.9, 4.1] }; },
-    html: (p) => top('Homes', 3, 'Collect timber', count(I.log(), '4 of 6')) + at('ring', p.t) + finger(p.t) + at('plus', [p.l[0] + 46, p.l[1] - 30], '+1') + florence + tray(`<span class="lab">Tap a tree to cut it</span>`, 'Done', true) },
-
-  { id: 'walk', li: 2, cam: [1.6, 0, -5, 22], build() { const y = 0, g = V.person(G, '#e0503a'); g.position.set(1.4, y, -3.2); g.scale.setScalar(1.5); g.rotation.y = 2.6; log(1.25, -2.9, y + 0.95, 0.3);
-      for (const [x, z] of [[1.2, -4.2], [1, -5.1], [0.9, -6], [1.1, -6.9]]) blk(G, x, z, 0.26, 0.26, y + 0.02, 0.06, '#ffd257', { shadow: false, mat: SUN });
-      for (const [x, z, r] of [[1.2, -8.1, 0.2], [1.5, -8.6, 1.2], [0.7, -8.5, 2]]) log(x, z, y, r); for (const [x, z] of [[2.2, -8.8], [0.2, -9.2], [-0.8, -7.6]]) V.tree(G, x, z, 1.3, y); stump(1.9, -7.6, y);
-      for (const [x, z, r] of [[-1.2, -3.2, 0.5], [2.6, -5.8, 1]]) log(x, z, y, r); cartBox(2.5, -1.6, y, 2);
-      return { a: [1.2, 0.3, -8.3], b: [-1.2, 0.3, -3.2], c: [2.6, 0.3, -5.8] }; },
-    html: (p) => top('Homes', 3, 'Collect timber', count(I.log(), '3 of 6')) + at('ring', p.a) + finger(p.a) + at('ring s', p.b) + at('ring s', p.c) + florence + tray(`<span class="lab">Tap where to walk</span>`, 'Done', true) },
-
-  { id: 'cart', li: 3, phase: 'after', cam: [3, 0.8, 0.2, 24], build() { const c = kit.cart(); c.position.set(3.1, 1, -0.5); c.rotation.y = 0; c.scale.setScalar(1.25);
-      for (const [x, z, col] of [[2.2, -0.5, '#e0503a'], [1.6, -1.6, '#e2c04a'], [4.5, 0.6, '#4f9550']]) blk(G, x, z, 0.5, 0.5, TW.heightAt(x, z) + 0.05, 0.42, col);
-      return { cr: [4.5, 2.6, 0.6], st: [TW.STALL[0], TOP + 2.4, TW.STALL[1]] }; },
-    html: (p) => top('Food', 4, 'Take the food to market', count(I.crate(), '5 of 8')) + at('ring s', p.cr) + at('badge', p.st) + `<div class="arrow" style="left:1120px;top:500px">${I.arr(0)}</div><div class="arrow" style="left:1048px;top:572px">${I.arr(-90)}</div><div class="arrow" style="left:1192px;top:572px">${I.arr(90)}</div>` + florence },
-
-  { id: 'right', li: 2, cam: [1.4, 0, -5, 21], build() { const y = 0;
-      for (const [dx, dz, r, h] of [[0, 0, 0, 0], [0.1, 0.34, 0, 0], [0.05, 0.17, 0, 0.26], [-0.1, -0.5, 1.3, 0]]) log(0.6 + dx, -7.4 + dz, y + h, r); for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) cell(-0.4 + a, -8.4 + b, y, SUN, 1);
-      for (let k = 0; k < 6; k++) blk(G, 1.2 + (k % 3) * 0.46 - 0.4, -5 + Math.floor(k / 3) * 0.3, 0.42, 0.24, y + (k > 2 ? 0.2 : 0), 0.2, PAL.brick);
-      for (let k = 0; k < 3; k++) blk(G, 1.9 + (k % 2) * 0.6 - 0.3, -2.6, 0.55, 0.4, y + (k > 1 ? 0.3 : 0), 0.3, PAL.concrete);
-      cartBox(2.7, -6.8, y, 4); log(1.7, -7.2, y + 1.3, 0.6);
-      return { a: [0.6, 0.5, -7.4], b: [1.2, 0.5, -5], c: [1.9, 0.5, -2.6] }; },
-    html: (p) => top('Homes', 3, 'Collect what your plan needs', count(I.log(), '5 of 6')) + at('ring', p.a) + finger(p.a) + florence + tray(`<span class="lab">Your plan</span>` + tok(I.log(), 'Timber', 'on') + `<i class="sep"></i>` + tok(I.brick(), 'Brick', 'used') + tok(I.bag(), 'Cement', 'used'), 'Done', true) },
-
-  { id: 'power', li: 4, cam: [8.4, 2, 2.4, 31], build() { for (let x = 5; x <= 12; x++) for (const z of [6, 7]) cell(x, z, TOP); kit.turbine(6.6, TOP, 7.2); const t = kit.turbine(10.2, TOP + 1.6, 6.8); for (let a = -1; a <= 0; a++) for (let b = -1; b <= 0; b++) cell(10.2 + a, 6.8 + b, TOP, SUN, 1);
-      for (const [x, z] of [[6, 6], [6, 5]]) blk(G, x + 0.5, z + 0.5, 0.34, 0.34, TOP + 0.08, 0.1, '#ffd257', { shadow: false, mat: SUN });
-      return { a: [10.2, TOP + 4.6, 6.8] }; },
-    html: (p) => top('Power', 5, 'Build your plan', count(I.turbine(), '1 of 2')) + finger(p.a) + florence + tray(tok(I.turbine(), '', 'used') + tok(I.turbine(), '', 'on') + `<i class="sep"></i>` + tok(I.wire(), 'Wire'), 'Done', true) },
+  { id: 'school', flat: true, li: 5, cam: ABOVE, build() { return {}; },
+    html: () => school() + top('A school for everyone', 'Build your plan', count(I.ramp(), '1 of 6')) + drag(230, 440, `<svg viewBox="0 0 160 80" width="160" height="80"><path d="M4 76h152V8z" fill="#bdbcb6" stroke="#1f2a44" stroke-width="4" stroke-linejoin="round"/></svg>`) + mouse(244, 440) + florence + hint('Choose a part. Its places turn yellow.')
+      + pal('Parts', tok(I.books(), 'Library', 'used', 'Placed') + tok(I.ramp(), 'Ramp', 'on', '1 left') + tok(I.lift(), 'Lift', '', '1 left') + tok(I.wide(), 'Wide door', '', '1 left') + tok(I.quiet(), 'Quiet room', '', '1 left') + tok(I.swing(), 'Playground', '', '1 left')) },
 ];
 
 let ui = null;
 export function show(i) {
-  const s = SCENES[i], m = film.segs[s.li + 1]; film.seek(m.start + (s.phase === 'after' ? m.inter[0] + 0.2 : m.askTap - 0.5));
+  const s = SCENES[i], m = film.segs[s.li + 1]; film.seek(m.start + (s.time ? s.time(m) : s.phase === 'after' ? m.inter[0] + 0.2 : m.askTap - 0.5));
   G.clear(); const pts = s.build() || {};
-  const st = film.dbg; st.camera.setViewOffset(W, H, 0, 46, W, H); st.look(s.cam[0], s.cam[1], s.cam[2], s.cam[3], TW.TILT, TW.YAW); st.camera.updateMatrixWorld(); st.draw(MAP.scene);
+  const st = film.dbg; st.camera.setViewOffset(W, H, 0, s.off ?? 0, W, H); st.look(...s.cam); st.camera.updateMatrixWorld(); st.draw(MAP.scene);
   const p = Object.fromEntries(Object.entries(pts).map(([k, v]) => [k, st.screen(new THREE.Vector3(...v))]));
   if (!ui) { const stage = document.querySelector('.stage'); document.head.insertAdjacentHTML('beforeend', `<style>${css} .stage > .ui:not(.cx), .stage > canvas.fx { visibility: hidden; }</style>`); ui = document.createElement('div'); ui.className = 'ui cx'; ui.style.setProperty('--ui-florence-sprite', `url(${new URL('../animation/florence-sprite.webp', import.meta.url)})`); stage.append(ui); }
   ui.innerHTML = s.html(p); return s.id;
