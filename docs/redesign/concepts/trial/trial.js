@@ -1,49 +1,72 @@
-// A playable trial of one level, Homes, in the new street and colouring (owner, 23 Nov 2026: "Yes, build the trial level").
-// It follows the wireframe steps (the job, ask Florence, her three plans, the test, the choice, the town changes, the recap)
-// and puts the play break, in which the child builds the home, between the choice and the town changing.
-// The steps and their words come from ../../wireframes-data.js. The words that are only in this file (the play break
-// hints and the last screen) are placeholders. Nothing here is part of the game; it only adds files in this folder.
-import { THREE, blk, group, hash, soft, fig, SKIN, HAIR, frame } from '../kit-v2.js';
-import D from '../../wireframes-data.js';
-const U = D.ui, TOWN = D.towns[0], L = TOWN.levels[2], $ = (id) => document.getElementById(id);
+// A playable trial of one level, Homes, rebuilt by the design agent (owner, 23 Nov 2026: "redesign and rebuild the trial
+// level and activity", with full freedom). One idea runs through the whole level: a home stays warm in winter if the low
+// sun can reach it. The street has a sunny side and a shady side. The words the child chooses (which side, and thick or
+// thin walls) are drawn in the town at once and change what the test shows. The play break builds the chosen home on the
+// family's plot, and the windows the child puts on the sunny wall let the sun in. Nobody can fail, and there is no score.
+// It is ONE place from start to finish: the camera glides from the street to the plot and back.
+// The look follows car town: a low camera, one vanishing point (the school), large shapes near the camera, pale
+// see-through sheets across the distance, a close palette with a few bright accents, and soft light.
+// Every word below is a placeholder written for this trial. Nothing here is part of the game.
+import { THREE, blk, group, hash, soft, fig, SKIN, HAIR, frame, place } from '../kit-v2.js';
+const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-// placeholder words, written for the trial only
-const PH = { build: 'Build a home', win2: 'You have two windows. Tap a yellow place to put one in.', win1: 'You have one more window. Tap a yellow place to put it in.', roof: 'Now tap the yellow place to lower the roof.', door: 'Choose a colour for the door. Then tap the yellow place.', ready: 'The home is ready, and your family is moving in.',
-  window: 'Window', roofT: 'Roof', doorT: 'Door', left: (n) => `${n} left`, placed: 'In place', colour: 'Door colour', family: 'Your family', yours: 'Your home', end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again', works: ['The sawmill', 'The brick oven', 'The cement works'] };
+// ---- the words of the trial (placeholders) -----------------------------------------------------------------------------
+const T = { level: 'A warm home for winter',
+  job: ['Winter is coming, and your family needs a home.', 'The low winter sun warms one side of the street. The other side is in shade all day.'], start: 'Start',
+  askT: 'Your sentence', askHow: 'Tap a word for each gap. Then ask Florence to suggest plans.', ask: 'Ask Florence',
+  sentence: ['Florence, please suggest homes that stay warm in winter. Build them on the', ['the sunny side', 'the shady side'], 'of the street, with', ['thick walls', 'thin walls'], '.'],
+  plansSay: (a, b) => [`Here are three plans, built on ${a} with ${b}.`, 'Press the button to test them on a cold winter night.'], test: 'Bring the winter night', watch: ['First the materials are made. Then the cold night comes.', 'Watch the air above each home, and watch the windows.'],
+  choose: 'Yellow windows are warm. Blue windows are cold. Which plan will you use?', again: 'Ask again', use: 'Use this plan',
+  plans: [['Timber home', 'Wood from the town forest, cut in a sawmill that runs on sunshine.'], ['Brick home', 'Clay bricks, baked hard in a hot oven.'], ['Concrete home', 'Cement, made in a very hot kiln.']],
+  checks: ['Staying warm', 'Clean air'], warm: { g: 'It stays warm all night.', f: 'It gets a little cold by morning.', p: 'It is cold inside all night.' }, tag: { g: 'Warm', f: 'A little cold', p: 'Cold' },
+  air: ['Making the wood adds no pollution.', 'Baking the bricks adds some pollution.', 'Making the cement adds a lot of pollution.'],
+  build: 'Build your home', win2: 'You have two windows. Tap a yellow place to put one in.', win1: 'You have one more window. Tap a yellow place to put it in.', roof: 'Now tap the yellow place to lower the roof.', door: 'Choose a colour for the door. Then tap the yellow place.',
+  sunIn: 'The winter sun shines in through this window and warms the home.', noSun: 'This wall is in shade, so no sun comes in here. You can tap the window to take it out again.', shade: 'No wall on this side of the street gets the winter sun.',
+  ready: ['The home is ready, and your family is moving in.', 'One window catches the sun. The home is ready, and your family is moving in.', 'Both windows catch the sun. The home is ready, and your family is moving in.'],
+  window: 'Window', roofT: 'Roof', doorT: 'Door', left: (n) => `${n} left`, placed: 'In place', colour: 'Door colour', family: 'Your family', plot: 'Your plot', yours: 'Your home', next: 'Next',
+  town: 'The street is built', after: ['The whole street is built your way. Making the wood added no pollution, and the air is clean.', 'The whole street is built your way. Baking the bricks added some pollution.', 'The whole street is built your way. Making the cement added a lot of pollution.'],
+  end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again' };
 
-// ---- colours and blocks, as in ../scenes-v3.js --------------------------------------------------------------------------
+// ---- colours and blocks ---------------------------------------------------------------------------------------------------
 const SKY = '#cfe6f2', SHEET = '#e3f0f6', NO = { shadow: false }, c0 = new THREE.Color(), hsl = {};
 const tone = (hex) => { c0.set(hex).getHSL(hsl, THREE.SRGBColorSpace); return '#' + c0.setHSL(hsl.h, hsl.s * 0.74, 0.66 + (hsl.l - 0.66) * 0.7, THREE.SRGBColorSpace).getHexString(); };
-const mats = new Map(), FARX = -30;
+const mats = new Map(), FARX = -34;
+// far things (x beyond FARX) are flat and unlit, as in car town. o.wx is the place in the world of something built in a group.
 const M = (hex, x, o = {}) => { const unlit = o.unlit || x < FARX, col = o.raw ? hex : tone(hex), k = col + (unlit ? 'u' : 'l') + (o.op || ''); if (!mats.has(k)) { const m = unlit ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshLambertMaterial({ color: col }); if (o.op) { m.transparent = true; m.opacity = o.op; m.depthWrite = false; } mats.set(k, m); } return mats.get(k); };
-const B = (g, x, z, w, d, y, h, hex, o = {}) => blk(g, x, z, w, d, y, h, hex, { shadow: o.shadow !== false && !o.op, mat: o.mat || M(hex, o.near ? 0 : x, o) });
+const B = (g, x, z, w, d, y, h, hex, o = {}) => blk(g, x, z, w, d, y, h, hex, { shadow: o.shadow !== false && !o.op, mat: o.mat || M(hex, o.wx ?? x, o) });
 const WALL = ['#ecd9b4', '#e4cfa6', '#f0e0c0', '#dcc69c'], ROOF = ['#c8643f', '#3f78b5', '#2e9b5a', '#e0a23a'], LEAF = ['#77c765', '#84d072', '#6cbd5b'], GRASS = ['#8fcf73', '#93d277', '#8bcb6f'], DOOR = ['#7a5a33', '#3f78b5', '#c8643f', '#2e9b5a'];
-// the three materials of the three plans: timber, brick and concrete
-const MAT = [{ wall: '#d8b482', line: '#c29a66', top: '#f6efdc' }, { wall: '#c77b5e', line: '#b0654b', top: '#c77b5e' }, { wall: '#cdccc6', line: '#b6b5ae', top: '#cdccc6' }];
-const GLASS = '#a9d3ee', LIT = '#ffe27a', glassMat = () => new THREE.MeshBasicMaterial({ color: GLASS });
-const LX = (k) => 14 - k * 7.6, LZ = 11.4, RZ = -12.7;
-// a low home. face is +1 when the front looks towards -z. o.mat is one of MAT, o.door a colour, o.glass a material of its own.
-function home(g, x, z, face, k, o = {}) { const w = 7.3, d = 7, h = 4.9, fz = z - face * (d / 2 + 0.03), m = o.mat, R = m ? { raw: true } : {};
-  B(g, x, z, w, d, 0, h, m ? m.wall : WALL[k % 4], R); if (m) for (const y of [1.2, 2.4, 3.6]) B(g, x, fz, w, 0.04, y, 0.07, m.line, { raw: true, shadow: false });
-  const rc = o.roofC || ROOF[k % 4]; B(g, x, z, w + 0.5, d + 0.9, h, 0.55, rc); B(g, x, z, w + 0.5, d * 0.45, h + 0.55, 0.5, rc);
-  B(g, x + 2.2, fz, 1.25, 0.08, 0, 2.5, o.door || DOOR[(k + 1) % 4], NO);
-  for (const [a, y] of [[-1.6, 0.9], [0.4, 0.9], [-1.6, 3.0], [0.4, 3.0], [2.2, 3.0]]) B(g, x + a, fz - face * 0.02, 1.2, 0.06, y, 1.25, GLASS, { unlit: true, raw: true, shadow: false, mat: o.glass }); }
+const MAT = [{ wall: '#d8b482', line: '#c29a66' }, { wall: '#c77b5e', line: '#b0654b' }, { wall: '#cdccc6', line: '#b6b5ae' }], LINING = '#f2d98a';
+const GLASS = '#a9d3ee', LIT = '#ffe27a', WARM = { g: '#ffe27a', f: '#d9bd8e', p: '#86a6d4' }, glassMat = () => new THREE.MeshBasicMaterial({ color: GLASS });
+const SH = ['#3f78b5', '#8a5fc2', '#2e9b5a', '#e0a23a', '#16a3a3', '#c98a5a'];
+// A low home in a group of its own. Its front looks towards +z. o: wx (where it stands), mat, glass, roofC, door, thick.
+function house(parent, o = {}) { const g = group(parent), w = o.w || 7.3, d = o.d || 7, h = o.h || 4.9, m = o.mat, X = { wx: o.wx, raw: !!m };
+  B(g, 0, 0, w, d, 0, h, m ? m.wall : WALL[(o.k || 0) % 4], X); if (m) for (const y of [1.2, 2.4, 3.6]) { B(g, 0, d / 2, w, 0.04, y, 0.07, m.line, { ...X, shadow: false }); for (const sx of [-1, 1]) B(g, sx * w / 2, 0, 0.04, d, y, 0.07, m.line, { ...X, shadow: false }); }
+  if (o.thick) B(g, 0, 0, w + 0.06, d + 0.06, h - 0.5, 0.5, LINING, { wx: o.wx, raw: true });
+  const rc = o.roofC || ROOF[(o.k || 0) % 4]; B(g, 0, 0, w + 0.6, d + 1, h, 0.55, rc, { wx: o.wx }); B(g, 0, 0, w + 0.6, d * 0.45, h + 0.55, 0.5, rc, { wx: o.wx });
+  B(g, w * 0.3, d / 2 + 0.03, 1.25, 0.08, 0, 2.5, o.door || DOOR[((o.k || 0) + 1) % 4], { wx: o.wx, shadow: false });
+  const G = { unlit: true, raw: true, shadow: false, mat: o.glass }; for (const [a, y] of [[-w * 0.3, 1.0], [0, 1.0], [-w * 0.3, 3.0], [0, 3.0], [w * 0.3, 3.0]]) B(g, a, d / 2 + 0.05, 1.25, 0.06, y, 1.25, GLASS, G);
+  for (const sx of [-1, 1]) for (const [b, y] of [[-1.6, 1.0], [1.6, 1.0], [0, 3.0]]) B(g, sx * (w / 2 + 0.05), b, 0.06, 1.25, y, 1.25, GLASS, G); return g; }
 function tree(g, x, z, k = 1, op) { B(g, x, z, 0.4 * k, 0.4 * k, 0, 4.6 * k, '#8a6a44'); B(g, x, z, 2.8 * k, 2.8 * k, 4.4 * k, 2.3 * k, LEAF[Math.floor(hash(x, z) * 3)], { op, unlit: true, raw: true }); B(g, x + 0.1, z - 0.1, 1.8 * k, 1.8 * k, 6.7 * k, 1.2 * k, LEAF[1], { op, unlit: true, raw: true }); }
 const lamp = (g, x, z) => { B(g, x, z, 0.18, 0.18, 0, 4.4, '#2b3a55'); B(g, x, z, 0.55, 0.55, 4.4, 0.45, '#ffe9a0', { unlit: true, raw: true }); };
-const SH = ['#3f78b5', '#8a5fc2', '#2e9b5a', '#e0a23a', '#16a3a3', '#c98a5a'];
-function fam(g, t, o = {}) { fig(g, 0, 0.06, 0, { k: 1.25, shirt: '#e0503a', legs: '#2b3a55', skin: SKIN[0], hair: HAIR[1], cap: '#3f78b5', pack: '#ffd257', turn: t, arms: ['up', 'down'] });
+function fam(g, t) { fig(g, 0, 0.06, 0, { k: 1.25, shirt: '#e0503a', legs: '#2b3a55', skin: SKIN[0], hair: HAIR[1], cap: '#3f78b5', pack: '#ffd257', turn: t, arms: ['up', 'down'] });
   fig(g, -Math.sin(t) * 0.9 + Math.cos(t) * 1.3, 0.06, -Math.cos(t) * 0.9 - Math.sin(t) * 1.3, { k: 1.62, shirt: '#8a5fc2', legs: '#2b3a55', skin: SKIN[3], hair: HAIR[4], long: true, turn: t - 0.2 });
-  fig(g, -Math.sin(t) * 0.9 - Math.cos(t) * 1.3, 0.06, -Math.cos(t) * 0.9 + Math.sin(t) * 1.3, { k: 1.68, shirt: '#2e9b5a', legs: '#4a556e', skin: SKIN[0], hair: HAIR[0], turn: t + 0.3, arms: ['down', o.wave ? 'up' : 'down'] }); }
+  fig(g, -Math.sin(t) * 0.9 - Math.cos(t) * 1.3, 0.06, -Math.cos(t) * 0.9 + Math.sin(t) * 1.3, { k: 1.68, shirt: '#2e9b5a', legs: '#4a556e', skin: SKIN[0], hair: HAIR[0], turn: t + 0.3, arms: ['down', 'up'] }); }
+// a small sound for a tap, a part going in and the end of a step. It starts only after the first tap.
+let AC = null; const beep = (f = 520, d = 0.09, type = 'triangle', v = 0.08) => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), a = AC.createGain(); o.type = type; o.frequency.value = f; a.gain.setValueAtTime(v, AC.currentTime); a.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + d); o.connect(a).connect(AC.destination); o.start(); o.stop(AC.currentTime + d); } catch (e) { /* no sound */ } };
+const chime = () => [660, 880, 1100].forEach((f, k) => setTimeout(() => beep(f, 0.16), k * 110));
+document.addEventListener('click', (e) => { if (e.target.closest('button')) beep(440, 0.06); });
 
 // ---- the stage ------------------------------------------------------------------------------------------------------------
 const view = $('view'), canvas = $('c'), QS = new URLSearchParams(location.search);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap;
 const cam = new THREE.PerspectiveCamera(30, 2, 1, 400);
 let cur = null, tws = [], run = 0;
-function newScene(half, o = {}) { const scene = new THREE.Scene(), hemi = new THREE.HemisphereLight('#fff6e8', '#d9cfb8', 1.55 * 0.96 * 1.3), sun = new THREE.DirectionalLight('#fff0d0', 2.1 * 0.62);
-  scene.add(hemi); sun.position.set(...(o.sun || [-16, 30, 18])); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -half, right: half, top: half * 0.75, bottom: -half * 0.75, near: 1, far: 120 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun);
+function newScene(half, o = {}) { const scene = new THREE.Scene(), hemi = new THREE.HemisphereLight('#fff6e8', '#cfc6b0', 1.5), sun = new THREE.DirectionalLight('#ffe9c4', 1.7);
+  scene.add(hemi); sun.position.set(...(o.sun || [-16, 30, 18])); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -half, right: half, top: half * 0.75, bottom: -half * 0.75, near: 1, far: 160 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun);
   scene.background = new THREE.Color(SKY); return { scene, hemi, sun, g: group(scene), picks: [], plates: [], minAspect: 1.9 }; }
 function fit() { if (!cur) return; const f = cur.fov * Math.PI / 180; cam.fov = cam.aspect >= cur.minAspect ? cur.fov : 2 * Math.atan(Math.tan(f / 2) * cur.minAspect / cam.aspect) * 180 / Math.PI; cam.position.set(...cur.eye); cam.lookAt(...cur.at); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
+// the camera glides from one view of the same place to another
+const glide = (to, sec = 1.6) => { const a = { eye: [...cur.eye], at: [...cur.at], fov: cur.fov }, mix = (p, q, k) => p.map((v, i) => v + (q[i] - v) * k); return tw(sec, (k) => { const e = ease(k); cur.eye = mix(a.eye, to.eye, e); cur.at = mix(a.at, to.at, e); cur.fov = a.fov + (to.fov - a.fov) * e; fit(); }); };
 function resize() { const w = view.clientWidth, h = view.clientHeight; if (!w || !h) return; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false); cam.aspect = w / h; fit(); }
 new ResizeObserver(resize).observe(view);
 function setScene(s) { run++; tws = []; cur = s; hover = null; view.classList.remove('can'); $('plates').innerHTML = ''; for (const p of s.plates) $('plates').append(p.el); fit(); return s; }
@@ -59,7 +82,7 @@ function pickAt(e) { if (!cur) return null; const r = canvas.getBoundingClientRe
 canvas.addEventListener('pointermove', (e) => { hover = pickAt(e); view.classList.toggle('can', !!hover); });
 canvas.addEventListener('pointerleave', () => { hover = null; view.classList.remove('can'); });
 canvas.addEventListener('click', (e) => { const p = pickAt(e); if (p) p.on(); });
-const hitBox = (s, x, y, z, w, h, d, can, on) => { const mesh = blk(s.g, x, z, w, d, y, h, '#fff', { shadow: false, mat: HID }); const p = { mesh, can, on }; s.picks.push(p); return p; };
+const hitBox = (s, parent, x, y, z, w, h, d, can, on) => { const mesh = blk(parent, x, z, w, d, y, h, '#fff', { shadow: false, mat: HID }); const p = { mesh, can, on }; s.picks.push(p); return p; };
 const HID = new THREE.MeshBasicMaterial({ visible: false });
 let last = performance.now(), frames = 0, fpsT = last;
 function loop(now) { requestAnimationFrame(loop); const dt = Math.min(0.1, (now - last) / 1000); last = now; if (!cur) return;
@@ -68,142 +91,148 @@ function loop(now) { requestAnimationFrame(loop); const dt = Math.min(0.1, (now 
   const w = view.clientWidth, h = view.clientHeight; for (const p of cur.plates) { const v = p.pos.clone().project(cam); p.el.style.left = `${(v.x + 1) / 2 * w}px`; p.el.style.top = `${(1 - v.y) / 2 * h}px`; p.el.style.display = v.z < 1 && !p.hide ? '' : 'none'; }
   if (QS.has('fps')) { frames++; if (now - fpsT > 1000) { $('fps').hidden = false; $('fps').textContent = `${Math.round(frames * 1000 / (now - fpsT))} pictures each second`; frames = 0; fpsT = now; } } }
 
-// ---- scene 1: the street. built is null before the homes exist, or the number of the chosen plan ----------------------------
-function street(built, o = {}) { const s = newScene(44), g = s.g; Object.assign(s, o.close ? { fov: 34, eye: [17, 7.2, 3.2], at: [-12, 3, -9.5] } : { fov: 31, eye: [15, 5.4, 2.6], at: [-12, 2.6, 0.4] });
-  for (let x = -96; x <= 24; x += 8) for (let z = -40; z <= 40; z += 8) B(g, x + 4, z + 4, 8, 8, -1.6, 1.6, GRASS[Math.floor(hash(x, z) * 3)]);
-  B(g, -36, 0, 120, 5.2, 0, 0.07, '#f3e9d2', NO); for (const z of [-2.75, 2.75]) B(g, -36, z, 120, 0.3, 0, 0.11, '#d9cdb2', NO); for (let x = -90; x < 22; x += 4) B(g, x, 0, 0.12, 5.2, 0.07, 0.02, '#e2d6bb', NO);
-  for (let k = 0; k < 7; k++) home(g, LX(k), LZ, 1, k);
-  for (let k = 0; k < 7; k++) { const x = LX(k);
-    if (built === null) { B(g, x, RZ, 7.3, 7, 0, 0.12, '#dccaa2', NO); for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B(g, x + a * 3.6, RZ + b * 3.4, 0.22, 0.22, 0, 1.1, '#8a6a44'); }
-    else home(g, x, RZ, -1, k + 2, k === 2 ? { mat: MAT[built], door: DOOR[S.doorC], roofC: ROOF[2] } : { mat: MAT[built] }); }
-  for (let k = 0; k < 7; k++) { const x = -13 - k * 7.6; for (const z of [-6.3, 6.3]) { tree(g, x, z, 1); lamp(g, x - 3.8, z > 0 ? 3.4 : -3.4); } }
-  { const x = -62, V = { raw: true, unlit: true }; B(g, x, 0, 6, 22, 0, 7.5, '#ffd76a', V); B(g, x, 0, 6.6, 23, 7.5, 1.2, '#d2553a', V); B(g, x, 0, 6.6, 12, 8.7, 1.1, '#d2553a', V); B(g, x, 0, 3, 3, 9.8, 4.4, '#ffd76a', V); B(g, x, 0, 3.8, 3.8, 14.2, 0.8, '#d2553a', V);
-    B(g, x + 3.1, 0, 0.1, 2.8, 0, 3.6, '#7a5a33', { unlit: true, shadow: false }); for (const z of [-7, -4, 4, 7]) B(g, x + 3.1, z, 0.1, 1.8, 2.4, 2, GLASS, { unlit: true, raw: true, shadow: false }); B(g, x + 3.6, 9, 0.2, 0.2, 0, 12, '#fbfbf7', V); B(g, x + 3.6, 10.4, 0.1, 2.6, 10, 1.7, '#e0503a', V); }
-  for (const [z, w, hh] of [[-36, 30, 9], [22, 30, 10]]) for (let q = 0; q < 3; q++) B(g, -110, z, 8, w * (1 - q * 0.26), q * hh / 3, hh / 3, ['#a9c6a0', '#b9cdb8', '#cdd8d0'][q], NO);
-  for (const [y, z] of [[30, -18], [33, 16]]) { B(g, -108, z, 2, 12, y, 2, '#ffffff', { raw: true, unlit: true }); B(g, -108, z + 2, 2, 6, y + 2, 1.5, '#ffffff', { raw: true, unlit: true }); }
-  for (const [x, z] of o.close ? [] : [[4, 7.4], [5, -8.6]]) { B(g, x, z, 5.6, 4.6, 5.4, 3, LEAF[0], { op: 0.8, unlit: true, raw: true }); B(g, x + 1, z - 0.4, 3.4, 3, 8.4, 1.8, LEAF[1], { op: 0.8, unlit: true, raw: true }); B(g, x, z, 0.5, 0.5, 0, 5.4, '#8a6a44'); }
-  [-22, -36, -50].forEach((x, k) => blk(g, x, 0, 0.1, 100, 0, 50, SHEET, { shadow: false, mat: soft(SHEET, [0.12, 0.15, 0.18][k]) }));
-  // people walk along both edges of the path, to the school and back; never cars
-  const walkers = []; for (let k = 0; k < 9; k++) { const dir = k % 3 === 2 ? 1 : -1, w = group(g, 8 - k * 7.3, 0, dir < 0 ? (k % 2 ? -1.7 : 1.5) : (k % 2 ? 0.5 : -0.6)), c = SH[k % 6];
+// ---- the place: one street, used for the whole level -----------------------------------------------------------------------
+// Side 0 is the sunny side (on the right of the picture) and side 1 the shady side (on the left, under the wood).
+const SIDEZ = [-12.7, 12.7], PX = [1, -10, -18, -26, -34], VIEW = { street: { eye: [19, 5, 4.6], at: [-10, 3, 0], fov: 33 }, plans: [{ eye: [3, 4.4, 5.6], at: [-17, 1.4, -12], fov: 40 }, { eye: [3, 4.4, -5.6], at: [-17, 1.4, 12], fov: 40 }], build: [{ eye: [14.5, 4.6, -0.5], at: [0.5, 3.1, -10.2], fov: 33 }, { eye: [14.5, 4.6, 0.5], at: [0.5, 3.1, 10.2], fov: 33 }] };
+const HW = 10, HD = 8, HH = 5.2, FRONT = [-3, 0.2], GABLE = [-1.9, 1.9], DOORX = 3.4;
+function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Object.assign(s, VIEW.street, { eye: [...VIEW.street.eye], at: [...VIEW.street.at], minAspect: 1.9 });
+  const sunDir = new THREE.Vector3(-10, 36, 48).normalize();
+  for (let x = -104; x <= 24; x += 8) for (let z = -40; z <= 40; z += 8) B(g, x + 4, z + 4, 8, 8, -1.6, 1.6, GRASS[Math.floor(hash(x, z) * 3)]);
+  B(g, -40, 0, 128, 5.2, 0, 0.07, '#f3e9d2', NO); for (const z of [-2.75, 2.75]) B(g, -40, z, 128, 0.3, 0, 0.11, '#d9cdb2', NO); for (let x = -100; x < 22; x += 4) B(g, x, 0, 0.12, 5.2, 0.07, 0.02, '#e2d6bb', NO);
+  // the wood behind the shady side: tall, dark and close to the camera. It keeps that side of the street in shade.
+  for (let k = 0; k < 13; k++) { const x = 16 - k * 7, hh = 11 + hash(k, 3) * 4; B(g, x, 23.5, 7.2, 6, 0, hh, ['#4f8a5a', '#58935f', '#4a8456'][k % 3]); B(g, x + 0.6, 22.6, 4.4, 4.4, hh, 2.2, '#58935f'); }
+  for (const x of [8, -6, -20]) { B(g, x, 19.6, 0.6, 0.6, 0, 5, '#6f5a44'); B(g, x, 19.6, 4.4, 4.4, 4.2, 4.6, '#4f8a5a'); }
+  // trees and lamps along the path lead the eye to the school
+  for (let k = 0; k < 9; k++) { const x = -6 - k * 8; for (const z of [-7.2, 7.2]) { tree(g, x, z, 1.55); lamp(g, x - 4, z > 0 ? 3.4 : -3.4); } }
+  // the far end of the street is already built, and the school closes the view
+  [-42, -50, -58, -66].forEach((x, k) => SIDEZ.forEach((z, sd) => { const h = house(g, { wx: x, k: k + sd * 2 }); h.position.set(x, 0, z); h.rotation.y = sd ? Math.PI : 0; }));
+  { const x = -80, V = { raw: true, unlit: true }; B(g, x, 0, 6, 24, 0, 8, '#ffd76a', V); B(g, x, 0, 6.6, 25, 8, 1.3, '#d2553a', V); B(g, x, 0, 6.6, 13, 9.3, 1.2, '#d2553a', V); B(g, x, 0, 4, 4, 10.5, 8, '#ffd76a', V); B(g, x, 0, 5, 5, 18.5, 1.2, '#d2553a', V); B(g, x + 2.1, 0, 0.1, 1.6, 13.5, 1.6, '#fbfbf7', V);
+    B(g, x + 3.1, 0, 0.1, 3, 0, 4, '#7a5a33', { unlit: true, shadow: false }); for (const z of [-8, -4.6, 4.6, 8]) B(g, x + 3.1, z, 0.1, 2, 2.6, 2.2, GLASS, { unlit: true, raw: true, shadow: false }); B(g, x + 3.6, 10, 0.2, 0.2, 0, 13, '#fbfbf7', V); B(g, x + 3.6, 11.5, 0.1, 2.8, 11, 1.8, '#e0503a', V); }
+  const hills = []; for (const [z, w, hh] of [[-34, 34, 10]]) for (let q = 0; q < 3; q++) hills.push(B(g, -118, z, 8, w * (1 - q * 0.26), q * hh / 3, hh / 3, ['#a9c6a0', '#b9cdb8', '#cdd8d0'][q], NO));
+  // the low winter sun, on the sunny side, and two clouds
+  const sunBox = B(g, -116, -27, 1, 8, 22, 8, '#ffe9a0', { raw: true, unlit: true, shadow: false }); const clouds = [[30, -8], [34, 20]].map(([y, z]) => { const c = group(g, -114, y, z); B(c, 0, 0, 2, 13, 0, 2, '#ffffff', { raw: true, unlit: true, wx: -114 }); B(c, 0, 2, 2, 6, 2, 1.5, '#ffffff', { raw: true, unlit: true, wx: -114 }); return c; });
+  // large see-through leaves near the camera, over the edges of the picture
+  for (const [x, z] of [[12, 9.6]]) { B(g, x, z, 6, 5, 5.6, 3.2, LEAF[0], { op: 0.78, unlit: true, raw: true }); B(g, x + 1, z - 0.4, 3.6, 3.2, 8.8, 2, LEAF[1], { op: 0.78, unlit: true, raw: true }); B(g, x, z, 0.5, 0.5, 0, 5.6, '#8a6a44'); }
+  const sheets = [-24, -38, -52, -66].map((x, k) => blk(g, x, 0, 0.1, 110, 0, 56, SHEET, { shadow: false, mat: soft(SHEET, [0.1, 0.14, 0.18, 0.22][k]) }));
+  // the empty plots near the camera, five on each side; the first on each side could be the family's plot
+  const plots = SIDEZ.map((z, sd) => PX.map((x, k) => { const p = group(g, x, 0, z), w = k ? 7.3 : HW, d = k ? 7 : HD; B(p, 0, 0, w, d, 0, 0.1, '#dccaa2', { wx: x, shadow: false }); for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B(p, a * w / 2, b * d / 2, 0.22, 0.22, 0, 1.1, '#8a6a44', { wx: x });
+    const mark = place(p, 0, 0, w - 0.3, d - 0.3, 0.1); mark.visible = false; p.mark = mark; return p; }));
+  // the footings of the family's walls, thick or thin, drawn as soon as the child chooses the word
+  const footing = [0.9, 0.3].map((t) => SIDEZ.map((z) => { const f = group(g, PX[0], 0.1, z); for (const sz of [-1, 1]) B(f, 0, sz * (HD / 2 - t / 2), HW, t, 0, 0.7, '#d9d2c2', { wx: 0 }); for (const sx of [-1, 1]) B(f, sx * (HW / 2 - t / 2), 0, t, HD, 0, 0.7, '#d9d2c2', { wx: 0 }); f.visible = false; return f; }));
+  const plotPlate = plate(s, T.plot, [PX[0], 3.2, SIDEZ[0]], 'on'); plotPlate.hide = true;
+  // the family, and people who walk along the path to the school and back; never cars
+  const family = group(g, 8, 0, 0.6); fam(family, 1.25); const famPlate = plate(s, T.family, [8, 3.6, 0.6], 'on');
+  const walkers = []; for (let k = 0; k < 8; k++) { const dir = k % 3 === 2 ? 1 : -1, w = group(g, -4 - k * 8.3, 0, dir < 0 ? (k % 2 ? -1.7 : 1.5) : (k % 2 ? 0.5 : -0.6)), c = SH[k % 6];
     fig(w, 0, 0.06, 0, { k: 1.5, shirt: c, skin: SKIN[k % 4], hair: HAIR[k % 5], turn: dir * Math.PI / 2, step: 0.12, long: k % 2 === 0 }); if (k % 2 === 0) fig(w, 0.2, 0.06, 0.8, { k: 1.05, shirt: SH[(k + 2) % 6], skin: SKIN[k % 4], hair: HAIR[(k + 1) % 5], pack: SH[(k + 4) % 6], turn: dir * Math.PI / 2, step: -0.1 });
     walkers.push({ w, dir, v: 1.5 + hash(k, 2) * 0.8, ph: k * 1.7 }); }
-  s.tick = (t, dt) => { for (const p of walkers) { p.w.position.x += p.dir * p.v * dt; if (p.w.position.x < -58) p.w.position.x = 14; if (p.w.position.x > 14) p.w.position.x = -58; p.w.position.y = Math.abs(Math.sin(t * 6 + p.ph)) * 0.12; } };
-  if (built !== null && o.close) plate(s, PH.yours, [LX(2), 6.5, RZ + 3.5], 'on');
-  return s; }
+  const snow = []; for (let k = 0; k < 150; k++) { const m = blk(g, 12 - hash(k, 1) * 70, (hash(k, 2) - 0.5) * 50, 0.22, 0.22, 0, 0.22, '#fff', { shadow: false, mat: M('#ffffff', 0, { raw: true, unlit: true }) }); m.visible = false; snow.push({ m, y: hash(k, 4) * 24, v: 3 + hash(k, 6) * 2 }); }
+  // night and day
+  const day = new THREE.Color(SKY), dusk = new THREE.Color('#8ea2c8'), hemi0 = s.hemi.intensity, sun0 = s.sun.intensity, farGlass = M(GLASS, 0, { unlit: true, raw: true }); let nightK = 0;
+  s.setNight = (k) => { nightK = k; s.scene.background.copy(day).lerp(dusk, k); s.hemi.intensity = hemi0 * (1 - 0.3 * k); s.sun.intensity = sun0 * (1 - 0.8 * k); for (const sh of sheets) sh.material.color.set(SHEET).lerp(c0.set('#a9b8d6'), k); sunBox.visible = k < 0.5; for (const c of clouds) c.visible = k < 0.5; for (const f of snow) f.m.visible = k > 0.05; farGlass.color.set(GLASS).lerp(c0.set(LIT), k); };
 
-// ---- scene 2: the three places that make the materials, each with a sample home beside it --------------------------------
-// done: the test has already run, so the pollution hangs in the air and the windows are lit.
-function works(done) { const s = newScene(40, { sun: [-14, 30, 26] }), g = s.g; Object.assign(s, { fov: 30, eye: [0, 12.5, 58], at: [0, 1.6, -4], minAspect: 2.05 });
-  for (let x = -56; x <= 48; x += 8) for (let z = -40; z <= 32; z += 8) B(g, x + 4, z + 4, 8, 8, -1.6, 1.6, GRASS[Math.floor(hash(x, z) * 3)], { near: true });
-  B(g, 0, 9, 120, 5.2, 0, 0.07, '#f3e9d2', NO); for (const z of [6.25, 11.75]) B(g, 0, z, 120, 0.3, 0, 0.11, '#d9cdb2', NO);
-  for (const x of [-28, -9, 9, 28]) tree(g, x, -15, 1.25); for (const x of [-40, 40]) tree(g, x, -6, 1.1);
-  for (const [x, w, hh] of [[-30, 34, 8], [26, 40, 9]]) for (let q = 0; q < 3; q++) B(g, x, -60, w * (1 - q * 0.26), 8, q * hh / 3, hh / 3, ['#a9c6a0', '#b9cdb8', '#cdd8d0'][q], { shadow: false, unlit: true, raw: true });
-  const sheet = blk(g, 0, -30, 200, 0.1, 0, 60, SHEET, { shadow: false, mat: soft(SHEET, 0.2) });
-  const CX = [-18, 0, 18], glass = [glassMat(), glassMat(), glassMat()], puffs = [], spin = [], glow = [];
-  const smoke = new THREE.MeshBasicMaterial({ color: '#6d6763', transparent: true, opacity: 0.62, depthWrite: false });
-  CX.forEach((cx, i) => { const wx = cx - 4.2, R = { raw: true, near: true };
-    home(g, cx + 4.4, -1, -1, i, { mat: MAT[i], glass: glass[i], roofC: ROOF[[1, 0, 3][i]] });
-    if (i === 0) { B(g, wx, -6, 7, 6, 0, 4, MAT[0].wall, R); B(g, wx, -6, 7.6, 6.8, 4, 0.5, ROOF[1], { near: true }); const p = blk(g, wx, -6, 5, 3, 4.7, 0.14, '#2f4f8f', { mat: M('#2f4f8f', 0, { raw: true }) }); p.rotation.x = 0.3;      // the sawmill, with a sun panel: it runs on electricity
-      B(g, wx, -2.9, 4, 0.1, 0.4, 2.8, '#5a4630', NO); const b = group(g, wx - 0.6, 1.9, -2.6); blk(b, 0, 0, 1.8, 0.12, -0.9, 1.8, '#c9ced6', { shadow: false, mat: M('#c9ced6', 0, { raw: true, unlit: true }) }); spin.push(b);
-      for (const [a, y] of [[0, 0], [1.1, 0], [0.55, 0.9]]) B(g, wx + 3 + a, -1.4, 1, 3.4, y, 0.9, '#a9794a', { near: true }); }
-    if (i === 1) { B(g, wx, -6, 6.4, 6, 0, 3.2, MAT[1].wall, R); B(g, wx, -6, 4.8, 4.6, 3.2, 1.3, MAT[1].line, R); B(g, wx, -6, 3.2, 3.2, 4.5, 0.9, MAT[1].wall, R); B(g, wx + 1.6, -7, 1.3, 1.3, 0, 8.2, '#9a5846', R);                          // the brick oven
-      glow.push(B(g, wx - 0.6, -2.95, 2.2, 0.1, 0.3, 1.7, '#ff9a3c', { mat: new THREE.MeshBasicMaterial({ color: '#7a4a3a' }), shadow: false })); for (const [a, y] of [[0, 0], [1.3, 0], [0.65, 0.7]]) B(g, wx + 3.2 + a, -1.6, 1.2, 1.6, y, 0.7, MAT[1].wall, R); }
-    if (i === 2) { B(g, wx + 0.4, -6, 6, 6, 0, 4.2, MAT[2].wall, R); B(g, wx + 0.4, -6, 6.4, 6.4, 4.2, 0.4, '#9a9992', R); B(g, wx - 3.2, -7, 3, 3, 0, 7.4, '#bdbcb5', R); B(g, wx - 3.2, -7, 3.3, 3.3, 7.4, 0.4, '#9a9992', R); B(g, wx + 2, -7, 1.4, 1.4, 0, 9.4, '#8e8d87', R);  // the cement works
-      const c = blk(g, wx + 2.6, -1.8, 4.6, 1, 1.2, 0.3, '#6f6e69', { mat: M('#6f6e69', 0, { raw: true }) }); c.rotation.z = 0.32; for (const a of [0, 1.3]) B(g, wx + 4.4 + a * 0.3, -1.6 + a, 1.6, 1.4, 0, 1, '#bdbcb5', R); }
-    // the pollution: none from the sawmill, a little from the brick oven, a large cloud from the cement works
-    const from = i === 1 ? [wx + 1.6, 8.4, -7] : [wx + 2, 9.6, -7]; for (let k = 0; k < [0, 3, 13][i]; k++) { const sz = (i === 1 ? 1.5 : 2.3) + hash(k, i) * 1.3, m = blk(g, 0, 0, sz, sz, 0, sz * 0.8, '#6d6763', { shadow: false, mat: smoke });
-      const to = [from[0] + (hash(k, 5) - 0.5) * (i === 1 ? 3.4 : 9.5), from[1] + 2.2 + hash(k, 9) * (i === 1 ? 2.4 : 4.6) + k * 0.1, from[2] + (hash(k, 3) - 0.5) * 3]; puffs.push({ m, from, to, at: k * (i === 1 ? 0.9 : 0.24), i }); }
-    plate(s, PH.works[i], [wx, [6.3, 6.9, 6.2][i], -6]); });
-  const snow = []; for (let k = 0; k < 130; k++) { const m = blk(g, (hash(k, 1) - 0.5) * 90, -22 + hash(k, 2) * 44, 0.22, 0.22, 0, 0.22, '#fff', { shadow: false, mat: M('#ffffff', 0, { raw: true, unlit: true }) }); m.visible = false; snow.push({ m, y: hash(k, 4) * 26, v: 3 + hash(k, 6) * 2 }); }
-  const day = new THREE.Color(SKY), cold = new THREE.Color('#b4c2dc'), hemi0 = s.hemi.intensity, sun0 = s.sun.intensity; let snowing = 0, t0 = 0, spinning = false, smokeT = done ? 99 : -1;
-  const setPuffs = (tt) => { for (const p of puffs) { const k = ease(Math.max(0, Math.min(1, (tt - p.at) / 2.2))); p.m.visible = k > 0; p.m.position.set(p.from[0] + (p.to[0] - p.from[0]) * k, p.from[1] + (p.to[1] - p.from[1]) * k, p.from[2] + (p.to[2] - p.from[2]) * k); p.m.scale.set(p.m.userData.w * (0.3 + 0.7 * k), p.m.userData.h * (0.3 + 0.7 * k), p.m.userData.w * (0.3 + 0.7 * k)); } };
-  for (const p of puffs) p.m.userData = { w: p.m.scale.x, h: p.m.scale.y };
-  const setCold = (k) => { s.scene.background.copy(day).lerp(cold, k); sheet.material = soft('#c5d0e2', 0.2 + 0.1 * k); s.hemi.intensity = hemi0 * (1 - 0.22 * k); s.sun.intensity = sun0 * (1 - 0.6 * k); for (const m of glass) m.color.set(GLASS).lerp(c0.set(LIT), k); snowing = k; for (const f of snow) f.m.visible = k > 0.05; };
-  setPuffs(smokeT); if (done) setCold(0);
-  s.tick = (t, dt) => { if (spinning) for (const b of spin) b.rotation.z -= dt * 9; if (smokeT >= 0 && smokeT < 90) { smokeT += dt; setPuffs(smokeT); }
-    for (const p of puffs) if (p.m.visible) p.m.position.y += Math.sin(t * 0.9 + p.at * 7) * 0.004;
-    if (spinning) glow[0].material.color.set('#ff8a2a').lerp(c0.set('#ffd24a'), 0.5 + 0.5 * Math.sin(t * 7));
-    if (snowing > 0.05) for (const f of snow) { f.y -= f.v * dt; if (f.y < 0) f.y = 26; f.m.position.y = f.y; }
-    if (s.rings) s.rings.forEach((r, i) => { const k = s.answer === undefined ? 1 + 0.06 * Math.sin(t * 3 + i) : s.answer === i ? 1.12 : 0.9; r.scale.setScalar(k); r.visible = s.answer === undefined || s.answer === i; s.plates[i].el.classList.toggle('on', s.answer === i); s.plates[i].el.classList.toggle('tap', s.answer === undefined); }); };
-  // the test: the three places start up and the pollution rises; then a cold evening comes and the windows show the warmth
-  s.run = async () => { const me = run; spinning = true; smokeT = 0; await wait(5.2); if (me !== run) return false; spinning = false; glow[0].material.color.set('#7a4a3a'); await tw(1.6, (k) => setCold(ease(k))); if (me !== run) return false; await wait(2.4); return me === run; };
-  s.again = async () => { const me = run; spinning = true; smokeT = 0; await wait(4.6); spinning = false; if (me === run) glow[0].material.color.set('#7a4a3a'); return me === run; };
-  s.ask = (on) => { s.rings = CX.map((cx) => { const r = group(g, cx - 4.2, 0.12, -3); for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; const d = blk(r, Math.cos(a) * 6.3, Math.sin(a) * 7, 1.9, 0.8, 0, 0.16, '#ffdf3d', { shadow: false, mat: M('#ffdf3d', 0, { raw: true, unlit: true }) }); d.rotation.y = -a + Math.PI / 2; } return r; });
-    CX.forEach((cx, i) => { hitBox(s, cx - 4.2, 0, -5, 10.5, 11, 9, () => s.answer === undefined, () => on(i)); const el = s.plates[i].el; el.classList.add('tap'); el.onclick = () => { if (s.answer === undefined) on(i); }; }); };
-  return s; }
+  // ---- the child's words, drawn in the town ----
+  s.side = null; s.thick = null;
+  s.words = (side, thick) => { s.side = side; s.thick = thick; plots.forEach((row, sd) => row.forEach((p, k) => { p.mark.visible = side === sd && k < 4; })); footing.forEach((pair, t) => pair.forEach((f, sd) => { f.visible = side === sd && thick === (t === 0); }));
+    plotPlate.hide = side === null; if (side !== null) plotPlate.pos.set(PX[0], 3.2, SIDEZ[side]); };
+  // ---- Florence's three plans: three sample homes on the side the child chose ----
+  let samples = [];
+  const level = (i) => { const n = [3, 2, 1][i] + (s.side === 0 ? 1 : 0) + (s.thick ? 1 : 0); return n >= 4 ? 'g' : n === 3 ? (i === 0 ? 'g' : 'f') : n === 2 ? (i === 0 ? 'g' : 'f') : 'p'; };
+  s.level = level; s.airLevel = (i) => 'gfp'[i];
+  const pop = (o, from = 0.01, to = 1, sec = 0.36) => tw(sec, (k) => o.scale.setScalar(Math.max(0.01, from + (to - from) * (to > from ? back(k) : ease(k)))));
+  s.clearPlans = () => { for (const q of samples) { g.remove(q.h); for (const c of q.cloud) g.remove(c.m); q.plate.hide = true; q.plate.el.remove(); s.plates.splice(s.plates.indexOf(q.plate), 1); } samples = []; };
+  s.showPlans = async () => { s.clearPlans(); const z = SIDEZ[s.side], me = run; plots[s.side].forEach((p, k) => { p.mark.visible = false; });
+    for (let i = 0; i < 3; i++) { const x = PX[s.side ? i + 1 : 3 - i], glass = glassMat(), h = house(g, { wx: x, mat: MAT[i], glass, thick: s.thick, roofC: ROOF[[2, 0, 1][i]] }); h.position.set(x, 0.1, z); h.rotation.y = s.side ? Math.PI : 0; h.scale.setScalar(0.01);
+      const cloud = []; for (let k = 0; k < [0, 4, 12][i]; k++) { const sz = (i === 1 ? 1.6 : 2.2) + hash(k, i) * 1.4, m = blk(g, 0, 0, sz, sz, 0, sz * 0.8, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.78) }); m.visible = false;
+        cloud.push({ m, sz, from: [x, 5.4, z], to: [x + (hash(k, 5) - 0.5) * (i === 1 ? 4 : 8), 7.2 + hash(k, 9) * (i === 1 ? 2.4 : 5) + k * 0.12, z + (hash(k, 3) - 0.5) * 5], at: k * (i === 1 ? 0.5 : 0.2) }); }
+      samples.push({ h, glass, cloud, plate: plate(s, T.plans[i][0], [x, 6.4, z + (s.side ? -3.6 : 3.6)]) }); }
+    glide(VIEW.plans[s.side], 1.6); for (const q of samples) { beep(360, 0.07); await pop(q.h); if (me !== run) return; } };
+  let cloudT = -1; const setClouds = (tt) => { for (const q of samples) for (const p of q.cloud) { const k = ease(Math.max(0, Math.min(1, (tt - p.at) / 2))); p.m.visible = k > 0; p.m.position.set(p.from[0] + (p.to[0] - p.from[0]) * k, p.from[1] + (p.to[1] - p.from[1]) * k, p.from[2] + (p.to[2] - p.from[2]) * k); p.m.scale.set(p.sz * (0.3 + 0.7 * k), p.sz * 0.8 * (0.3 + 0.7 * k), p.sz * (0.3 + 0.7 * k)); } };
+  // the test: the materials are made and the pollution rises; then the cold night comes and the windows show the warmth
+  s.run = async () => { const me = run; cloudT = 0; await wait(4.2); if (me !== run) return false; await tw(2, (k) => s.setNight(ease(k))); if (me !== run) return false;
+    samples.forEach((q, i) => { const lv = level(i); q.glass.color.set(WARM[lv]); q.plate.el.textContent = `${T.plans[i][0]}: ${T.tag[lv]}`; q.plate.el.classList.toggle('on', lv === 'g'); }); beep(300, 0.3, 'sine'); await wait(1.6); return me === run; };
 
-// ---- scene 3: the play break. One home is built on its plot while the family it is for looks on -----------------------------
-const PLACES = [[-3.6, 1.2], [-0.4, 1.2], [-3.6, 3.7], [2.9, 3.9]];
-function build(pick, onChange) { const s = newScene(44), g = s.g, m = MAT[pick], R = { raw: true }; Object.assign(s, { fov: 30, eye: [5.5, 4.4, 24], at: [1.2, 4.2, -2], minAspect: 1.75 });
-  for (let x = -96; x <= 24; x += 8) for (let z = -40; z <= 40; z += 8) B(g, x + 4, z + 4, 8, 8, -1.6, 1.6, GRASS[Math.floor(hash(x, z) * 3)]);
-  B(g, -36, 0, 120, 5.2, 0, 0.07, '#f3e9d2', NO); for (const z of [-2.75, 2.75]) B(g, -36, z, 120, 0.3, 0, 0.11, '#d9cdb2', NO); for (let x = -90; x < 22; x += 4) B(g, x, 0, 0.12, 5.2, 0.07, 0.02, '#e2d6bb', NO);
-  B(g, 0, -4, 12.4, 9, 0, 0.3, '#d9d2c2'); B(g, 0, -4, 11.6, 8.2, 0.3, 5.6, m.wall, R); B(g, 0, -4, 11.7, 8.3, 5.5, 0.4, m.top, R); for (const y of [1.5, 2.7, 3.9, 5.1]) B(g, 0, 0.11, 11.6, 0.04, y, 0.07, m.line, { raw: true, shadow: false });
-  B(g, 2.9, 0.12, 1.7, 0.1, 0.3, 3.1, '#5a4630', NO);
-  home(g, -12.6, -4.4, -1, 1); home(g, 12.6, -4.4, -1, 3); tree(g, -8.6, -12, 1.2); tree(g, 9, -12.4, 1.2); tree(g, 19.4, 1.4, 1, 0.8);
-  fig(g, -6.4, 0.06, 3.4, { k: 1.65, shirt: '#e0a23a', legs: '#3f78b5', skin: SKIN[1], hair: HAIR[3], hat: '#ffd257', arms: ['up', 'down'], turn: 0.5 });
-  { const c = group(g, -8.6, 0, 6.2); blk(c, 0, 0, 3.2, 1.7, 0.5, 0.2, '#c9925a', { mat: M('#c9925a', 0) }); for (const a of [-1.1, 1.1]) blk(c, a, 0.9, 0.9, 0.2, 0, 0.9, '#2a2a2a', { mat: M('#3a3a3a', 0) }); }
-  const family = group(g, 7.6, 0, 5.2); fam(family, -0.9, { wave: true }); const famPlate = plate(s, PH.family, [7.6, 3.5, 5.2], 'on');
-  // the parts and their yellow places
-  const lit = glassMat(), winPlace = PLACES.map(([x, y]) => frame(g, x, y, 0.2, 1.9, 1.7, true)), winPart = PLACES.map(([x, y]) => { const w = group(g, x, y - 0.05, 0.28); blk(w, 0, 0, 2, 0.22, 0, 1.8, '#fbfbf7', { mat: M('#fbfbf7', 0, R) }); blk(w, 0, 0.05, 1.7, 0.2, 0.15, 1.5, GLASS, { shadow: false, mat: lit }); blk(w, 0, 0.1, 0.1, 0.2, 0.15, 1.5, '#fbfbf7', { shadow: false, mat: M('#fbfbf7', 0, R) }); w.visible = false; return w; });
-  const roof = group(g, 0, 8.4, -4); blk(roof, 0, 0, 12.6, 9.6, 0, 0.6, ROOF[2], { mat: M(ROOF[2], 0) }); blk(roof, 0, 0, 12.6, 4.4, 0.6, 0.55, ROOF[2], { mat: M(ROOF[2], 0) }); const ropes = [-5, 5].map((x) => blk(roof, x, 0, 0.08, 0.08, 1.1, 14, '#2b3a55', { shadow: false }));
-  const roofPlace = frame(g, 0, 5.95, 0.22, 11.6, 0.8, true), doorPlace = frame(g, 2.9, 0.3, 0.24, 1.7, 3.1, true);
-  const doorMat = new THREE.MeshLambertMaterial({ color: tone(DOOR[S.doorC]) }), door = group(g, 2.9, 0.3, 0.22); blk(door, 0, 0, 1.7, 0.14, 0, 3.1, '#fff', { mat: doorMat }); blk(door, -0.6, 0.1, 0.18, 0.08, 1.4, 0.18, '#ffd257', { shadow: false, mat: M('#ffd257', 0, { raw: true, unlit: true }) }); door.visible = false;
-  let tool = 'win', busy = false; s.done = false;
-  const left = () => ({ win: 2 - S.win.size, roof: S.roof ? 0 : 1, door: S.door ? 0 : 1 });
-  const show = () => { const n = left(); winPlace.forEach((p, i) => { p.visible = !s.done && tool === 'win' && n.win > 0 && !S.win.has(i); }); roofPlace.visible = !s.done && tool === 'roof' && !S.roof; doorPlace.visible = !s.done && tool === 'door' && !S.door; onChange(tool, n, s.done); };
-  const next = () => { const n = left(); if (!n[tool]) tool = ['win', 'roof', 'door'].find((k) => n[k]) || tool; if (!n.win && !n.roof && !n.door) finish(); else show(); };
-  const pop = (o) => tw(0.32, (k) => o.scale.setScalar(Math.max(0.01, back(k))));
-  async function finish() { s.done = true; show(); const me = run; famPlate.hide = true; await wait(0.5); if (me !== run) return; lit.color.set(LIT); const a = family.position.clone();
-    await tw(2.2, (k) => { const e = ease(k); family.position.set(a.x + (4.6 - a.x) * e, Math.abs(Math.sin(k * 16)) * 0.14 * (k < 1), a.z + (3.4 - a.z) * e); }); if (me === run) s.onDone(); }
-  s.setTool = (t) => { if (s.done || !left()[t]) return; tool = t; show(); };
-  s.setDoor = (i) => { S.doorC = i; doorMat.color.set(tone(DOOR[i])); if (!s.done && !S.door) { tool = 'door'; } show(); };
-  PLACES.forEach(([x, y], i) => { hitBox(s, x, y, 0.3, 2.1, 1.9, 0.8, () => !s.done && !busy && (S.win.has(i) || (tool === 'win' && left().win > 0)), () => {
-    if (S.win.has(i)) { S.win.delete(i); winPart[i].visible = false; tool = 'win'; show(); return; } S.win.add(i); winPart[i].visible = true; pop(winPart[i]); next(); }).frame = winPlace[i]; });
-  hitBox(s, 0, 5.6, -2, 12.8, 4.6, 6, () => !s.done && !busy && !S.roof && tool === 'roof', async () => { busy = true; S.roof = true; roofPlace.visible = false; const me = run; await tw(1.1, (k) => { roof.position.y = 8.4 - 2.5 * ease(k); }); if (me !== run) return; for (const r of ropes) r.visible = false; busy = false; next(); }).frame = roofPlace;
-  hitBox(s, 2.9, 0.3, 0.3, 1.9, 3.1, 0.8, () => !s.done && !busy && !S.door && tool === 'door', () => { S.door = true; door.visible = true; pop(door); next(); }).frame = doorPlace;
-  // what was built before (after "Play again" the parts start afresh, so this only matters within one visit)
-  s.tick = (t) => { const k = 1 + 0.04 * Math.sin(t * 4.5); for (const p of [...winPlace, roofPlace, doorPlace]) p.scale.set(k, k, 1); if (hover && hover.frame) hover.frame.scale.set(1.12, 1.12, 1); };
-  s.start = show; return s; }
+  // ---- the family's home, built by the child ----
+  let H = null;
+  s.startBuild = async (pick) => { const me = run, sd = s.side, z = SIDEZ[sd], m = MAT[pick], R = { raw: true, wx: 0 }; famPlate.hide = true; plotPlate.hide = true;
+    await Promise.all([tw(1.2, (k) => s.setNight(1 - ease(k))), ...samples.map((q) => pop(q.h, 1, 0.01, 0.5)), tw(1, (k) => { for (const q of samples) for (const p of q.cloud) p.m.material.opacity = 0.78 * (1 - k); })]); if (me !== run) return; s.clearPlans(); cloudT = -1;
+    footing.forEach((pair) => pair.forEach((f) => { f.visible = false; })); plots[sd][0].visible = false;
+    const hg = group(g, PX[0], 0, z); hg.rotation.y = sd ? Math.PI : 0; const t = s.thick ? 0.9 : 0.3;
+    B(hg, 0, 0, HW + 0.8, HD + 0.8, 0, 0.3, '#d9d2c2', { wx: 0 }); const walls = group(hg, 0, 0.3, 0); B(walls, 0, 0, HW, HD, 0, HH, m.wall, R); for (const y of [1.3, 2.6, 3.9]) { B(walls, 0, HD / 2, HW, 0.04, y, 0.07, m.line, { ...R, shadow: false }); for (const sx of [-1, 1]) B(walls, sx * HW / 2, 0, 0.04, HD, y, 0.07, m.line, { ...R, shadow: false }); }
+    B(walls, 0, 0, HW + 0.04, HD + 0.04, HH - 0.12, 0.14, s.thick ? LINING : m.line, R); B(walls, 0, 0, HW - 2 * t, HD - 2 * t, HH - 0.1, 0.14, '#5a4630', { ...R, shadow: false });      // the top of the walls shows how thick they are
+    B(walls, DOORX, HD / 2 + 0.02, 1.8, 0.08, 0, 3.3, '#5a4630', { wx: 0, shadow: false }); walls.scale.y = 0.01;
+    // the yellow places: two on the front wall and two on each end wall
+    const spots = [...FRONT.map((x) => ({ wall: 'front', p: [x, 1.9, HD / 2 + 0.16], ry: 0 })), ...GABLE.map((zz) => ({ wall: 'end', p: [HW / 2 + 0.16, 1.9, zz], ry: Math.PI / 2 })), ...GABLE.map((zz) => ({ wall: 'end', p: [-HW / 2 - 0.16, 1.9, zz], ry: -Math.PI / 2 }))];
+    const lit = glassMat(), beamMat = soft('#ffe27a', 0.34);
+    for (const q of spots) { q.frame = group(hg, ...q.p); q.frame.rotation.y = q.ry; frame(q.frame, 0, 0, 0, 2.3, 2.1, true); q.frame.visible = false;
+      q.part = group(hg, ...q.p); q.part.rotation.y = q.ry; blk(q.part, 0, 0, 2.3, 0.24, 0, 2.1, '#fbfbf7', { mat: M('#fbfbf7', 0, { raw: true }) }); q.glass = glassMat(); blk(q.part, 0, 0.06, 1.95, 0.22, 0.17, 1.76, GLASS, { shadow: false, mat: q.glass }); blk(q.part, 0, 0.1, 0.12, 0.22, 0.17, 1.76, '#fbfbf7', { shadow: false, mat: M('#fbfbf7', 0, { raw: true }) }); q.part.visible = false;
+      q.sunny = sd === 0 && q.wall === 'front';
+      // a shaft of sunlight that comes down into a window on the sunny wall
+      q.beam = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.7, 9), beamMat); q.beam.visible = false; g.add(q.beam); }
+    const roof = group(hg, 0, 9.4, 0); blk(roof, 0, 0, HW + 0.9, HD + 1.2, 0, 0.6, ROOF[2], { mat: M(ROOF[2], 0) }); blk(roof, 0, 0, HW + 0.9, HD * 0.45, 0.6, 0.55, ROOF[2], { mat: M(ROOF[2], 0) }); const ropes = [-4.2, 4.2].map((x) => blk(roof, x, 0, 0.08, 0.08, 1.1, 16, '#2b3a55', { shadow: false })); roof.visible = false;
+    const roofSpot = group(hg, 0, 0.3 + HH, 0); frame(roofSpot, 0, 0.1, HD / 2 + 0.2, HW, 0.9, true); for (const sx of [-1, 1]) { const f = group(roofSpot, sx * (HW / 2 + 0.2), 0.1, 0); f.rotation.y = sx * Math.PI / 2; frame(f, 0, 0, 0, HD, 0.9, true); } roofSpot.visible = false;
+    const doorSpot = group(hg, DOORX, 0.3, HD / 2 + 0.2); frame(doorSpot, 0, 0, 0, 1.8, 3.3, true); doorSpot.visible = false;
+    const doorMat = new THREE.MeshLambertMaterial({ color: tone(DOOR[S.doorC]) }), door = group(hg, DOORX, 0.3, HD / 2 + 0.14); blk(door, 0, 0, 1.8, 0.16, 0, 3.3, '#fff', { mat: doorMat }); blk(door, -0.6, 0.1, 0.2, 0.1, 1.5, 0.2, '#ffd257', { shadow: false, mat: M('#ffd257', 0, { raw: true, unlit: true }) }); door.visible = false;
+    H = { hg, spots, roof, door, lit, sd };
+    tw(1.3, (k) => { const e = ease(k); family.position.set(8 + (-7.5 - 8) * e, Math.abs(Math.sin(k * 14)) * 0.12 * (k < 1), 0.6 + ((sd ? 4.6 : -4.6) - 0.6) * e); family.rotation.y = (sd ? -0.5 : 0.4) * e; });
+    await Promise.all([glide(VIEW.build[sd], 1.8), tw(1.4, (k) => { walls.scale.y = Math.max(0.01, ease(k)); })]); if (me !== run) return; roof.visible = true; beep(500, 0.1);
+    let tool = 'win', busy = false; const used = new Set(); let roofOn = false, doorOn = false, note = ''; s.done = false;
+    const left = () => ({ win: 2 - used.size, roof: roofOn ? 0 : 1, door: doorOn ? 0 : 1 });
+    const show = () => { const n = left(); spots.forEach((q, i) => { q.frame.visible = !s.done && tool === 'win' && n.win > 0 && !used.has(i); }); roofSpot.visible = !s.done && tool === 'roof' && !roofOn; doorSpot.visible = !s.done && tool === 'door' && !doorOn; s.onChange(tool, n, s.done, note, [...used].filter((i) => spots[i].sunny).length); };
+    const finish = async () => { s.done = true; show(); chime(); await wait(0.4); if (me !== run) return; for (const i of used) spots[i].glass.color.set(spots[i].sunny ? LIT : WARM[level(pick)]); const a = family.position.clone(), to = hg.localToWorld(new THREE.Vector3(DOORX - 1.2, 0, HD / 2 + 2.4));
+      await tw(2, (k) => { const e = ease(k); family.position.set(a.x + (to.x - a.x) * e, Math.abs(Math.sin(k * 16)) * 0.14 * (k < 1), a.z + (to.z - a.z) * e); }); if (me === run) s.onDone(); };
+    const next = () => { const n = left(); if (!n[tool]) tool = ['win', 'roof', 'door'].find((k) => n[k]) || tool; if (!n.win && !n.roof && !n.door) finish(); else show(); };
+    s.setTool = (k) => { if (s.done || !left()[k]) return; tool = k; note = ''; show(); };
+    s.setDoor = (i) => { S.doorC = i; doorMat.color.set(tone(DOOR[i])); if (!s.done && !doorOn && !left().win && roofOn) tool = 'door'; show(); };
+    spots.forEach((q, i) => { hitBox(s, q.frame.parent, q.p[0], q.p[1] - 0.1, q.p[2], q.ry ? 1 : 2.6, 2.4, q.ry ? 2.6 : 1, () => !s.done && !busy && (used.has(i) || (tool === 'win' && left().win > 0)), () => {
+      if (used.has(i)) { used.delete(i); q.part.visible = false; q.beam.visible = false; tool = 'win'; note = ''; beep(300, 0.08); show(); return; }
+      used.add(i); q.part.visible = true; pop(q.part); beep(q.sunny ? 880 : 520, 0.14);
+      if (q.sunny) { const w = q.part.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 1.05, 0)); q.beam.position.copy(w).addScaledVector(sunDir, 4.5); q.beam.lookAt(w.clone().addScaledVector(sunDir, 20)); q.beam.visible = true; q.glass.color.set('#fff3b0'); }
+      note = q.sunny ? T.sunIn : sd === 1 ? T.shade : T.noSun; next(); }).frame = q.frame; });
+    hitBox(s, hg, 0, 0.3 + HH - 0.4, 0, HW + 1.4, 5.4, HD + 1.4, () => !s.done && !busy && !roofOn && tool === 'roof', async () => { busy = true; roofOn = true; roofSpot.visible = false; note = ''; await tw(1.1, (k) => { roof.position.y = 9.4 - (9.4 - 0.3 - HH) * ease(k); }); if (me !== run) return; for (const r of ropes) r.visible = false; beep(220, 0.2, 'sine', 0.12); busy = false; next(); }).frame = roofSpot;
+    hitBox(s, hg, DOORX, 0.3, HD / 2 + 0.3, 2.2, 3.4, 1, () => !s.done && !busy && !doorOn && tool === 'door', () => { doorOn = true; door.visible = true; pop(door); beep(660, 0.12); note = ''; next(); }).frame = doorSpot;
+    s.pulse = [...spots.map((q) => q.frame), roofSpot, doorSpot];
+    // where the yellow places are in the world, for the script that plays the level through
+    s.spot = (name, i = 0) => { const v = name === 'win' ? new THREE.Vector3(...spots[i].p) : name === 'roof' ? new THREE.Vector3(0, 0.3 + HH + 0.5, HD / 2 + 0.3) : new THREE.Vector3(DOORX, 1.9, HD / 2 + 0.3); return hg.localToWorld(v).toArray(); };
+    show(); };
+  // ---- the town changes: the whole street is built in the chosen way ----
+  s.fill = async (pick) => { const me = run; for (const q of H.spots) q.beam.visible = false; await glide(VIEW.street, 1.8); if (me !== run) return; plate(s, T.yours, [PX[0] - 3, 6.2, SIDEZ[H.sd] + (H.sd ? -4 : 4)], 'on');
+    const lv = level(pick); for (let k = 1; k < 5; k++) for (const sd of [H.sd, 1 - H.sd]) { plots[sd][k].visible = false; const x = PX[k], glass = glassMat(); glass.color.set(GLASS); const h = house(g, { wx: x, mat: MAT[pick], glass, thick: s.thick, roofC: ROOF[(k + sd) % 4] }); h.position.set(x, 0.1, SIDEZ[sd]); h.rotation.y = sd ? Math.PI : 0; h.scale.setScalar(0.01); beep(330 + k * 40, 0.06); await pop(h, 0.01, 1, 0.26); if (me !== run) return; }
+    plots[1 - H.sd][0].visible = false; { const h = house(g, { wx: 0, mat: MAT[pick], thick: s.thick, w: HW, d: HD, h: HH, roofC: ROOF[1] }); h.position.set(PX[0], 0.1, SIDEZ[1 - H.sd]); h.rotation.y = H.sd ? 0 : Math.PI; h.scale.setScalar(0.01); await pop(h); }
+    // the pollution from making the materials for a whole street hangs over it
+    for (let k = 0; k < [0, 6, 16][pick]; k++) { const sz = 2.4 + hash(k, 7) * 2.4; blk(g, -8 - hash(k, 1) * 34, (hash(k, 2) - 0.5) * 30, sz * 1.5, sz, 8.5 + hash(k, 3) * 5, sz * 0.7, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.7) }); } if (me === run) chime(); };
+  s.tick = (t, dt) => { for (const p of walkers) { p.w.position.x += p.dir * p.v * dt; if (p.w.position.x < -74) p.w.position.x = 4; if (p.w.position.x > 4) p.w.position.x = -74; p.w.position.y = Math.abs(Math.sin(t * 6 + p.ph)) * 0.12; }
+    if (cloudT >= 0) { cloudT += dt; setClouds(cloudT); } if (nightK > 0.05) for (const f of snow) { f.y -= f.v * dt; if (f.y < 0) f.y = 24; f.m.position.y = f.y; }
+    const k = 1 + 0.05 * Math.sin(t * 4.5); for (const row of plots) for (const p of row) p.mark.scale.set(k, 1, k); if (s.pulse) { for (const p of s.pulse) p.scale.set(k, k, 1); if (hover && hover.frame) hover.frame.scale.set(1.12, 1.12, 1); } };
+  return s; }
 
 // ---- the steps of the level ---------------------------------------------------------------------------------------------------
-const S = { words: [], pick: null, first: null, phase: 0, win: new Set(), roof: false, door: false, doorC: 1 };
+const S = { words: [], pick: null, doorC: 1 };
 const btn = (label, cls, fn) => { const b = document.createElement('button'); b.className = `btn ${cls}`; b.textContent = label; b.onclick = fn; return b; };
-function ui({ step = '', say = [], tray = [], wide = false, over = '' }) { $('step').textContent = step; $('say').innerHTML = [].concat(say).map((p) => `<p>${esc(p)}</p>`).join(''); const t = $('tray'); t.className = `tray${wide ? ' wide' : ''}`; t.replaceChildren(...tray); if (over !== null) $('over').innerHTML = over; }
-const planCards = () => L.sol.map(([n, d]) => `<div class="card"><h3>${esc(n)}</h3><p>${esc(d)}</p></div>`).join('');
+function ui({ step = '', say = [], tray = [], wide = false, over = '' }) { $('step').textContent = step; $('say').innerHTML = [].concat(say).filter(Boolean).map((p) => `<p>${esc(p)}</p>`).join(''); const t = $('tray'); t.className = `tray${wide ? ' wide' : ''}`; t.replaceChildren(...tray); if (over !== null) $('over').innerHTML = over; }
 const MARK = { g: '✓', f: '–', p: '✕' };
-const resultCards = (choose) => L.sol.map(([n], i) => `<div class="card${S.phase && S.first === i ? ' mine' : ''}"><h3>${esc(n)}</h3>${L.res.map((r) => `<div class="res"><i class="mark ${r[i + 1][0]}">${MARK[r[i + 1][0]]}</i><span>${esc(r[i + 1][1])}</span></div>`).join('')}${choose ? (S.phase && S.first === i ? `<p><b>${esc(U.firstPlan)}</b></p>` : `<button class="btn sun" data-plan="${i}">${esc(U.use)}</button>`) : ''}</div>`).join('');
+const resultCards = () => T.plans.map(([n], i) => { const w = cur.level(i), a = cur.airLevel(i); return `<div class="card"><h3>${esc(n)}</h3><div class="res"><i class="mark ${w}">${MARK[w]}</i><span><b>${esc(T.checks[0])}.</b> ${esc(T.warm[w])}</span></div><div class="res"><i class="mark ${a}">${MARK[a]}</i><span><b>${esc(T.checks[1])}.</b> ${esc(T.air[i])}</span></div><button class="btn sun" data-plan="${i}">${esc(T.use)}</button></div>`; }).join('');
 $('over').addEventListener('click', (e) => { const b = e.target.closest('[data-plan]'); if (b) choose(+b.dataset.plan); });
-
-function job() { Object.assign(S, { words: [], pick: null, first: null, phase: 0, win: new Set(), roof: false, door: false }); setScene(street(null)).kind = 'street0'; ui({ step: L.name, say: [L.scene, L.job], tray: [btn(U.start, 'sun', ask)] }); }
-function ask() { if (!cur || cur.kind !== 'street0') setScene(street(null)).kind = 'street0'; const gaps = L.s.filter((p) => Array.isArray(p)); let now = Math.max(0, gaps.findIndex((_, i) => S.words[i] === undefined));
-  const draw = () => { const sen = document.createElement('div'); sen.className = 'sentence'; let gi = 0; for (const p of L.s) { if (typeof p === 'string') sen.append(`${p} `); else { const i = gi++, sp = document.createElement('span'); sp.className = `gap${S.words[i] !== undefined ? ' full' : ''}${i === now ? ' now' : ''}`; sp.textContent = S.words[i] !== undefined ? p[S.words[i] + 1] : '…'; sp.onclick = () => { now = i; draw(); }; sen.append(sp, ' '); } }
-    const words = document.createElement('div'); words.className = 'words'; gaps[now].slice(1).forEach((w, k) => { const b = document.createElement('button'); b.className = 'word'; b.textContent = w; b.onclick = () => { S.words[now] = k; const n = gaps.findIndex((_, i) => S.words[i] === undefined); if (n >= 0) now = n; draw(); }; words.append(b); });
-    const go = btn(U.ask, 'sun', suggest); go.disabled = gaps.some((_, i) => S.words[i] === undefined); go.style.marginLeft = 'auto';
-    ui({ step: U.yourSentence, say: gaps.length === 1 ? U.askHowOne : U.askHow, tray: [sen, words, go], wide: true }); };
+function job() { Object.assign(S, { words: [], pick: null }); setScene(town()); ui({ step: T.level, say: T.job, tray: [btn(T.start, 'sun', ask)] }); }
+function ask() { if (cur.side !== null && S.pick !== null) return job(); if (cur.side !== null) glide(VIEW.street, 1); cur.clearPlans(); cur.setNight(0); const gaps = T.sentence.filter((p) => Array.isArray(p)); let now = Math.max(0, gaps.findIndex((_, i) => S.words[i] === undefined));
+  const draw = () => { cur.words(S.words[0] ?? null, S.words[1] === undefined ? null : S.words[1] === 0); const sen = document.createElement('div'); sen.className = 'sentence'; let gi = 0;
+    for (const p of T.sentence) { if (typeof p === 'string') sen.append(p === '.' ? p : `${p} `); else { const i = gi++, sp = document.createElement('span'); sp.className = `gap${S.words[i] !== undefined ? ' full' : ''}${i === now ? ' now' : ''}`; sp.textContent = S.words[i] !== undefined ? p[S.words[i]] : '…'; sp.onclick = () => { now = i; draw(); }; sen.append(sp, ' '); } }
+    const words = document.createElement('div'); words.className = 'words'; gaps[now].forEach((w, k) => { const b = document.createElement('button'); b.className = 'word'; b.textContent = w; b.onclick = () => { S.words[now] = k; const n = gaps.findIndex((_, i) => S.words[i] === undefined); if (n >= 0) now = n; draw(); }; words.append(b); });
+    const go = btn(T.ask, 'sun', plans); go.disabled = gaps.some((_, i) => S.words[i] === undefined); go.style.marginLeft = 'auto'; ui({ step: T.askT, say: T.askHow, tray: [sen, words, go], wide: true }); };
   draw(); }
-function suggest() { ui({ step: L.name, say: U.offers, tray: [btn(U.onward, 'sun', test)], over: planCards() }); }
-function test() { const s = setScene(works(false)); const b = btn(L.test, 'sun big', async () => { b.disabled = true; ui({ step: L.test, say: L.watch, tray: [], over: '' }); if (await s.run()) results(); }); ui({ step: L.name, say: U.testHow, tray: [b] }); }
-function results() { ui({ step: L.name, say: S.phase ? U.chooseAgain : U.chooseHow, tray: S.phase ? [] : [btn(U.again, '', ask)], over: resultCards(true) }); }
-function choose(i) { S.pick = i; if (S.phase) return result(); playBreak(); }
-function playBreak() { const I = { win: '<svg viewBox="0 0 44 40"><rect x="7" y="5" width="30" height="30" rx="3" fill="#a9d3ee" stroke="#1f2a44" stroke-width="3"/><path d="M22 5v30M7 20h30" stroke="#1f2a44" stroke-width="3"/></svg>', roof: '<svg viewBox="0 0 44 40"><path d="M4 30L22 8l18 22z" fill="#2e9b5a" stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"/></svg>', door: '<svg viewBox="0 0 44 40"><rect x="13" y="4" width="18" height="32" rx="2" fill="#3f78b5" stroke="#1f2a44" stroke-width="3"/><circle cx="26" cy="21" r="2.2" fill="#ffd257"/></svg>' };
-  const names = { win: PH.window, roof: PH.roofT, door: PH.doorT }, toks = {}, tray = [];
+async function plans() { const s = cur, b = btn(T.test, 'sun big', async () => { b.disabled = true; ui({ step: T.test, say: T.watch, tray: [], over: '' }); if (await s.run()) ui({ step: T.level, say: T.choose, tray: [btn(T.again, '', () => { S.words = []; ask(); })], over: resultCards() }); });
+  ui({ step: T.level, say: T.plansSay(T.sentence[1][S.words[0]], T.sentence[3][S.words[1]]), tray: [b] }); b.disabled = true; await s.showPlans(); b.disabled = false; }
+async function choose(i) { S.pick = i; const s = cur, I = { win: '<svg viewBox="0 0 44 40"><rect x="7" y="5" width="30" height="30" rx="3" fill="#a9d3ee" stroke="#1f2a44" stroke-width="3"/><path d="M22 5v30M7 20h30" stroke="#1f2a44" stroke-width="3"/></svg>', roof: '<svg viewBox="0 0 44 40"><path d="M4 30L22 8l18 22z" fill="#2e9b5a" stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"/></svg>', door: '<svg viewBox="0 0 44 40"><rect x="13" y="4" width="18" height="32" rx="2" fill="#3f78b5" stroke="#1f2a44" stroke-width="3"/><circle cx="26" cy="21" r="2.2" fill="#ffd257"/></svg>' };
+  const names = { win: T.window, roof: T.roofT, door: T.doorT }, toks = {}, tray = [];
   for (const k of ['win', 'roof', 'door']) { const b = document.createElement('button'); b.className = 'tok'; b.onclick = () => s.setTool(k); toks[k] = b; tray.push(b); }
-  const sw = document.createElement('div'); sw.innerHTML = `<div class="sws-h">${esc(PH.colour)}</div><div class="sws">${DOOR.map((c, i) => `<button class="sw" data-c="${i}" style="background:${c}" aria-label="${esc(PH.colour)} ${i + 1}"></button>`).join('')}</div>`; sw.onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) s.setDoor(+b.dataset.c); }; tray.push(sw);
-  const s = setScene(build(S.pick, (tool, n, done) => { for (const k in toks) { toks[k].className = `tok${!n[k] ? ' used' : tool === k && !done ? ' on' : ''}`; toks[k].innerHTML = `${I[k]}<span>${esc(names[k])}<small>${esc(n[k] ? PH.left(n[k]) : PH.placed)}</small></span>`; }
+  const sw = document.createElement('div'); sw.innerHTML = `<div class="sws-h">${esc(T.colour)}</div><div class="sws">${DOOR.map((c, k) => `<button class="sw" data-c="${k}" style="background:${c}" aria-label="${esc(T.colour)} ${k + 1}"></button>`).join('')}</div>`; sw.onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) s.setDoor(+b.dataset.c); }; tray.push(sw);
+  s.onChange = (tool, n, done, note, sunny) => { for (const k in toks) { toks[k].className = `tok${!n[k] ? ' used' : tool === k && !done ? ' on' : ''}`; toks[k].innerHTML = `${I[k]}<span>${esc(names[k])}<small>${esc(n[k] ? T.left(n[k]) : T.placed)}</small></span>`; }
     for (const b of sw.querySelectorAll('.sw')) b.classList.toggle('on', +b.dataset.c === S.doorC);
-    $('say').innerHTML = `<p>${esc(done ? PH.ready : tool === 'win' ? (n.win === 2 ? PH.win2 : PH.win1) : tool === 'roof' ? PH.roof : PH.door)}</p>`; }));
-  s.onDone = () => { $('tray').replaceChildren(btn(U.onward, 'sun', result)); };
-  ui({ step: PH.build, say: '', tray, over: '' }); s.start(); }
-const afterText = (i) => (i === L.pick ? [L.after] : [L.sol[i][1], ...L.res.map((r) => r[i + 1][1])]);
-function result() { setScene(street(S.pick, { close: true })); const settle = () => { S.phase = 2; result(); };
-  if (S.phase === 1) return ui({ step: L.sol[S.pick][0], say: U.whichKeep, tray: [btn(U.keepFirst, '', () => { S.pick = S.first; settle(); }), btn(U.keepThis, 'sun', settle)], over: '' });
-  ui({ step: L.sol[S.pick][0], say: afterText(S.pick), tray: [...(S.phase === 0 ? [btn(U.tryOther, '', () => { S.phase = 1; S.first = S.pick; setScene(works(true)); results(); })] : []), btn(U.onward, 'sun', recap)], over: '' }); }
-function recap() { const s = setScene(works(true)); ui({ step: U.recapTitle, say: [L.point[0], U.pointHow], tray: [], over: '' });
-  s.ask(async (i) => { const fin = () => { s.answer = 0; ui({ step: U.recapTitle, say: i === 0 ? U.recapYes : L.res[0][1][1], tray: [btn(U.next, 'sun', end)], over: null }); }; if (i === 0) return fin(); s.answer = -1; if (await s.again()) fin(); }); }
-function end() { setScene(street(S.pick, { close: true })); ui({ step: L.name, say: PH.end, tray: [btn(PH.replay, 'sun', job)], over: '' }); }
+    $('say').innerHTML = [done ? '' : note, done ? T.ready[sunny] : tool === 'win' ? (n.win === 2 ? T.win2 : T.win1) : tool === 'roof' ? T.roof : T.door].filter(Boolean).map((p) => `<p>${esc(p)}</p>`).join(''); };
+  s.onDone = () => { $('tray').replaceChildren(btn(T.next, 'sun', async () => { ui({ step: T.town, say: '', tray: [], over: '' }); await s.fill(S.pick); if (cur === s) ui({ step: T.town, say: T.after[S.pick], tray: [btn(T.next, 'sun', () => ui({ step: T.level, say: T.end, tray: [btn(T.replay, 'sun', job)], over: '' }))], over: '' }); })); };
+  ui({ step: T.build, say: '', tray: [], over: '' }); await s.startBuild(i); if (cur === s) $('tray').replaceChildren(...tray); }
 
 // Florence breathes: frames 0 to 3 of her sheet, three each second
 { let n = 0; setInterval(() => { n = (n + 1) % 4; $('flo').style.setProperty('--col', n); }, 333); }
 resize(); job(); requestAnimationFrame(loop);
-window.trial = { S, job, ask, suggest, test, results, choose, playBreak, result, recap, end, get cur() { return cur; } };
+window.trial = { S, job, ask, plans, choose, get cur() { return cur; } };
 window.trialProject = (x, y, z, r) => { const v = new THREE.Vector3(x, y, z).project(cam); return [r.left + (v.x + 1) / 2 * r.width, r.top + (1 - v.y) / 2 * r.height]; };
