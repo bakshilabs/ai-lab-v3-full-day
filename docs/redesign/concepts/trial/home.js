@@ -8,16 +8,26 @@ import { THREE, blk, group, soft, fig, frame, hash } from '../kit-v2.js';
 export const FH = 3.3, SL = 0.3, Y0 = 0.3, Y1 = Y0 + FH + SL, TOP = Y1 + FH;
 const WOOD = '#b9834a', INS = '#f6d77a', BOARD = '#e6c992', GLASS = '#a9d3ee', OPEN = 1.72;
 const NIGHT = { g: ['#ffd27a', 0.3], f: ['#e3c9a4', 0.17], p: ['#7fa0d8', 0.22] }, LEAK = { g: 0, f: 0.34, p: 0.78 };
-// o: w, d (size), mat { wall, line }, thick, roofWin, roofC, doorC, M (makes a lit material), people (what each person looks like), done (arrives complete)
+// The outside of a wall is drawn from a small picture that repeats: bricks in courses, or boards. A box that uses it is given a size of its own, so that the bricks stay the same size on every wall
+const TEX = {}; export function wallMat(kind) { if (TEX[kind]) return TEX[kind]; const c = document.createElement('canvas'); c.width = 128; c.height = 64; const x = c.getContext('2d');
+  if (kind === 'brick') { x.fillStyle = '#ead8c0'; x.fillRect(0, 0, 128, 64); for (let r = 0; r < 2; r++) for (let k = -1; k < 2; k++) { x.fillStyle = ['#c9775a', '#bb6b4f', '#d08467'][(k + 1 + r * 2) % 3]; x.fillRect(k * 64 + r * 32 + 2, r * 32 + 2, 60, 28); } }
+  else { x.fillStyle = '#d9b684'; x.fillRect(0, 0, 128, 64); x.fillStyle = '#c39b67'; for (let r = 0; r < 2; r++) { x.fillRect(0, r * 32, 128, 3); x.fillRect(r * 64 + 20, r * 32, 2, 32); } }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return (TEX[kind] = new THREE.MeshLambertMaterial({ map: t })); }
+export function texBox(parent, x, z, w, d, y, h, mat) { const geo = new THREE.BoxGeometry(w, h, d), uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) { const f = Math.floor(i / 4); uv.setXY(i, uv.getX(i) * (f < 2 ? d : w) / 2, uv.getY(i) * (f === 2 || f === 3 ? d : h) / 0.8); }
+  const m = new THREE.Mesh(geo, mat); m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; }
+// o: brick (a brick home; otherwise timber), ins (insulation: 0 none, 1 some, 2 a lot), w, d (size), mat { wall, line }, thick, roofWin, roofC, doorC, M (makes a lit material), people (what each person looks like), done (arrives complete)
 export function makeHome(parent, o) {
-  const g = group(parent), w = o.w, d = o.d, ti = o.thick ? 0.7 : 0.25, T = 0.48 + ti, lam = (c) => o.M(c, 0, { raw: true }), flat = (c) => new THREE.MeshBasicMaterial({ color: c });
-  const wood = lam(WOOD), ins = flat(INS), lining = flat('#f6eedc'), wallM = new THREE.MeshLambertMaterial({ color: o.mat.wall }), white = lam('#fbfbf7'), board = lam(BOARD), vis = !!o.done;
-  const m = { g, w, d, T, ti, wallM, walls: [[], []], spots: [], people: [], heat: { stage: vis ? 3 : 0, leak: 0 }, lv: null };
+  const g = group(parent), w = o.w, d = o.d, brick = !!o.brick, noIns = !o.ins, ti = [0.02, 0.25, 0.7][o.ins || 0], BR = 0.5, T = (brick ? BR + 0.08 : 0.48) + ti, lam = (c) => o.M(c, 0, { raw: true }), flat = (c) => new THREE.MeshBasicMaterial({ color: c });
+  const wood = lam(WOOD), ins = flat(INS), lining = flat('#f6eedc'), outer = wallMat(brick ? 'brick' : 'plank'), wallM = outer, white = lam('#fbfbf7'), board = lam(BOARD), vis = !!o.done;
+  const m = { g, w, d, T, ti, brick, wallM, walls: [[], []], spots: [], people: [], heat: { stage: vis ? 3 : 0, leak: [0.78, 0.23, 0][o.ins || 0] }, lv: null };
   blk(g, 0, 0, w + 0.8, d + 0.8, 0, Y0, '#d9d2c2', { mat: lam('#d9d2c2') }); blk(g, 0, 0, w - 0.1, d - 0.1, Y0, 0.05, BOARD, { mat: board, shadow: false });
   // three walls on each floor. In each one the frame is on the inside, then the insulation (thick or thin, as the child asked), then the outer wall
   const defs = [{ x: 0, z: -d / 2, len: w - 2 * T, ry: Math.PI }, { x: -w / 2, z: -T / 2, len: d - T, ry: -Math.PI / 2 }, { x: w / 2, z: -T / 2, len: d - T, ry: Math.PI / 2 }];
-  const layers = (pg, len, hh, x0 = 0) => { const fr = group(pg), n = Math.max(2, Math.round(len / 1.9)), zf = -0.2 - ti - 0.14; for (let k = 0; k <= n; k++) blk(fr, x0 - len / 2 + 0.16 + k * (len - 0.32) / n, zf, 0.26, 0.26, 0, hh, WOOD, { mat: wood }); for (const y of [0, hh - 0.26]) blk(fr, x0, zf, len - 0.3, 0.26, y, 0.26, WOOD, { mat: wood });
-    const il = blk(pg, x0, -0.2 - ti / 2, len, ti, 0, hh, INS, { mat: ins }), pn = group(pg); blk(pn, x0, -0.1, len, 0.2, 0, hh, o.mat.wall, { mat: wallM }); blk(pn, x0, -0.2 - ti - 0.04, len - 0.3, 0.06, 0.2, hh - 0.4, '#f6eedc', { shadow: false, mat: lining }); fr.visible = il.visible = pn.visible = vis; return { fr, il, pn, n: vis ? 3 : 0 }; };
+  // A timber wall: the frame of posts is on the inside, then the insulation, then boards outside and a pale lining inside. A brick wall has no posts:
+  // thick bricks laid in courses stand outside, the insulation goes against their inside face, and the pale inside wall face covers it
+  const layers = (pg, len, hh, x0 = 0) => { const fr = group(pg), pn = group(pg), n = Math.max(2, Math.round(len / 1.9)), zf = -0.2 - ti - 0.14, zi = brick ? -BR - ti / 2 : -0.2 - ti / 2;
+    if (brick) texBox(fr, x0, -BR / 2, len, BR, 0, hh, outer); else { for (let k = 0; k <= n; k++) blk(fr, x0 - len / 2 + 0.16 + k * (len - 0.32) / n, zf, 0.26, 0.26, 0, hh, WOOD, { mat: wood }); for (const y of [0, hh - 0.26]) blk(fr, x0, zf, len - 0.3, 0.26, y, 0.26, WOOD, { mat: wood }); texBox(pn, x0, -0.1, len, 0.2, 0, hh, outer); }
+    const il = blk(pg, x0, zi, len, ti, 0, hh, INS, { mat: ins }); if (brick) blk(pn, x0, zi - ti / 2 - 0.04, len - 0.04, 0.08, 0, hh, '#f6eedc', { shadow: false, mat: lining }); fr.visible = pn.visible = vis; il.visible = vis && !noIns; return { fr, il, pn, n: vis ? 3 : 0 }; };
   for (const f of [0, 1]) defs.forEach((def, i) => { const yb = f ? Y1 : Y0, hh = f ? FH : FH + SL, wg = group(g, def.x, yb, def.z); wg.rotation.y = def.ry; const q = layers(wg, def.len, hh); Object.assign(q, { def, f, i, wg, hh });
     q.mark = frame(wg, 0, 0.15, -T - 0.12, def.len - 0.5, hh - 0.4, true); q.mark.visible = false; m.walls[f].push(q); });
   // the floor between, with a gap for the stairs along the back wall
@@ -31,7 +41,7 @@ export function makeHome(parent, o) {
   // the roof, in three layers: beams, insulation, and the cover
   const rb = group(g, 0, TOP, 0); for (let k = 0; k < 6; k++) blk(rb, -w / 2 + 0.4 + k * (w - 0.8) / 5, 0, 0.26, d + 0.5, 0, 0.25, WOOD, { mat: wood });
   const ri = blk(g, 0, 0, w + 0.2, d + 0.4, TOP + 0.25, ti, INS, { mat: ins }), yr = TOP + 0.25 + ti, roof = group(g, 0, yr, 0), rc = o.M(o.roofC, 0); blk(roof, 0, 0, w + 0.9, d + 1.2, 0, 0.6, o.roofC, { mat: rc }); if (!o.roofWin) blk(roof, 0, 0, w + 0.9, d * 0.42, 0.6, 0.45, o.roofC, { mat: rc });
-  m.ropes = [-0.4 * w, 0.4 * w].map((x) => { const r = blk(roof, x, 0, 0.08, 0.08, 0.6, 16, '#2b3a55', { shadow: false }); r.visible = false; return r; }); rb.visible = ri.visible = roof.visible = vis; Object.assign(m, { rb, ri, roof, yr });
+  m.ropes = [-0.4 * w, 0.4 * w].map((x) => { const r = blk(roof, x, 0, 0.08, 0.08, 0.6, 16, '#2b3a55', { shadow: false }); r.visible = false; return r; }); rb.visible = roof.visible = vis; ri.visible = vis && !noIns; Object.assign(m, { rb, ri, roof, yr });
   m.roofMark = group(g, 0, TOP, 0); frame(m.roofMark, 0, 0.1, d / 2 + 0.25, w + 0.4, 1, true); m.roofMark.visible = false;
   // the front wall: two leaves on hinges at the corners. The door and the front windows are in the leaves
   const HT = TOP - Y0, leaves = [-1, 1].map((sx) => { const lg = group(g, sx * w / 2, Y0, d / 2), q = layers(lg, w / 2, HT, -sx * w / 4); q.lg = lg; q.sx = sx; return q; }); m.leaves = leaves; let openK = 0;
@@ -51,7 +61,7 @@ export function makeHome(parent, o) {
   // a soft light in each room at night: warm, or cold
   const glowM = soft('#ffd27a', 0.3), glow = [0, 1].map((f) => blk(g, 0, -T / 2, w - 2 * T, d - T - 0.1, (f ? Y1 : Y0) + 0.05, FH - 0.1, '#ffd27a', { shadow: false, mat: glowM })); for (const q of glow) q.visible = false;
   // night: lv is 'g' (warm), 'f' (a little cold) or 'p' (cold); null is day
-  m.setNight = (lv) => { m.lv = lv; smallM.color.set(lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : GLASS); ins.color.set(lv ? { g: '#e6c267', f: '#b3a57c', p: '#8a909c' }[lv] : INS); lining.color.set(lv ? { g: '#f7dfa4', f: '#c9bfa8', p: '#9aa6bb' }[lv] : '#f6eedc'); for (const q of glow) q.visible = !!lv; if (lv) { glowM.color.set(NIGHT[lv][0]); glowM.opacity = NIGHT[lv][1]; m.heat.leak = Math.max(LEAK[lv], o.thick ? 0 : 0.23); } for (const q of m.spots) { if (q.on) { q.shaft.visible = q.patch.visible = !lv && q.sunny; q.gm.color.set(lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : q.sunny ? '#fff3b0' : GLASS); } }
+  m.setNight = (lv) => { m.lv = lv; smallM.color.set(lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : GLASS); ins.color.set(lv ? { g: '#e6c267', f: '#b3a57c', p: '#8a909c' }[lv] : INS); lining.color.set(lv ? { g: '#f7dfa4', f: '#c9bfa8', p: '#9aa6bb' }[lv] : '#f6eedc'); for (const q of glow) q.visible = !!lv; if (lv) { glowM.color.set(NIGHT[lv][0]); glowM.opacity = NIGHT[lv][1]; m.heat.leak = LEAK[lv]; } for (const q of m.spots) { if (q.on) { q.shaft.visible = q.patch.visible = !lv && q.sunny; q.gm.color.set(lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : q.sunny ? '#fff3b0' : GLASS); } }
     m.people.forEach((p, k) => { p.cold = lv === 'p' || (lv === 'f' && k === 0); }); };
   // the people: each has a place to stand, shivers when cold and has a snowflake over the head
   const stand = [[-0.34 * w, Y0, 0.1 * d], [-0.04 * w, Y0, -0.08 * d], [0.33 * w, Y0, 0.12 * d]];
