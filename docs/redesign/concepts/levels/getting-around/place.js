@@ -221,7 +221,8 @@ export function makePlace(W, hooks) {
   // ---- a picture of the moment, for the postcard ----------------------------------------------------------------------------------------------
   // The picture is taken in the same turn in which the stage has drawn it, because the drawing is not kept afterwards.
   const flashEl = document.createElement('i'); flashEl.className = 'flash'; view.append(flashEl);
-  const snap = () => new Promise((res) => { requestAnimationFrame(() => requestAnimationFrame(() => { try { const c = document.createElement('canvas'); c.width = 640; c.height = Math.round(640 * canvas.height / canvas.width); c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.86)); } catch (e) { res(''); } }); }));
+  let snapWant = null; const snap = () => new Promise((res) => { snapWant = res; });
+  const takeNow = (res) => requestAnimationFrame(() => { try { const c = document.createElement('canvas'); c.width = 640; c.height = Math.round(640 * canvas.height / canvas.width); c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.86)); } catch (e) { res(''); } });
   const flash = () => { flashEl.classList.remove('go'); void flashEl.offsetWidth; flashEl.classList.add('go'); beep(1400, 0.03, 'square', 0.05); setTimeout(() => beep(900, 0.05, 'square', 0.04), 70); };
 
   // ---- the board of Florence's three plans, as three small maps on a notice board ----------------------------------------------------------
@@ -241,7 +242,7 @@ export function makePlace(W, hooks) {
   const PN = 110, petalM = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.03, 0.16), new THREE.MeshBasicMaterial({ color: hot('#ffd9e8', 1.15) }), PN), dummy = new THREE.Object3D(), petal = Array.from({ length: PN }, (_, i) => ({ x: (hash(i, 31) - 0.5) * 56, z: -18 + hash(i, 32) * 66, y: hash(i, 33) * 12, v: 0.5 + hash(i, 34) * 0.7, ph: hash(i, 35) * 6 }));
   petalM.frustumCulled = false; g.add(petalM);
   let strollers = [], ambN = 0;
-  s.tick = (t, dt) => { petal.forEach((p, i) => { p.y -= p.v * dt; if (p.y < 0.05) p.y = 9 + hash(i, t) * 4; dummy.position.set(p.x + Math.sin(t * 0.7 + p.ph) * 0.9, p.y, p.z + Math.cos(t * 0.5 + p.ph) * 0.6); dummy.rotation.set(t * p.v + p.ph, p.ph, t * 0.8 + p.ph); dummy.updateMatrix(); petalM.setMatrixAt(i, dummy.matrix); }); petalM.instanceMatrix.needsUpdate = true;
+  s.tick = (t, dt) => { if (snapWant) { const r = snapWant; snapWant = null; takeNow(r); } petal.forEach((p, i) => { p.y -= p.v * dt; if (p.y < 0.05) p.y = 9 + hash(i, t) * 4; dummy.position.set(p.x + Math.sin(t * 0.7 + p.ph) * 0.9, p.y, p.z + Math.cos(t * 0.5 + p.ph) * 0.6); dummy.rotation.set(t * p.v + p.ph, p.ph, t * 0.8 + p.ph); dummy.updateMatrix(); petalM.setMatrixAt(i, dummy.matrix); }); petalM.instanceMatrix.needsUpdate = true;
     for (const sh of shops) { sh.bell.rotation.x = Math.sin(t * 9) * 0.5 * (sh.ring || 0); sh.ring = Math.max(0, (sh.ring || 0) - dt * 0.7); }
     for (const q of strollers) { const k = (t * q.v + q.ph) % 2, u = k < 1 ? k : 2 - k; along(q.o, k < 1 ? q.pts : q.back, k < 1 ? u : 1 - u, 0.12); }
     for (const q of lorries) if (q.pts) { q.l.visible = true; const k = (t * 0.05 + q.i * 0.37) % 1; along(q.l, q.pts, k); } };
@@ -269,7 +270,7 @@ export function makePlace(W, hooks) {
   const lines = group(g); lines.visible = false; for (let i = 0; i <= N; i++) { B(lines, 17.5 - i * 5, 28.5, 0.1, 35, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); B(lines, 0, 11 + i * 5, 35, 0.1, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); }
   const marks = []; const markAt = (k) => { if (!marks[k]) { const m = group(g, X(cOf(k)), 0.2, Z(rOf(k))), y = M('#ffdf3d', { unlit: true, raw: true, op: 0.86 }), ink = M('#1f2a44', { unlit: true, raw: true }); blk(m, 0, 0, 4.3, 4.3, 0, 0.06, '#ffdf3d', { shadow: false, mat: y }); for (let q = 0; q < 4; q++) for (const e of [-1, 1]) { blk(m, -1.6 + q * 1.07, e * 2.15, 0.6, 0.2, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); blk(m, e * 2.15, -1.6 + q * 1.07, 0.2, 0.6, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); } glowMarks(m); marks[k] = m; } return marks[k]; };
   s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick, s.park === 2), state = GATES.map(() => 'home'), toks = {}; let sel = pick === 2 ? 'fork' : 'straight', told = '', finished = false, slotN = 0;
-    s.child = { plan: pick, board: b }; quiet(); hooks.clear(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; glide(VIEW.play, 1.8);
+    s.child = { plan: pick, board: b }; quiet(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; glide(VIEW.play, 1.8);
     GATES.forEach((q, i) => { people[i].position.set(gatePt[i][0] + DX[q.side] * 0.9, 0, gatePt[i][1] + DZ[q.side] * 0.9); people[i].rotation.y = Math.atan2(-DX[q.side], -DZ[q.side]); });
     const kinds = ['straight', 'bend', 'fork', ...(left.bridge ? ['bridge'] : []), 'lift'];
     const targets = () => (sel === 'lift' ? b.cells.map((p, k) => (p ? k : -1)).filter((k) => k >= 0) : left[sel] > 0 ? BD.places(b, sel) : []);
@@ -277,13 +278,14 @@ export function makePlace(W, hooks) {
       for (const kd of kinds) { const el = toks[kd]; el.className = `tok mini${kd === sel ? ' on' : ''}${kd !== 'lift' && !left[kd] ? ' used' : ''}`; if (kd !== 'lift') el.querySelector('small').textContent = W.left(left[kd]); }
       const hs = BD.homes(b), joined = hs.filter((h) => h.joined).length, n = tg.size;
       const how = sel === 'lift' ? W.liftHow : !left[sel] ? W.noneLeft : n ? W.pieceHow[sel] : b.cells.some(Boolean) ? W.noPlace : W.firstPiece;
-      api.say([told || W.joined(joined), how]); };
+      api.say(finished ? [doneSay(), W.doneHow] : [told || W.joined(joined), how]); };
+    const doneSay = () => (state.every((q) => q === 'walked') ? W.doneAll : W.doneSome); let nextBtn = null;
     // what happens at each home when the paths change: a family whose walk is short enough sets off for the shops; if the way is too long, the car comes out
     const react = () => { const hs = BD.homes(b); drawBoard(b, true); hs.forEach((h, i) => { const within = h.joined && h.steps <= BD.LIMIT[s.style];
         if (within && state[i] !== 'walked') { state[i] = 'walked'; cars[i].visible = false; people[i].visible = true; openGate(i, 1); const pts = walkWay(i, h.way, slotN++ % SLOT.length), sl = slotN - 1; tw(2 + lengthOf(pts) * 0.07, (k) => along(people[i], pts, k, 0.14)).then(() => faceShops(people[i], sl % SLOT.length)); told = h.gran ? W.granWalks : W.homeWalks; beep(660, 0.1); setTimeout(() => beep(880, 0.12), 110); }
         else if (h.joined && !within && state[i] === 'home') { state[i] = 'car'; openGate(i, 1); cars[i].visible = true; cars[i].position.set(backPt[i][0], 0, backPt[i][1]); cars[i].rotation.y = homeAt[i][2]; told = W.tooFar; beep(200, 0.15, 'sawtooth', 0.04); }
         else if (!h.joined && state[i] === 'car') { state[i] = 'home'; cars[i].visible = false; } });
-      if (hs.every((h) => h.joined) && !finished) { finished = true; chime(); } if (finished && hs.every((h) => h.joined)) api.done([state.every((q) => q === 'walked') ? W.doneAll : W.doneSome, W.doneHow]); else if (finished) { finished = false; setTray(); } show(); };
+      const all = hs.every((h) => h.joined); if (all && !finished) { finished = true; chime(); api.done([doneSay(), W.doneHow]); nextBtn = document.querySelector('#tray .btn.sun'); setTray(); } else if (!all && finished) { finished = false; setTray(); } show(); };
     const act = (k) => { const c = cOf(k), r = rOf(k), p = b.cells[k]; told = '';
       if (sel === 'lift') { const kd = BD.lift(b, c, r); if (kd) { left[kd === 'cross' ? 'fork' : kd]++; beep(300, 0.08); } }
       else if (p && p.kind === sel) { if (BD.turn(b, c, r)) beep(520, 0.06); else told = W.oneWay; }
@@ -295,7 +297,7 @@ export function makePlace(W, hooks) {
     const sw = document.createElement('div'); sw.innerHTML = `<div class="sws-h">${W.colour}</div>`; const row = document.createElement('div'); row.className = 'sws three'; sw.append(row);
     PAVINGS.forEach((hex, i) => { const el = document.createElement('button'); el.className = `sw${i === s.paving ? ' on' : ''}`; el.style.background = hex; el.setAttribute('aria-label', W.colours[i]); el.onclick = () => { s.paving = i; mine.color.set(tone(hex)); [...row.children].forEach((q, j) => q.classList.toggle('on', j === i)); beep(600 + i * 80, 0.06); }; row.append(el); }); mine.color.set(tone(PAVINGS[s.paving]));
     const help = hooks.btn(W.showMe, '', () => { const at = b.cells.findIndex((p) => p && p.kind === 'bridge'), f = BD.florence(pick, s.park === 2, at >= 0 ? cOf(at) : null); b.cells = f.cells; for (const kd of ['straight', 'bend', 'fork', 'bridge']) left[kd] = 0; told = W.shown; react(); });
-    const setTray = () => api.tray([...kinds.map((kd) => toks[kd]), sw, help]);
+    const setTray = () => api.tray([...kinds.map((kd) => toks[kd]), sw, ...(finished && nextBtn ? [nextBtn] : [help])]);
     s.spot = (name, i) => (name === 'cell' ? [X(i % N), 0.3, Z(Math.floor(i / N))] : [0, 0, 0]);
     s.playState = () => ({ joined: BD.homes(b).filter((h) => h.joined).length, left: { ...left } });
     await wait(1.2); if (me !== run) return; setTray(); show(); };
@@ -311,7 +313,8 @@ export function makePlace(W, hooks) {
   // the last picture: the family and Gran walk the last stretch of the path to the shops, with the camera low behind them
   s.walkHome = async (pick) => { const me = run; nb.visible = false; const m = settle(pick); quiet(); famPlate.hide = true; granPlate.hide = true; const h = m.hs[granI], way = (h.joined ? h.way : m.hs[0].way).map(mid), pts = [...way.slice(-5), [0, 10.6], [0.5, 2]], withGran = m.walk[granI];
     const gr = people[granI]; family.rotation.y = 0; family.scale.setScalar(1);
-    await tw(11, (k) => { const u = ease(k); along(family, pts, u, 0.1); family.rotation.y += Math.PI - 0.5; if (withGran) { const q = { position: gr.position, rotation: gr.rotation }; along(q, pts, Math.min(1, u + 0.07), 0.1); gr.position.x += 1.3; }
+    const tmp = { position: new THREE.Vector3(), rotation: { y: 0 } };
+    await tw(11, (k) => { const u = ease(k); along(tmp, pts, u, 0.1); family.position.copy(tmp.position); family.rotation.y = tmp.rotation.y - 0.5; if (withGran) { const q = { position: gr.position, rotation: gr.rotation }; along(q, pts, Math.min(1, u + 0.07), 0.1); gr.position.x += 1.3; }
       const L = lengthOf(pts), d = (o) => { const t = { position: new THREE.Vector3(), rotation: { y: 0 } }; along(t, pts, Math.max(0, Math.min(1, u + o / L))); return t.position; }, b0 = d(-7), a0 = d(7);
       s.eye = [b0.x - 0.6, 2.3, b0.z]; s.at = [a0.x, 1.5, a0.z]; s.fov = 50; });
     if (me !== run) return; family.rotation.y = 0.5; if (withGran) gr.rotation.y = Math.PI / 2; glide(VIEW.shops, 2.4); };
