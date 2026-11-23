@@ -222,7 +222,7 @@ function valley() {
     s.spot = (name, i) => [MID[i][0], MID[i][1] + 1, MID[i][2]];
     MID.forEach(([x, y, z], i) => { const go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(i === 2 ? 880 : 300, 0.15); if (i === 2) chime(); answer(i === 2); }, pl = plate(s, words.here, [x, y + (i === 2 ? 6 : i === 1 ? 2.8 : 5), z], 'tap'); signs.push(pl); pl.el.onclick = go;
       hitBox(s, g, x, y - 1, z, i === 2 ? 30 : 22, 7, i === 2 ? 16 : 13, () => open, go); }); };
-  s.evening = () => { toWeather(0.02, 1, 2); glide({ eye: [TOWN[site].eye[0] + 3, 7.6, 27], at: TOWN[site].at, fov: TOWN[site].fov - 5 }, 4); };
+  s.evening = () => { homes.forEach((q) => q.light(true)); toWeather(0.02, 1, 2); glide({ eye: [TOWN[site].eye[0] + 3, 7.6, 27], at: TOWN[site].at, fov: TOWN[site].fov - 5 }, 4); };
 
   // ---- every picture ------------------------------------------------------------------------------------------------------------------------
   s.tick = (t, dt) => {
