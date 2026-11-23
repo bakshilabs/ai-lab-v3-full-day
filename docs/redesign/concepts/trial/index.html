@@ -60,7 +60,7 @@
   .word { min-height: 52px; padding: 8px 16px; background: #fff; border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: 0 5px 0 var(--ui-ink); font: var(--ui-t-chip); cursor: pointer; }
   .word:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ui-ink); }
   .tok { display: grid; grid-template-columns: 44px auto; align-items: center; gap: 8px; min-width: 150px; min-height: 60px; padding: 5px 14px 5px 8px; background: #fff; border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: 0 5px 0 var(--ui-ink); font: 700 18px/1.15 var(--ui-body); text-align: left; cursor: pointer; }
-  .tok.mini { grid-template-columns: 1fr; justify-items: center; gap: 0; min-width: 0; width: 96px; min-height: 0; padding: 4px 4px 6px; text-align: center; font-size: 16px; } .tok.mini small { font-size: 12px; } .tok.mini svg { width: 40px; height: 34px; }
+  .tok.mini { grid-template-columns: 1fr; justify-items: center; gap: 0; min-width: 0; width: 82px; min-height: 0; padding: 4px 4px 6px; text-align: center; font-size: 16px; } .tok.mini small { font-size: 12px; } .tok.mini svg { width: 40px; height: 34px; }
   .tok small { display: block; font: 700 15px/1.2 var(--ui-body); color: var(--ui-ink-soft); }
   .tok.on { background: var(--ui-sun); }
   .tok.used { background: var(--ui-paper-dim); border-style: dashed; box-shadow: none; transform: translateY(5px); color: var(--ui-ink-soft); cursor: default; }
@@ -69,14 +69,14 @@
   .sw { width: 42px; height: 42px; border: 3px solid var(--ui-ink); border-radius: 10px; box-shadow: 0 4px 0 var(--ui-ink); cursor: pointer; padding: 0; }
   .sw.on { outline: 4px solid var(--ui-sun); outline-offset: 2px; transform: translateY(-3px); }
   @media (max-height: 700px) { .over { gap: 8px; bottom: 8px; } .card { padding: 7px 11px 9px; gap: 3px; } .card .res { grid-template-columns: 26px 1fr; gap: 6px; font-size: 13px; line-height: 1.2; } .card .res + .res { padding-top: 3px; } .card .mark { width: 22px; height: 22px; font-size: 14px; } .card .btn { min-height: 38px; padding: 4px 10px; font-size: 17px; margin-top: 2px; } }
-  @media (max-height: 700px) { .tray { gap: 6px 8px; } .tok.mini { width: 84px; padding: 2px 2px 4px; font-size: 14px; box-shadow: 0 4px 0 var(--ui-ink); } .tok.mini svg { width: 32px; height: 26px; } .sw { width: 32px; height: 32px; } }
+  @media (max-height: 700px) { .tray { gap: 6px 6px; } .tok.mini { width: 74px; padding: 2px 2px 4px; font-size: 14px; box-shadow: 0 4px 0 var(--ui-ink); } .tok.mini svg { width: 32px; height: 26px; } .sw { width: 32px; height: 32px; } }
   .first { position: absolute; left: 16px; top: 76px; z-index: 3; display: flex; flex-direction: column; gap: 5px; padding: 9px 13px 10px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 16px/1.2 var(--ui-body); }
   .first[hidden] { display: none; } .first b { font: 800 17px/1.2 var(--ui-display); } .first span { display: flex; align-items: center; gap: 8px; } .first .mark { width: 24px; height: 24px; font-size: 15px; }
   .fps { position: absolute; right: 16px; bottom: 8px; z-index: 4; font: 600 14px/1 var(--ui-body); background: #fff; border: 2px solid var(--ui-ink); border-radius: 8px; padding: 4px 8px; }
   @media (max-width: 900px), (max-height: 640px) {
     .band { grid-template-columns: 84px minmax(0, 1fr); min-height: 150px; } .flo { width: 84px; height: 110px; }
     .say { font-size: 17px; padding: 9px 14px; } .card p, .card .res { font-size: 14px; } .card h3 { font-size: 17px; } .btn { font-size: 19px; min-height: 48px; padding: 8px 14px; } .btn.big { font-size: 24px; }
-    .sentence { font-size: 18px; } .word { font-size: 17px; min-height: 46px; } .trial { display: none; } .step { font-size: 18px; } .chip { font-size: 15px; height: 40px; } .chip b { width: 28px; height: 28px; }
+    .sentence { font-size: 18px; } .word { font-size: 17px; min-height: 46px; } .trial { font-size: 11px; padding: 3px 7px; max-width: 150px; } .step { font-size: 18px; } .chip { font-size: 15px; height: 40px; } .chip b { width: 28px; height: 28px; }
   }
 </style>
 </head>

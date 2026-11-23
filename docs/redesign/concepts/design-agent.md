@@ -56,6 +56,7 @@ These points were drawn from screen 3 and are now part of every brief.
 2. Replace the letter walk on screen 3 with the split screen. This is finished (commit `2cd902c`).
 3. Redesign the other six screens to the standard of screen 3, and make Eco Town look nicer than car town. This was in progress when this file was written.
 4. Draw an alternate look for the whole island of six towns in the visual style of the car town picture, with eco town content and no favouring of cars, in a new folder with its own short deck. This is queued behind item 3.
+5. Build a playable trial of the Homes level in `trial/` (owner, 23 Nov 2026), then fix its test and visit views and rebuild the family's home as a dollhouse with two floors: the child builds the frame, the insulation and the walls floor by floor, the front wall opens, and the family inside show what each layer does. The home model is in `trial/home.js`, and `trial/play.mjs` plays the level through and saves a picture of every step.
 
 ## The original brief, word for word
 
