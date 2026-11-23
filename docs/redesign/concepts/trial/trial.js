@@ -27,7 +27,7 @@ const T = { level: 'A warm home for winter',
   town: 'The street is built', homes: ['Timber homes', 'Brick homes', 'Concrete homes'], afterAir: ['Making the wood added no pollution, and the air is clean.', 'Baking the bricks added some pollution.', 'Making the cement added a lot of pollution.'],
   afterWarm: { g: 'The homes stay warm at night.', f: 'The homes get a little cold by morning.', p: 'The homes are cold at night.' }, built: 'The whole street is built your way.',
   tryOther: 'Try another plan', chooseOther: 'Choose a different plan to see it in the town.', first: 'Your first plan', what: 'What changed?', keepFirst: 'Go back to my first plan', keepThis: 'Keep this plan',
-  recapT: 'One more question', recapQ: 'Which side of the street does the winter sun warm? Tap that side.', thisSide: 'This side', sunSide: 'The sunny side', recapYes: 'Yes. The low winter sun reaches this side, so homes here stay warmer.', recapNo: 'The winter sun shines on this side. The wood keeps the other side in shade.',
+  nightT: 'The first winter night', nightSay: { g: 'Snow is falling, and every home in your street glows warm.', f: 'Snow is falling. The homes in your street are a little cold tonight.', p: 'Snow is falling. The homes in your street are cold tonight.' }, recapT: 'One more question', recapQ: 'Which side of the street does the winter sun warm? Tap that side.', thisSide: 'This side', sunSide: 'The sunny side', recapYes: 'Yes. The low winter sun reaches this side, so homes here stay warmer.', recapNo: 'The winter sun shines on this side. The wood keeps the other side in shade.',
   end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again' };
 
 // ---- colours and blocks ---------------------------------------------------------------------------------------------------
@@ -67,7 +67,8 @@ let cur = null, tws = [], run = 0;
 function newScene(half, o = {}) { const scene = new THREE.Scene(), hemi = new THREE.HemisphereLight('#fff6e8', '#cfc6b0', 1.5), sun = new THREE.DirectionalLight('#ffe9c4', 1.7);
   scene.add(hemi); sun.position.set(...(o.sun || [-16, 30, 18])); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -half, right: half, top: half * 0.75, bottom: -half * 0.75, near: 1, far: 160 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun);
   scene.background = new THREE.Color(SKY); return { scene, hemi, sun, g: group(scene), picks: [], plates: [], minAspect: 1.9 }; }
-function fit() { if (!cur) return; const f = cur.fov * Math.PI / 180; cam.fov = cam.aspect >= cur.minAspect ? cur.fov : 2 * Math.atan(Math.tan(f / 2) * cur.minAspect / cam.aspect) * 180 / Math.PI; cam.position.set(...cur.eye); cam.lookAt(cur.at[0], cur.at[1] - (view.clientHeight < 560 ? cur.drop || 0 : 0), cur.at[2]); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
+let swayT = 0;
+function fit() { if (!cur) return; const f = cur.fov * Math.PI / 180; cam.fov = cam.aspect >= cur.minAspect ? cur.fov : 2 * Math.atan(Math.tan(f / 2) * cur.minAspect / cam.aspect) * 180 / Math.PI; cam.position.set(cur.eye[0] + Math.sin(swayT * 0.31) * 0.16, cur.eye[1] + Math.sin(swayT * 0.23 + 1) * 0.09, cur.eye[2] + Math.cos(swayT * 0.27) * 0.16); cam.lookAt(cur.at[0], cur.at[1] - (view.clientHeight < 560 ? cur.drop || 0 : 0), cur.at[2]); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
 // the camera glides from one view of the same place to another
 const glide = (to, sec = 1.6) => { const a = { eye: [...cur.eye], at: [...cur.at], fov: cur.fov, drop: cur.drop || 0 }, mix = (p, q, k) => p.map((v, i) => v + (q[i] - v) * k); return tw(sec, (k) => { const e = ease(k); cur.eye = mix(a.eye, to.eye, e); cur.at = mix(a.at, to.at, e); cur.fov = a.fov + (to.fov - a.fov) * e; cur.drop = a.drop + ((to.drop || 0) - a.drop) * e; fit(); }); };
 function resize() { const w = view.clientWidth, h = view.clientHeight; if (!w || !h) return; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false); cam.aspect = w / h; fit(); }
@@ -90,7 +91,7 @@ const HID = new THREE.MeshBasicMaterial({ visible: false });
 let last = performance.now(), frames = 0, fpsT = last;
 function loop(now) { requestAnimationFrame(loop); const dt = Math.min(0.1, (now - last) / 1000); last = now; if (!cur) return;
   for (const t of [...tws]) { const k = Math.min(1, (now - t.t0) / t.d); t.fn(k); if (k >= 1) { tws.splice(tws.indexOf(t), 1); t.res(); } }
-  if (cur.tick) cur.tick(now / 1000, dt); renderer.render(cur.scene, cam);
+  if (cur.tick) cur.tick(now / 1000, dt); swayT += dt; fit(); renderer.render(cur.scene, cam);
   const w = view.clientWidth, h = view.clientHeight; for (const p of cur.plates) { const v = p.pos.clone().project(cam); p.el.style.left = `${(v.x + 1) / 2 * w}px`; p.el.style.top = `${(1 - v.y) / 2 * h}px`; p.el.style.display = v.z < 1 && !p.hide ? '' : 'none'; }
   if (QS.has('fps')) { frames++; if (now - fpsT > 1000) { $('fps').hidden = false; $('fps').textContent = `${Math.round(frames * 1000 / (now - fpsT))} pictures each second`; frames = 0; fpsT = now; } } }
 
@@ -106,7 +107,7 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
   for (let k = 0; k < 13; k++) { const x = 16 - k * 7, hh = 11 + hash(k, 3) * 4; B(g, x, 23.5, 7.2, 6, 0, hh, ['#4f8a5a', '#58935f', '#4a8456'][k % 3]); B(g, x + 0.6, 22.6, 4.4, 4.4, hh, 2.2, '#58935f'); }
   for (const x of [8, -6, -20]) { B(g, x, 19.6, 0.6, 0.6, 0, 5, '#6f5a44'); B(g, x, 19.6, 4.4, 4.4, 4.2, 4.6, '#4f8a5a'); }
   // trees and lamps along the path lead the eye to the school
-  const avenue = []; for (let k = 0; k < 9; k++) { const x = -6 - k * 8; for (const z of [-7.2, 7.2]) { const tg = group(g), lg = group(g), sd = z > 0 ? 1 : 0; tree(tg, x, z, 1.55); lamp(lg, x - 4, sd ? 3.4 : -3.4); avenue.push({ o: tg, x, sd, tree: true }, { o: lg, x: x - 4, sd }); } }
+  const avenue = [], glow = []; for (let k = 0; k < 9; k++) { const x = -6 - k * 8; for (const z of [-7.2, 7.2]) { const tg = group(g), lg = group(g), sd = z > 0 ? 1 : 0; tree(tg, x, z, 1.55); lamp(lg, x - 4, sd ? 3.4 : -3.4); for (const [w, y, h, o] of [[1.7, 3.9, 1.5, 0.3], [4.6, 0.14, 0.05, 0.22]]) { const m = blk(lg, x - 4, sd ? 3.4 : -3.4, w, w, y, h, '#ffe27a', { shadow: false, mat: soft('#ffe27a', o) }); m.visible = false; glow.push(m); } avenue.push({ o: tg, x, sd, tree: true }, { o: lg, x: x - 4, sd }); } }
   // for the test, the trees in front of the three sample homes and the lamps beside them step aside, so that the windows and the air can be seen
   const clearView = (on) => { for (const a of avenue) a.o.visible = !(on && a.x > -42 && a.x < 8); };
   // the far end of the street is already built, and the school closes the view
@@ -133,7 +134,7 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
   const snow = []; for (let k = 0; k < 150; k++) { const m = blk(g, 12 - hash(k, 1) * 70, (hash(k, 2) - 0.5) * 50, 0.22, 0.22, 0, 0.22, '#fff', { shadow: false, mat: M('#ffffff', 0, { raw: true, unlit: true }) }); m.visible = false; snow.push({ m, y: hash(k, 4) * 24, v: 3 + hash(k, 6) * 2 }); }
   // night and day
   const day = new THREE.Color(SKY), dusk = new THREE.Color('#8ea2c8'), hemi0 = s.hemi.intensity, sun0 = s.sun.intensity, farGlass = M(GLASS, 0, { unlit: true, raw: true }); let nightK = 0;
-  s.setNight = (k) => { nightK = k; s.scene.background.copy(day).lerp(dusk, k); s.hemi.intensity = hemi0 * (1 - 0.3 * k); s.sun.intensity = sun0 * (1 - 0.8 * k); for (const sh of sheets) sh.material.color.set(SHEET).lerp(c0.set('#a9b8d6'), k); sunBox.visible = k < 0.5; for (const c of clouds) c.visible = k < 0.5; for (const f of snow) f.m.visible = k > 0.05; farGlass.color.set(GLASS).lerp(c0.set(LIT), k); };
+  s.setNight = (k) => { nightK = k; s.scene.background.copy(day).lerp(dusk, k); s.hemi.intensity = hemi0 * (1 - 0.3 * k); s.sun.intensity = sun0 * (1 - 0.8 * k); for (const sh of sheets) sh.material.color.set(SHEET).lerp(c0.set('#a9b8d6'), k); sunBox.visible = k < 0.5; for (const c of clouds) c.visible = k < 0.5; for (const f of snow) f.m.visible = k > 0.05; farGlass.color.set(GLASS).lerp(c0.set(LIT), k); for (const m of glow) m.visible = k > 0.5; };
 
   // ---- the child's words, drawn in the town ----
   s.side = null; s.thick = null;
@@ -195,7 +196,7 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
       if (used.has(i)) { used.delete(i); q.part.visible = false; q.beam.visible = false; tool = 'win'; note = ''; beep(300, 0.08); show(); return; }
       used.add(i); q.part.visible = true; pop(q.part); beep(q.sunny ? 880 : 520, 0.14);
       if (q.sunny) { const w = q.part.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, q.flat ? 0.3 : 1.05, 0)); q.beam.position.copy(w).addScaledVector(sunDir, 4.5); q.beam.lookAt(w.clone().addScaledVector(sunDir, 20)); q.beam.visible = true; q.glass.color.set('#fff3b0'); }
-      note = q.sunny ? T.sunIn : T.noSun; next(); }).frame = q.frame; });
+      if (q.sunny) { setTimeout(chime, 120); tw(0.7, (k) => { family.position.y = Math.abs(Math.sin(k * Math.PI * 2)) * 0.55 * (k < 1); }); } note = q.sunny ? T.sunIn : T.noSun; next(); }).frame = q.frame; });
     hitBox(s, hg, 0, 0.3 + HH - 0.4, 0, HW + 1.4, 5.4, HD + 1.4, () => !s.done && !busy && !roofOn && tool === 'roof', async () => { busy = true; roofOn = true; roofSpot.visible = false; note = sd ? T.shadyWin : ''; await tw(1.1, (k) => { roof.position.y = 9.4 - (9.4 - 0.3 - HH) * ease(k); }); if (me !== run) return; for (const r of ropes) r.visible = false; beep(220, 0.2, 'sine', 0.12); busy = false; next(); }).frame = roofSpot;
     hitBox(s, hg, DOORX, 0.3, HD / 2 + 0.3, 2.2, 3.4, 1, () => !s.done && !busy && !doorOn && tool === 'door', () => { doorOn = true; door.visible = true; pop(door); beep(660, 0.12); note = ''; next(); }).frame = doorSpot;
     s.pulse = [...spots.map((q) => q.frame), roofSpot, doorSpot];
@@ -203,19 +204,25 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
     s.spot = (name, i = 0) => { const v = name === 'win' ? new THREE.Vector3(spots[i].p[0], spots[i].p[1], spots[i].p[2] - (spots[i].flat ? 1 : 0)) : name === 'roof' ? new THREE.Vector3(0, 0.3 + HH + 0.5, HD / 2 + 0.3) : new THREE.Vector3(DOORX, 1.9, HD / 2 + 0.3); return hg.localToWorld(v).toArray(); };
     show(); };
   // ---- the town changes: the whole street is built in the chosen way ----
-  let built = [], haze = [];
+  let built = [], haze = []; const streetGlass = glassMat();
   const lay = async (pick, quick) => { const me = run; for (const h of built) g.remove(h); for (const m of haze) g.remove(m); built = []; haze = []; H.wallMat.color.set(MAT[pick].wall); H.lineMat.color.set(MAT[pick].line);
     const put = async (h) => { built.push(h); if (quick) return true; h.scale.setScalar(0.01); beep(330 + built.length * 30, 0.06); await pop(h, 0.01, 1, 0.26); return me === run; };
-    for (let k = 1; k < 5; k++) for (const sd of [H.sd, 1 - H.sd]) { plots[sd][k].visible = false; const x = PX[k], h = house(g, { wx: x, mat: MAT[pick], thick: s.thick, roofC: ROOF[(k + sd) % 4] }); h.position.set(x, 0.1, SIDEZ[sd]); h.rotation.y = sd ? Math.PI : 0; if (!await put(h)) return; }
-    plots[1 - H.sd][0].visible = false; { const h = house(g, { wx: 0, mat: MAT[pick], thick: s.thick, w: HW, d: HD, h: HH, roofC: ROOF[1] }); h.position.set(PX[0], 0.1, SIDEZ[1 - H.sd]); h.rotation.y = H.sd ? 0 : Math.PI; if (!await put(h)) return; }
+    for (let k = 1; k < 5; k++) for (const sd of [H.sd, 1 - H.sd]) { plots[sd][k].visible = false; const x = PX[k], h = house(g, { wx: x, mat: MAT[pick], glass: streetGlass, thick: s.thick, roofC: ROOF[(k + sd) % 4] }); h.position.set(x, 0.1, SIDEZ[sd]); h.rotation.y = sd ? Math.PI : 0; if (!await put(h)) return; }
+    plots[1 - H.sd][0].visible = false; { const h = house(g, { wx: 0, mat: MAT[pick], glass: streetGlass, thick: s.thick, w: HW, d: HD, h: HH, roofC: ROOF[1] }); h.position.set(PX[0], 0.1, SIDEZ[1 - H.sd]); h.rotation.y = H.sd ? 0 : Math.PI; if (!await put(h)) return; }
     // the pollution from making the materials for a whole street hangs in the open sky above the path, where the trees do not hide it
     for (let k = 0; k < [0, 6, 16][pick]; k++) { const sz = 2.4 + hash(k, 7) * 2.4; haze.push(blk(g, -16 - hash(k, 1) * 40, (hash(k, 2) - 0.5) * 7, sz, sz * 1.5, 6.2 + hash(k, 3) * 4.5, sz * 0.7, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.72) })); } };
   s.fill = async (pick) => { const me = run; clearView(false); for (const q of H.spots) q.beam.visible = false; await glide(VIEW.street, 1.8); if (me !== run) return; plate(s, T.yours, [PX[0] - 3, 6.2, SIDEZ[H.sd] + (H.sd ? -4 : 4)], 'on'); await lay(pick, false); if (me === run) chime(); };
   s.swap = (pick) => lay(pick, true);
+  // ---- the last picture: the first winter night in the street the child made; the camera walks slowly towards the school ----
+  s.night = async (pick) => { const me = run, lv = level(pick), c1 = new THREE.Color(WARM[lv]), a = family.position.clone(), to = H.hg.localToWorld(new THREE.Vector3(DOORX, 0, HD / 2 - 0.6)); if (s.recapOff) s.recapOff(); famPlate.hide = true;
+    glide({ eye: [7, 3.3, H.sd ? -1.2 : 1.2], at: [-40, 4.4, 0], fov: 38 }, 11);
+    await tw(2.6, (k) => { const e = ease(k); s.setNight(e); s.hemi.intensity *= 1 - 0.42 * e; s.sun.intensity *= 1 - 0.6 * e; s.scene.background.lerp(c0.set('#36426f'), e * 0.85); streetGlass.color.set(GLASS).lerp(c1, e); family.position.set(a.x + (to.x - a.x) * e, Math.abs(Math.sin(k * 12)) * 0.12, a.z + (to.z - a.z) * e); family.scale.setScalar(1 - 0.99 * Math.max(0, e - 0.7) / 0.3); }); if (me !== run) return;
+    for (const q of H.spots) if (q.part.visible) q.glass.color.set(q.sunny || lv === 'g' ? LIT : WARM[lv]); [523, 659, 784, 1047, 1319].forEach((f, k) => setTimeout(() => { if (me === run) beep(f, 0.5, 'sine', 0.06); }, k * 260)); };
   // ---- the recap: the child taps one side of the street ----
   s.recap = (on) => { const marks = SIDEZ.map((z, sd) => { const m = place(g, -12, sd ? 5 : -5, 36, 2.4, 0.12), pl = plate(s, T.thisSide, [-9, 8.4, z + (sd ? -4 : 4)], 'tap'); hitBox(s, g, -12, 0, z + (sd ? -4 : 4), 44, 10, 9, () => s.answer === undefined, () => go(sd)); pl.el.onclick = () => { if (s.answer === undefined) go(sd); }; return { m, pl }; });
+    const stuff = marks.map((q) => q.m); s.recapOff = () => { for (const m of stuff) m.visible = false; for (const q of marks) q.pl.hide = true; };
     const go = (sd) => { s.answer = sd; beep(sd === 0 ? 880 : 300, 0.15); marks.forEach((q, i) => { q.m.visible = i === 0; q.pl.hide = i !== 0; q.pl.el.classList.remove('tap'); q.pl.el.classList.add('on'); q.pl.el.textContent = T.sunSide; });
-      for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 18), soft('#ffe27a', 0.32)), base = new THREE.Vector3(-4 - k * 8, 3, SIDEZ[0] + 4); b.position.copy(base).addScaledVector(sunDir, 9); b.lookAt(base.clone().addScaledVector(sunDir, 30)); g.add(b); } on(sd === 0); };
+      for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 18), soft('#ffe27a', 0.32)), base = new THREE.Vector3(-4 - k * 8, 3, SIDEZ[0] + 4); b.position.copy(base).addScaledVector(sunDir, 9); b.lookAt(base.clone().addScaledVector(sunDir, 30)); g.add(b); stuff.push(b); } on(sd === 0); };
     s.pulseM = marks.map((q) => q.m); s.spot = (name, i) => [-9, 3, SIDEZ[i] + (i ? -4 : 4)]; };
   s.tick = (t, dt) => { for (const p of walkers) { p.w.position.x += p.dir * p.v * dt; if (p.w.position.x < -74) p.w.position.x = 4; if (p.w.position.x > 4) p.w.position.x = -74; p.w.position.y = Math.abs(Math.sin(t * 6 + p.ph)) * 0.12; }
     if (cloudT >= 0) { cloudT += dt; setClouds(cloudT); } if (nightK > 0.05) for (const f of snow) { f.y -= f.v * dt; if (f.y < 0) f.y = 24; f.m.position.y = f.y; }
@@ -255,7 +262,7 @@ function settled(canTry) { $('first').hidden = true; ui({ step: T.homes[S.pick],
 function second(i) { const s = cur, first = S.first, w = s.level(first), a = s.airLevel(first); S.first = null; S.pick = i; s.swap(i);
   $('first').innerHTML = `<b>${esc(T.first)}: ${esc(T.homes[first])}</b><span><i class="mark ${w}">${MARK[w]}</i>${esc(T.checks[0])}</span><span><i class="mark ${a}">${MARK[a]}</i>${esc(T.checks[1])}</span>`; $('first').hidden = false;
   ui({ step: T.homes[i], say: [T.what, after(i)], tray: [btn(T.keepFirst, '', () => { S.pick = first; s.swap(first); settled(false); }), btn(T.keepThis, 'sun', () => settled(false))], over: '' }); }
-function recap() { const s = cur; $('first').hidden = true; ui({ step: T.recapT, say: T.recapQ, tray: [], over: '' }); s.recap((ok) => ui({ step: T.recapT, say: ok ? T.recapYes : T.recapNo, tray: [btn(T.next, 'sun', () => ui({ step: T.level, say: T.end, tray: [btn(T.replay, 'sun', job)], over: '' }))], over: null })); }
+function recap() { const s = cur; $('first').hidden = true; ui({ step: T.recapT, say: T.recapQ, tray: [], over: '' }); s.recap((ok) => ui({ step: T.recapT, say: ok ? T.recapYes : T.recapNo, tray: [btn(T.next, 'sun', () => { s.night(S.pick); ui({ step: T.nightT, say: [T.nightSay[s.level(S.pick)], T.end], tray: [btn(T.replay, 'sun', job)], over: '' }); })], over: null })); }
 
 // Florence breathes: frames 0 to 3 of her sheet, three each second
 { let n = 0; setInterval(() => { n = (n + 1) % 4; $('flo').style.setProperty('--col', n); }, 333); }

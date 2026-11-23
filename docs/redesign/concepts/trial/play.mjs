@@ -18,5 +18,5 @@ if (+side) { await tap('roof'); await shot('build-1', 2300); await tap('win', 6)
 await p.click('[data-c="2"]'); await tap('door'); await shot('build-4', 600);
 await has('Next'); await shot('build-done'); await click('Next'); await has('Try another plan'); await shot('town', 800);
 await click('Try another plan'); await shot('other-plans'); await p.click(`[data-plan="${(+plan + 1) % 3}"]`); await shot('what-changed', 900); await click('Go back to my first plan'); await shot('first-kept', 900);
-await click('Next'); await shot('recap', 900); await tap('side', +side ? 0 : 1); await shot('recap-answer', 900); await click('Next'); await shot('end', 900);
+await click('Next'); await shot('recap', 900); await tap('side', +side ? 0 : 1); await shot('recap-answer', 900); await click('Next'); await shot('night-1', 3200); await shot('night-2', 8500);
 await b.close(); srv.close();
