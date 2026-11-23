@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eco Town trial level: a school for everyone</title>
+<!-- The page, Florence's band and the order of the steps come from the shared kit in ../../level-kit/. This level's own code is in level.js, valley.js, bus.js and parts.js. Every word on the page is a placeholder. -->
+<link rel="stylesheet" href="../../../ui/tokens.css">
+<link rel="stylesheet" href="../../level-kit/kit.css">
+<style>
+  /* the badges of this level: a shoe in a round badge for a child who walked, a car in a square badge for a child who was driven */
+  .bdgs { display: inline-flex; flex-wrap: wrap; gap: 2px; vertical-align: middle; }
+  .bdg { width: 24px; height: 24px; flex: none; }
+  .card .res .bdgs { display: flex; margin-bottom: 4px; }
+  .plate.board { padding: 6px 8px; } .plate.board .bdg { width: 28px; height: 28px; }
+  /* the strips that keep each finished test on the screen, one for each plan */
+  .strips { position: absolute; left: 16px; right: 16px; top: 76px; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; pointer-events: none; }
+  .strip { display: flex; flex-direction: column; gap: 5px; padding: 8px 12px 9px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 16px/1.2 var(--ui-body); animation: pop .3s var(--ui-ease-pop) both; }
+  .strip.wait { background: rgba(255, 250, 240, .55); border-style: dashed; box-shadow: none; color: var(--ui-ink-soft); } .strip.now { background: #fff3c9; }
+  .sws.four { grid-template-columns: repeat(4, 42px); }
+  @media (max-width: 1100px), (max-height: 700px) { .bdg { width: 19px; height: 19px; } .plate.board .bdg { width: 22px; height: 22px; } .strips { top: 62px; gap: 8px; } .strip { padding: 5px 8px 6px; font-size: 13px; gap: 3px; } .sws.four { grid-template-columns: repeat(4, 32px); } }
+</style>
+</head>
+<body>
+<script type="module" src="level.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+// Plays the School level through and saves a picture of every step: node play.mjs <out dir> [width] [height] [word 0-2] [plan 0-2] [try another 0|1] [speed]
+// A speed above 1 is for quick checks only. The browser, the pictures, the presses and the taps come from the shared helper in ../../level-kit/record.mjs.
+import { openLevel } from '../../level-kit/record.mjs';
+const [out = 'pictures/run', W = 1440, H = 810, word = 1, plan = 2, tryOther = 0, speed = 1] = process.argv.slice(2);
+const r = await openLevel({ page: 'concepts/levels/school/index.html', out, width: W, height: H, speed: +speed }), { shot, click, has, tap, pause, until } = r; r.p.setDefaultTimeout(240000);
+const WORDS = ['in the town', 'between the town and the farms', 'by the farms'], want = (w) => until((w) => window.trial.cur.wants && window.trial.cur.wants() === w, w);
+await shot('job', 2500); await click('Start'); await shot('ask', 2600); await click(WORDS[word]); await shot('ask-word', 900); await click('Ask Florence'); await has('Ring the school bell'); await shot('plans', 900);
+await click('Ring the school bell'); for (const k of [0, 1, 2]) { await shot(`test-${k + 1}a`, k ? 5200 : 3600); await shot(`test-${k + 1}b`, 3600); await shot(`test-${k + 1}c`, 3400); } await has('Ask again'); await shot('results', 2200);
+await r.usePlan(plan); await has('Set off'); await shot('bus-colour', 1500); await r.p.click('[aria-label="Pink flag"]'); await shot('bus-colour-chosen', 700); await click('Set off');
+let n = 0; const friends = async (stopAt) => { for (;;) { await until(() => window.trial.cur.wants && window.trial.cur.wants()); const w = await r.p.evaluate(() => window.trial.cur.wants()); if (w !== 'friend') return w; n++; await shot(`bus-friend-${n}`, 900); await tap('friend', 0); await shot(`bus-joined-${n}`, 1500); } };
+await friends(); await shot('bus-fork', 900); await tap('fork', +plan % 2); await shot('bus-way-a', 3200); await shot('bus-way-b', 2600); await friends(); await shot('bus-crossing', 1800); await tap('button', 0); await shot('bus-wait', 1500);
+await shot('bus-green', 4200); await shot('bus-cross', 2200); await want('rope'); await shot('bus-rope', 2200);
+{ const q = await r.p.evaluate(() => { const rect = document.getElementById('c').getBoundingClientRect(); return window.trialProject(...window.trial.cur.spot('rope', 0), rect); }); await r.p.mouse.move(q[0], q[1]); await r.p.mouse.down(); await r.p.mouse.move(q[0], q[1] + 40, { steps: 4 }); await shot('bus-rope-pull', 300); await r.p.mouse.move(q[0], q[1] + 90, { steps: 4 }); await r.p.mouse.up(); }
+await shot('bus-bell', 1500); await has('Next'); await shot('bus-done', 600); await click('Next'); await shot('town-1', 3500); await shot('town-2', 3500); await has('Try another plan'); await shot('town', 1200);
+if (+tryOther) { r.tryStart(); await click('Try another plan'); await shot('other-plans', 1200); await r.p.click(`[data-plan="${(+plan + 1) % 3}"]`); await shot('what-changed', 2200); await click('Go back to my first plan'); await shot('first-kept', 2200); r.tryEnd(); }
+await click('Next'); await shot('recap', 2400); await tap('answer', 2); await shot('recap-answer', 900); await click('Next'); await shot('end-1', 3000); await shot('end-2', 5000); r.report(); await r.close();

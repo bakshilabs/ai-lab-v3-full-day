@@ -15,7 +15,7 @@ await shot('job', 2500); await click('Start'); await shot('ask', 2600);
 await click(WORDS[0]); await shot('ask-paths', 900); await click(WORDS[1]); await shot('ask-park', 900);
 await click('Ask Florence'); await has('Open the shops'); await shot('plans', 900);
 await click('Open the shops'); await shot('test-opening', 3300);
-for (const i of [0, 1, 2]) { await r.until((i) => document.querySelectorAll('.pc img').length === i && /morning/.test(document.getElementById('say').textContent), i); await shot(`test-${i + 1}-start`, 2600); await shot(`test-${i + 1}-walking`, 3600); await r.until((i) => document.querySelectorAll('.pc img').length === i + 1, i); await shot(`test-${i + 1}-postcard`, 500); }
+for (const i of [0, 1, 2]) { await r.until((i) => document.querySelectorAll('.pc img').length >= i && /morning/.test(document.getElementById('say').textContent), i); await shot(`test-${i + 1}-start`, 2600); await shot(`test-${i + 1}-walking`, 3600); await r.until((i) => document.querySelectorAll('.pc img').length >= i + 1, i); await shot(`test-${i + 1}-postcard`, 500); }
 await has('Ask again'); await shot('results', 1200);
 if (path === 'look') { await r.close(); process.exit(0); }
 if (path === 'park') {

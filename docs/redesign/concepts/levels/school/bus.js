@@ -99,7 +99,7 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
     FLAGS.forEach(([name, hex], k) => { const q = document.createElement('button'); q.className = `sw${k === flagN ? ' on' : ''}`; q.style.background = hex; q.setAttribute('aria-label', `${name} flag`); q.onclick = () => { setFlag(k); beep(500 + k * 80, 0.08); tray(); }; sw.append(q); }); box.append(h, sw);
     api.tray([box, ...(started ? [] : [btn(W.go, 'sun', () => { started = true; tray(); answer(); })]), ...(showSkip && !done ? [btn(W.skip, '', () => { auto = true; showSkip = false; tray(); answer(); })] : [])], false); };
 
-  async function play() { const live = () => me === run; s.spot = (name, i = 0) => ({ friend: () => [gates[at], 1.1, -1.6], fork: () => ways[i].at, button: () => [xc - 0.7, 1.1, -1.2], rope: () => ROPE.at() }[name]());
+  async function play() { const live = () => me === run; s.wants = () => want; s.spot = (name, i = 0) => ({ friend: () => [gates[at], 1.1, -1.6], fork: () => ways[i].at, button: () => [xc - 0.7, 1.1, -1.2], rope: () => ROPE.at() }[name]());
     tw(180, () => {}).then(() => { if (live() && !done) { showSkip = true; tray(); } });
     api.say(W.colour); tray(); await until('go'); if (!live()) return; started = true; tray(); chime();
     const stopAt = async (j) => { await walkTo(dOf(gates[j]) + GAP * (j + 1) + 0.1); if (!live()) return; at = j; marks[j].visible = true; api.say(cfg.ids[j] === 6 ? W.family : W.friend); await until('friend'); if (!live()) return; marks[j].visible = false; beep(620 + j * 60, 0.1);
