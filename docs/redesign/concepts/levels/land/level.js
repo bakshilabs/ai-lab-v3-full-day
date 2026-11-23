@@ -189,7 +189,7 @@ function valley() {
   const clearHuts = () => { tags.forEach((t) => { t.hide = true; }); huts.flat().forEach((q) => tw(0.5, (t) => { q.g.scale.setScalar(Math.max(0.01, (1 - ease(t)) * q.k)); if (t >= 1) q.g.visible = false; })); };
   s.playBreak = async (pick, api) => { const me = run; site = pick; clearHuts(); brolly.visible = false; mud.visible = true; toWeather(0.08, 1, 2.4); toLevel(0, 2.4); s.still = true; await glide(PLAN[pick], 2.6); if (me !== run) return;
     const P = PLACES[pick], used = new Set(), marks = P.map(([x, y, z]) => glowMarks(place(g, x, z, 2.7, 2.7, y + 0.02))), N = { home: 10, green: 1 }; let tool = 'home', flag = 0, done = false;
-    const sign = plate(s, words.line, pick === 0 ? [-13.5, HIGH, 1.2] : pick === 1 ? [20, HIGH, -17.6] : [14, HIGH, -17.4], 'line'); s.lineSign = sign;
+    const sign = plate(s, words.line, pick === 0 ? [-13.5, HIGH, 4.8] : pick === 1 ? [20, HIGH, -17.6] : [14, HIGH, -17.4], 'line'); s.lineSign = sign;
     walker = fig(g, P[0][0], P[0][1], P[0][2] + 4, { ...FAMILY[0], pack: '#ffd257', arms: ['up', 'down'], k: 1.25 });
     const tok = {}, mk = (k) => { const b = document.createElement('button'); b.onclick = () => { if (N[k] && !done) { tool = k; draw(); } }; tok[k] = b; return b; }, sw = document.createElement('div');
     sw.innerHTML = `<div class="sws-h">${esc(words.flag)}</div><div class="sws">${FLAG.map((c, k) => `<button class="sw" data-c="${k}" style="background:${c}" aria-label="${esc(words.flag)} ${k + 1}"></button>`).join('')}</div>`;
@@ -220,7 +220,7 @@ function valley() {
   // ---- the recap: a tap on the place that stayed dry. Any answer goes on ----------------------------------------------------------------
   s.recap = (answer) => { swapN++; raining = 0; rain.visible = false; toLevel(0, 1.4); toWeather(0.05, 1, 1.4); glide(V0, 1.6); let open = true; const signs = [];
     s.spot = (name, i) => [MID[i][0], MID[i][1] + 1, MID[i][2]];
-    MID.forEach(([x, y, z], i) => { const go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(i === 2 ? 880 : 300, 0.15); if (i === 2) chime(); answer(i === 2); }, pl = plate(s, words.here, [x, y + (i === 2 ? 6 : 5), z], 'tap'); signs.push(pl); pl.el.onclick = go;
+    MID.forEach(([x, y, z], i) => { const go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(i === 2 ? 880 : 300, 0.15); if (i === 2) chime(); answer(i === 2); }, pl = plate(s, words.here, [x, y + (i === 2 ? 6 : i === 1 ? 2.8 : 5), z], 'tap'); signs.push(pl); pl.el.onclick = go;
       hitBox(s, g, x, y - 1, z, i === 2 ? 30 : 22, 7, i === 2 ? 16 : 13, () => open, go); }); };
   s.evening = () => { toWeather(0.02, 1, 2); glide({ eye: [TOWN[site].eye[0] + 3, 7.6, 27], at: TOWN[site].at, fov: TOWN[site].fov - 5 }, 4); };
 

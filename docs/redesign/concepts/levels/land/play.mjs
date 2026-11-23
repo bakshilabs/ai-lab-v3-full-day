@@ -3,7 +3,7 @@
 // plan is the plan that the child chooses (0 the bank, 1 the meadow, 2 the hill). If a second plan is given, the script also presses "Try another plan".
 import { openLevel } from '../../level-kit/record.mjs';
 const [out = 'pictures/run', width = 1440, height = 810, plan = 2, other = -1, speed = 1] = process.argv.slice(2);
-const r = await openLevel({ page: 'concepts/levels/land/index.html', out, width: +width, height: +height, speed: +speed }), { shot, click, has, tap } = r;
+const r = await openLevel({ page: 'concepts/levels/land/index.html', out, width: +width, height: +height, speed: +speed }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);   // the recording machine is slow when other recordings run at the same time
 const WORD = ['on a bank beside the river', 'far away from the river', 'high up and far away'];
 // the places that the sample child chooses, in this order: ten homes and then the town green
 const ORDER = [[0, 2, 4, 6, 7, 9, 11, 12, 14, 15, 8], [0, 1, 3, 5, 6, 9, 10, 12, 14, 15, 7], [0, 1, 3, 4, 6, 7, 9, 11, 13, 15, 8]][+plan];
