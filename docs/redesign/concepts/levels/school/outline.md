@@ -4,11 +4,11 @@ This is an outline only, written on 23 November 2026. Nothing has been built. Th
 
 ## The place, and why it does not look like Homes
 
-The place is the whole valley of Eco Town seen as one long strip from the far bank of the river. The town and its clock tower are at the left end, the park is at the edge of the town, an open meadow lies in the middle, and the farm houses and barns are at the right end. One lane joins them all. Homes is a closed street that runs away from the camera under trees. This level is open country that runs across the screen from left to right, so the child can see "near" and "far" as a plain distance along one line. It is autumn, with orange and red trees, hay bales and a low mist on the river.
+The place is the whole valley of Eco Town seen as one long strip from the far bank of the river. The town and its clock tower are at the left end, the park is at the edge of the town, an open meadow lies in the middle, and the farm houses and barns are at the right end. One lane joins them all. Homes is a closed street that runs away from the camera under trees. This level is open country that runs across the screen from left to right, so the child can see "near" and "far" as a plain distance along one line. It is autumn, with orange and red trees, hay bales and bright leaves lying on the lane.
 
 ## The camera, the time of day and the weather
 
-The camera sits low on the opposite river bank, at the height of a child, with reeds and a duck in front of it. It moves sideways along the bank and never rises above the roofs. The time is early morning, just after sunrise. The sun is low behind the farms, the sky is pink and gold, the mist glows, and there is no wind. During the play break the camera crosses the river and travels beside the children at their shoulder height, as a film camera travels beside people who are walking.
+The camera sits low on the opposite river bank, at the height of a child, with reeds and a duck in front of it. It moves sideways along the bank and never rises above the roofs. The time is school time on a bright, crisp morning, at about half past eight. The sun is well up, the sky is high, clear and deep blue, and the shadows are sharp. A light breeze carries red and orange leaves across the lane and turns the weathercock on the clock tower, and there is no mist. During the play break the camera crosses the river and travels beside the children at their shoulder height, as a film camera travels beside people who are walking.
 
 ## What happens when the child presses "Ring the school bell"
 
@@ -44,6 +44,6 @@ The whole level should take about ten minutes. The test takes about thirty secon
 
 ## The two biggest risks
 
-The first risk is that the play break looks too much like the walk in the "Getting around" level, because both show people on a path. I will keep it distinct by making it about gathering friends into one growing line that ends at a bell, with a camera that travels beside the line and not behind it, at sunrise in autumn. If the other outline also gathers people along a route, one of us should change.
+The first risk is that the play break looks too much like the walk in the "Getting around" level, because both show people on a path. I will keep it distinct by making it about gathering friends into one growing line that ends at a bell, with a camera that travels beside the line and not behind it, on a bright morning of blowing autumn leaves. If the other outline also gathers people along a route, one of us should change.
 
 The second risk is that the long view across the river makes the children too small to read, and that three test runs in a row ask the child to remember the first one. I will make the figures large for the distance, keep the lane close to the near bank, and keep each finished run on the screen as a strip with its row of badges, so that the comparison never depends on memory.
