@@ -18,6 +18,16 @@ const TEX = {}; export function wallMat(kind) { if (TEX[kind]) return TEX[kind];
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return (TEX[kind] = new THREE.MeshLambertMaterial({ map: t })); }
 export function texBox(parent, x, z, w, d, y, h, mat) { const geo = new THREE.BoxGeometry(w, h, d), uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) { const f = Math.floor(i / 4); uv.setXY(i, uv.getX(i) * (f < 2 ? d : w) / 2, uv.getY(i) * (f === 2 || f === 3 ? d : h) / 0.8); }
   const m = new THREE.Mesh(geo, mat); m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; }
+// Small pictures that repeat, drawn in greys so that a material's own colour tints them: a window with a dark frame and a glint, a pane of glass, grass, leaves, and three wallpapers
+const PT = {}; export function patTex(kind) { if (PT[kind]) return PT[kind]; const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), R = (a, b, w, h, col) => { x.fillStyle = col; x.fillRect(a, b, w, h); }, rnd = (i, j) => hash(i * 7 + 1.3, j * 13 + 5.7), glint = () => { x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(6, 44); x.lineTo(44, 6); x.lineTo(58, 6); x.lineTo(6, 58); x.fill(); };
+  if (kind === 'win') { R(0, 0, 64, 64, '#7d7d7d'); R(5, 5, 54, 54, '#dcdcdc'); glint(); R(30, 5, 4, 54, '#9a9a9a'); R(5, 30, 54, 4, '#9a9a9a'); }
+  else if (kind === 'pane') { R(0, 0, 64, 64, '#dedede'); glint(); }
+  else if (kind === 'grass') { R(0, 0, 64, 64, '#e2e2e2'); for (let i = 0; i < 46; i++) R(Math.floor(rnd(i, 1) * 61), Math.floor(rnd(i, 2) * 58), 3, 6, rnd(i, 3) > 0.5 ? '#ffffff' : '#c2c2c2'); }
+  else if (kind === 'leaf') { for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) R(i * 16, j * 16, 16, 16, ['#ffffff', '#e4e4e4', '#c0c0c0', '#d4d4d4'][Math.floor(rnd(i, j) * 4)]); }
+  else if (kind === 'stripe') { R(0, 0, 64, 64, '#ffffff'); for (let i = 0; i < 8; i++) R(i * 8, 0, 3, 64, '#d0d0d0'); }
+  else if (kind === 'dot') { R(0, 0, 64, 64, '#ffffff'); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) R(i * 16 + (j % 2) * 8 + 2, j * 16 + 5, 5, 5, '#cfcfcf'); }
+  else { R(0, 0, 64, 64, '#e6e6e6'); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { R(i * 16 + (j % 2) * 8 + 3, j * 16 + 6, 6, 2, '#ffffff'); R(i * 16 + (j % 2) * 8 + 5, j * 16 + 4, 2, 6, '#ffffff'); } }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return (PT[kind] = t); }
 // How tall a home is, to the top of its roof
 export const homeTop = (insLevel) => YA + AH + 0.25 + TI[insLevel || 0] + 0.85;
 
@@ -56,18 +66,18 @@ export function makeHome(parent, o) {
   const ri = group(g, 0, YA, 0), I = (x, z, ww, dd, y, h) => blk(ri, x, z, ww, dd, y, h, INS, { mat: ins, shadow: false }); for (const sx of [-1, 1]) { I(sx * (a1 + ti / 2), (zo + zfA) / 2, ti, zfA - zo, 0, RH); I(sx * (a2 + w / 2 + 0.1) / 2, -0.05, w / 2 + 0.1 - a2, d + 0.1, 0, ti); } I(0, zbA - 0.26 - ti / 2, 2 * a1, ti, 0, RH); I(0, (zo + zfA) / 2, 2 * a2, zfA - zo, RH, ti);
   const roof = group(g, 0, YA, 0), R = (x, z, ww, dd, y, h) => blk(roof, x, z, ww, dd, y, h, o.roofC, { mat: rc }); for (const sx of [-1, 1]) { R(sx * (a3 + w / 2 + 0.45) / 2, -0.2, w / 2 + 0.45 - a3, d + 0.5, ti, 0.3); R(sx * (a2 + 0.125), (zo + zfA) / 2, 0.25, zfA - zo, ti, RH); } R(0, zo - 0.125, 2 * a3, 0.25, ti, RH); R(0, -0.05, 2 * a3 + 0.6, d + 0.9, RH + ti, 0.45); R(0, -0.05, a3 * 1.1, d + 0.9, RH + ti + 0.45, 0.4);
   m.ropes = [-0.6 * a3, 0.6 * a3].map((x) => { const r = blk(roof, x, 0, 0.08, 0.08, RH + ti + 0.45, 16, '#2b3a55', { shadow: false }); r.visible = false; return r; }); rb.visible = roof.visible = vis; ri.visible = vis && !noIns; Object.assign(m, { rb, ri, roof, yr: YA });
-  if (!vis) { m.roofMark = group(g, 0, YA, 0); frame(m.roofMark, 0, 0.1, d / 2 + 0.25, 2 * a3 + 0.4, AH + 0.2, true, { fill: 0.45 }); m.roofMark.visible = false; }
+  if (!vis) { m.roofMark = group(g, 0, YA, 0); frame(m.roofMark, 0, 0.1, d / 2 + 0.25, 2 * a3 + 0.4, AH + 0.2, true, { fill: 0.7 }); m.roofMark.visible = false; }
   // the front wall: two leaves on hinges at the corners, each with half of the front of the attic. The door and the front windows are in the leaves
   const HT = TOP - Y0, GH = RH + ti, leaves = [-1, 1].map((sx) => { const lg = group(g, sx * w / 2, Y0, d / 2), q = layers({ lg, sx }, lg, w / 2, HT, -sx * w / 4); layers(q, lg, a3, GH, -sx * (w / 2 - a3 / 2), HT + SL); q.out = brick ? q.fr : q.pn; return q; }); m.leaves = leaves;
   m.openK = 0; m.setOpen = (k) => { m.openK = k; for (const q of leaves) q.lg.rotation.y = q.sx * k * OPEN; };
   if (!vis) { m.frontMark = group(g, 0, Y0, d / 2 + 0.15); frame(m.frontMark, 0, 0.15, 0, w - 0.4, HT - 0.4, true, { fill: 0.3 }); m.frontMark.visible = false; }
-  const smallM = flat(GLASS), lampM = flat('#fff3cf'), small = (q, x, y, s) => { const sm = group(q.out), lxx = x - q.sx * w / 2; blk(sm, lxx, -T / 2, s + 0.25, T + 0.1, y - 0.12, s + 0.25, '#fbfbf7', { mat: white, shadow: false }); blk(sm, lxx, -T / 2, s, T + 0.16, y, s, GLASS, { shadow: false, mat: smallM }); return sm; };
+  const smallM = new THREE.MeshBasicMaterial({ color: GLASS, map: patTex('pane') }), lampM = flat('#fff3cf'), small = (q, x, y, s) => { const sm = group(q.out), lxx = x - q.sx * w / 2; blk(sm, lxx, -T / 2, s + 0.25, T + 0.1, y - 0.12, s + 0.25, '#fbfbf7', { mat: white, shadow: false }); blk(sm, lxx, -T / 2, s, T + 0.16, y, s, GLASS, { shadow: false, mat: smallM }); return sm; };
   for (const q of leaves) small(q, q.sx * 0.85, HT + SL + 0.75, 0.85);
   const doorX = 0.25 * w, doorMat = new THREE.MeshLambertMaterial({ color: o.doorC }), door = group(leaves[1].lg, doorX - w / 2, 0, 0); blk(door, 0, -T / 2, 1.6, T + 0.12, 0, 2.45, '#fff', { mat: doorMat }); blk(door, -0.5, 0.08, 0.18, 0.1, 1.15, 0.18, '#ffd257', { shadow: false, mat: flat('#ffd257') }); door.visible = vis;
   m.door = door; m.doorMat = doorMat; if (!vis) { m.doorMark = group(g, doorX, Y0, d / 2 + 0.2); frame(m.doorMark, 0, 0, 0, 1.9, 2.7, true); m.doorMark.visible = false; }
   // Five places in the front wall each have a small window. A big window can take the place of two of them. Behind each is a shaft of sunlight, which is shown only if the sun reaches that window
   const shaftM = soft('#fff3a8', 0.15), patchM = flat('#fff3b0');
-  for (const [x, f] of [[-0.25 * w, 0], [-0.25 * w, 1], [0.25 * w, 1], [-0.25 * w, 2], [0.25 * w, 2]]) { const lf = leaves[x < 0 ? 0 : 1], y = YF[f] - Y0, sm = small(lf, x, y + 1, 1), p = group(lf.lg, x - lf.sx * w / 2, y + 0.55, 0), gm = flat(GLASS);
+  for (const [x, f] of [[-0.25 * w, 0], [-0.25 * w, 1], [0.25 * w, 1], [-0.25 * w, 2], [0.25 * w, 2]]) { const lf = leaves[x < 0 ? 0 : 1], y = YF[f] - Y0, sm = small(lf, x, y + 1, 1), p = group(lf.lg, x - lf.sx * w / 2, y + 0.55, 0), gm = new THREE.MeshBasicMaterial({ color: GLASS, map: patTex('pane') });
     blk(p, 0, -T / 2, 2.25, T + 0.1, 0, 1.85, '#fbfbf7', { mat: white }); blk(p, 0, -T / 2, 1.9, T + 0.18, 0.17, 1.51, GLASS, { shadow: false, mat: gm }); blk(p, 0, -T / 2, 0.12, T + 0.22, 0.17, 1.51, '#fbfbf7', { shadow: false, mat: white }); p.visible = false;
     const q = { p, gm, sm, f, fy: YF[f], at: [x, YF[f], d / 2 - T - 1.35], c: [x, YF[f] + 1.5, d / 2 + 0.3], on: false };
     q.shaft = blk(g, q.at[0], q.at[2], 2, 2.4, q.fy + 0.06, 2.2, '#fff1a0', { shadow: false, mat: shaftM }); q.patch = blk(g, q.at[0], q.at[2], 2.1, 2.5, q.fy + 0.06, 0.04, '#fff1a0', { shadow: false, mat: patchM }); q.shaft.visible = q.patch.visible = false;
@@ -89,7 +99,11 @@ export function makeHome(parent, o) {
   const plant = (pg, x, z) => { F(pg, x, z, 0.4, 0.4, 0, 0.4, '#c8643f'); F(pg, x, z, 0.7, 0.7, 0.4, 0.6, '#5fb04e'); F(pg, x, z, 0.4, 0.4, 1, 0.35, '#77c765'); };
   const G0 = group(furn, 0, Y0, 0), G1 = group(furn, 0, YF[1], 0), G2 = group(furn, 0, YF[2], 0), G3 = group(furn, 0, YA, 0), tx = full ? xl + 2.7 : xl + 1.5, tz = zfi - 1.5, sfx = full ? xl + 2.8 : xl + 1.3, sfz = zb + 1.5, sflen = full ? 2.6 : 2;
   // Coloured walls go up with the furniture in every room of an insulated home, and leave a band at the top where the insulation can still be seen. A home with no insulation keeps its bare frame
-  if (!noIns) [[G0, '#9fd3b4'], [G1, '#f2ab8e'], [G2, '#a3b9ea']].forEach(([pg, c]) => { const h = FH * 0.72; F(pg, 0, zb + 0.03, xr - xl, 0.06, 0, h, c); for (const sx of [-1, 1]) F(pg, sx * (xr - 0.03), (zb + zfi) / 2, 0.06, zfi - zb, 0, h, c); });
+  const PAPER = [['#74c79a', 'stripe'], ['#f08a66', 'dot'], ['#7c9ce8', 'star'], ['#b58be0', 'dot']].map(([c, k]) => { const mt = new THREE.MeshLambertMaterial({ color: c, map: patTex(k) }); return mt; }), papers = [];
+  if (!noIns) { [G0, G1, G2].forEach((pg, f) => { const h = FH * 0.72, mt = PAPER[f]; F(pg, 0, zb + 0.03, xr - xl, 0.06, 0, h, '#fff', mt); F(pg, 0, zb + 0.08, xr - xl, 0.05, 0, 0.22, '#fbfbf7'); for (const sx of [-1, 1]) F(pg, sx * (xr - 0.03), (zb + zfi) / 2, 0.06, zfi - zb, 0, h, '#fff', mt);
+      for (const q of leaves) { const pp = blk(q.lg, -q.sx * w / 4, -T - 0.02, w / 2 - 0.04, 0.04, YF[f] - Y0, h, '#fff', { shadow: false, mat: mt }); pp.visible = vis; papers.push(pp); } }); F(G3, 0, zbA + 0.03, 2 * ah, 0.06, 0, AH * 0.72, '#fff', PAPER[3]); }
+  // a soft warm lamp in front of the family's open home lights the rooms
+  const light = o.light ? new THREE.PointLight('#ffe6bf', 0, 30, 0) : null; if (light) { light.position.set(0, 7.5, d / 2 + 5); g.add(light); if (vis) light.intensity = 0.85; }
   // the ground floor
   F(G0, tx, tz, full ? 2 : 1.5, 1.1, 0.72, 0.1, '#c99a5e'); for (const sx of [-1, 1]) F(G0, tx + sx * (full ? 0.75 : 0.5), tz, 0.14, 0.8, 0, 0.72, '#b9834a'); chair(G0, tx - 0.45, tz - 0.85, '#e0503a', -1); chair(G0, tx + 0.45, tz + 0.85, '#16a3a3', 1); lamp(G0, tx, tz);
   if (full) { chair(G0, tx + 0.45, tz - 0.85, '#e0a23a', -1); chair(G0, tx - 0.45, tz + 0.85, '#3f78b5', 1); F(G0, tx, tz, 0.5, 0.4, 0.82, 0.12, '#fbfbf7'); F(G0, tx - 0.08, tz, 0.16, 0.16, 0.9, 0.14, '#e0503a'); F(G0, tx + 0.1, tz, 0.16, 0.16, 0.9, 0.14, '#e9ad1c'); F(G0, tx, tz, 3, 2.9, 0.06, 0.03, '#f0c9b4');
@@ -98,6 +112,7 @@ export function makeHome(parent, o) {
   // the first floor
   sofa(G1, sfx, sfz, sflen, '#16a3a3'); lamp(G1, sfx, sfz + 1.2); F(G1, sfx + sflen / 2 + 0.4, sfz - 0.2, 0.08, 0.08, 0, 1.6, '#2b3a55'); F(G1, sfx + sflen / 2 + 0.4, sfz - 0.2, 0.5, 0.5, 1.5, 0.4, '#ffd257', lampM);
   if (full) { F(G1, xl + 0.6, zb + 0.22, 1.1, 0.4, 0, 2.1, WOOD); for (let k = 0; k < 3; k++) F(G1, xl + 0.6, zb + 0.3, 0.9, 0.3, 1.05 + k * 0.33, 0.24, ['#e0503a', '#3f78b5', '#2e9b5a'][k]); F(G1, sfx, sfz + 1.5, 1.2, 0.6, 0, 0.36, '#c99a5e'); F(G1, sfx, sfz + 1.4, 3.2, 2.2, 0.01, 0.03, '#f3d9a0');
+    F(G1, sfx + 0.2, zb + 0.1, 1.1, 0.08, 1.35, 0.75, '#fbfbf7'); F(G1, sfx + 0.2, zb + 0.14, 0.9, 0.06, 1.45, 0.55, '#3f9bd8'); F(G1, sfx + 0.45, zb + 0.16, 0.3, 0.06, 1.45, 0.3, '#ffd257'); F(G1, sfx + 1.6, zb + 0.1, 0.6, 0.08, 1.2, 0.6, '#2b3a55'); F(G1, sfx + 1.6, zb + 0.14, 0.44, 0.06, 1.28, 0.44, '#f6eedc');
     // the cat sleeps on the sofa
     const cx = sfx + sflen / 2 - 0.75, cz = sfz + 0.05; F(G1, cx, cz, 0.5, 0.28, 0.45, 0.22, '#e9963a'); F(G1, cx + 0.3, cz + 0.02, 0.24, 0.24, 0.5, 0.24, '#e9963a'); for (const s of [-1, 1]) F(G1, cx + 0.3 + s * 0.08, cz + 0.02, 0.07, 0.07, 0.74, 0.08, '#e9963a'); F(G1, cx - 0.3, cz, 0.1, 0.1, 0.5, 0.3, '#c97a26');
     // the bath, behind a low wall of tiles
@@ -114,7 +129,7 @@ export function makeHome(parent, o) {
       F(G3, -ah + 0.4, zbA + 0.3, 0.5, 0.36, 0, 0.14, '#3f78b5'); F(G3, -ah + 0.42, zbA + 0.3, 0.44, 0.34, 0.14, 0.12, '#2e9b5a'); F(G3, 0, zc, 0.06, 0.06, AH - 0.4, 0.4, '#2b3a55'); F(G3, 0, zc, 0.5, 0.5, AH - 0.66, 0.28, '#fff3cf', lampM); } else F(G3, -ah + 0.8, zc, 0.8, 0.8, 0, 0.7, '#c99a5e'); }
 
   // night: lv is 'g' (warm), 'f' (a little cold) or 'p' (cold); null is day. A warm person sleeps in bed, and a cold person stands by the heater and shivers
-  m.setNight = (lv) => { m.lv = lv; const c = lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : null; smallM.color.set(c || GLASS); lampM.color.set(lv === 'g' ? '#fff0a0' : lv ? '#c9cfdc' : '#fff3cf'); ins.color.set(lv ? { g: '#e6c267', f: '#b3a57c', p: '#8a909c' }[lv] : INS); lining.color.set(lv ? { g: '#f7dfa4', f: '#c9bfa8', p: '#9aa6bb' }[lv] : '#f6eedc'); for (const q of glow) q.visible = !!lv; if (lv) { glowM.color.set(NIGHT[lv][0]); glowM.opacity = NIGHT[lv][1]; m.heat.leak = LEAK[lv]; }
+  m.setNight = (lv) => { m.lv = lv; const c = lv ? (lv === 'g' ? '#ffe27a' : NIGHT[lv][0]) : null; smallM.color.set(c || GLASS); lampM.color.set(lv === 'g' ? '#fff0a0' : lv ? '#c9cfdc' : '#fff3cf'); ins.color.set(lv ? { g: '#e6c267', f: '#b3a57c', p: '#8a909c' }[lv] : INS); lining.color.set(lv ? { g: '#f7dfa4', f: '#c9bfa8', p: '#9aa6bb' }[lv] : '#f6eedc'); for (const q of glow) q.visible = !!lv; if (lv) { glowM.color.set(NIGHT[lv][0]); glowM.opacity = NIGHT[lv][1]; m.heat.leak = LEAK[lv]; } if (light && furn.visible) { light.intensity = lv === 'g' ? 1.9 : lv ? 1.1 : 0.85; light.color.set(lv && lv !== 'g' ? '#cfd8ff' : '#ffe6bf'); }
     for (const q of m.spots) if (q.on) { q.shaft.visible = q.patch.visible = !lv && q.sunny; q.gm.color.set(c || (q.sunny ? '#fff3b0' : GLASS)); } if (lv) m.people.forEach((p, k) => { p.cold = lv === 'p' || (lv === 'f' && k === 0); }); if (furn.visible) m.live(lv ? 'night' : 'day'); };
   // the people: each has a place to stand, shivers when cold with a snowflake over the head, and sleeps with a Z over the head
   const stand = [[-0.34 * w, Y0, 0.1 * d], [-0.1 * w, Y0, -0.06 * d], [0.33 * w, Y0, 0.12 * d]], ZM = flat('#2a4a9a');
@@ -127,7 +142,7 @@ export function makeHome(parent, o) {
   m.live = (kind) => { m.people.forEach((p, k) => { if (kind === 'night') { if (p.cold) setMode(p, [hx - 0.9 + k * 0.95, Y0, hz + 1.2 + (k % 2) * 0.45]); else { const b = beds[k % beds.length]; setMode(p, [b.x, b.y + 0.27 * p.k, b.z], 'bed'); } }
     else if (!full) setMode(p, k ? [sfx + sflen / 2 + 0.9, YF[1], sfz + 0.9] : [tx + 1.3, Y0, tz + 0.5]); else if (k === 0) setMode(p, [-0.4, YA, (zbA + zfA) / 2 + 0.7]); else if (k === 1) setMode(p, [sfx - 0.1, YF[1] + 0.47 - 0.42 * p.k, sfz - 0.05], 'sit'); else setMode(p, [(xl + 0.95 + hx - 0.85) / 2 - 0.1, Y0, zb + 1.35]); }); };
   // the furniture is carried in while the front wall is closed, and the family takes its places
-  m.furnish = () => { furn.visible = true; for (const p of m.people) p.pg.visible = true; m.live(m.lv ? 'night' : 'day'); };
+  m.furnish = () => { furn.visible = true; for (const pp of papers) pp.visible = true; if (light) light.intensity = 0.85; for (const p of m.people) p.pg.visible = true; m.live(m.lv ? 'night' : 'day'); };
   // a person walks to a place on any of the three floors, by the stairs if need be
   const floorOf = (y) => Math.max(0, Math.min(2, Math.round((y - Y0) / STEP)));
   m.walk = async (k, f, x, z, sec = 1) => { const p = m.people[k], pts = [[...p.pos]]; let c = floorOf(p.pos[1]); while (c !== f) { const lo = Math.min(c, c < f ? c + 1 : c - 1), a = [[sx0 - 0.3, YF[lo], zs + 1.3], [sx0 - 0.1, YF[lo], zs], [sx1 + 0.2, YF[lo + 1], zs], [lx, YF[lo + 1], zs], [lx, YF[lo + 1], zh + 0.5]]; pts.push(...(c < f ? a : a.reverse())); c += c < f ? 1 : -1; } pts.push([x, YF[f], z]);
