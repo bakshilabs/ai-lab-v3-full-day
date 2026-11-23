@@ -1,4 +1,4 @@
-// The lighting effects of the trial level (owner, 23 Nov 2026: "The classrooms have fast windows computers. Remove the
+// The lighting effects that every level shares. They were written for the Homes trial (owner, 23 Nov 2026: "The classrooms have fast windows computers. Remove the
 // quality limits."). This file was written for the trial; it uses only three.js itself and no add-on files.
 // The town is first drawn into a picture that can hold light brighter than white. Then four small steps are run over it:
 //   1. soft darkening where blocks meet (ambient occlusion), worked out from how far away each point of the picture is;

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eco Town: Power (trial level)</title>
+<!-- A trial of level 5 of Eco Town, "Power". It runs on the shared level kit. Every word on this page is a placeholder. -->
+<link rel="stylesheet" href="../../../ui/tokens.css">
+<link rel="stylesheet" href="../../level-kit/kit.css">
+<style>
+/* Only the parts that belong to this level: the numbers of the play break, the parts to place and the colours of the stripe */
+.pw { display: flex; gap: 8px; align-items: stretch; }
+.pw div { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 92px; padding: 6px 10px 7px; background: #fff; border: 3px solid var(--ui-ink); border-radius: 14px; font: 700 14px/1.15 var(--ui-body); text-align: center; }
+.pw div b { font: 800 34px/1 var(--ui-display); }
+.pw div.bat { background: var(--ui-sun); }
+.pw div[hidden] { display: none; }
+.part { display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 6px 14px; background: #fff; border: 3px dashed var(--ui-ink-soft); border-radius: 14px; font: 800 19px/1.1 var(--ui-display); cursor: pointer; }
+.part small { display: block; font: 700 14px/1.2 var(--ui-body); color: var(--ui-ink-soft); }
+.part.on { background: var(--ui-sun); border-style: solid; border-color: var(--ui-ink); box-shadow: 0 5px 0 var(--ui-ink); }
+.part.done { opacity: .55; cursor: default; }
+.stripes { display: flex; align-items: center; gap: 8px; font: 700 15px/1.2 var(--ui-body); }
+.stripes button { width: 46px; height: 46px; border: 3px solid var(--ui-ink); border-radius: 12px; box-shadow: 0 4px 0 var(--ui-ink); cursor: pointer; }
+.stripes button.on { outline: 4px solid var(--ui-sun); outline-offset: 2px; }
+.plate.num { font: 800 30px/1 var(--ui-display); text-align: center; background: var(--ui-sun); }
+.plate.mine { background: var(--ui-sun); }
+@media (max-width: 1100px), (max-height: 700px) { .pw div { min-width: 70px; padding: 4px 6px; font-size: 12px; } .pw div b { font-size: 24px; } .part { min-height: 44px; font-size: 16px; padding: 4px 10px; } .stripes button { width: 36px; height: 36px; } .plate.num { font-size: 22px; } }
+</style>
+</head>
+<body>
+<script type="module" src="level.js"></script>
+</body>
+</html>

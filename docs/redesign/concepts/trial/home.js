@@ -7,45 +7,22 @@
 // They stay under the roof when it is insulated and leave through the top when it is not. Warm and cold can be seen
 // without colour: by where the warm air goes, by who sleeps in bed and who stands shivering by the heater, by a small
 // snowflake over a cold person's head and by the letter Z over a sleeper.
-import { THREE, blk, group, soft, fig, frame, hash } from '../kit-v2.js';
+import { THREE, blk, group, soft, fig, frame, hash, wallMat, texBox, patTex, tileMat } from '../level-kit/blocks.js';
 export const FH = 2.8, SL = 0.25, Y0 = 0.3, STEP = FH + SL, YF = [Y0, Y0 + STEP, Y0 + 2 * STEP], TOP = Y0 + 3 * FH + 2 * SL, YA = TOP + SL, AH = 2.3;
 const WOOD = '#b9834a', INS = '#f6d77a', BOARD = '#f1e2c4', PALE = '#f6eddb', GLASS = '#a9d3ee', TI = [0.02, 0.3, 0.6];
 const NIGHT = { g: ['#ffd27a', 0.13], f: ['#e3c9a4', 0.1], p: ['#7fa0d8', 0.18] }, LEAK = { g: 0, f: 0.34, p: 0.78 };
-// The outside of a wall is drawn from a small picture that repeats: bricks in courses, or boards. A box that uses it is given a size of its own, so that the bricks stay the same size on every wall
-const TEX = {}; export function wallMat(kind) { if (TEX[kind]) return TEX[kind]; const c = document.createElement('canvas'); c.width = 128; c.height = 64; const x = c.getContext('2d');
-  if (kind === 'brick') { x.fillStyle = '#ead8c0'; x.fillRect(0, 0, 128, 64); for (let r = 0; r < 2; r++) for (let k = -1; k < 2; k++) { x.fillStyle = ['#c9775a', '#bb6b4f', '#d08467'][(k + 1 + r * 2) % 3]; x.fillRect(k * 64 + r * 32 + 2, r * 32 + 2, 60, 28); } }
-  else { x.fillStyle = '#d9b684'; x.fillRect(0, 0, 128, 64); x.fillStyle = '#c39b67'; for (let r = 0; r < 2; r++) { x.fillRect(0, r * 32, 128, 3); x.fillRect(r * 64 + 20, r * 32, 2, 32); } }
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return (TEX[kind] = new THREE.MeshLambertMaterial({ map: t })); }
-export function texBox(parent, x, z, w, d, y, h, mat, U = 2, V = 0.8) { const geo = new THREE.BoxGeometry(w, h, d), uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) { const f = Math.floor(i / 4); uv.setXY(i, uv.getX(i) * (f < 2 ? d : w) / U, uv.getY(i) * (f === 2 || f === 3 ? d : h) / V); }
-  const m = new THREE.Mesh(geo, mat); m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; }
 // Light walls and light floors inside (owner, 23 Nov 2026: "apply light interior walls and flooring for contrast"). Each room keeps a faint tint of its own, a quiet pattern and a thin rail
 // in a stronger colour, so that the rooms can still be told apart while the furniture and the family stand out. A light wall also glows a little by itself, so that it stays light in the shade
 const ROOMS = [['#d9ecd3', 'stripe', '#74c79a'], ['#f8e0cc', 'dot', '#f08a66'], ['#d8e5f7', 'star', '#7c9ce8'], ['#e7daf3', 'dot', '#b58be0']], WALLH = 0.86, DAYGLOW = 0.1;
 // at night the light walls carry the warm or cold sign as well: [what the wall's own colour is multiplied by, the colour of its glow, how strong the glow is]
 const NIGHTWALL = { g: ['#fff0cf', '#ffd98c', 0.3], f: ['#d6d6da', '#c9c4ba', 0.14], p: ['#b4c2e0', '#8ea6d6', 0.16] };
-// Small pictures that repeat, drawn in greys so that a material's own colour tints them: a window with a dark frame and a glint, a pane of glass, grass, leaves, and three wallpapers
-const PT = {}; export function patTex(kind) { if (PT[kind]) return PT[kind]; const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), R = (a, b, w, h, col) => { x.fillStyle = col; x.fillRect(a, b, w, h); }, rnd = (i, j) => hash(i * 7 + 1.3, j * 13 + 5.7), glint = () => { x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(6, 44); x.lineTo(44, 6); x.lineTo(58, 6); x.lineTo(6, 58); x.fill(); };
-  if (kind === 'win') { R(0, 0, 64, 64, '#7d7d7d'); R(5, 5, 54, 54, '#dcdcdc'); glint(); R(30, 5, 4, 54, '#9a9a9a'); R(5, 30, 54, 4, '#9a9a9a'); }
-  else if (kind === 'pane') { R(0, 0, 64, 64, '#dedede'); glint(); }
-  else if (kind === 'grass') { R(0, 0, 64, 64, '#e2e2e2'); for (let i = 0; i < 46; i++) R(Math.floor(rnd(i, 1) * 61), Math.floor(rnd(i, 2) * 58), 3, 6, rnd(i, 3) > 0.5 ? '#ffffff' : '#c2c2c2'); }
-  else if (kind === 'leaf') { for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) R(i * 16, j * 16, 16, 16, ['#ffffff', '#e4e4e4', '#c0c0c0', '#d4d4d4'][Math.floor(rnd(i, j) * 4)]); }
-  else if (kind === 'stripe') { R(0, 0, 64, 64, '#ffffff'); for (let i = 0; i < 8; i++) R(i * 8, 0, 3, 64, '#e4e4e4'); }
-  else if (kind === 'dot') { R(0, 0, 64, 64, '#ffffff'); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) R(i * 16 + (j % 2) * 8 + 2, j * 16 + 5, 5, 5, '#e6e6e6'); }
-  else if (kind === 'tile') { for (let j = 0; j < 4; j++) for (let i = -1; i < 4; i++) { const a = i * 16 + (j % 2) * 8, v = ['#ffffff', '#ececec', '#dadada', '#f6f6f6'][Math.floor(rnd(i + 9, j) * 4)]; R(a, j * 16, 16, 16, v); R(a, j * 16 + 12, 16, 4, '#9c9c9c'); R(a, j * 16, 1, 12, '#b8b8b8'); R(a + 1, j * 16, 14, 2, '#ffffff'); } }
-  else if (kind === 'pave') { R(0, 0, 64, 64, '#a8a8a8'); for (let j = 0; j < 2; j++) for (let i = -1; i < 2; i++) { const a = i * 32 + j * 16; R(a + 1, j * 32 + 1, 30, 30, ['#ffffff', '#f0f0f0', '#e2e2e2', '#f8f8f8'][Math.floor(rnd(i + 3, j + 5) * 4)]); R(a + 1, j * 32 + 28, 30, 3, '#d2d2d2'); } }
-  else if (kind === 'board') { for (let j = 0; j < 4; j++) { R(0, j * 16, 64, 16, ['#ffffff', '#efefef', '#f8f8f8', '#e6e6e6'][j]); R(0, j * 16 + 15, 64, 1, '#b4b4b4'); R(Math.floor(rnd(j, 7) * 56), j * 16, 1, 15, '#b4b4b4'); } }
-  else if (kind === 'bark') { R(0, 0, 64, 64, '#f0f0f0'); for (let i = 0; i < 9; i++) R(i * 7 + 1, 0, 2, 64, i % 2 ? '#c4c4c4' : '#dcdcdc'); for (let i = 0; i < 14; i++) R(Math.floor(rnd(i, 11) * 60), Math.floor(rnd(i, 12) * 56), 3, 8, '#b8b8b8'); }
-  else { R(0, 0, 64, 64, '#ffffff'); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { R(i * 16 + (j % 2) * 8 + 3, j * 16 + 6, 6, 2, '#e4e4e4'); R(i * 16 + (j % 2) * 8 + 5, j * 16 + 4, 2, 6, '#e4e4e4'); } }
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return (PT[kind] = t); }
-// A lit material in one colour whose small picture repeats across a box made with texBox: roof tiles, paving stones, floor boards, bark, grass or leaves
-const TM = {}; export function tileMat(kind, hex, o = {}) { const k = kind + hex + (o.unlit ? 'u' : ''); if (TM[k]) return TM[k]; const t = patTex(kind).clone(); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.needsUpdate = true; return (TM[k] = o.unlit ? new THREE.MeshBasicMaterial({ color: hex, map: t }) : new THREE.MeshLambertMaterial({ color: hex, map: t })); }
 // How tall a home is, to the top of its roof
 export const homeTop = (insLevel) => YA + AH + 0.25 + TI[insLevel || 0] + 0.85;
 
 // o: brick (a brick home; otherwise timber), ins (insulation: 0 none, 1 some, 2 a lot), w, d (size), roofC, doorC, M (makes a lit material), tw (a change over time),
 // people (what each person looks like), done (arrives complete and furnished), simple (fewer pieces of furniture), wins (which two of the five window places have a big window), sunny (says whether the sun reaches a window)
 export function makeHome(parent, o) {
-  const g = group(parent), w = o.w, d = o.d, brick = !!o.brick, noIns = !o.ins, ti = TI[o.ins || 0], BR = 0.5, T = (brick ? BR + 0.08 : 0.42) + ti, OPEN = o.open || 1.72, lam = (c) => o.M(c, 0, { raw: true }), flat = (c) => new THREE.MeshBasicMaterial({ color: c });
+  const g = group(parent), w = o.w, d = o.d, brick = !!o.brick, noIns = !o.ins, ti = TI[o.ins || 0], BR = 0.5, T = (brick ? BR + 0.08 : 0.42) + ti, OPEN = o.open || 1.72, lam = (c) => o.M(c, { raw: true }), flat = (c) => new THREE.MeshBasicMaterial({ color: c });
   const wood = lam(WOOD), ins = flat(INS), lining = flat('#f6eedc'), outer = wallMat(brick ? 'brick' : 'plank'), white = lam('#fbfbf7'), board = new THREE.MeshLambertMaterial({ color: BOARD, map: tileMat('board', BOARD).map }), pale = new THREE.MeshLambertMaterial({ color: PALE }), vis = !!o.done, hotC = (c, k) => new THREE.Color(c).multiplyScalar(k);
   const m = { g, w, d, T, ti, brick, wallM: outer, walls: [[], [], []], spots: [], people: [], heat: { stage: vis ? 3 : 0, leak: [0.78, 0.23, 0][o.ins || 0], top: YA + AH }, lv: null };
   blk(g, 0, 0, w + 0.8, d + 0.8, 0, Y0, '#d9d2c2', { mat: lam('#d9d2c2') }); texBox(g, 0, 0, w - 0.1, d - 0.1, Y0, 0.05, board, 2.4, 1.2);
@@ -71,7 +48,7 @@ export function makeHome(parent, o) {
   const hx = sx0 - 1.15, hz = zb + 0.4, heater = group(g, hx, Y0, hz); blk(heater, 0, 0, 1.3, 0.4, 0.15, 0.95, '#f0ede4', { mat: lam('#f0ede4') }); blk(heater, 0, 0.22, 1.1, 0.05, 0.3, 0.6, '#e2674a', { shadow: false, mat: new THREE.MeshBasicMaterial({ color: hotC('#ff6a3c', 1.9) }) }); heater.visible = vis; m.heater = heater;
   const puffM = soft('#ff8a4c', 0.88), puffs = []; for (let k = 0; k < 12; k++) { const p = blk(g, 0, 0, 0.34, 0.34, 0, 0.34, '#ff8a4c', { shadow: false, mat: puffM }); p.visible = false; puffs.push(p); }
   // the attic is the roof. It is made in three layers: a frame of beams, insulation, and the cover, which is lowered on ropes
-  const ah = 0.28 * w, a1 = ah + 0.26, a2 = a1 + ti, a3 = a2 + 0.25, zbA = -d / 2 + 0.9, zfA = d / 2 - T, zo = zbA - 0.26 - ti, RH = AH + 0.25, rc = o.M(o.roofC, 0);
+  const ah = 0.28 * w, a1 = ah + 0.26, a2 = a1 + ti, a3 = a2 + 0.25, zbA = -d / 2 + 0.9, zfA = d / 2 - T, zo = zbA - 0.26 - ti, RH = AH + 0.25, rc = o.M(o.roofC);
   const rb = group(g, 0, YA, 0); for (const sx of [-1, 1]) { for (const z of [zbA, (zbA + zfA) / 2, zfA - 0.2]) blk(rb, sx * (ah + 0.13), z, 0.26, 0.26, 0, AH, WOOD, { mat: wood }); blk(rb, sx * (ah + 0.13), (zbA + zfA) / 2, 0.26, zfA - zbA, AH - 0.26, 0.26, WOOD, { mat: wood, shadow: false }); }
   for (let k = 0; k < 5; k++) blk(rb, 0, zbA + k * (zfA - 0.2 - zbA) / 4, 2 * a1, 0.26, AH, 0.25, WOOD, { mat: wood, shadow: false }); blk(rb, 0, zbA - 0.13, 2 * ah, 0.26, 0, 0.26, WOOD, { mat: wood, shadow: false });
   const ri = group(g, 0, YA, 0), I = (x, z, ww, dd, y, h) => blk(ri, x, z, ww, dd, y, h, INS, { mat: ins, shadow: false }); for (const sx of [-1, 1]) { I(sx * (a1 + ti / 2), (zo + zfA) / 2, ti, zfA - zo, 0, RH); I(sx * (a2 + w / 2 + 0.1) / 2, -0.05, w / 2 + 0.1 - a2, d + 0.1, 0, ti); } I(0, zbA - 0.26 - ti / 2, 2 * a1, ti, 0, RH); I(0, (zo + zfA) / 2, 2 * a2, zfA - zo, RH, ti);
