@@ -67,12 +67,12 @@ const after = (i) => (i === 2 && CFG[2].battery ? W.after2 : `${lightText(i)} ${
 const K = { morning: { sky: ['#4f8fe0', '#bcd6ee', '#ffe3c2'], u: 0.14, sunP: 2.6, sunC: '#ffe0b0', hemi: 1.25, n: 0 }, midday: { sky: ['#3f8fe2', '#a9d2f2', '#f1f1e6'], u: 0.5, sunP: 3.1, sunC: '#fff3dc', hemi: 1.45, n: 0 },
   afternoon: { sky: ['#4078cc', '#c2c6e0', '#ffd49a'], u: 0.84, sunP: 2.9, sunC: '#ffc27a', hemi: 1.15, n: 0 }, late: { sky: ['#3d6cc0', '#d3bfcf', '#ffc680'], u: 0.83, sunP: 2.8, sunC: '#ffb96c', hemi: 1.1, n: 0.05 },
   sunset: { sky: ['#2c3c86', '#d9836a', '#ffb04a'], u: 0.965, sunP: 1.5, sunC: '#ff8f4a', hemi: 0.9, n: 0.42 }, dusk: { sky: ['#141c56', '#4d4a92', '#d9785e'], u: 1.07, sunP: 0, sunC: '#ff8f4a', hemi: 0.64, n: 0.82 },
-  night: { sky: ['#060a22', '#121a48', '#2a3470'], u: 1.2, sunP: 0, sunC: '#ff8f4a', hemi: 0.48, n: 1 }, nightB: { sky: ['#060a22', '#121a48', '#2a3470'], u: -0.14, sunP: 0, sunC: '#ffb48c', hemi: 0.48, n: 1 },
+  night: { sky: ['#060a22', '#121a48', '#2a3470'], u: 1.2, sunP: 0, sunC: '#ff8f4a', hemi: 0.66, n: 1 }, nightB: { sky: ['#060a22', '#121a48', '#2a3470'], u: -0.14, sunP: 0, sunC: '#ffb48c', hemi: 0.66, n: 1 },
   dawn: { sky: ['#3a4c9c', '#e99aa6', '#ffcf9a'], u: 0.055, sunP: 1.3, sunC: '#ffb48c', hemi: 0.88, n: 0.5 } };
-const STRIPES = ['#e0503a', '#3f78b5', '#2e9b5a', '#8a5fc2'], CX = [-26, 0, 26], HX = [-2.6, 2.6, 7.8, 0, 5.2, 10.4], WIDE = { eye: [0, 9.6, 37], at: [0, 7.6, -22], fov: 44 }, CARDS = { eye: [0, 10.4, 37], at: [0, -1.5, -22], fov: 44 };
+const HY = 5.65, STRIPES = ['#e0503a', '#3f78b5', '#2e9b5a', '#8a5fc2'], CX = [-26, 0, 26], HX = [-2.6, 2.6, 7.8, 0, 5.2, 10.4], WIDE = { eye: [0, 9.6, 37], at: [0, 7.6, -22], fov: 44 }, CARDS = { eye: [0, 10.4, 37], at: [0, -1.5, -22], fov: 44 };
 const playCam = (h) => ({ eye: [CX[h] * 0.62 + 1, 10.5, 15], at: [CX[h] + 2.4, 6.6, -26], fov: 46 });
 const c0 = new THREE.Color(), c1 = new THREE.Color(), V = (a) => new THREE.Vector3(...a);
-const BEAD = new THREE.BoxGeometry(0.62, 0.62, 0.62), glowM = (hex, k) => new THREE.MeshBasicMaterial({ color: hot(hex, k), fog: false });
+const BEAD = new THREE.BoxGeometry(0.52, 0.52, 0.52), glowM = (hex, k) => new THREE.MeshBasicMaterial({ color: hot(hex, k), fog: false });
 
 // the drag of the sun and the moon in the play break: the scene on the stage says what a press and a move do
 let dragging = false; canvas.addEventListener('pointerdown', (e) => { if (cur && cur.dragStart && cur.dragStart(e)) { dragging = true; canvas.setPointerCapture(e.pointerId); } });
@@ -90,14 +90,14 @@ function hilltop() {
   B(g, 0, -10, 240, 72, -2, 2, GRASS[0], { tex: 'grass' }); B(g, 0, -33.5, 240, 21, 0, 4.2, GRASS[1], { tex: 'grass' }); B(g, 0, -51, 240, 14, 0, 7, GRASS[2], { tex: 'grass' }); B(g, 0, -81, 280, 46, 0, 10, GRASS[3], { tex: 'grass' });
   for (let k = 0; k < 16; k++) { const x = -120 + k * 16 + hash(k, 2) * 8; B(g, x, -84 - hash(k, 5) * 12, 12 + hash(k, 3) * 14, 16, 10, 0.5 + hash(k, 4) * 2.2, GRASS[3], { tex: 'grass' }); }
   for (let k = 0; k < 9; k++) { const x = -150 + k * 38 + hash(k, 8) * 14, h = 13 + hash(k, 9) * 10; B(g, x, -128, 44 + hash(k, 7) * 20, 10, 0, h, '#8fa6c8', NO_SH); B(g, x + 6, -128, 20, 10, h, 3 + hash(k, 6) * 3, '#8fa6c8', NO_SH); B(g, x + 6, -128, 12, 10.2, h + 3, 1.2, '#f4f7ff', NO_SH); }
-  B(g, 0, 44, 160, 36, -2, 9, '#b4d2a6', { tex: 'grass' }); B(g, 0, 24.5, 160, 3, -2, 7.2, '#a9c99c', { tex: 'grass' }); B(g, 0, 22, 160, 2.4, -2, 4.8, '#9fc194', { tex: 'grass' });
+  B(g, 0, 44, 160, 36, -2, HY + 2, '#cfe6c2', { tex: 'grass' }); B(g, 0, 24.5, 160, 3, -2, HY + 0.6, '#c2dcb5', { tex: 'grass' }); B(g, 0, 22, 160, 2.4, -2, HY - 0.9, '#b5d2a8', { tex: 'grass' });
   for (let k = 0; k < 26; k++) { const x = -60 + hash(k, 21) * 120, z = 10 - hash(k, 22) * 30, w = 1.6 + hash(k, 23) * 3.4; B(g, x, z, w, w * 0.6, 0, 0.07, '#ffffff', NO_SH); }
-  for (let k = 0; k < 9; k++) { const x = -5 + hash(k, 31) * 12, z = 27 + hash(k, 32) * 5; B(g, x, z, 0.5 + hash(k, 33), 0.4, 7, 0.06, '#ffffff', NO_SH); }
+  for (let k = 0; k < 9; k++) { const x = -5 + hash(k, 31) * 12, z = 27 + hash(k, 32) * 5; B(g, x, z, 0.5 + hash(k, 33), 0.4, HY, 0.06, '#ffffff', NO_SH); }
   for (let k = 0; k < 22; k++) B(g, -13 + Math.sin(k * 0.7) * 1.6, 19 - k * 1.95, 3.4, 2.2, 0, 0.06, '#7db6dc', { ...NO_SH, raw: true });   // the river, between the first two neighbourhoods
   for (let k = 0; k < 11; k++) { const z = 8 - k * 2.9; B(g, 13 + hash(k, 41) * 0.5, z, 1.7, 2.7, 0, 1.3 + hash(k, 42) * 0.5, ['#5e9a62', '#6aa76a'][k % 2]); B(g, 13, z, 1.3, 2.2, 1.4, 0.14, '#ffffff', NO_SH); }   // the hedge, between the last two
   const pine = (x, z, k = 1) => { const y = gy(z), p = group(g, x, y, z); B(p, 0, 0, 0.4 * k, 0.4 * k, 0, 1.1 * k, '#6b4a2e'); [[2.6, 1.3], [2.0, 1.2], [1.3, 1.2], [0.7, 0.9]].forEach(([w, h], j) => { B(p, 0, 0, w * k, w * k, (0.9 + j * 1.05) * k, h * k, ['#3f7f5a', '#3a7654'][j % 2]); }); B(p, 0, 0, 0.8 * k, 0.8 * k, 5.0 * k, 0.14 * k, '#ffffff', NO_SH); };
   for (const [x, z, k] of [[-44, -26, 1.2], [-41, -30, 0.9], [-12.5, -27, 1.1], [14, -29, 1.2], [16.5, -26, 0.8], [47, -27, 1.1], [-34, -48, 1.3], [-22, -50, 1], [-6, -49, 1.2], [9, -50, 1], [22, -48, 1.3], [-52, -50, 1.1], [58, -30, 1.2], [-58, -14, 1.3], [-50, -8, 1], [52, -6, 1.2]]) pine(x, z, k);
-  for (const [x, z, k] of [[-16.5, 22.6, 1.25], [-19.6, 23.4, 0.9], [15.5, 23, 1.1], [18.4, 22.5, 1.35]]) { const p = group(g, x, 3, z); B(p, 0, 0, 0.4 * k, 0.4 * k, 0, 1.4 * k, '#6b4a2e'); [[2.6, 1.3], [2.0, 1.2], [1.3, 1.2], [0.7, 0.9]].forEach(([w, h], j) => B(p, 0, 0, w * k, w * k, (1.2 + j * 1.05) * k, h * k, ['#3f7f5a', '#356e4e'][j % 2])); }
+  for (const [x, z, k] of [[-16.5, 22.6, 1.25], [-19.6, 23.4, 0.9], [15.5, 23, 1.1], [18.4, 22.5, 1.35]]) { const p = group(g, x, HY - 4, z); B(p, 0, 0, 0.4 * k, 0.4 * k, 0, 1.4 * k, '#6b4a2e'); [[2.6, 1.3], [2.0, 1.2], [1.3, 1.2], [0.7, 0.9]].forEach(([w, h], j) => B(p, 0, 0, w * k, w * k, (1.2 + j * 1.05) * k, h * k, ['#3f7f5a', '#356e4e'][j % 2])); }
 
   // ---- the sky: the sun on its low winter path, the moon, the stars and a few clouds ----
   const sunM = glowM('#ffd27a', 2.4), sunBox = new THREE.Mesh(new THREE.BoxGeometry(9, 9, 1), sunM); g.add(sunBox);
@@ -133,7 +133,7 @@ function hilltop() {
   const paint = () => { const nn = Math.min(1, s.n * 1.7); for (const row of homes) for (const q of row) { q.winM.color.copy(DAYGLASS).lerp(q.lit ? LIT : DARK, nn); q.pipM.color.copy(q.fed ? PIPON : PIPOFF); } for (const p of posts) p.m.color.copy(p.on ? hot('#ffe9a0', 1.2 + 1.8 * nn) : PIPOFF); };
   for (const cx of CX) { B(g, cx + 2.6, -14.6, 17, 1.7, 0, 0.06, '#ead9b4', NO_SH); B(g, cx + 5.2, -24.7, 17, 1.5, 4.2, 0.06, '#ead9b4', NO_SH); for (let k = 0; k < 4; k++) B(g, cx - 6.4 + k * 0.5, -23.6 + k * 0.42, 1.6, 0.42, 0, 4.2 - k * 1.05, '#d9c7a2'); }
   const posts = CX.map((cx) => { const m = new THREE.MeshBasicMaterial({ color: PIPOFF.clone(), fog: false }); B(g, cx - 5.6, -22, 0.4, 0.4, 0, 8, '#4a556e'); B(g, cx - 5.6, -22, 1.5, 1.5, 7.9, 0.2, '#4a556e'); B(g, cx - 5.6, -22, 1.0, 1.0, 8.1, 1.0, '#fff', { mat: m, shadow: false }); B(g, cx - 5.6, -22, 1.4, 1.4, 9.1, 0.25, '#4a556e'); return { m, on: false, top: [cx - 5.6, 8.6, -22] }; });
-  const cellOn = glowM('#fff0a0', 2.2), cellOff = M('#27304f');
+  const cellOn = glowM('#ffe680', 1.45), cellOff = M('#27304f');
   const barns = CX.map((cx, h) => { const bx = cx - 9.6, bz = -16.6, bg = group(g, bx, 0, bz); B(bg, 0, -0.5, 5, 0.3, 0, 3.6, '#c9a476', { tex: 'board' }); for (const dx of [-2.35, 2.35]) B(bg, dx, 0, 0.3, 1.3, 0, 3.6, '#c9a476', { tex: 'board' }); B(bg, 0, 0, 5.4, 1.7, 3.6, 0.35, '#8a6b4c'); B(bg, 0, 0, 5.4, 1.75, 3.95, 0.5, '#fff', { mat: stripeM }); B(bg, 0, 0, 5, 1.3, 0, 0.2, '#8a6b4c'); B(bg, 0, 0, 4.4, 1.2, 1.72, 0.14, '#8a6b4c'); B(bg, 0, 0, 3, 1.75, 4.45, 0.1, '#ffffff', NO_SH);
     const cells = [0, 1, 2, 3, 4, 5].map((k) => { const m = B(bg, (k % 3 - 1) * 1.42, 0.1, 1.15, 0.9, 0.3 + Math.floor(k / 3) * 1.64, 1.15, '#27304f', { mat: cellOff, shadow: false }); return { m, at: [bx + (k % 3 - 1) * 1.42, 0.9 + Math.floor(k / 3) * 1.64, bz + 0.2] }; }); const num = plate(s, '', [bx - 0.2, 6.1, bz], 'num'); num.hide = true; bg.visible = false;
     return { g: bg, cells, num, n: 0, x: bx, z: bz }; });
@@ -146,10 +146,10 @@ function hilltop() {
   B(g, 40.5, -51.5, 30, 9, 7, 0.9, GRASS[2], { tex: 'grass' }); knollT.forEach((t) => { t.g.position.y = t.y = 7.9; });
   const DEF = { ridge: [1, 2, 3, 4, 5, 6], knoll: [0, 1, 2, 3], roofs0: [0, 1, 2, 3, 4, 5], roofs2: [0, 1, 2, 4] };
   // the tall turbine beside the family: only its foot and, now and then, the tip of a blade are in the picture
-  const near = turbine(-10.4, 4.8, 21.5, 1.5, 19); near.g.visible = true; near.rotor.children.slice(1).forEach((b) => b.scale.set(1, 1.5, 1));
+  const near = turbine(-10.4, HY - 2.2, 21.5, 1.5, 19); near.g.visible = true; near.rotor.children.slice(1).forEach((b) => b.scale.set(1, 1.5, 1));
 
   // ---- beads of light: power on its way. A stream is a line of beads that keep moving along a raised line ----
-  const beadM = glowM('#fff0a0', 2.5), lineM = M('#56607c'), streams = [];
+  const beadM = glowM('#fff0a0', 1.9), lineM = M('#56607c'), streams = [];
   function stream(pts, n, speed, line = true) { const P = pts.map(V), len = [0]; for (let k = 1; k < P.length; k++) len.push(len[k - 1] + P[k].distanceTo(P[k - 1])); const lg = group(g);
     if (line) for (let k = 1; k < P.length; k++) { rod(lg, pts[k - 1], pts[k], 0.14, '#56607c', { mat: lineM }); const mid = P[k - 1].clone().lerp(P[k], 0.5), y0 = gy(mid.z); if (P[k].distanceTo(P[k - 1]) > 16 && mid.y - y0 > 1) B(lg, mid.x, mid.z, 0.3, 0.3, y0, mid.y - y0, '#56607c'); }
     const beads = Array.from({ length: n }, () => { const m = new THREE.Mesh(BEAD, beadM); m.visible = false; g.add(m); return m; }), st = { P, len, beads, speed, on: 0, lg }; lg.visible = false; streams.push(st); return st; }
@@ -173,13 +173,13 @@ function hilltop() {
   const fly = (a, b, sec = 0.7, lift = 2.4) => { const m = new THREE.Mesh(BEAD, beadM), A = V(a), Bv = V(b); m.position.copy(A); g.add(m); return tw(sec, (k) => { const e = ease(k); m.position.lerpVectors(A, Bv, e); m.position.y += Math.sin(Math.PI * e) * lift; }).then(() => { g.remove(m); }); };
 
   // ---- the family on the hilltop, a kite that shows the wind, people in the town, and the geese ----
-  const fam = group(g, 3.7, 7, 29.2), scarves = [];
+  const fam = group(g, 3.9, HY, 29.2), scarves = [];
   const person = (who, x, z, o, scarf) => { const p = fig(fam, x, 0.02, z, { ...FAMILY[who], ...o }); B(p, 0, 0.02, 0.62, 0.4, 1.06, 0.14, scarf); const tail = group(p, 0.3, 1.1, -0.18); B(tail, 0.28, 0, 0.56, 0.1, -0.06, 0.16, scarf); scarves.push(tail); return p; };
   const kid = person(0, -2.5, 0.9, { turn: -0.75, arms: ['up', 'down'], pack: '#ffd257' }, '#ffd257'); person(1, 0.1, 0.2, { turn: -1.05, arms: ['down', 'up'] }, '#e0503a'); person(2, 1.6, 0.9, { turn: -0.5, head: -0.5 }, '#ffffff');
-  const famPlate = plate(s, W.family, [4.2, 9.9, 29.6], 'on');
+  const famPlate = plate(s, W.family, [4.4, HY + 2.9, 29.6], 'on');
   const kite = group(g, -5.4, 15.2, 16); { const d = group(kite); d.rotation.z = Math.PI / 4; B(d, 0, 0, 1.9, 0.12, -0.95, 1.9, '#e0503a', { raw: true }); B(d, 0, 0.07, 0.95, 0.06, -0.95, 0.95, '#ffd257', { raw: true, shadow: false }); }
   const tails = [0, 1, 2, 3].map((k) => B(kite, -0.5 - k * 0.55, 0, 0.42, 0.08, -1.7 - k * 0.42, 0.26, ['#ffd257', '#3f78b5', '#ffd257', '#2e9b5a'][k], { raw: true, shadow: false }));
-  const stringM = M('#f7f3e8'); let string = null; const hand = [3.7 - 2.5 - 0.28, 7 + 1.72, 29.2 + 0.9 + 0.2];
+  const stringM = M('#f7f3e8'); let string = null; const hand = [3.9 - 2.5 - 0.28, HY + 1.72, 29.2 + 0.9 + 0.2];
   const walkers = CX.flatMap((cx, h) => [0, 1].map((j) => { const p = fig(g, cx + 14 - j * 28, 0.06, -14.4, { k: 1.4, ...FAMILY[(h + j) % 3], shirt: SHIRTS[(h * 2 + j) % 6], turn: j ? 1.5 : -1.5, pack: j ? '#ffd257' : null }); p.visible = false; return { p, x0: cx + 14 - j * 28, x1: cx + (j ? -3.6 : 6.8) }; }));
   const geese = group(g), birds = [0, 1, 2, 3, 4, 5, 6].map((k) => { const b = group(geese, Math.ceil(k / 2) * 2.3, -Math.ceil(k / 2) * 0.5, (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 1.2), m = new THREE.MeshBasicMaterial({ color: '#232a45' }); const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.45, 0.5), m); b.add(body); const wings = [-1, 1].map((sd) => { const w = group(b); const wm = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.14, 1.9), m); wm.position.z = sd * 0.95; w.add(wm); return { w, sd }; }); return { b, wings }; }); geese.visible = false;
   // the geese cross the sky from right to left. Where the long row of turbines stands on the ridge, they have to bend their path up and over it
@@ -286,7 +286,7 @@ function hilltop() {
   // ---- every picture: the wind in the kite and the scarves, the turbines, the beads, the geese's wings ----
   s.tick = (t, dt) => { for (const T of [ridgeT, knollT, [near]]) for (const q of T) if (q.g.visible) q.rotor.rotation.z -= dt * (q === near ? 0.9 : 1.7 + 0.5 * q.k);
     kite.position.set(-5.4 + Math.sin(t * 0.9) * 0.7, 15.2 + Math.sin(t * 1.3) * 0.45, 16); kite.rotation.z = Math.sin(t * 1.7) * 0.14; tails.forEach((m, k) => { m.position.y = -1.7 - k * 0.42 + Math.sin(t * 6 + k) * 0.12; }); if (string) g.remove(string); string = rod(g, hand, [kite.position.x, kite.position.y - 0.9, kite.position.z], 0.05, '#fff', { mat: stringM }); string.castShadow = false;
-    scarves.forEach((m, k) => { m.rotation.y = Math.sin(t * 7 + k * 2) * 0.5; m.rotation.z = Math.sin(t * 5 + k) * 0.25; }); fam.position.y = 7 + (s.cheer ? Math.abs(Math.sin(t * 5)) * 0.22 : 0); kid.position.y = 0.02 + Math.abs(Math.sin(t * 2.2)) * 0.05;
+    scarves.forEach((m, k) => { m.rotation.y = Math.sin(t * 7 + k * 2) * 0.5; m.rotation.z = Math.sin(t * 5 + k) * 0.25; }); fam.position.y = HY + (s.cheer ? Math.abs(Math.sin(t * 5)) * 0.22 : 0); kid.position.y = 0.02 + Math.abs(Math.sin(t * 2.2)) * 0.05;
     for (const st of streams) { const L = st.len[st.len.length - 1], n = st.beads.length; st.beads.forEach((m, i) => { const vis = st.on > 0 && i / n < st.on; m.visible = vis; if (!vis) return; let d = ((t * st.speed / L + i / n) % 1) * L, k = 1; while (k < st.len.length - 1 && st.len[k] < d) k++; m.position.lerpVectors(st.P[k - 1], st.P[k], (d - st.len[k - 1]) / (st.len[k] - st.len[k - 1])); }); }
     if (geese.visible) birds.forEach((b, k) => b.wings.forEach(({ w, sd }) => { w.rotation.x = sd * Math.sin(t * 7 + k) * 0.5; })); if (mark.visible) mark.scale.setScalar(1 + Math.sin(t * 4) * 0.08);
     clouds.forEach((c, k) => { c.position.x += dt * (0.9 + k * 0.2); if (c.position.x > 190) c.position.x = -190; }); };
