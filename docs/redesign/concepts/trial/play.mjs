@@ -1,13 +1,13 @@
 // Plays the trial level through and saves a picture of every step: node play.mjs <out dir> [width] [height] [side 0|1] [walls 0|1] [plan 0-2]
 import { createRequire } from 'module'; const require = createRequire('/'); import fs from 'fs'; import http from 'http'; import path from 'path';
-const { chromium } = require('playwright'); const root = '/home/user/ai-lab-v3-full-day/docs/redesign', [out, W = 1440, H = 810, side = 0, walls = 0, plan = 0] = process.argv.slice(2);
+const { chromium } = require('playwright'); const root = '/home/user/ai-lab-v3-full-day/docs/redesign', [out, W = 1440, H = 810, side = 0, walls = 0, plan = 0, speed = 1] = process.argv.slice(2);   // a speed above 1 is for quick checks only: the times printed are then wrong
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.webp': 'image/webp' };
 const srv = http.createServer((q, r) => { const f = path.join(root, decodeURIComponent(q.url.split('?')[0])); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end(); } r.setHeader('content-type', types[path.extname(f)] || 'application/octet-stream'); fs.createReadStream(f).pipe(r); }).listen(0);
 await new Promise((r) => srv.once('listening', r));
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }); const p = await b.newPage({ viewport: { width: +W, height: +H } });
 p.on('pageerror', (e) => console.log('ERR', e.message)); p.on('console', (m) => { if (m.type() === 'error') console.log('CON', m.text()); });
-await p.goto(`http://localhost:${srv.address().port}/concepts/trial/index.html?fps`); await p.waitForFunction(() => window.trial); fs.mkdirSync(out, { recursive: true });
-let n = 0; const shot = async (name, ms = 700) => { await p.waitForTimeout(ms); await p.screenshot({ path: `${out}/${String(++n).padStart(2, '0')}-${name}.jpg`, type: 'jpeg', quality: 82 }); console.log(name, await p.evaluate(() => document.getElementById('fps').textContent)); };
+await p.goto(`http://localhost:${srv.address().port}/concepts/trial/index.html?fps&speed=${speed}`); await p.waitForFunction(() => window.trial); fs.mkdirSync(out, { recursive: true });
+let n = 0; const shot = async (name, ms = 700) => { await p.waitForTimeout(ms / speed + (speed > 1 ? 250 : 0)); await p.screenshot({ path: `${out}/${String(++n).padStart(2, '0')}-${name}.jpg`, type: 'jpeg', quality: 82 }); console.log(name, await p.evaluate(() => document.getElementById('fps').textContent)); };
 // The time a child of 8 to 12 would take is estimated like this: the real time the animations take, plus 0.5 seconds for every new word to read
 // (about 120 words a minute), plus 2 seconds to decide on and press a button and 4 seconds to find and tap a place in the town.
 const N = { words: 0, doing: 0, wordsTry: 0, doingTry: 0, realTry: 0 }; let lastText = '', inTry = false; const t0 = Date.now();
@@ -19,11 +19,11 @@ await click(['the sunny side', 'the shady side'][side]); await shot('ask-side');
 await click('Bring the winter night'); await shot('test-a', 1500); await shot('test-b', 1500); await shot('test-c', 1500); await has('Show all three'); await shot('look-0', 600); for (const i of [0, 1, 2]) { await tap('sample', i); await shot(`look-${i + 1}`, 1500); } await click('Show all three'); await shot('results', 1500); await think(4);
 await p.click(`[data-plan="${plan}"]`); await p.waitForFunction(() => document.querySelector('.tok'), null, { timeout: 90000 }); await shot('build-0', 900);
 const pickTool = (k) => p.click(`[data-tool="${k}"]`);
-for (const [r, nm] of [[0, 'frame'], [1, 'insulation'], [2, 'walls']]) { for (const w of [1, 2, 0, 3]) { await tap('wall', w); await p.waitForTimeout(650); if (w === 2) await shot(`build-${nm}-a`, 100); } await shot(`build-${nm}-b`, 300); }
+for (const [r, nm] of [[0, 'frame'], [1, 'insulation'], [2, 'walls']]) { for (const w of [1, 2, 0, 3]) { await tap('wall', w); await p.waitForTimeout(650 / speed + (speed > 1 ? 150 : 0)); if (w === 2) await shot(`build-${nm}-a`, 100); } await shot(`build-${nm}-b`, 300); }
 const wins = async () => { await tap('win', 0); await shot('build-window-1', 900); await tap('win', +plan === 1 ? 1 : 2); await shot('build-window-2', 900); }, roofs = async () => { for (const nm of ['beams', 'roof-insulation', 'roof']) { await tap('roof'); await shot(`build-${nm}`, 1500); } };
 if (+plan === 1) { await roofs(); await wins(); } else { await wins(); await roofs(); }
 await p.click('[data-c="2"]'); await tap('door'); await shot('build-door', 700); await has('Next'); await shot('home-done', 900); await click('Next');
-for (let k = 0; k < 8; k++) { await p.waitForFunction(() => window.trial.cur.cueAt, null, { timeout: 60000 }); await p.waitForTimeout(700); if (k === 3) await shot('street-building', 100); await tap('plot', 0); } await has('Try another plan'); await shot('town', 800);
+for (let k = 0; k < 8; k++) { await p.waitForFunction(() => window.trial.cur.cueAt, null, { timeout: 60000 }); await p.waitForTimeout(700 / speed + (speed > 1 ? 150 : 0)); if (k === 3) await shot('street-building', 100); await tap('plot', 0); } await has('Try another plan'); await shot('town', 800);
 inTry = true; const tTry = Date.now(); await click('Try another plan'); await shot('other-plans'); await p.click(`[data-plan="${(+plan + 1) % 3}"]`); await shot('what-changed', 900); await click('Go back to my first plan'); await shot('first-kept', 900); inTry = false; N.realTry = (Date.now() - tTry) / 1000;
 await click('Next'); await shot('recap', 900); await tap('side', +side ? 0 : 1); await shot('recap-answer', 900); await click('Next'); await shot('night-1', 1500); await shot('night-2', 3500); await shot('night-3', 5500); await click('Visit your home'); await shot('visit-1', 1800); await shot('visit-2', 2200); await think(2);
 const real = (Date.now() - t0) / 1000, m = (x) => (x / 60).toFixed(1);
