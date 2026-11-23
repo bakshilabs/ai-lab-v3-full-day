@@ -26,7 +26,7 @@ export function mkPlant(parent, x, y, z, c, o = {}) { const g = group(parent, x,
   else for (const dx of [-0.75, -0.25, 0.25, 0.75]) { B(leaves, dx, 0, 0.3, 0.34, 0, 0.3, '#2f8a4c'); blk(fruit, dx, 0, 0.4, 0.44, 0.3, 0.32, c.col, { mat: GL('#37b061'), shadow: false }); blk(fruit, dx, 0.05, 0.24, 0.26, 0.62, 0.16, c.col, { mat: GL('#62cf7c'), shadow: false }); }
   if (o.roots) for (let j = 0; j < 7; j++) blk(g, -0.9 + j * 0.3, 0.1 * ((j % 3) - 1), 0.06, 0.06, -0.52 - hash(j, x) * 0.1, 0.4 + hash(j, x) * 0.1, '#ffffff', { mat: GL('#ffffff'), shadow: false });
   q.set = (k) => { q.k = k; const sc = 0.22 + 0.78 * k; leaves.scale.setScalar(sc); fruit.scale.setScalar(sc); fruit.visible = !q.picked && (k > 0.9 || c.id === 'lettuce' || c.id === 'herbs'); };
-  q.pick = () => { q.picked = true; fruit.visible = false; }; q.set(o.k ?? 1); return q; }
+  q.pick = () => { q.picked = true; fruit.visible = false; }; q.regrow = () => { q.picked = false; q.set(1); }; q.set(o.k ?? 1); return q; }
 
 // an open wooden crate; fill(n, colours) shows n pieces of food in it
 function mkCrate(parent, x, y, z, k = 1) { const g = group(parent, x, y, z), bits = []; g.scale.setScalar(k);
@@ -53,7 +53,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
   for (let k = 0; k < NS; k++) blk(g, 0, stepZ(k) - 4, 460 - k * 16, 8, -1, stepH(k) + 1, '', { mat: k % 2 ? grassM : grassM2, shadow: false });
   blk(g, -250, -150, 240, 60, -1, 30, '', { mat: grassM2, shadow: false }); blk(g, 260, -170, 260, 60, -1, 36, '', { mat: grassM, shadow: false }); blk(g, 0, -250, 900, 40, -1, 58, '', { mat: sm('#8fc2a0', '#b9c08a', '#e3e9f2'), shadow: false });
   s.roadY = (z) => (z > -50 ? 0.08 : 3 * ((-50 - z) / 8 + 1) + 0.25);                                          // the height of the road at z
-  const roadM = sm('#ecd9a8', '#e9d5a0', '#d9d4c9'); blk(g, 0, -31, 4.6, 38.5, 0, 0.08, '', { mat: roadM, shadow: false });
+  const roadM = sm('#ecd9a8', '#e9d5a0', '#b7b0a3'); blk(g, 0, -31, 4.6, 38.5, 0, 0.08, '', { mat: roadM, shadow: false });
   { const len = Math.hypot(104, 39), r = blk(g, 0, -102, 5.4, len, 0, 0.4, '', { mat: roadM, shadow: false }); r.position.y = 3 + 19.5; r.rotation.x = Math.atan2(39, 104); for (const sx of [-1, 1]) { const e = blk(g, sx * 3, -102, 0.6, len, 0, 0.5, '', { mat: sm('#c9a970', '#c9a970', '#b9b4aa'), shadow: false }); e.position.y = 22.5; e.rotation.x = Math.atan2(39, 104); } }
   for (const [x, z, k] of [[-60, -44, 2], [62, -40, 2], [-52, -30, 1.8], [48, -28, 1.7], [-75, -34, 2], [-66, -22, 1.6], [58, -20, 1.6]]) tree(g, x, 0, z, k);
   for (const [x, w] of [[-22, 26], [24, 30]]) blk(g, x, -36, w, 1, 0, 1.1, '', { mat: leafM[1] });        // hedges across the valley
@@ -74,10 +74,10 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
     s.shed = [16, y, z + 3.6]; s.coldPile = group(farmOn, 27.4, y, z + 3); for (let j = 0; j < 6; j++) mkCold(s.coldPile, (j % 3) * 2.6, Math.floor(j / 3) * 1.7, 0, 2.6); }
   const hv = group(farmOn, 16, stepH(5), stepZ(5) - 2.2); s.harvester = hv; B(hv, 0, 0, 6, 3.2, 0.8, 3.2, '#d2452f', { shadow: false }); B(hv, -1.2, 0, 2.6, 2.8, 4, 2.2, '#bfe3f2', { shadow: false, tex: 'pane' }); B(hv, 1.8, 0, 1, 1, 4, 2.6, '#8a2f22', { shadow: false }); B(hv, 0, 2.2, 11, 1.6, 0.2, 1.3, '#f2b21c', { shadow: false }); for (const x of [-2, 2]) B(hv, x, 0, 1.6, 3.6, 0, 1.8, '#2b2f3a', { shadow: false });
   // the lorry: plain and grey, so that it is never the prettiest thing in the picture. It is drawn larger while it is far away, so that it can be found
-  const lorry = group(g); s.lorry = lorry; B(lorry, 0, -1.2, 2.8, 5.2, 0.7, 3, '#dfe3e8'); B(lorry, 0, 2.4, 2.7, 1.9, 0.7, 2.3, '#7f8b99'); B(lorry, 0, 3.36, 2.2, 0.06, 1.8, 0.9, '#bfe3f2', { tex: 'pane' }); B(lorry, 0, -1.2, 2.84, 5.24, 2.2, 0.5, '#4f8fd0'); for (const [x, z] of [[-1.3, 2.2], [1.3, 2.2], [-1.3, -2.6], [1.3, -2.6]]) wheel(lorry, x, 0.55, z, 0.55, 0.4);
-  const puffs = []; for (let j = 0; j < 18; j++) { const m = new THREE.MeshBasicMaterial({ color: '#6f6a66', transparent: true, opacity: 0, depthWrite: false }), p = blk(g, 0, 0, 1, 1, 0, 1, '', { mat: m, shadow: false }); p.visible = false; puffs.push({ p, m, t: 9 }); }
-  let puffN = 0, puffT = 0; s.lorryAt = (z, on = true) => { const k = 1 + 1.7 * Math.min(1, Math.max(0, (-z - 24) / 90)); lorry.visible = on; lorry.position.set(0, s.roadY(z), z); lorry.scale.setScalar(k); lorry.rotation.x = z < -50 ? Math.atan2(39, 104) : 0; s.lorryPlate.pos.set(0, s.roadY(z) + 4.6 * k, z); };
-  s.puff = () => { const q = puffs[puffN++ % puffs.length], k = lorry.scale.x; q.t = 0; q.k = k; q.p.visible = true; q.p.position.set((hash(puffN, 1) - 0.5) * k, lorry.position.y + 2.2 * k, lorry.position.z - 4.4 * k); };
+  const lorry = group(g); s.lorry = lorry; B(lorry, 0, -1.2, 2.8, 5.2, 0.7, 3, '#aeb6c0'); B(lorry, 0, 2.4, 2.7, 1.9, 0.7, 2.3, '#5f6b7a'); B(lorry, 0, 3.36, 2.2, 0.06, 1.8, 0.9, '#bfe3f2', { tex: 'pane' }); B(lorry, 0, -1.2, 2.84, 5.24, 2.2, 0.5, '#4f8fd0'); for (const [x, z] of [[-1.3, 2.2], [1.3, 2.2], [-1.3, -2.6], [1.3, -2.6]]) wheel(lorry, x, 0.55, z, 0.55, 0.4);
+  const puffs = []; for (let j = 0; j < 18; j++) { const m = new THREE.MeshBasicMaterial({ color: '#57524f', transparent: true, opacity: 0, depthWrite: false }), p = blk(g, 0, 0, 1, 1, 0, 1, '', { mat: m, shadow: false }); p.visible = false; puffs.push({ p, m, t: 9 }); }
+  let puffN = 0, puffT = 0; s.lorryAt = (z, on = true, back = false) => { lorry.rotation.y = back ? Math.PI : 0; const k = 1 + 1.7 * Math.min(1, Math.max(0, (-z - 24) / 90)); lorry.visible = on; lorry.position.set(0, s.roadY(z), z); lorry.scale.setScalar(k); lorry.rotation.x = z < -50 ? Math.atan2(39, 104) : 0; s.lorryPlate.pos.set(0, s.roadY(z) + 4.6 * k, z); };
+  s.puff = () => { const q = puffs[puffN++ % puffs.length], k = lorry.scale.x; q.t = 0; q.k = k; q.p.visible = true; q.p.position.set((hash(puffN, 1) - 0.5) * 2.4 * k, lorry.position.y + 4.2 * k, lorry.position.z - 3 * k); };
 
   // ---- the town gate and the walls on either side of it ---------------------------------------------------------------------------------
   for (const sx of [-1, 1]) { texBox(g, sx * 5, -12, 1.5, 1.5, 0, 4.4, tileMat('pave', '#e2cfa6'), 1, 1); B(g, sx * 5, -12, 1.9, 1.9, 4.4, 0.4, '#b98f5a'); cap(g, sx * 5, -12, 1.9, 1.9, 4.8); blk(g, sx * 5, -12, 0.7, 0.7, 4.8, 0.8, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#ffe9a8', 1.5) }), shadow: false });
@@ -89,7 +89,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
   home(-20.5, -19.5, 7, 6, 5.2, '#f3d9a4', '#d2553a'); home(-29.5, -15, 8, 7, 7.5, '#efc9a0', '#3f78b5', 3); home(-30.5, -3, 7, 10, 6.4, '#f6e2b5', '#2e9b5a'); home(-31, 9, 7, 9, 8, '#eec79b', '#d2553a', 3);
   home(27.5, -16, 8, 8, 8.6, '#f3d9a4', '#3f78b5', 3); home(31, -4, 7, 10, 6.6, '#efc9a0', '#d2553a'); home(31.5, 8, 7, 9, 8.2, '#f6e2b5', '#2e9b5a', 3);
   tree(g, -23, 0, -9.5, 1.25); tree(g, -24.5, 0, 2, 1.35); tree(g, 24.5, 0, 0.5, 1.3); tree(g, 23.5, 0, -8, 1.1); tree(g, 27, 0, -26, 1.6); tree(g, -26, 0, -25, 1.7);
-  for (const x of [-12.5, 12.5]) { B(g, x, 2, 0.3, 0.3, 0, 3.6, '#2b2f3a'); B(g, x, 2, 1, 1, 3.6, 0.16, '#2b2f3a'); blk(g, x, 2, 0.7, 0.7, 3.1, 0.5, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#ffe9a8', 1.3) }), shadow: false }); }
+  for (const x of [-21, 23.5]) { B(g, x, 5, 0.3, 0.3, 0, 3.6, '#2b2f3a'); B(g, x, 5, 1, 1, 3.6, 0.16, '#2b2f3a'); blk(g, x, 5, 0.7, 0.7, 3.1, 0.5, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#ffe9a8', 1.3) }), shadow: false }); }
 
   // ---- the community gardens: eight raised beds between the homes --------------------------------------------------------------------
   const gardenOn = group(g), gardenOff = group(g); s.beds = [];
@@ -107,30 +107,30 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
 
   // ---- the indoor farm: three floors of shelves behind an open front --------------------------------------------------------------------
   const DX = 2, ig = group(g, DX, 0, 0), inOn = group(ig), inOff = group(ig), X0 = 6.5, X1 = 20.5, ZF = -12, ZB = -19.5, FH = 3.4, XM = (X0 + X1) / 2, fy = (f) => f * FH + 0.3; s.fy = fy;
-  B(ig, XM, (ZF + ZB) / 2, X1 - X0, ZF - ZB, 0, 0.3, '#e9e4dc'); B(ig, XM, ZB, X1 - X0 + 0.4, 0.4, 0, 3 * FH + 0.6, '#3a2d58'); for (const x of [X0, X1]) { B(ig, x, (ZF + ZB) / 2, 0.4, ZF - ZB, 0, 3 * FH + 0.6, '#f6f3ee'); B(ig, x, ZF + 0.02, 0.6, 0.5, 0, 3 * FH + 0.6, '#ffffff'); }
+  B(ig, XM, (ZF + ZB) / 2, X1 - X0, ZF - ZB, 0, 0.3, '#e9e4dc'); const backM = new THREE.MeshLambertMaterial({ color: '#3a2d58' }); blk(ig, XM, ZB, X1 - X0 + 0.4, 0.4, 0, 3 * FH + 0.6, '', { mat: backM }); const poolM = soft('#ff7fe0', 0); blk(ig, XM, ZF + 2.2, X1 - X0 - 1, 4.4, 0.02, 0.04, '', { mat: poolM, shadow: false }); for (const x of [X0, X1]) { B(ig, x, (ZF + ZB) / 2, 0.4, ZF - ZB, 0, 3 * FH + 0.6, '#f6f3ee'); B(ig, x, ZF + 0.02, 0.6, 0.5, 0, 3 * FH + 0.6, '#ffffff'); }
   for (let f = 1; f <= 3; f++) B(ig, XM, (ZF + ZB) / 2, X1 - X0 + 0.5, ZF - ZB + 0.3, f * FH, 0.3, f === 3 ? '#f6f3ee' : '#e9e4dc'); B(ig, XM, (ZF + ZB) / 2, X1 - X0 + 1.2, ZF - ZB + 1, 3 * FH + 0.3, 0.5, '#2e9b5a'); cap(ig, XM, (ZF + ZB) / 2, X1 - X0 + 1.2, ZF - ZB + 1, 3 * FH + 0.8);
   B(ig, 18.1, (ZF + ZB) / 2 - 0.5, 0.2, ZF - ZB - 1.2, 0.3, 3 * FH, '#d9d2c6');                                // the wall of the lift shaft
   // shelves: three bays on each floor. The ground floor has low benches with tall room above them; the upper floors have high benches
   s.shelves = []; const pinkBars = [], pipeFill = []; s.pink = [];
   for (let f = 0; f < 3; f++) { const ty = fy(f) + (f === 0 ? 0.75 : 1.55);
-    for (let b = 0; b < 3; b++) { const x = 10.2 + b * 2.9; B(inOn, x, -14.2, 2.5, 1.5, ty - 0.14, 0.14, '#ffffff'); blk(inOn, x, -14.2, 2.4, 1.3, ty - 0.62, 0.48, '', { mat: soft('#9fdcff', 0.33), shadow: false }); for (const dx of [-1.15, 1.15]) B(inOn, x + dx, -14.2, 0.12, 1.4, fy(f), ty - fy(f) - 0.14, '#b8c0c8');
+    for (let b = 0; b < 3; b++) { const x = 9.9 + b * 2.8; B(inOn, x, -14.2, 2.5, 1.5, ty - 0.14, 0.14, '#ffffff'); blk(inOn, x, -14.2, 2.4, 1.3, ty - 0.62, 0.48, '', { mat: soft('#9fdcff', 0.33), shadow: false }); for (const dx of [-1.15, 1.15]) B(inOn, x + dx, -14.2, 0.12, 1.4, fy(f), ty - fy(f) - 0.14, '#b8c0c8');
       const sh = { x: x + DX, y: ty, z: -14.2, tall: f === 0, plant: null, pg: group(inOn, x, ty, -14.2), f }; sh.mark = glowMarks(frame(inOn, x, ty + 0.05, -13.3, 2.6, f === 0 ? 2.3 : 1.45, true, { fill: 0.3 })); sh.mark.visible = false; s.shelves.push(sh); }
     // the water pipe along the front of the trays: clear at first, and blue once the water runs (the blue grows from the left)
     B(inOn, 13.1, -13.4, 9.6, 0.16, ty - 0.5, 0.16, '#d6dde3'); const pg = group(inOn, 8.3, ty - 0.52, -13.38); blk(pg, 4.8, 0, 9.6, 0.2, 0, 0.2, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#39a8ff', 1.25) }), shadow: false }); pg.scale.x = 0.001; pipeFill.push(pg);
-    const bar = new THREE.MeshBasicMaterial({ color: '#6a5a78' }); blk(inOn, 13.1, -14.2, 9.4, 0.5, fy(f) + FH - 0.62, 0.16, '', { mat: bar, shadow: false }); B(inOn, 13.1, -14.2, 9.6, 0.7, fy(f) + FH - 0.46, 0.14, '#cfd6dc', { shadow: false }); pinkBars.push(bar);
-    const pl = new THREE.PointLight('#ff6fd8', 0, 17, 1.6); pl.position.set(13.1, fy(f) + 2.2, -13.6); inOn.add(pl); s.pink.push(pl); }
+    const bar = new THREE.MeshBasicMaterial({ color: '#6a5a78' }); blk(inOn, 13.1, -14.2, 9.4, 0.5, fy(f) + FH - 0.62, 0.16, '', { mat: bar, shadow: false }); B(inOn, 13.1, -14.2, 9.6, 0.7, fy(f) + FH - 0.46, 0.14, '#cfd6dc', { shadow: false }); pinkBars.push(bar); }
   { const riser = group(inOn, 8.3, 0.5, -13.38); blk(riser, 0, 0, 0.2, 0.2, 0, 1, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#39a8ff', 1.25) }), shadow: false }).position.y = 0.5; riser.scale.y = 0.001; s.riser = riser; B(inOn, 8.3, -13.4, 0.16, 0.16, 0.5, fy(2) + 1.1, '#d6dde3'); }
   B(inOn, 7.5, -13.3, 1.3, 1.3, 0.3, 2.1, '#3f78b5'); B(inOn, 7.5, -13.3, 1.45, 1.45, 2.4, 0.14, '#2a5a94'); blk(inOn, 7.5, -12.6, 0.7, 0.1, 1.2, 0.7, '', { mat: GL('#ffd257'), shadow: false }); blk(inOn, 7.5, -12.52, 0.2, 0.1, 1.45, 0.2, '', { mat: GL('#1f2a44'), shadow: false }); s.tank = [7.5 + DX, 0.3, -12.8];
   B(inOn, 19.3, -12.3, 1, 0.3, 1.3, 1.2, '#cfd6dc'); const lever = blk(inOn, 19.3, -12.1, 0.3, 0.3, 1.5, 0.7, '', { mat: GL('#ffd257'), shadow: false }); s.lever = lever; s.switchAt = [19.3 + DX, 1.2, -12.2];
   const lift = group(inOn, 19.3, fy(1), -14.5); s.lift = lift; B(lift, 0, 0, 2, 2, 0, 0.14, '#ffd257'); for (const [dx, dz] of [[-0.95, -0.95], [0.95, -0.95]]) B(lift, dx, dz, 0.1, 0.1, 0, 2.6, '#e9ad1c'); B(lift, 0, -0.95, 2, 0.1, 2.6, 0.1, '#e9ad1c');
   s.grower = fig(lift, 0, 0.14, 0, { k: 1.2, shirt: '#ffffff', legs: '#3f78b5', skin: SKIN[2], hair: HAIR[3], cap: '#2e9b5a', arms: ['fwd', 'fwd'] }); s.liftCrate = mkCrate(lift, 0, 1.25, 0.75, 0.8); s.liftCrate.fill(0); s.liftCrate.visible = false;
-  fig(inOn, 11.65, fy(2), -13.2, { k: 1.2, shirt: '#ffffff', legs: '#3f78b5', skin: SKIN[0], hair: HAIR[4], long: true, cap: '#2e9b5a', turn: 0.5, arms: ['down', 'fwd'] }); fig(inOn, 14.55, fy(0), -12.9, { k: 1.2, shirt: '#ffffff', legs: '#3f78b5', skin: SKIN[1], hair: HAIR[0], cap: '#2e9b5a', turn: -0.4, arms: ['fwd', 'down'] });
+  fig(inOn, 17.45, fy(2), -13.5, { k: 1.2, shirt: '#ffffff', legs: '#3f78b5', skin: SKIN[0], hair: HAIR[4], long: true, cap: '#2e9b5a', turn: -0.5, arms: ['fwd', 'down'] }); fig(inOn, 17.45, fy(0), -13.5, { k: 1.2, shirt: '#ffffff', legs: '#3f78b5', skin: SKIN[1], hair: HAIR[0], cap: '#2e9b5a', turn: -0.4, arms: ['fwd', 'down'] });
   // without the plan the building has an ordinary front of boards and windows
   { texBox(inOff, XM, ZF + 0.1, X1 - X0 + 0.2, 0.5, 0, 3 * FH + 0.3, tileMat('board', '#e8b98a'), 1.6, 0.8); for (let f = 0; f < 3; f++) for (let i = 0; i < 5; i++) if (f || i !== 2) B(inOff, X0 + 1.8 + i * 2.6, ZF + 0.38, 1.4, 0.06, fy(f) + 0.9, 1.6, '#bfe3f2', { tex: 'win', shadow: false }); B(inOff, XM, ZF + 0.38, 2, 0.08, 0, 2.6, '#3f78b5', { shadow: false }); }
-  s.lights = (k) => { pinkBars.forEach((m) => m.color.set('#6a5a78').lerp(hot('#ff5fd0', 2.4), k)); s.pink.forEach((p) => { p.intensity = 26 * k; }); s.lightsOn = k; };
+  // The growing lights are glowing bars. Their light on the back wall and on the paving in front is painted, not worked out lamp by lamp, which keeps the picture quick to draw
+  s.lights = (k) => { pinkBars.forEach((m) => m.color.set('#6a5a78').lerp(hot('#ff5fd0', 2.4), k)); backM.color.set('#3a2d58').lerp(new THREE.Color('#8a3f9e'), k); backM.emissive.set('#ff5fd0').multiplyScalar(0.13 * k); poolM.opacity = 0.2 * k; s.lightsOn = k; };
   s.water = (k) => { s.riser.scale.y = Math.max(0.001, Math.min(1, k * 2.5) * (fy(2) + 1.1)); pipeFill.forEach((p, f) => { p.scale.x = Math.max(0.001, Math.min(1, Math.max(0, k * 2.5 - 0.4 - f * 0.5))); }); };
   // the cargo bike: a box on two wheels in front, and a rider
-  const bike = group(g, 15.5, 0, -10.4); s.bike = bike; texBox(bike, 0, 0.9, 1.2, 1.3, 0.4, 0.5, tileMat('board', '#c99a5e'), 0.6, 0.4); for (const sx of [-1, 1]) wheel(bike, sx * 0.7, 0.42, 0.9, 0.42); wheel(bike, 0, 0.42, -1.2, 0.42); B(bike, 0, -0.2, 0.14, 1.9, 0.5, 0.14, '#16a3a3'); B(bike, 0, -0.7, 0.14, 0.14, 0.5, 0.6, '#16a3a3'); B(bike, 0, -0.75, 0.4, 0.5, 1.08, 0.1, '#2b2f3a'); B(bike, 0, 0.2, 1, 0.1, 1.25, 0.1, '#2b2f3a');
+  const bike = group(g, 7.6, 0, -9.6); s.bike = bike; texBox(bike, 0, 0.9, 1.2, 1.3, 0.4, 0.5, tileMat('board', '#c99a5e'), 0.6, 0.4); for (const sx of [-1, 1]) wheel(bike, sx * 0.7, 0.42, 0.9, 0.42); wheel(bike, 0, 0.42, -1.2, 0.42); B(bike, 0, -0.2, 0.14, 1.9, 0.5, 0.14, '#16a3a3'); B(bike, 0, -0.7, 0.14, 0.14, 0.5, 0.6, '#16a3a3'); B(bike, 0, -0.75, 0.4, 0.5, 1.08, 0.1, '#2b2f3a'); B(bike, 0, 0.2, 1, 0.1, 1.25, 0.1, '#2b2f3a');
   fig(bike, 0, 0.72, -0.75, { k: 1.15, shirt: '#16a3a3', legs: '#2b3a55', skin: SKIN[2], hair: HAIR[3], cap: '#ffd257', sit: true, arms: ['fwd', 'fwd'] }); s.bikeLoad = [mkCrate(bike, 0, 0.9, 0.9, 1), mkCrate(bike, 0, 1.3, 0.9, 0.9)];
 
   // ---- the three market stalls: each has a summer side with a sun and a winter side with a snowflake --------------------------------
@@ -138,7 +138,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
     B(st, -1.33, 0.86, 2.62, 0.06, 0.04, 0.84, '#ffd257'); B(st, 1.33, 0.86, 2.62, 0.06, 0.04, 0.84, '#cfe6f8');
     blk(st, -1.33, 0.9, 0.36, 0.04, 0.3, 0.36, '', { mat: GL('#f08a2a'), shadow: false }); for (const [dx, dy] of [[-0.42, 0], [0.42, 0], [0, 0.4], [0, -0.4]]) blk(st, -1.33 + dx, 0.9, dy ? 0.1 : 0.2, 0.04, 0.48 - (dy ? 0.1 : 0.05) + dy * 0.75, dy ? 0.2 : 0.1, '', { mat: GL('#f08a2a'), shadow: false });
     for (const [w, h, r] of [[0.62, 0.09, 0], [0.09, 0.62, 0], [0.5, 0.08, 0.785], [0.5, 0.08, -0.785]]) { const m = blk(st, 1.33, 0.9, w, 0.04, 0.48 - h / 2, h, '', { mat: GL('#3f78b5'), shadow: false }); m.rotation.z = r; }
-    for (const side of [0, 1]) { const cx = side ? 1.33 : -1.33, crates = [-0.82, 0, 0.82].map((dx) => mkCrate(st, cx + dx, 1.02, 0)), colds = [-0.82, 0, 0.82].map((dx) => mkCold(st, cx + dx, 1.02, 0)), basket = mkBasket(st, cx, 1.02, 0); q.sides.push({ crates, colds, basket }); }
+    for (const side of [0, 1]) { const cx = side ? 1.33 : -1.33, crates = [-0.82, 0, 0.82].map((dx) => mkCrate(st, cx + dx, 1.02, 0)), colds = [-0.82, 0, 0.82].map((dx) => mkCold(st, cx + dx, 1.02, 0)), basket = mkBasket(st, cx, 1.02, 0); basket.scale.setScalar(1.7); q.sides.push({ crates, colds, basket }); }
     // set(side, kind, colours) puts three crates, three cold boxes, one small basket or nothing on a side of the stall. It gives back what was put there, so that it can pop
     q.set = (side, kind, cols) => { const o = q.sides[side]; o.crates.forEach((c) => { c.visible = kind === 'crate'; if (cols) c.fill(6, cols); }); o.colds.forEach((c) => { c.visible = kind === 'cold'; }); o.basket.visible = kind === 'basket'; return kind === 'crate' ? o.crates : kind === 'cold' ? o.colds : kind === 'basket' ? [o.basket] : []; };
     q.set(0, null); q.set(1, null); return q; });
@@ -155,15 +155,15 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
   // ---- which plans stand in the town, and the season -----------------------------------------------------------------------------------
   // show([gardens, big farm, indoor farm]) says which of the three plans is in the town; the others go back to an ordinary corner, pasture and an ordinary building
   s.shown = [false, false, false];
-  s.show = (on) => { s.shown = [...on]; gardenOn.visible = on[0]; gardenOff.visible = !on[0]; cart.visible = on[0]; farmOn.visible = on[1]; s.fields.forEach((f) => { f.g.visible = on[1] && f.sown; }); if (!on[1]) { lorry.visible = false; s.lorryPlate.hide = true; } inOn.visible = on[2]; inOff.visible = !on[2]; bike.visible = on[2]; s.lights(on[2] ? (s.lightsOn || 1) : 0); if (!on[2]) s.pink.forEach((p) => { p.intensity = 0; }); };
+  s.show = (on) => { s.shown = [...on]; gardenOn.visible = on[0]; gardenOff.visible = !on[0]; cart.visible = on[0]; farmOn.visible = on[1]; s.fields.forEach((f) => { f.g.visible = on[1] && f.sown; }); if (!on[1]) { lorry.visible = false; s.lorryPlate.hide = true; } inOn.visible = on[2]; inOff.visible = !on[2]; bike.visible = on[2]; s.lights(on[2] ? (s.lightsOn || 1) : 0); };
   s.parts = { gardenOn, gardenOff, farmOn, inOn, inOff };
-  s.lorryPlate = plate(s, 'Lorry', [0, 0, 0]); s.lorryPlate.hide = true;
+  s.lorryPlate = plate(s, 'The lorry', [0, 0, 0]); s.lorryPlate.hide = true;
   const fogC = new THREE.Color(), sunC = [C('#ffe7c2'), C('#ffd49a'), C('#e4ecff')], evC = C('#ffb070');
   // season(a, w): a is how far into autumn the year is and w how far into winter (each from 0 to 1). evening darkens a summer day
   s.season = (a, w, evening = 0) => { s.a = a; s.w = w; for (const q of seasonal) q.m.color.copy(q.c[0]).lerp(q.c[1], a).lerp(q.c[2], w);
     const air = evening ? drawSky(evening, 0, [SKY[0], EVENING, EVENING]) : drawSky(a, w, SKY); s.scene.fog.color.copy(air); s.sun.color.copy(sunC[0]).lerp(sunC[1], a).lerp(sunC[2], w).lerp(evC, evening); s.sun.intensity = 3.2 - 0.3 * a - 1.2 * w - 1.9 * evening; s.hemi.intensity = 1.4 + 0.15 * w - 0.55 * evening;
     snowCaps.forEach((c) => { c.visible = w > 0.02; c.scale.y = Math.max(0.01, 0.3 * w); c.position.y = c.userData.y + 0.15 * w; }); flakes.visible = w > 0.04;
     s.beds.forEach((b) => { if (b.plant) b.plant.g.scale.setScalar(Math.max(0.02, 1 - w)); }); s.neighbours.forEach((n, i) => { n.visible = w < 0.5 || i === 0; }); };
-  s.flakes = (dt) => { if (!flakes.visible) return; for (const q of FL) { q.y -= q.v * dt; if (q.y < 0) q.y += 18; q.f.position.set(q.x + Math.sin(q.y + q.z) * 0.4, q.y, q.z); } };
-  s.puffs = (dt) => { for (const q of puffs) { if (q.t > 5) { q.p.visible = false; continue; } q.t += dt; const k = q.k * (1 + q.t * 0.9); q.p.scale.set(k, k, k); q.p.position.y += dt * 0.5 * q.k; q.m.opacity = 0.55 * Math.max(0, 1 - q.t / 5); } };
+  s.flakes = (dt) => { if (!flakes.visible) return; for (const q of FL) { q.y -= q.v * dt; if (q.y < 0) q.y += 18; q.f.position.set(q.x + Math.sin(q.y + q.z) * 0.4, q.y, q.z); q.f.visible = Math.hypot(q.x - s.eye[0], q.y - s.eye[1], q.z - s.eye[2]) > 5; } };   /* a flake right in front of the camera would look like a white block */
+  s.puffs = (dt) => { for (const q of puffs) { if (q.t > 5) { q.p.visible = false; continue; } q.t += dt; const k = q.k * (1.3 + q.t * 1.1); q.p.scale.set(k, k, k); q.p.position.y += dt * 0.6 * q.k; q.m.opacity = 0.78 * Math.max(0, 1 - q.t / 5); } };
   s.mkCrate = mkCrate; s.tree = tree; return s; }

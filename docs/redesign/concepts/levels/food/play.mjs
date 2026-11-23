@@ -5,6 +5,7 @@
 import { openLevel } from '../../level-kit/record.mjs';
 const [out = 'pictures/run', width = 1440, height = 810, plan = 2, other = -1, speed = 1] = process.argv.slice(2), P = +plan;
 const r = await openLevel({ page: 'concepts/levels/food/index.html', out, width: +width, height: +height, speed: +speed }), { shot, click, has, tap, p } = r;
+p.setDefaultTimeout(300000);   // the recording machine is shared and can be very slow, so a press may take minutes to land
 // the words of the sample child, which are nearest to the plan it will choose, and the crops and places it uses
 const WORD = [['inside the town', 'outdoors in the soil'], ['far away, where there is lots of land', 'outdoors in the soil'], ['inside the town', 'indoors under lights']][P];
 const CROP = ['tomato', 'lettuce', 'strawberry'], SLOT = [[0, 2, 4, 5, 7, 6], [0, 1, 3, 4, 6, 7], [0, 2, 3, 5, 7, 8]][P];

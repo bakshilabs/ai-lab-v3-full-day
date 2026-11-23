@@ -58,7 +58,7 @@ const STALL = [['crate', 'basket'], ['cold', 'cold'], ['crate', 'crate']];
 const nearest = (w) => (w[0] === 0 ? 1 : w[1] === 0 ? 0 : 2);
 
 // ---- 3. views -----------------------------------------------------------------------------------------------------------------------------
-const RESULTS = { eye: [0, 8.2, 23.5], at: [0, -5.2, 8], fov: 40 };
+const RESULTS = { eye: [0, 8.2, 23.5], at: [0, -3.3, 8], fov: 40 };
 const VIEW = [{ eye: [-13.8, 5.6, 3.6], at: [-13.8, 0.2, -8.6], fov: 40 }, { eye: [0, 15, -18], at: [0, 25, -112], fov: 46 }, { eye: [15.4, 5.5, 6.5], at: [15.4, 5.35, -14], fov: 39 }];
 const only = (i) => [0, 1, 2].map((k) => k === i || i < 0);
 const colsOf = (list) => list.map((c) => ({ tomato: '#ea3d2d', lettuce: '#8fd86c', strawberry: '#e8284c', pepper: '#f6b81e', herbs: '#37b061' }[c.id]));
@@ -83,13 +83,13 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   const clearStalls = () => s.stalls.forEach((st) => { st.set(0, null); st.set(1, null); });
   const pop = (objs) => Promise.all(objs.map((o, j) => { const k = o.scale.x || 1; o.scale.setScalar(0.01); return wait(j * 0.12).then(() => { beep(520 + j * 90, 0.07); return tw(0.35, (t) => o.scale.setScalar(Math.max(0.01, k * back(t)))); }); }));
   const move = (o, a, b, sec, bob = 0.05) => { o.rotation.y = Math.atan2(b[0] - a[0], b[1] - a[1]); return tw(sec, (t) => { const e = ease(t); o.position.set(a[0] + (b[0] - a[0]) * e, Math.abs(Math.sin(t * sec * 6)) * bob, a[1] + (b[1] - a[1]) * e); }); };
-  const CART = [[-8.6, -4.4], [-7.2, 8.1]], BIKE = [[15.5, -10.4], [7.2, 8.1]];
+  const CART = [[-8.6, -4.4], [-7.2, 8.1]], BIKE = [[7.6, -9.6], [7.2, 8.1]];
   const home = () => { s.cart.position.set(CART[0][0], 0, CART[0][1]); s.cart.rotation.y = 0; s.bike.position.set(BIKE[0][0], 0, BIKE[0][1]); s.bike.rotation.y = 0; };
   const cartLoad = (kind, cols) => { s.cartLoad.crates.forEach((c) => { c.visible = kind === 'crate'; c.fill(6, cols || DEFCOLS); }); s.cartLoad.basket.visible = kind === 'basket'; };
   const bikeLoad = (on, cols) => s.bikeLoad.forEach((c) => { c.visible = on; c.fill(6, cols || DEFCOLS); });
   cartLoad(null); bikeLoad(false);
   // the lorry comes down the long road with grey pollution behind it; the carriers then bring its cold boxes to the middle stall
-  const lorryRun = (sec, from = -128, to = -19) => { s.lorryRun = true; s.lorryPlate.hide = false; return tw(sec, (t) => s.lorryAt(from + (to - from) * (t * (0.6 + 0.4 * t)))).then(() => { s.lorryRun = false; s.lorryPlate.hide = true; }); };
+  const lorryRun = (sec, from = -128, to = -19) => { s.lorryRun = true; return tw(sec, (t) => s.lorryAt(from + (to - from) * (t * (0.6 + 0.4 * t)))).then(() => { s.lorryRun = false; }); };
   const carry = async (side) => { s.carriers.forEach((c) => { c.visible = true; }); await Promise.all(s.carriers.map((c, i) => move(c, [i ? 1.2 : -1.2, -15], [i ? 1 : -1, 9], 3.4))); s.carriers.forEach((c) => { c.visible = false; }); await pop(s.stalls[1].set(side, 'cold')); };
 
   // ---- the child's words are drawn in the town at once: a yellow place where the food would grow, and a small sample of how -----------
@@ -99,7 +99,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     if (k === 2) { for (const y of [0.9, 2]) { B(p, 0, 0, 4.2, 1.5, y, 0.14, '#ffffff'); B(p, 0, 0, 3.8, 0.5, y + 0.14, 0.4, '#58b85a'); } for (const x of [-2.05, 2.05]) B(p, x, 0, 0.14, 1.5, 0.45, 2.7, '#cfd6dc'); blk(p, 0, 0, 4.2, 0.6, 3.05, 0.16, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#ff5fd0', 2.2) }), shadow: false }); }
     p.visible = false; return p; });
   function texBoxless(p) { B(p, 0, 0, 4.6, 3.2, 0, 0.45, '#a8743f'); B(p, 0, 0, 4.2, 2.8, 0.4, 0.08, '#6b4a2e'); }
-  const ANCHOR = [[-25, s.roadY(-102) - 0.25, -103, 5], [-7.6, 0, -20.5, 1.25], [0, 0, -3.5, 1]], mplate = plate(s, '', [0, 0, 0], 'on'); mplate.hide = true;
+  const ANCHOR = [[-25, s.roadY(-102) - 0.25, -103, 5], [-7.6, 0, -20.5, 1.25], [-3, 0, 1.5, 1]], mplate = plate(s, '', [0, 0, 0], 'on'); mplate.hide = true;
   s.words = (list) => { s.words0 = [...list]; const [a, b] = list, on = a !== undefined || b !== undefined; marker.visible = on; mplate.hide = !on; if (!on) return; const [x, y, z, k] = ANCHOR[a ?? 2]; marker.position.set(x, y, z); marker.scale.setScalar(k);
     samples.forEach((p, i) => { p.visible = b === i; }); mplace.visible = a !== undefined; mback.visible = a === 0; mplate.pos.set(x, y + (b === undefined ? 1.2 : 3.9) * k, z); mplate.el.innerHTML = [a !== undefined ? WHERE[a] : '', b !== undefined ? HOW[b] : ''].filter(Boolean).join('<br>'); mplate.el.style.textAlign = 'center'; mplate.el.style.lineHeight = '1.25'; };
   s.asking = () => { s.tags.forEach((t) => { t.hide = true; }); s.show([false, false, false]); clearStalls(); glide(MAIN, 1); };
@@ -114,13 +114,13 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   s.test = async (api) => { const me = run;
     for (const side of [0, 1]) {
       if (side) { api.step(T.autumnT); api.say(T.autumn); cartLoad(null); bikeLoad(false); const a = s.cart.position, b = s.bike.position;
-        move(s.cart, [a.x, a.z], CART[0], 3); move(s.bike, [b.x, b.z], BIKE[0], 3); tw(4, (t) => s.lorryAt(-19 - 109 * t)).then(() => { s.lorry.visible = false; });
+        move(s.cart, [a.x, a.z], CART[0], 3); move(s.bike, [b.x, b.z], BIKE[0], 3); tw(4, (t) => s.lorryAt(-19 - 109 * t, true, true)).then(() => { s.lorry.visible = false; });
         await tw(4, (t) => s.season(ease(t), 0)); if (me !== run) return false; api.step(T.winterT); api.say(T.winter); await tw(4.5, (t) => s.season(1 - ease(t), ease(t))); if (me !== run) return false; home(); await wait(0.6); }
       cartLoad(side ? 'basket' : 'crate'); bikeLoad(true); const lor = lorryRun(side ? 11 : 14);
       await Promise.all([move(s.cart, ...CART, side ? 5.4 : 4.6), move(s.bike, ...BIKE, 4.2, 0)]); if (me !== run) return false;
       cartLoad(null); bikeLoad(false); pop(s.stalls[0].set(side, STALL[0][side])); await pop(s.stalls[2].set(side, 'crate')); api.say(T.early[side]);
       await lor; if (me !== run) return false; await carry(side); api.say(T.late[side]); await wait(1.6); if (me !== run) return false; }
-    tagsAt(true); await glide(RESULTS, 2.2); return me === run; };
+    s.tags.forEach((t) => { t.hide = true; }); await glide(RESULTS, 2.2); return me === run; };
 
   // ---- the play break: grow a crate of food with the plan the child chose ------------------------------------------------------------
   const tok = (c, small) => { const b = document.createElement('button'); b.className = 'tok'; b.dataset.crop = c.id; b.innerHTML = `<svg viewBox="0 0 44 40" aria-hidden="true"><circle cx="22" cy="${c.tall ? 12 : 22}" r="9" fill="${c.col}" stroke="${INK}" stroke-width="2.5"/><path d="M22 ${c.tall ? 21 : 31}v${c.tall ? 16 : 6}" stroke="#2e9b5a" stroke-width="4" stroke-linecap="round"/></svg><span>${c.name}<small>${small}</small></span>`; return b; };
@@ -171,10 +171,13 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
 
   // ---- the plan is carried out in the town; another plan can be shown at once ---------------------------------------------------------
   const settle = (pick) => { s.pick2 = pick; s.show(only(pick)); s.lights(1); s.water(1); home(); cartLoad(null); bikeLoad(false); tagsAt(false); s.tags.forEach((t, i) => { tagHtml(i, false); t.hide = i !== pick; }); };
-  s.town = async (pick) => { const me = run, w0 = s.w, cols = s.crops ? colsOf(s.crops) : DEFCOLS; settle(pick); glide(MAIN, 1.4); if (w0 > 0.01) await tw(3, (t) => s.season(0, w0 * (1 - ease(t)))); if (me !== run) return;
+  // after the play break the plants grow again, and the growers fill the places that the child left empty with the child's own crops
+  const regrow = (pick) => { if (pick === 1 || !s.crops) return; const slots = pick === 0 ? s.beds : s.shelves, low = s.crops.filter((c) => !c.tall), tall = s.crops.find((c) => c.tall); let n = 0;
+    slots.forEach((q) => { if (q.plant) q.plant.regrow(); else q.plant = mkPlant(q.pg, 0, 0, 0, q.tall && tall ? tall : low[n++ % low.length], { roots: pick === 2 }); }); };
+  s.town = async (pick) => { const me = run, w0 = s.w, cols = s.crops ? colsOf(s.crops) : DEFCOLS; settle(pick); regrow(pick); glide(MAIN, 1.4); if (w0 > 0.01) await tw(3, (t) => s.season(0, w0 * (1 - ease(t)))); if (me !== run) return;
     const st = s.stalls[pick]; for (const side of [0, 1]) { const o = st.set(side, STALL[pick][side], cols); if (!(pick === 2 && side === 1) && !(pick !== 2 && side === 0)) await pop(o); } await wait(0.6); };
   s.swap = (pick) => { settle(pick); s.season(0, 0); glide(MAIN, 1); stallsFor(pick, pick === s.pick && s.crops ? colsOf(s.crops) : null); pop(s.stalls[pick].sides.flatMap((o) => [...o.crates, ...o.colds, o.basket].filter((c) => c.visible))); };
-  s.showResults = () => { tagsAt(true); s.tags.forEach((t, i) => { tagHtml(i, false); t.hide = false; }); };
+  s.showResults = () => { s.tags.forEach((t) => { t.hide = true; }); };   // the cards stand under the stalls and carry the tags of the plans
 
   // ---- the recap: winter again, all three places in the town, and a tap on one of them ----------------------------------------------
   s.answers = [[-13.8, 1.6, -8], [-10, 30, -120], [15.5, 5.5, -12.5]];
@@ -183,9 +186,9 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   // the closing picture: a summer evening in the square, with the plan the child chose
   s.evening = (pick) => { const w0 = s.w, cols = s.crops && pick === s.pick ? colsOf(s.crops) : null; settle(pick); s.tags.forEach((t) => { t.hide = true; }); stallsFor(pick, cols);
     tw(1.6, (t) => s.season(0, w0 * (1 - t))).then(() => tw(3, (t) => s.season(0, 0, 0.82 * ease(t)))); if (pick === 1) { s.lorryAt(-128, true); tw(16, (t) => s.lorryAt(-128 + 100 * t)); s.lorryRun = true; }
-    glide({ eye: [[4, 2.5, 21], [0, 3, 25], [-5, 2.5, 21]][pick], at: [[-11, 3.2, -8], [0, 7, -14], [13, 5, -10]][pick], fov: 44 }, 4); };
+    glide({ eye: [[5, 3, 25.5], [0, 3.1, 26], [-5, 3, 25.5]][pick], at: [[-7, 4.2, -12], [0, 6.4, -14], [8, 5.2, -12]][pick], fov: 43 }, 4); };
 
-  let puffT = 0; s.tick = (t, dt) => { s.flakes(dt); s.puffs(dt); if (s.lorryRun && s.lorry.visible) { puffT -= dt; if (puffT < 0) { s.puff(); puffT = 0.28; } }
+  let puffT = 0; s.tick = (t, dt) => { s.flakes(dt); s.puffs(dt); s.lorryPlate.hide = !(s.lorryRun && s.lorry.visible); if (s.lorryRun && s.lorry.visible) { puffT -= dt; if (puffT < 0) { s.puff(); puffT = 0.28; } }
     s.family.position.y = Math.abs(Math.sin(t * 2)) * 0.04; s.walkers.forEach((w, i) => { w.position.y = 0.06 + Math.abs(Math.sin(t * 2.4 + i)) * 0.05; }); if (s.pick !== 1) s.harvester.position.x = 17 + Math.sin(t * 0.25) * 9; };
   return s; }
 
