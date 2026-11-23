@@ -67,6 +67,8 @@
   .sws { display: grid; grid-template-columns: repeat(2, 42px); gap: 8px; } .sws-h { font: 700 15px/1.1 var(--ui-body); color: var(--ui-ink-soft); margin-bottom: 6px; }
   .sw { width: 42px; height: 42px; border: 3px solid var(--ui-ink); border-radius: 10px; box-shadow: 0 4px 0 var(--ui-ink); cursor: pointer; padding: 0; }
   .sw.on { outline: 4px solid var(--ui-sun); outline-offset: 2px; transform: translateY(-3px); }
+  .first { position: absolute; left: 16px; top: 76px; z-index: 3; display: flex; flex-direction: column; gap: 5px; padding: 9px 13px 10px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 16px/1.2 var(--ui-body); }
+  .first[hidden] { display: none; } .first b { font: 800 17px/1.2 var(--ui-display); } .first span { display: flex; align-items: center; gap: 8px; } .first .mark { width: 24px; height: 24px; font-size: 15px; }
   .fps { position: absolute; right: 16px; bottom: 8px; z-index: 4; font: 600 14px/1 var(--ui-body); background: #fff; border: 2px solid var(--ui-ink); border-radius: 8px; padding: 4px 8px; }
   @media (max-width: 900px), (max-height: 640px) {
     .band { grid-template-columns: 84px minmax(0, 1fr); min-height: 150px; } .flo { width: 84px; height: 110px; }
@@ -81,6 +83,7 @@
     <canvas id="c"></canvas>
     <div class="plates" id="plates"></div>
     <div class="top"><div class="chip"><b>1</b>Eco Town <strong>Homes</strong></div><div class="step" id="step"></div><div class="trial">This is a trial level. Its words are placeholders.</div></div>
+    <div class="first" id="first" hidden></div>
     <div class="over" id="over"></div>
     <div class="fps" id="fps" hidden></div>
   </div>

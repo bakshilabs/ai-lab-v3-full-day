@@ -20,11 +20,14 @@ const T = { level: 'A warm home for winter',
   plans: [['Timber home', 'Wood from the town forest, cut in a sawmill that runs on sunshine.'], ['Brick home', 'Clay bricks, baked hard in a hot oven.'], ['Concrete home', 'Cement, made in a very hot kiln.']],
   checks: ['Staying warm', 'Clean air'], warm: { g: 'It stays warm all night.', f: 'It gets a little cold by morning.', p: 'It is cold inside all night.' }, tag: { g: 'Warm', f: 'A little cold', p: 'Cold' },
   air: ['Making the wood adds no pollution.', 'Baking the bricks adds some pollution.', 'Making the cement adds a lot of pollution.'],
-  build: 'Build your home', win2: 'You have two windows. Tap a yellow place to put one in.', win1: 'You have one more window. Tap a yellow place to put it in.', roof: 'Now tap the yellow place to lower the roof.', door: 'Choose a colour for the door. Then tap the yellow place.',
+  build: 'Build your home', win2: 'You have two windows. Tap a yellow place to put one in.', win1: 'You have one more window. Tap a yellow place to put it in.', roof: 'Tap the yellow place to lower the roof.', shadyWin: 'The walls on this side are in shade, but the sun reaches the roof. A window in the roof lets it in.', door: 'Choose a colour for the door. Then tap the yellow place.',
   sunIn: 'The winter sun shines in through this window and warms the home.', noSun: 'This wall is in shade, so no sun comes in here. You can tap the window to take it out again.', shade: 'No wall on this side of the street gets the winter sun.',
   ready: ['The home is ready, and your family is moving in.', 'One window catches the sun. The home is ready, and your family is moving in.', 'Both windows catch the sun. The home is ready, and your family is moving in.'],
   window: 'Window', roofT: 'Roof', doorT: 'Door', left: (n) => `${n} left`, placed: 'In place', colour: 'Door colour', family: 'Your family', plot: 'Your plot', yours: 'Your home', next: 'Next',
-  town: 'The street is built', after: ['The whole street is built your way. Making the wood added no pollution, and the air is clean.', 'The whole street is built your way. Baking the bricks added some pollution.', 'The whole street is built your way. Making the cement added a lot of pollution.'],
+  town: 'The street is built', homes: ['Timber homes', 'Brick homes', 'Concrete homes'], afterAir: ['Making the wood added no pollution, and the air is clean.', 'Baking the bricks added some pollution.', 'Making the cement added a lot of pollution.'],
+  afterWarm: { g: 'The homes stay warm at night.', f: 'The homes get a little cold by morning.', p: 'The homes are cold at night.' }, built: 'The whole street is built your way.',
+  tryOther: 'Try another plan', chooseOther: 'Choose a different plan to see it in the town.', first: 'Your first plan', what: 'What changed?', keepFirst: 'Go back to my first plan', keepThis: 'Keep this plan',
+  recapT: 'One more question', recapQ: 'Which side of the street does the winter sun warm? Tap that side.', thisSide: 'This side', sunSide: 'The sunny side', recapYes: 'Yes. The low winter sun reaches this side, so homes here stay warmer.', recapNo: 'The winter sun shines on this side. The wood keeps the other side in shade.',
   end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again' };
 
 // ---- colours and blocks ---------------------------------------------------------------------------------------------------
@@ -64,9 +67,9 @@ let cur = null, tws = [], run = 0;
 function newScene(half, o = {}) { const scene = new THREE.Scene(), hemi = new THREE.HemisphereLight('#fff6e8', '#cfc6b0', 1.5), sun = new THREE.DirectionalLight('#ffe9c4', 1.7);
   scene.add(hemi); sun.position.set(...(o.sun || [-16, 30, 18])); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -half, right: half, top: half * 0.75, bottom: -half * 0.75, near: 1, far: 160 }); sun.shadow.bias = -0.002; sun.shadow.normalBias = 0.09; scene.add(sun);
   scene.background = new THREE.Color(SKY); return { scene, hemi, sun, g: group(scene), picks: [], plates: [], minAspect: 1.9 }; }
-function fit() { if (!cur) return; const f = cur.fov * Math.PI / 180; cam.fov = cam.aspect >= cur.minAspect ? cur.fov : 2 * Math.atan(Math.tan(f / 2) * cur.minAspect / cam.aspect) * 180 / Math.PI; cam.position.set(...cur.eye); cam.lookAt(...cur.at); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
+function fit() { if (!cur) return; const f = cur.fov * Math.PI / 180; cam.fov = cam.aspect >= cur.minAspect ? cur.fov : 2 * Math.atan(Math.tan(f / 2) * cur.minAspect / cam.aspect) * 180 / Math.PI; cam.position.set(...cur.eye); cam.lookAt(cur.at[0], cur.at[1] - (view.clientHeight < 560 ? cur.drop || 0 : 0), cur.at[2]); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
 // the camera glides from one view of the same place to another
-const glide = (to, sec = 1.6) => { const a = { eye: [...cur.eye], at: [...cur.at], fov: cur.fov }, mix = (p, q, k) => p.map((v, i) => v + (q[i] - v) * k); return tw(sec, (k) => { const e = ease(k); cur.eye = mix(a.eye, to.eye, e); cur.at = mix(a.at, to.at, e); cur.fov = a.fov + (to.fov - a.fov) * e; fit(); }); };
+const glide = (to, sec = 1.6) => { const a = { eye: [...cur.eye], at: [...cur.at], fov: cur.fov, drop: cur.drop || 0 }, mix = (p, q, k) => p.map((v, i) => v + (q[i] - v) * k); return tw(sec, (k) => { const e = ease(k); cur.eye = mix(a.eye, to.eye, e); cur.at = mix(a.at, to.at, e); cur.fov = a.fov + (to.fov - a.fov) * e; cur.drop = a.drop + ((to.drop || 0) - a.drop) * e; fit(); }); };
 function resize() { const w = view.clientWidth, h = view.clientHeight; if (!w || !h) return; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false); cam.aspect = w / h; fit(); }
 new ResizeObserver(resize).observe(view);
 function setScene(s) { run++; tws = []; cur = s; hover = null; view.classList.remove('can'); $('plates').innerHTML = ''; for (const p of s.plates) $('plates').append(p.el); fit(); return s; }
@@ -93,7 +96,7 @@ function loop(now) { requestAnimationFrame(loop); const dt = Math.min(0.1, (now 
 
 // ---- the place: one street, used for the whole level -----------------------------------------------------------------------
 // Side 0 is the sunny side (on the right of the picture) and side 1 the shady side (on the left, under the wood).
-const SIDEZ = [-12.7, 12.7], PX = [1, -10, -18, -26, -34], VIEW = { street: { eye: [19, 5, 4.6], at: [-10, 3, 0], fov: 33 }, plans: [{ eye: [3, 4.4, 5.6], at: [-17, 1.4, -12], fov: 40 }, { eye: [3, 4.4, -5.6], at: [-17, 1.4, 12], fov: 40 }], build: [{ eye: [14.5, 4.6, -0.5], at: [0.5, 3.1, -10.2], fov: 33 }, { eye: [14.5, 4.6, 0.5], at: [0.5, 3.1, 10.2], fov: 33 }] };
+const SIDEZ = [-12.7, 12.7], PX = [1, -10, -18, -26, -34], VIEW = { street: { eye: [19, 5, 4.6], at: [-10, 3, 0], fov: 33 }, plans: [{ eye: [-13, 6.6, 14.5], at: [-18.5, 2.3, -12.7], fov: 48, drop: 1.7 }, { eye: [-23, 6.6, -14.5], at: [-17.5, 2.3, 12.7], fov: 48, drop: 1.7 }], build: [{ eye: [14.5, 4.6, -0.5], at: [0.5, 3.1, -10.2], fov: 33 }, { eye: [15, 9.6, 0], at: [0.5, 3.8, 10.4], fov: 33 }] };
 const HW = 10, HD = 8, HH = 5.2, FRONT = [-3, 0.2], GABLE = [-1.9, 1.9], DOORX = 3.4;
 function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Object.assign(s, VIEW.street, { eye: [...VIEW.street.eye], at: [...VIEW.street.at], minAspect: 1.9 });
   const sunDir = new THREE.Vector3(-10, 36, 48).normalize();
@@ -103,7 +106,9 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
   for (let k = 0; k < 13; k++) { const x = 16 - k * 7, hh = 11 + hash(k, 3) * 4; B(g, x, 23.5, 7.2, 6, 0, hh, ['#4f8a5a', '#58935f', '#4a8456'][k % 3]); B(g, x + 0.6, 22.6, 4.4, 4.4, hh, 2.2, '#58935f'); }
   for (const x of [8, -6, -20]) { B(g, x, 19.6, 0.6, 0.6, 0, 5, '#6f5a44'); B(g, x, 19.6, 4.4, 4.4, 4.2, 4.6, '#4f8a5a'); }
   // trees and lamps along the path lead the eye to the school
-  for (let k = 0; k < 9; k++) { const x = -6 - k * 8; for (const z of [-7.2, 7.2]) { tree(g, x, z, 1.55); lamp(g, x - 4, z > 0 ? 3.4 : -3.4); } }
+  const avenue = []; for (let k = 0; k < 9; k++) { const x = -6 - k * 8; for (const z of [-7.2, 7.2]) { const tg = group(g), lg = group(g), sd = z > 0 ? 1 : 0; tree(tg, x, z, 1.55); lamp(lg, x - 4, sd ? 3.4 : -3.4); avenue.push({ o: tg, x, sd, tree: true }, { o: lg, x: x - 4, sd }); } }
+  // for the test, the trees in front of the three sample homes and the lamps beside them step aside, so that the windows and the air can be seen
+  const clearView = (on) => { for (const a of avenue) a.o.visible = !(on && a.x > -42 && a.x < 8); };
   // the far end of the street is already built, and the school closes the view
   [-42, -50, -58, -66].forEach((x, k) => SIDEZ.forEach((z, sd) => { const h = house(g, { wx: x, k: k + sd * 2 }); h.position.set(x, 0, z); h.rotation.y = sd ? Math.PI : 0; }));
   { const x = -80, V = { raw: true, unlit: true }; B(g, x, 0, 6, 24, 0, 8, '#ffd76a', V); B(g, x, 0, 6.6, 25, 8, 1.3, '#d2553a', V); B(g, x, 0, 6.6, 13, 9.3, 1.2, '#d2553a', V); B(g, x, 0, 4, 4, 10.5, 8, '#ffd76a', V); B(g, x, 0, 5, 5, 18.5, 1.2, '#d2553a', V); B(g, x + 2.1, 0, 0.1, 1.6, 13.5, 1.6, '#fbfbf7', V);
@@ -139,17 +144,17 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
   const level = (i) => { const n = [3, 2, 1][i] + (s.side === 0 ? 1 : 0) + (s.thick ? 1 : 0); return n >= 4 ? 'g' : n === 3 ? (i === 0 ? 'g' : 'f') : n === 2 ? (i === 0 ? 'g' : 'f') : 'p'; };
   s.level = level; s.airLevel = (i) => 'gfp'[i];
   const pop = (o, from = 0.01, to = 1, sec = 0.36) => tw(sec, (k) => o.scale.setScalar(Math.max(0.01, from + (to - from) * (to > from ? back(k) : ease(k)))));
-  s.clearPlans = () => { for (const q of samples) { g.remove(q.h); for (const c of q.cloud) g.remove(c.m); q.plate.hide = true; q.plate.el.remove(); s.plates.splice(s.plates.indexOf(q.plate), 1); } samples = []; };
-  s.showPlans = async () => { s.clearPlans(); const z = SIDEZ[s.side], me = run; plots[s.side].forEach((p, k) => { p.mark.visible = false; });
+  s.clearPlans = () => { clearView(false); for (const q of samples) { g.remove(q.h); for (const c of q.cloud) g.remove(c.m); q.plate.hide = true; q.plate.el.remove(); s.plates.splice(s.plates.indexOf(q.plate), 1); } samples = []; };
+  s.showPlans = async () => { s.clearPlans(); clearView(true); const z = SIDEZ[s.side], me = run; plots[s.side].forEach((p, k) => { p.mark.visible = false; });
     for (let i = 0; i < 3; i++) { const x = PX[s.side ? i + 1 : 3 - i], glass = glassMat(), h = house(g, { wx: x, mat: MAT[i], glass, thick: s.thick, roofC: ROOF[[2, 0, 1][i]] }); h.position.set(x, 0.1, z); h.rotation.y = s.side ? Math.PI : 0; h.scale.setScalar(0.01);
       const cloud = []; for (let k = 0; k < [0, 4, 12][i]; k++) { const sz = (i === 1 ? 1.6 : 2.2) + hash(k, i) * 1.4, m = blk(g, 0, 0, sz, sz, 0, sz * 0.8, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.78) }); m.visible = false;
-        cloud.push({ m, sz, from: [x, 5.4, z], to: [x + (hash(k, 5) - 0.5) * (i === 1 ? 4 : 8), 7.2 + hash(k, 9) * (i === 1 ? 2.4 : 5) + k * 0.12, z + (hash(k, 3) - 0.5) * 5], at: k * (i === 1 ? 0.5 : 0.2) }); }
+        cloud.push({ m, sz, from: [x, 5.4, z], to: [x + (hash(k, 5) - 0.5) * (i === 1 ? 4 : 8), 6.9 + hash(k, 9) * (i === 1 ? 1.6 : 3.2) + k * 0.05, z + (hash(k, 3) - 0.5) * 5], at: k * (i === 1 ? 0.5 : 0.2) }); }
       samples.push({ h, glass, cloud, plate: plate(s, T.plans[i][0], [x, 6.4, z + (s.side ? -3.6 : 3.6)]) }); }
     glide(VIEW.plans[s.side], 1.6); for (const q of samples) { beep(360, 0.07); await pop(q.h); if (me !== run) return; } };
   let cloudT = -1; const setClouds = (tt) => { for (const q of samples) for (const p of q.cloud) { const k = ease(Math.max(0, Math.min(1, (tt - p.at) / 2))); p.m.visible = k > 0; p.m.position.set(p.from[0] + (p.to[0] - p.from[0]) * k, p.from[1] + (p.to[1] - p.from[1]) * k, p.from[2] + (p.to[2] - p.from[2]) * k); p.m.scale.set(p.sz * (0.3 + 0.7 * k), p.sz * 0.8 * (0.3 + 0.7 * k), p.sz * (0.3 + 0.7 * k)); } };
   // the test: the materials are made and the pollution rises; then the cold night comes and the windows show the warmth
   s.run = async () => { const me = run; cloudT = 0; await wait(4.2); if (me !== run) return false; await tw(2, (k) => s.setNight(ease(k))); if (me !== run) return false;
-    samples.forEach((q, i) => { const lv = level(i); q.glass.color.set(WARM[lv]); q.plate.el.textContent = `${T.plans[i][0]}: ${T.tag[lv]}`; q.plate.el.classList.toggle('on', lv === 'g'); }); beep(300, 0.3, 'sine'); await wait(1.6); return me === run; };
+    samples.forEach((q, i) => { const lv = level(i); q.glass.color.set(WARM[lv]); }); beep(300, 0.3, 'sine'); await wait(1.6); return me === run; };
 
   // ---- the family's home, built by the child ----
   let H = null;
@@ -157,62 +162,74 @@ function town() { const s = newScene(46, { sun: [-10, 36, 48] }), g = s.g; Objec
     await Promise.all([tw(1.2, (k) => s.setNight(1 - ease(k))), ...samples.map((q) => pop(q.h, 1, 0.01, 0.5)), tw(1, (k) => { for (const q of samples) for (const p of q.cloud) p.m.material.opacity = 0.78 * (1 - k); })]); if (me !== run) return; s.clearPlans(); cloudT = -1;
     footing.forEach((pair) => pair.forEach((f) => { f.visible = false; })); plots[sd][0].visible = false;
     const hg = group(g, PX[0], 0, z); hg.rotation.y = sd ? Math.PI : 0; const t = s.thick ? 0.9 : 0.3;
-    B(hg, 0, 0, HW + 0.8, HD + 0.8, 0, 0.3, '#d9d2c2', { wx: 0 }); const walls = group(hg, 0, 0.3, 0); B(walls, 0, 0, HW, HD, 0, HH, m.wall, R); for (const y of [1.3, 2.6, 3.9]) { B(walls, 0, HD / 2, HW, 0.04, y, 0.07, m.line, { ...R, shadow: false }); for (const sx of [-1, 1]) B(walls, sx * HW / 2, 0, 0.04, HD, y, 0.07, m.line, { ...R, shadow: false }); }
-    B(walls, 0, 0, HW + 0.04, HD + 0.04, HH - 0.12, 0.14, s.thick ? LINING : m.line, R); B(walls, 0, 0, HW - 2 * t, HD - 2 * t, HH - 0.1, 0.14, '#5a4630', { ...R, shadow: false });      // the top of the walls shows how thick they are
+    const wallMat = new THREE.MeshLambertMaterial({ color: m.wall }), lineMat = new THREE.MeshLambertMaterial({ color: m.line });
+    B(hg, 0, 0, HW + 0.8, HD + 0.8, 0, 0.3, '#d9d2c2', { wx: 0 }); const walls = group(hg, 0, 0.3, 0); B(walls, 0, 0, HW, HD, 0, HH, m.wall, { mat: wallMat }); for (const y of [1.3, 2.6, 3.9]) { B(walls, 0, HD / 2, HW, 0.04, y, 0.07, m.line, { mat: lineMat, shadow: false }); for (const sx of [-1, 1]) B(walls, sx * HW / 2, 0, 0.04, HD, y, 0.07, m.line, { mat: lineMat, shadow: false }); }
+    B(walls, 0, 0, HW + 0.04, HD + 0.04, HH - 0.12, 0.14, LINING, s.thick ? R : { mat: lineMat }); B(walls, 0, 0, HW - 2 * t, HD - 2 * t, HH - 0.1, 0.14, '#5a4630', { ...R, shadow: false });      // the top of the walls shows how thick they are
     B(walls, DOORX, HD / 2 + 0.02, 1.8, 0.08, 0, 3.3, '#5a4630', { wx: 0, shadow: false }); walls.scale.y = 0.01;
     // the yellow places: two on the front wall and two on each end wall
     const spots = [...FRONT.map((x) => ({ wall: 'front', p: [x, 1.9, HD / 2 + 0.16], ry: 0 })), ...GABLE.map((zz) => ({ wall: 'end', p: [HW / 2 + 0.16, 1.9, zz], ry: Math.PI / 2 })), ...GABLE.map((zz) => ({ wall: 'end', p: [-HW / 2 - 0.16, 1.9, zz], ry: -Math.PI / 2 }))];
+    // on the shady side the walls get no sun, but the sun comes over the wood onto the roof: two more places, for windows in the roof
+    if (sd) for (const x of [-2.6, 2.6]) spots.push({ wall: 'roof', p: [x, 0.3 + HH + 0.62, 3.9], ry: 0, flat: true });
     const lit = glassMat(), beamMat = soft('#ffe27a', 0.34);
-    for (const q of spots) { q.frame = group(hg, ...q.p); q.frame.rotation.y = q.ry; frame(q.frame, 0, 0, 0, 2.3, 2.1, true); q.frame.visible = false;
-      q.part = group(hg, ...q.p); q.part.rotation.y = q.ry; blk(q.part, 0, 0, 2.3, 0.24, 0, 2.1, '#fbfbf7', { mat: M('#fbfbf7', 0, { raw: true }) }); q.glass = glassMat(); blk(q.part, 0, 0.06, 1.95, 0.22, 0.17, 1.76, GLASS, { shadow: false, mat: q.glass }); blk(q.part, 0, 0.1, 0.12, 0.22, 0.17, 1.76, '#fbfbf7', { shadow: false, mat: M('#fbfbf7', 0, { raw: true }) }); q.part.visible = false;
-      q.sunny = sd === 0 && q.wall === 'front';
+    for (const q of spots) { q.frame = group(hg, ...q.p); q.frame.rotation.y = q.ry; if (q.flat) q.frame.rotation.x = -Math.PI / 2; frame(q.frame, 0, 0, 0, 2.3, 2.1, true); q.frame.visible = false;
+      q.part = group(hg, ...q.p); q.part.rotation.y = q.ry; if (q.flat) q.part.rotation.x = -Math.PI / 2; blk(q.part, 0, 0, 2.3, 0.24, 0, 2.1, '#fbfbf7', { mat: M('#fbfbf7', 0, { raw: true }) }); q.glass = glassMat(); blk(q.part, 0, 0.06, 1.95, 0.22, 0.17, 1.76, GLASS, { shadow: false, mat: q.glass }); blk(q.part, 0, 0.1, 0.12, 0.22, 0.17, 1.76, '#fbfbf7', { shadow: false, mat: M('#fbfbf7', 0, { raw: true }) }); q.part.visible = false;
+      q.sunny = q.wall === 'roof' || (sd === 0 && q.wall === 'front');
       // a shaft of sunlight that comes down into a window on the sunny wall
       q.beam = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.7, 9), beamMat); q.beam.visible = false; g.add(q.beam); }
     const roof = group(hg, 0, 9.4, 0); blk(roof, 0, 0, HW + 0.9, HD + 1.2, 0, 0.6, ROOF[2], { mat: M(ROOF[2], 0) }); blk(roof, 0, 0, HW + 0.9, HD * 0.45, 0.6, 0.55, ROOF[2], { mat: M(ROOF[2], 0) }); const ropes = [-4.2, 4.2].map((x) => blk(roof, x, 0, 0.08, 0.08, 1.1, 16, '#2b3a55', { shadow: false })); roof.visible = false;
     const roofSpot = group(hg, 0, 0.3 + HH, 0); frame(roofSpot, 0, 0.1, HD / 2 + 0.2, HW, 0.9, true); for (const sx of [-1, 1]) { const f = group(roofSpot, sx * (HW / 2 + 0.2), 0.1, 0); f.rotation.y = sx * Math.PI / 2; frame(f, 0, 0, 0, HD, 0.9, true); } roofSpot.visible = false;
     const doorSpot = group(hg, DOORX, 0.3, HD / 2 + 0.2); frame(doorSpot, 0, 0, 0, 1.8, 3.3, true); doorSpot.visible = false;
     const doorMat = new THREE.MeshLambertMaterial({ color: tone(DOOR[S.doorC]) }), door = group(hg, DOORX, 0.3, HD / 2 + 0.14); blk(door, 0, 0, 1.8, 0.16, 0, 3.3, '#fff', { mat: doorMat }); blk(door, -0.6, 0.1, 0.2, 0.1, 1.5, 0.2, '#ffd257', { shadow: false, mat: M('#ffd257', 0, { raw: true, unlit: true }) }); door.visible = false;
-    H = { hg, spots, roof, door, lit, sd };
+    H = { hg, spots, roof, door, lit, sd, wallMat, lineMat };
     tw(1.3, (k) => { const e = ease(k); family.position.set(8 + (-7.5 - 8) * e, Math.abs(Math.sin(k * 14)) * 0.12 * (k < 1), 0.6 + ((sd ? 4.6 : -4.6) - 0.6) * e); family.rotation.y = (sd ? -0.5 : 0.4) * e; });
     await Promise.all([glide(VIEW.build[sd], 1.8), tw(1.4, (k) => { walls.scale.y = Math.max(0.01, ease(k)); })]); if (me !== run) return; roof.visible = true; beep(500, 0.1);
-    let tool = 'win', busy = false; const used = new Set(); let roofOn = false, doorOn = false, note = ''; s.done = false;
+    for (const q of avenue) if (q.tree && q.sd === sd && sd && q.x > -10) q.o.visible = false; const order = sd ? ['roof', 'win', 'door'] : ['win', 'roof', 'door']; let tool = order[0], busy = false; const used = new Set(); let roofOn = false, doorOn = false, note = ''; s.done = false;
     const left = () => ({ win: 2 - used.size, roof: roofOn ? 0 : 1, door: doorOn ? 0 : 1 });
     const show = () => { const n = left(); spots.forEach((q, i) => { q.frame.visible = !s.done && tool === 'win' && n.win > 0 && !used.has(i); }); roofSpot.visible = !s.done && tool === 'roof' && !roofOn; doorSpot.visible = !s.done && tool === 'door' && !doorOn; s.onChange(tool, n, s.done, note, [...used].filter((i) => spots[i].sunny).length); };
     const finish = async () => { s.done = true; show(); chime(); await wait(0.4); if (me !== run) return; for (const i of used) spots[i].glass.color.set(spots[i].sunny ? LIT : WARM[level(pick)]); const a = family.position.clone(), to = hg.localToWorld(new THREE.Vector3(DOORX - 1.2, 0, HD / 2 + 2.4));
       await tw(2, (k) => { const e = ease(k); family.position.set(a.x + (to.x - a.x) * e, Math.abs(Math.sin(k * 16)) * 0.14 * (k < 1), a.z + (to.z - a.z) * e); }); if (me === run) s.onDone(); };
-    const next = () => { const n = left(); if (!n[tool]) tool = ['win', 'roof', 'door'].find((k) => n[k]) || tool; if (!n.win && !n.roof && !n.door) finish(); else show(); };
-    s.setTool = (k) => { if (s.done || !left()[k]) return; tool = k; note = ''; show(); };
+    const next = () => { const n = left(); if (!n[tool]) tool = order.find((k) => n[k]) || tool; if (!n.win && !n.roof && !n.door) finish(); else show(); };
+    s.setTool = (k) => { if (s.done || !left()[k] || (sd && k === 'win' && !roofOn)) return; tool = k; note = ''; show(); };
     s.setDoor = (i) => { S.doorC = i; doorMat.color.set(tone(DOOR[i])); if (!s.done && !doorOn && !left().win && roofOn) tool = 'door'; show(); };
-    spots.forEach((q, i) => { hitBox(s, q.frame.parent, q.p[0], q.p[1] - 0.1, q.p[2], q.ry ? 1 : 2.6, 2.4, q.ry ? 2.6 : 1, () => !s.done && !busy && (used.has(i) || (tool === 'win' && left().win > 0)), () => {
+    spots.forEach((q, i) => { hitBox(s, hg, ...(q.flat ? [q.p[0], q.p[1] - 0.2, q.p[2] - 1.05, 2.6, 0.9, 2.3] : [q.p[0], q.p[1] - 0.1, q.p[2], q.ry ? 1 : 2.6, 2.4, q.ry ? 2.6 : 1]), () => !s.done && !busy && (used.has(i) || (tool === 'win' && left().win > 0)), () => {
       if (used.has(i)) { used.delete(i); q.part.visible = false; q.beam.visible = false; tool = 'win'; note = ''; beep(300, 0.08); show(); return; }
       used.add(i); q.part.visible = true; pop(q.part); beep(q.sunny ? 880 : 520, 0.14);
-      if (q.sunny) { const w = q.part.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 1.05, 0)); q.beam.position.copy(w).addScaledVector(sunDir, 4.5); q.beam.lookAt(w.clone().addScaledVector(sunDir, 20)); q.beam.visible = true; q.glass.color.set('#fff3b0'); }
-      note = q.sunny ? T.sunIn : sd === 1 ? T.shade : T.noSun; next(); }).frame = q.frame; });
-    hitBox(s, hg, 0, 0.3 + HH - 0.4, 0, HW + 1.4, 5.4, HD + 1.4, () => !s.done && !busy && !roofOn && tool === 'roof', async () => { busy = true; roofOn = true; roofSpot.visible = false; note = ''; await tw(1.1, (k) => { roof.position.y = 9.4 - (9.4 - 0.3 - HH) * ease(k); }); if (me !== run) return; for (const r of ropes) r.visible = false; beep(220, 0.2, 'sine', 0.12); busy = false; next(); }).frame = roofSpot;
+      if (q.sunny) { const w = q.part.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, q.flat ? 0.3 : 1.05, 0)); q.beam.position.copy(w).addScaledVector(sunDir, 4.5); q.beam.lookAt(w.clone().addScaledVector(sunDir, 20)); q.beam.visible = true; q.glass.color.set('#fff3b0'); }
+      note = q.sunny ? T.sunIn : T.noSun; next(); }).frame = q.frame; });
+    hitBox(s, hg, 0, 0.3 + HH - 0.4, 0, HW + 1.4, 5.4, HD + 1.4, () => !s.done && !busy && !roofOn && tool === 'roof', async () => { busy = true; roofOn = true; roofSpot.visible = false; note = sd ? T.shadyWin : ''; await tw(1.1, (k) => { roof.position.y = 9.4 - (9.4 - 0.3 - HH) * ease(k); }); if (me !== run) return; for (const r of ropes) r.visible = false; beep(220, 0.2, 'sine', 0.12); busy = false; next(); }).frame = roofSpot;
     hitBox(s, hg, DOORX, 0.3, HD / 2 + 0.3, 2.2, 3.4, 1, () => !s.done && !busy && !doorOn && tool === 'door', () => { doorOn = true; door.visible = true; pop(door); beep(660, 0.12); note = ''; next(); }).frame = doorSpot;
     s.pulse = [...spots.map((q) => q.frame), roofSpot, doorSpot];
     // where the yellow places are in the world, for the script that plays the level through
-    s.spot = (name, i = 0) => { const v = name === 'win' ? new THREE.Vector3(...spots[i].p) : name === 'roof' ? new THREE.Vector3(0, 0.3 + HH + 0.5, HD / 2 + 0.3) : new THREE.Vector3(DOORX, 1.9, HD / 2 + 0.3); return hg.localToWorld(v).toArray(); };
+    s.spot = (name, i = 0) => { const v = name === 'win' ? new THREE.Vector3(spots[i].p[0], spots[i].p[1], spots[i].p[2] - (spots[i].flat ? 1 : 0)) : name === 'roof' ? new THREE.Vector3(0, 0.3 + HH + 0.5, HD / 2 + 0.3) : new THREE.Vector3(DOORX, 1.9, HD / 2 + 0.3); return hg.localToWorld(v).toArray(); };
     show(); };
   // ---- the town changes: the whole street is built in the chosen way ----
-  s.fill = async (pick) => { const me = run; for (const q of H.spots) q.beam.visible = false; await glide(VIEW.street, 1.8); if (me !== run) return; plate(s, T.yours, [PX[0] - 3, 6.2, SIDEZ[H.sd] + (H.sd ? -4 : 4)], 'on');
-    const lv = level(pick); for (let k = 1; k < 5; k++) for (const sd of [H.sd, 1 - H.sd]) { plots[sd][k].visible = false; const x = PX[k], glass = glassMat(); glass.color.set(GLASS); const h = house(g, { wx: x, mat: MAT[pick], glass, thick: s.thick, roofC: ROOF[(k + sd) % 4] }); h.position.set(x, 0.1, SIDEZ[sd]); h.rotation.y = sd ? Math.PI : 0; h.scale.setScalar(0.01); beep(330 + k * 40, 0.06); await pop(h, 0.01, 1, 0.26); if (me !== run) return; }
-    plots[1 - H.sd][0].visible = false; { const h = house(g, { wx: 0, mat: MAT[pick], thick: s.thick, w: HW, d: HD, h: HH, roofC: ROOF[1] }); h.position.set(PX[0], 0.1, SIDEZ[1 - H.sd]); h.rotation.y = H.sd ? 0 : Math.PI; h.scale.setScalar(0.01); await pop(h); }
-    // the pollution from making the materials for a whole street hangs over it
-    for (let k = 0; k < [0, 6, 16][pick]; k++) { const sz = 2.4 + hash(k, 7) * 2.4; blk(g, -8 - hash(k, 1) * 34, (hash(k, 2) - 0.5) * 30, sz * 1.5, sz, 8.5 + hash(k, 3) * 5, sz * 0.7, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.7) }); } if (me === run) chime(); };
+  let built = [], haze = [];
+  const lay = async (pick, quick) => { const me = run; for (const h of built) g.remove(h); for (const m of haze) g.remove(m); built = []; haze = []; H.wallMat.color.set(MAT[pick].wall); H.lineMat.color.set(MAT[pick].line);
+    const put = async (h) => { built.push(h); if (quick) return true; h.scale.setScalar(0.01); beep(330 + built.length * 30, 0.06); await pop(h, 0.01, 1, 0.26); return me === run; };
+    for (let k = 1; k < 5; k++) for (const sd of [H.sd, 1 - H.sd]) { plots[sd][k].visible = false; const x = PX[k], h = house(g, { wx: x, mat: MAT[pick], thick: s.thick, roofC: ROOF[(k + sd) % 4] }); h.position.set(x, 0.1, SIDEZ[sd]); h.rotation.y = sd ? Math.PI : 0; if (!await put(h)) return; }
+    plots[1 - H.sd][0].visible = false; { const h = house(g, { wx: 0, mat: MAT[pick], thick: s.thick, w: HW, d: HD, h: HH, roofC: ROOF[1] }); h.position.set(PX[0], 0.1, SIDEZ[1 - H.sd]); h.rotation.y = H.sd ? 0 : Math.PI; if (!await put(h)) return; }
+    // the pollution from making the materials for a whole street hangs in the open sky above the path, where the trees do not hide it
+    for (let k = 0; k < [0, 6, 16][pick]; k++) { const sz = 2.4 + hash(k, 7) * 2.4; haze.push(blk(g, -16 - hash(k, 1) * 40, (hash(k, 2) - 0.5) * 7, sz, sz * 1.5, 6.2 + hash(k, 3) * 4.5, sz * 0.7, '#6d6763', { shadow: false, mat: soft(['#6f6a62', '#7d776d', '#5f5b55'][k % 3], 0.72) })); } };
+  s.fill = async (pick) => { const me = run; clearView(false); for (const q of H.spots) q.beam.visible = false; await glide(VIEW.street, 1.8); if (me !== run) return; plate(s, T.yours, [PX[0] - 3, 6.2, SIDEZ[H.sd] + (H.sd ? -4 : 4)], 'on'); await lay(pick, false); if (me === run) chime(); };
+  s.swap = (pick) => lay(pick, true);
+  // ---- the recap: the child taps one side of the street ----
+  s.recap = (on) => { const marks = SIDEZ.map((z, sd) => { const m = place(g, -12, sd ? 5 : -5, 36, 2.4, 0.12), pl = plate(s, T.thisSide, [-9, 8.4, z + (sd ? -4 : 4)], 'tap'); hitBox(s, g, -12, 0, z + (sd ? -4 : 4), 44, 10, 9, () => s.answer === undefined, () => go(sd)); pl.el.onclick = () => { if (s.answer === undefined) go(sd); }; return { m, pl }; });
+    const go = (sd) => { s.answer = sd; beep(sd === 0 ? 880 : 300, 0.15); marks.forEach((q, i) => { q.m.visible = i === 0; q.pl.hide = i !== 0; q.pl.el.classList.remove('tap'); q.pl.el.classList.add('on'); q.pl.el.textContent = T.sunSide; });
+      for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 18), soft('#ffe27a', 0.32)), base = new THREE.Vector3(-4 - k * 8, 3, SIDEZ[0] + 4); b.position.copy(base).addScaledVector(sunDir, 9); b.lookAt(base.clone().addScaledVector(sunDir, 30)); g.add(b); } on(sd === 0); };
+    s.pulseM = marks.map((q) => q.m); s.spot = (name, i) => [-9, 3, SIDEZ[i] + (i ? -4 : 4)]; };
   s.tick = (t, dt) => { for (const p of walkers) { p.w.position.x += p.dir * p.v * dt; if (p.w.position.x < -74) p.w.position.x = 4; if (p.w.position.x > 4) p.w.position.x = -74; p.w.position.y = Math.abs(Math.sin(t * 6 + p.ph)) * 0.12; }
     if (cloudT >= 0) { cloudT += dt; setClouds(cloudT); } if (nightK > 0.05) for (const f of snow) { f.y -= f.v * dt; if (f.y < 0) f.y = 24; f.m.position.y = f.y; }
-    const k = 1 + 0.05 * Math.sin(t * 4.5); for (const row of plots) for (const p of row) p.mark.scale.set(k, 1, k); if (s.pulse) { for (const p of s.pulse) p.scale.set(k, k, 1); if (hover && hover.frame) hover.frame.scale.set(1.12, 1.12, 1); } };
+    const k = 1 + 0.05 * Math.sin(t * 4.5); for (const row of plots) for (const p of row) p.mark.scale.set(k, 1, k); if (s.pulseM) for (const m of s.pulseM) m.scale.set(1, 1, k); if (s.pulse) { for (const p of s.pulse) p.scale.set(k, k, 1); if (hover && hover.frame) hover.frame.scale.set(1.12, 1.12, 1); } };
   return s; }
 
 // ---- the steps of the level ---------------------------------------------------------------------------------------------------
-const S = { words: [], pick: null, doorC: 1 };
+const S = { words: [], pick: null, first: null, doorC: 1 };
 const btn = (label, cls, fn) => { const b = document.createElement('button'); b.className = `btn ${cls}`; b.textContent = label; b.onclick = fn; return b; };
 function ui({ step = '', say = [], tray = [], wide = false, over = '' }) { $('step').textContent = step; $('say').innerHTML = [].concat(say).filter(Boolean).map((p) => `<p>${esc(p)}</p>`).join(''); const t = $('tray'); t.className = `tray${wide ? ' wide' : ''}`; t.replaceChildren(...tray); if (over !== null) $('over').innerHTML = over; }
 const MARK = { g: '✓', f: '–', p: '✕' };
-const resultCards = () => T.plans.map(([n], i) => { const w = cur.level(i), a = cur.airLevel(i); return `<div class="card"><h3>${esc(n)}</h3><div class="res"><i class="mark ${w}">${MARK[w]}</i><span><b>${esc(T.checks[0])}.</b> ${esc(T.warm[w])}</span></div><div class="res"><i class="mark ${a}">${MARK[a]}</i><span><b>${esc(T.checks[1])}.</b> ${esc(T.air[i])}</span></div><button class="btn sun" data-plan="${i}">${esc(T.use)}</button></div>`; }).join('');
+const resultCards = (mine = -1) => T.plans.map(([n], i) => { const w = cur.level(i), a = cur.airLevel(i); return `<div class="card"><h3>${esc(n)}</h3><div class="res"><i class="mark ${w}">${MARK[w]}</i><span><b>${esc(T.checks[0])}.</b> ${esc(T.warm[w])}</span></div><div class="res"><i class="mark ${a}">${MARK[a]}</i><span><b>${esc(T.checks[1])}.</b> ${esc(T.air[i])}</span></div>${i === mine ? `<p><b>${esc(T.first)}</b></p>` : `<button class="btn sun" data-plan="${i}">${esc(T.use)}</button>`}</div>`; }).join('');
 $('over').addEventListener('click', (e) => { const b = e.target.closest('[data-plan]'); if (b) choose(+b.dataset.plan); });
-function job() { Object.assign(S, { words: [], pick: null }); setScene(town()); ui({ step: T.level, say: T.job, tray: [btn(T.start, 'sun', ask)] }); }
+function job() { Object.assign(S, { words: [], pick: null, first: null }); $('first').hidden = true; setScene(town()); ui({ step: T.level, say: T.job, tray: [btn(T.start, 'sun', ask)] }); }
 function ask() { if (cur.side !== null && S.pick !== null) return job(); if (cur.side !== null) glide(VIEW.street, 1); cur.clearPlans(); cur.setNight(0); const gaps = T.sentence.filter((p) => Array.isArray(p)); let now = Math.max(0, gaps.findIndex((_, i) => S.words[i] === undefined));
   const draw = () => { cur.words(S.words[0] ?? null, S.words[1] === undefined ? null : S.words[1] === 0); const sen = document.createElement('div'); sen.className = 'sentence'; let gi = 0;
     for (const p of T.sentence) { if (typeof p === 'string') sen.append(p === '.' ? p : `${p} `); else { const i = gi++, sp = document.createElement('span'); sp.className = `gap${S.words[i] !== undefined ? ' full' : ''}${i === now ? ' now' : ''}`; sp.textContent = S.words[i] !== undefined ? p[S.words[i]] : '…'; sp.onclick = () => { now = i; draw(); }; sen.append(sp, ' '); } }
@@ -221,15 +238,24 @@ function ask() { if (cur.side !== null && S.pick !== null) return job(); if (cur
   draw(); }
 async function plans() { const s = cur, b = btn(T.test, 'sun big', async () => { b.disabled = true; ui({ step: T.test, say: T.watch, tray: [], over: '' }); if (await s.run()) ui({ step: T.level, say: T.choose, tray: [btn(T.again, '', () => { S.words = []; ask(); })], over: resultCards() }); });
   ui({ step: T.level, say: T.plansSay(T.sentence[1][S.words[0]], T.sentence[3][S.words[1]]), tray: [b] }); b.disabled = true; await s.showPlans(); b.disabled = false; }
-async function choose(i) { S.pick = i; const s = cur, I = { win: '<svg viewBox="0 0 44 40"><rect x="7" y="5" width="30" height="30" rx="3" fill="#a9d3ee" stroke="#1f2a44" stroke-width="3"/><path d="M22 5v30M7 20h30" stroke="#1f2a44" stroke-width="3"/></svg>', roof: '<svg viewBox="0 0 44 40"><path d="M4 30L22 8l18 22z" fill="#2e9b5a" stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"/></svg>', door: '<svg viewBox="0 0 44 40"><rect x="13" y="4" width="18" height="32" rx="2" fill="#3f78b5" stroke="#1f2a44" stroke-width="3"/><circle cx="26" cy="21" r="2.2" fill="#ffd257"/></svg>' };
+async function choose(i) { if (S.first !== null) return second(i); S.pick = i; const s = cur, I = { win: '<svg viewBox="0 0 44 40"><rect x="7" y="5" width="30" height="30" rx="3" fill="#a9d3ee" stroke="#1f2a44" stroke-width="3"/><path d="M22 5v30M7 20h30" stroke="#1f2a44" stroke-width="3"/></svg>', roof: '<svg viewBox="0 0 44 40"><path d="M4 30L22 8l18 22z" fill="#2e9b5a" stroke="#1f2a44" stroke-width="3" stroke-linejoin="round"/></svg>', door: '<svg viewBox="0 0 44 40"><rect x="13" y="4" width="18" height="32" rx="2" fill="#3f78b5" stroke="#1f2a44" stroke-width="3"/><circle cx="26" cy="21" r="2.2" fill="#ffd257"/></svg>' };
   const names = { win: T.window, roof: T.roofT, door: T.doorT }, toks = {}, tray = [];
   for (const k of ['win', 'roof', 'door']) { const b = document.createElement('button'); b.className = 'tok'; b.onclick = () => s.setTool(k); toks[k] = b; tray.push(b); }
   const sw = document.createElement('div'); sw.innerHTML = `<div class="sws-h">${esc(T.colour)}</div><div class="sws">${DOOR.map((c, k) => `<button class="sw" data-c="${k}" style="background:${c}" aria-label="${esc(T.colour)} ${k + 1}"></button>`).join('')}</div>`; sw.onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) s.setDoor(+b.dataset.c); }; tray.push(sw);
   s.onChange = (tool, n, done, note, sunny) => { for (const k in toks) { toks[k].className = `tok${!n[k] ? ' used' : tool === k && !done ? ' on' : ''}`; toks[k].innerHTML = `${I[k]}<span>${esc(names[k])}<small>${esc(n[k] ? T.left(n[k]) : T.placed)}</small></span>`; }
     for (const b of sw.querySelectorAll('.sw')) b.classList.toggle('on', +b.dataset.c === S.doorC);
     $('say').innerHTML = [done ? '' : note, done ? T.ready[sunny] : tool === 'win' ? (n.win === 2 ? T.win2 : T.win1) : tool === 'roof' ? T.roof : T.door].filter(Boolean).map((p) => `<p>${esc(p)}</p>`).join(''); };
-  s.onDone = () => { $('tray').replaceChildren(btn(T.next, 'sun', async () => { ui({ step: T.town, say: '', tray: [], over: '' }); await s.fill(S.pick); if (cur === s) ui({ step: T.town, say: T.after[S.pick], tray: [btn(T.next, 'sun', () => ui({ step: T.level, say: T.end, tray: [btn(T.replay, 'sun', job)], over: '' }))], over: '' }); })); };
+  s.onDone = () => { $('tray').replaceChildren(btn(T.next, 'sun', townStep)); };
   ui({ step: T.build, say: '', tray: [], over: '' }); await s.startBuild(i); if (cur === s) $('tray').replaceChildren(...tray); }
+
+const after = (i) => `${T.afterAir[i]} ${T.afterWarm[cur.level(i)]}`;
+async function townStep() { const s = cur; ui({ step: T.town, say: '', tray: [], over: '' }); await s.fill(S.pick); if (cur === s) settled(true); }
+function settled(canTry) { $('first').hidden = true; ui({ step: T.homes[S.pick], say: [T.built, after(S.pick)], tray: [...(canTry ? [btn(T.tryOther, '', () => { S.first = S.pick; ui({ step: T.town, say: T.chooseOther, tray: [], over: resultCards(S.first) }); })] : []), btn(T.next, 'sun', recap)], over: '' }); }
+// the second plan is shown in the town at once, with no second play break; a small sign keeps the first result in view
+function second(i) { const s = cur, first = S.first, w = s.level(first), a = s.airLevel(first); S.first = null; S.pick = i; s.swap(i);
+  $('first').innerHTML = `<b>${esc(T.first)}: ${esc(T.homes[first])}</b><span><i class="mark ${w}">${MARK[w]}</i>${esc(T.checks[0])}</span><span><i class="mark ${a}">${MARK[a]}</i>${esc(T.checks[1])}</span>`; $('first').hidden = false;
+  ui({ step: T.homes[i], say: [T.what, after(i)], tray: [btn(T.keepFirst, '', () => { S.pick = first; s.swap(first); settled(false); }), btn(T.keepThis, 'sun', () => settled(false))], over: '' }); }
+function recap() { const s = cur; $('first').hidden = true; ui({ step: T.recapT, say: T.recapQ, tray: [], over: '' }); s.recap((ok) => ui({ step: T.recapT, say: ok ? T.recapYes : T.recapNo, tray: [btn(T.next, 'sun', () => ui({ step: T.level, say: T.end, tray: [btn(T.replay, 'sun', job)], over: '' }))], over: null })); }
 
 // Florence breathes: frames 0 to 3 of her sheet, three each second
 { let n = 0; setInterval(() => { n = (n + 1) % 4; $('flo').style.setProperty('--col', n); }, 333); }

@@ -14,6 +14,9 @@ await shot('job', 1500); await click('Start'); await shot('ask');
 await click(['the sunny side', 'the shady side'][side]); await shot('ask-side'); await click(['thick walls', 'thin walls'][walls]); await shot('ask-full'); await click('Ask Florence'); await has('Bring the winter night'); await shot('plans');
 await click('Bring the winter night'); await shot('test-making', 3600); await p.waitForFunction(() => document.querySelector('[data-plan]'), null, { timeout: 90000 }); await shot('results');
 await p.click(`[data-plan="${plan}"]`); await p.waitForFunction(() => document.querySelector('.tok'), null, { timeout: 90000 }); await shot('build-0', 900);
-await tap('win', 0); await shot('build-1'); await tap('win', +side ? 4 : 2); await shot('build-2'); await tap('roof'); await shot('build-3', 2300); await p.click('[data-c="2"]'); await tap('door'); await shot('build-4', 600);
-await has('Next'); await shot('build-done'); await click('Next'); await has('Next'); await shot('town', 800); await click('Next'); await shot('end', 900);
+if (+side) { await tap('roof'); await shot('build-1', 2300); await tap('win', 6); await shot('build-2'); await tap('win', 0); await shot('build-3'); } else { await tap('win', 0); await shot('build-1'); await tap('win', 2); await shot('build-2'); await tap('roof'); await shot('build-3', 2300); }
+await p.click('[data-c="2"]'); await tap('door'); await shot('build-4', 600);
+await has('Next'); await shot('build-done'); await click('Next'); await has('Try another plan'); await shot('town', 800);
+await click('Try another plan'); await shot('other-plans'); await p.click(`[data-plan="${(+plan + 1) % 3}"]`); await shot('what-changed', 900); await click('Go back to my first plan'); await shot('first-kept', 900);
+await click('Next'); await shot('recap', 900); await tap('side', +side ? 0 : 1); await shot('recap-answer', 900); await click('Next'); await shot('end', 900);
 await b.close(); srv.close();
