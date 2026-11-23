@@ -72,6 +72,8 @@
   .cardw > header { display: flex; gap: 10px; align-items: center; font-weight: 600; } .cardw > header span { margin-right: auto; }
   .mini { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem; }
   .cardw .note { font-size: 0.9rem; }
+  .pbw { flex: none; width: 840px; display: flex; flex-direction: column; gap: 8px; border-left: 6px dashed var(--c); padding-left: 30px; } .pbw > header { display: flex; gap: 10px; align-items: center; font-weight: 600; } .pbw > header span { margin-right: auto; }
+  .pbw img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 2px solid var(--fg); border-radius: 10px; background: var(--panel); } .pbw p { color: var(--muted); font-size: 0.9rem; margin: 0; }
   .sticky { position: absolute; width: 250px; background: #fff3a6; color: #26240f; border-radius: 4px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; z-index: 5; }
   .sticky.c1 { background: #ffd0dc; } .sticky.c2 { background: #cfe6ff; } .sticky.c3 { background: #d3f2cf; }
   .sticky .grip { display: flex; gap: 6px; align-items: center; padding: 6px 8px; cursor: grab; touch-action: none; font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid rgba(0, 0, 0, 0.15); user-select: none; } .sticky .grip span { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -313,11 +315,14 @@
   function buildBoard() {
     if (built) return; built = true;
     const card = (n, title) => { const s = slides[n], r = s.kind === 'flow' ? flowScreen() : s.kind === 'town' ? townScreen(s) : s.kind === 'jobs' ? jobsScreen(s) : stepScreen(s); return `<section class="cardw" id="s${n + 1}" data-n="${n}" data-comment-target style="--c:${r.colour}"><header><span>${title}</span><button class="mini" data-note="${n}">Note</button><button class="mini" data-comment="${n}" hidden>Comment</button><button class="mini" data-open="${n}">Open</button></header>${r.html}</section>`; };
+    // the play break pictures (concept screens, Eco Town only so far): one or two at the end of a level's row
+    const PB = [[['01-land', 'Play break']], [['02-paths', 'Play break, part 1: the paths'], ['03-walk', 'Play break, part 2: the walk']], [['04-homes', 'Play break']], [['05-food', 'Play break']], [['06-power', 'Play break']], [['07-school', 'Play break']]];
+    const pbCards = (ti, li, name) => (ti === 0 && PB[li] ? PB[li].map(([f, title]) => `<section class="pbw" id="pb-${f}" data-comment-target data-where="Week 1, Eco Town, level ${li + 1} (${esc(name)}): the play break"><header><span>${title}</span><button class="mini" data-note="pb">Note</button><button class="mini" data-comment="pb" hidden>Comment</button></header><img src="concepts/screens-v3/${f}.jpg" width="1920" height="1080" loading="lazy" alt="A concept picture of the play break for the level called ${esc(name)}."><p>This is a concept picture of the play break, in which the child builds the plan they chose. The words in the picture are placeholders.</p></section>`).join('') : '');
     let h = `<div class="townrow" style="--c:${D.towns[0].colour}">${esc(U.flow.title)}</div><div class="lane" style="--c:${D.towns[0].colour}"><div class="lanehead">Flow chart<span>${esc(U.flow.crumb)}</span></div>${card(1, U.flow.crumb)}</div>`;
     D.towns.forEach((t, ti) => {
       const first = slides.findIndex((s) => s.kind === 'town' && s.ti === ti), last = slides.findIndex((s) => s.kind === 'jobs' && s.ti === ti);
       h += `<div class="townrow" style="--c:${t.colour}">Week ${ti + 1}: ${esc(t.name)}</div><div class="lane" style="--c:${t.colour}"><div class="lanehead">Start and end<span>The first and last screens of the hour</span></div>${card(first, 'The town opens')}${card(last, 'The end of the hour')}</div>`;
-      t.levels.forEach((v, li) => { h += `<div class="lane" id="lane-${ti}-${li}" style="--c:${t.colour}"><div class="lanehead">Level ${li + 1} of 6<span>${esc(v.name)}</span></div>${slides.map((s, n) => (s.kind === 'step' && s.ti === ti && s.li === li ? card(n, `Screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`) : '')).join('')}</div>`; });
+      t.levels.forEach((v, li) => { h += `<div class="lane" id="lane-${ti}-${li}" style="--c:${t.colour}"><div class="lanehead">Level ${li + 1} of 6<span>${esc(v.name)}</span></div>${slides.map((s, n) => (s.kind === 'step' && s.ti === ti && s.li === li ? card(n, `Screen ${s.si + 1} of ${s.of}: ${STEP[s.step][0]}`) : '')).join('')}${pbCards(ti, li, v.name)}</div>`; });
     });
     board.insertAdjacentHTML('afterbegin', h);
     for (const c of board.querySelectorAll('.cardw')) mark(c, slides[+c.dataset.n]);
@@ -370,15 +375,15 @@
     el.querySelector('.grip span').textContent = (people && n.by && people[n.by] && people[n.by].name) || 'Note card'; place(id);
   }
   async function names() { if (!me) return; const ids = [...new Set([...notes.values()].map((n) => n.by).filter(Boolean))]; if (!ids.length) return; try { people = await me.profiles(ids); for (const id of notes.keys()) paint(id); } catch (e) { /* names are optional */ } }
-  async function addNote(x, y) {
+  async function addNote(x, y, where) {
     if (!db) return status('Note cards are not available in this view.'); if (!canWrite) return status('You can read the note cards, but your access does not let you add one.');
     const a = anchorAt(x, y); let by = null; try { by = me ? await me.id() : null; } catch (e) { /* stays unnamed */ }
-    try { await db.collection('notes').add({ text: '', colour: 0, ...a, x: Math.round(x), y: Math.round(y), where: whereOf(a.slide), by, at: new Date().toISOString() }); } catch (e) { status('The note card could not be added. Your access may not allow it.'); }
+    try { await db.collection('notes').add({ text: '', colour: 0, ...a, x: Math.round(x), y: Math.round(y), where: where || whereOf(a.slide), by, at: new Date().toISOString() }); } catch (e) { status('The note card could not be added. Your access may not allow it.'); }
   }
   $('addnote').onclick = () => addNote((surface.scrollLeft + surface.clientWidth / 2) / z - 125, (surface.scrollTop + surface.clientHeight / 3) / z);
   board.addEventListener('click', (e) => {
-    const b = e.target.closest('button.mini'); if (!b) return; const c = b.closest('.cardw');
-    if (b.dataset.note) { const [cx, cy] = pt(c); addNote(cx + c.offsetWidth - 150 + Math.random() * 40, cy + 30 + Math.random() * 40); }
+    const b = e.target.closest('button.mini'); if (!b) return; const c = b.closest('.cardw, .pbw');
+    if (b.dataset.note) { const [cx, cy] = pt(c); addNote(cx + c.offsetWidth - 150 + Math.random() * 40, cy + 30 + Math.random() * 40, c.dataset.where); }
     if (b.dataset.open) { setView('deck'); show(+b.dataset.open); }
     if (b.dataset.comment && commentsApi) commentsApi.openComposer({ element: c }).catch(() => status('The comment box could not be opened here. You can use the comment tool of the page itself.'));
   });
