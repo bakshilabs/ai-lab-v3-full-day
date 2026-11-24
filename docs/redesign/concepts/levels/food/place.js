@@ -88,7 +88,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
     for (let f = 0; f < fl; f++) for (let i = 0; i < Math.floor(w / 2.4); i++) B(p, -w / 2 + 1.3 + i * 2.4, d / 2 + 0.03, 1.1, 0.06, 0.9 + f * (h / fl), 1.3, '#bfe3f2', { tex: 'win', shadow: false }); return p; };
   home(-20.5, -19.5, 7, 6, 5.2, '#f3d9a4', '#d2553a'); home(-29.5, -15, 8, 7, 7.5, '#efc9a0', '#3f78b5', 3); home(-30.5, -3, 7, 10, 6.4, '#f6e2b5', '#2e9b5a'); home(-31, 9, 7, 9, 8, '#eec79b', '#d2553a', 3);
   home(27.5, -16, 8, 8, 8.6, '#f3d9a4', '#3f78b5', 3); home(31, -4, 7, 10, 6.6, '#efc9a0', '#d2553a'); home(31.5, 8, 7, 9, 8.2, '#f6e2b5', '#2e9b5a', 3);
-  tree(g, -23, 0, -9.5, 1.25); tree(g, -24.5, 0, 2, 1.35); tree(g, 24.5, 0, 0.5, 1.3); tree(g, 23.5, 0, -8, 1.1); tree(g, 27, 0, -26, 1.6); tree(g, -26, 0, -25, 1.7);
+  s.trees = [[-23, -9.5, 1.25], [-24.5, 2, 1.35], [24.5, 0.5, 1.3], [23.5, -8, 1.1]].map(([x, z, k]) => Object.assign(tree(g, x, 0, z, k), { at: [x, z, k] })); tree(g, 27, 0, -26, 1.6); tree(g, -26, 0, -25, 1.7);
   for (const x of [-21, 23.5]) { B(g, x, 5, 0.3, 0.3, 0, 3.6, '#2b2f3a'); B(g, x, 5, 1, 1, 3.6, 0.16, '#2b2f3a'); blk(g, x, 5, 0.7, 0.7, 3.1, 0.5, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#ffe9a8', 1.3) }), shadow: false }); }
 
   // ---- the community gardens: eight raised beds between the homes --------------------------------------------------------------------
@@ -140,7 +140,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
     for (const [w, h, r] of [[0.62, 0.09, 0], [0.09, 0.62, 0], [0.5, 0.08, 0.785], [0.5, 0.08, -0.785]]) { const m = blk(st, 1.33, 0.9, w, 0.04, 0.48 - h / 2, h, '', { mat: GL('#3f78b5'), shadow: false }); m.rotation.z = r; }
     for (const side of [0, 1]) { const cx = side ? 1.33 : -1.33, crates = [-0.82, 0, 0.82].map((dx) => mkCrate(st, cx + dx, 1.02, 0)), colds = [-0.82, 0, 0.82].map((dx) => mkCold(st, cx + dx, 1.02, 0)), basket = mkBasket(st, cx, 1.02, 0); basket.scale.setScalar(1.7); q.sides.push({ crates, colds, basket }); }
     // set(side, kind, colours) puts three crates, three cold boxes, one small basket or nothing on a side of the stall. It gives back what was put there, so that it can pop
-    q.set = (side, kind, cols) => { const o = q.sides[side]; o.crates.forEach((c) => { c.visible = kind === 'crate'; if (cols) c.fill(6, cols); }); o.colds.forEach((c) => { c.visible = kind === 'cold'; }); o.basket.visible = kind === 'basket'; return kind === 'crate' ? o.crates : kind === 'cold' ? o.colds : kind === 'basket' ? [o.basket] : []; };
+    q.kind = [null, null]; q.set = (side, kind, cols) => { const o = q.sides[side]; q.kind[side] = kind; o.crates.forEach((c) => { c.visible = kind === 'crate'; if (cols) c.fill(6, cols); }); o.colds.forEach((c) => { c.visible = kind === 'cold'; }); o.basket.visible = kind === 'basket'; return kind === 'crate' ? o.crates : kind === 'cold' ? o.colds : kind === 'basket' ? [o.basket] : []; };
     q.set(0, null); q.set(1, null); return q; });
   // the people who carry the cold boxes from the lorry
   s.carriers = [0, 1].map((i) => { const c = group(g, i ? 1.2 : -1.2, 0, -15); fig(c, 0, 0.06, 0, { k: 1.25, shirt: '#7f8b99', legs: '#2b3a55', skin: SKIN[i ? 0 : 2], hair: HAIR[i ? 1 : 3], cap: '#4f8fd0', arms: ['fwd', 'fwd'] }); mkCold(c, 0, 1.15, 0.62, 0.9); c.visible = false; return c; });

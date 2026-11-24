@@ -12,30 +12,31 @@ import { buildPlace, mkPlant, CROPS, crop, MAIN, STALLX, STALLZ } from './place.
 const WHERE = ['far away, where there is lots of land', 'at the edge of the town', 'inside the town'], HOW = ['outdoors in the soil', 'under glass', 'indoors under lights'];
 const words = {
   level: 'Fresh food all year',
-  job: ['The town needs fresh fruit and vegetables all year. Eco Town has cold winters, and fresh food does not keep for long.', 'Ask Florence to suggest plans for growing them. Then test her plans, so that you can make a good decision.'], start: 'Start',
-  askT: 'Your sentence', askHow: 'Eco Town has cold winters, and fresh food does not keep for long. How could the town grow it? Tap a word for each gap.', ask: 'Ask Florence',
+  job: ['The town needs fresh fruit and vegetables all year, and the winters here are cold.', 'Ask Florence to suggest plans. Then test her plans, so that you can make a good decision.'], start: 'Start',
+  askT: 'Your sentence', askHow: 'The winters are cold, and fresh food does not keep for long. Tap a word for each gap.', ask: 'Ask Florence',
   sentence: ['Plan how to grow fresh fruit and vegetables that reach the market quickly, all year round. Grow them', WHERE, 'and grow them', HOW, '.'],
-  plansSay: ([where, how]) => [`You asked for food grown ${where}, ${how}. The plan nearest to your words has the yellow sign. Here are two more plans to compare.`, 'Press the button to test all three.'],
-  test: 'Take the food to market', testT: 'Summer at the market', watch: 'Food sets off from all three places at the same moment. Which stall is filled first?',
+  plansSay: () => ['The plan nearest to your words has the yellow sign. Here are two more to compare.', 'Press the button to test all three.'],
+  test: 'Take the food to market', testT: 'Summer at the market', watch: 'Food sets off from all three places. Which stall is filled first?',
   choose: 'Each stall has a summer side and a winter side. Which plan will you use?', again: 'Ask again', use: 'Use this plan',
   playT: 'Grow a crate of food', next: 'Next', townT: 'A year in the town', townHow: 'The town grows its food with the plan you chose.',
   built: 'The town now grows its food with the plan you chose.', tryOther: 'Try another plan', chooseOther: 'Choose a different plan to see it in the town.', first: 'Your first plan', what: 'What changed?', keepFirst: 'Go back to my first plan', keepThis: 'Keep this plan',
   recapT: 'One more question', recapQ: 'It is winter again. Point to the place that still grows fresh food in the snow.', recapYes: 'Yes. The indoor farm is warm and light inside, so it grows food in every season.', recapNo: 'The indoor farm is warm and light inside, so it grows food in every season.',
   end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again' };
 const T = { nearest: 'Nearest to your words', autumnT: 'Autumn comes', winterT: 'Winter at the market', lorry: 'The lorry',
-  autumn: 'The leaves turn, and the carts go home. The year moves on.', winter: 'Snow falls on the town. Food sets off from all three places again.',
-  early: ['The handcart and the cargo bike are here already, with food picked this morning. The lorry is still on the road.', 'The cargo bike is full again. The handcart has only one small basket. The lorry is still on the road.'],
-  late: ['The lorry is here. Its food was picked days ago, so it comes in cold boxes.', 'The lorry brings plenty of cold boxes in winter too.'],
+  autumn: 'The year moves on.', winter: 'Snow falls. Food sets off again.',
+  early: ['The handcart and the cargo bike are here already. Tap a crate to see when it was picked.', 'The cargo bike is full again. The handcart has one small basket.'],
+  late: ['The lorry is here at last, with cold boxes. Tap a box.', 'The lorry brings plenty of cold boxes in winter too.'],
   pick3: ['Choose three crops to grow.'], growThese: 'Grow these', tall: 'A tall plant', low: 'A low plant', left: (n) => (n === 1 ? '1 left' : `${n} left`), placed: 'All placed', here: 'Here',
-  put: [(c) => [`Tap a yellow bed to plant ${c.name.toLowerCase()}.`, c.tall ? 'Tall plants go in the back row, so that they do not shade the others.' : 'There are more beds than plants, so you decide where each crop goes.'],
-    (c) => [`Tap a yellow field to sow ${c.name.toLowerCase()}.`, 'The fields are huge. There are more fields than seed, so you decide where each crop goes.'],
-    (c) => [`Tap a yellow shelf to put a tray of ${c.name.toLowerCase()} there.`, c.tall ? 'Tall plants only fit the tall shelves on the ground floor.' : 'There are more shelves than trays, so you decide where each crop goes.']],
-  spring: 'Spring has come, and the soil is warm again.', cleared: 'The growers have cleared the shelves for you. Snow is falling outside.', farmGo: 'It is spring at the big farm, far from the town.',
-  a: ['Water', 'Start the harvester', 'Water'], aSay: [['The seedlings are thirsty. Tap the rain barrel to water the beds.'], ['The crops have grown in the big fields. Tap the harvester to bring them in.'], ['These plants grow in water, with no soil. Tap the tank to send water past their roots.']],
-  b: ['', 'Pack the boxes', 'Lights'], bSay: [[], ['The food has a long way to go. Tap the packing shed to pack it in cold boxes.'], ['Water runs past the white roots. Now tap the switch to turn on the growing lights.']],
-  ripe: [['The sun and the rain have done their work. Tap each bed to pick the food.'], [], ['The lights are on, and the plants grow while it snows outside. Tap each shelf to pick the food.']],
-  off: [['The crate is full. The handcart takes it across the square.'], ['The lorry sets off on the long road to the town.'], ['The crate is full. The grower takes it down in the lift and loads the cargo bike.']],
-  done: [['Your food is on the stall, picked this morning.', 'You grew it in the gardens, with your neighbours.'], ['Your food is on the stall, in cold boxes.', 'It grew far away in the big fields, and it came a long way.'], ['Your food is on the stall, picked this morning.', 'You grew it indoors, in the snow.']],
+  put: [(c) => [`Tap a yellow bed to plant ${c.name.toLowerCase()}.`, c.tall ? 'Tall plants go in the back row, so that they do not shade the others.' : ''],
+    (c) => [`Tap a yellow field to sow ${c.name.toLowerCase()}.`],
+    (c) => [`Tap a yellow shelf for a tray of ${c.name.toLowerCase()}.`, c.tall ? 'Tall plants only fit the tall shelves on the ground floor.' : '']],
+  spring: 'Spring has come to the gardens.', cleared: 'The shelves are ready for you. Snow is falling outside.', farmGo: 'It is spring at the big farm, far from the town.',
+  note: { crate: 'Picked this morning', cold: 'Picked days ago', basket: 'The last carrots of the year', lorry: 'It has come a long way.' },
+  a: ['Water', 'Start the harvester', 'Water'], aSay: [['Tap the rain barrel to water the beds.'], ['Tap the harvester to bring the crops in.'], ['These plants grow in water, with no soil. Tap the tank.']],
+  b: ['', 'Pack the boxes', 'Lights'], bSay: [[], ['The food has a long way to go. Tap the shed to pack it in cold boxes.'], ['Now tap the switch to turn on the growing lights.']],
+  ripe: [['Tap each bed to pick the food.'], [], ['It snows outside, and the plants grow anyway. Tap each shelf to pick the food.']],
+  off: [['The handcart takes the food across the square.'], ['The lorry sets off on the long road to the town.'], ['The grower loads the cargo bike.']],
+  done: [['Your food is on the stall, picked this morning.'], ['Your food is on the stall, in cold boxes. It came a long way.'], ['Your food is on the stall. You grew it indoors, in the snow.']],
   endT: 'A summer evening', endSay: [['The gardens are full, and the neighbours are picking food for supper.'], ['The lorry from the big farm is on its way with tomorrow\'s food.'], ['The indoor farm glows across the square, with your crops on its shelves.']] };
 
 // ---- 2. the plans, in the order in which they stand in the square from left to right, and what the checks find ----------------------
@@ -51,7 +52,7 @@ const RES = [
   [{ check: 'Short journey', evidence: meter(1, 'a very short journey'), text: 'The food was picked this morning and walked to the market on a handcart.', mark: 'g' }, { check: 'Food all year', evidence: year(3, 1), text: 'The gardens were full in summer and autumn. In winter there was little to pick.', mark: 'f' }],
   [{ check: 'Short journey', evidence: meter(10, 'a very long journey'), text: 'The food was picked days ago, kept cold and driven a long way. The lorries caused pollution.', mark: 'p' }, { check: 'Food all year', evidence: year(3, 3), text: 'The big fields sent plenty of food in every season.', mark: 'g' }],
   [{ check: 'Short journey', evidence: meter(1, 'a very short journey'), text: 'The food was picked this morning and came across the square by cargo bike.', mark: 'g' }, { check: 'Food all year', evidence: year(3, 3), text: 'The indoor farm grew salad, tomatoes and strawberries in every season. Its lights use electricity.', mark: 'g' }]];
-const AFTER = ['The gardens are in the town, so the food is picked in the morning and walked to the market. In winter there is little to pick.', 'The big fields send plenty of food in every season. It is picked days before, kept cold and driven a long way, and the lorries cause pollution.', 'The indoor farm is in the town and grows food in every season, so the food is picked in the morning and comes by cargo bike. Its lights use electricity.'];
+const AFTER = ['The food is picked in the morning and walked to the market. In winter there is little to pick.', 'The big fields send plenty of food all year. It travels a long way, and the lorries cause pollution.', 'The food is picked in the morning, in every season, and comes by cargo bike. The lights use electricity.'];
 // what stands on each side of each stall after a year: [summer, winter]
 const STALL = [['crate', 'basket'], ['cold', 'cold'], ['crate', 'crate']];
 // the plan that is nearest to the child's words: far away is the big farm; otherwise soil is the gardens, and glass or lights is the indoor farm
@@ -75,7 +76,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   for (const q of s.shelves) hitBox(s, g, q.x, q.y - 0.3, -13.4, 2.8, q.tall ? 2.8 : 1.9, 2.4, () => !!(q.can && q.can()), () => q.on());
   for (const q of s.fields) hitBox(s, g, q.x, q.y, q.z - 3.5, q.w, 6.4, 9, () => !!(q.can && q.can()), () => q.on());
   // the tags of the plans stand over their places; at the results they move to the stalls
-  const TAGPOS = [[-13.8, 4.4, -8], [0, 43, -128], [15.5, 12.6, -12]];
+  const TAGPOS = [[-13.8, 4.4, -8], [0, 39.5, -128], [15.5, 12.6, -12]];
   s.tags = plans.map((p, i) => { const t = plate(s, '', TAGPOS[i], 'pl'); t.hide = true; return t; });
   const tagHtml = (i, near) => { s.tags[i].el.className = `plate pl${near ? ' on' : ''}`; s.tags[i].el.innerHTML = `${plans[i].icon}<span><b>${plans[i].lines[0]}</b><b>${plans[i].lines[1]}</b>${near ? `<small style="font-size:14px;color:#1f2a44">${T.nearest}</small>` : ''}</span>`; };
   const tagsAt = (stalls) => s.tags.forEach((t, i) => { t.pos.set(...(stalls ? [STALLX[i], 2.5, STALLZ] : TAGPOS[i])); });
@@ -113,13 +114,13 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   // ---- the test: food sets off from all three places at the same moment, once in summer and once in winter ---------------------------
   s.test = async (api) => { const me = run;
     for (const side of [0, 1]) {
-      if (side) { api.step(T.autumnT); api.say(T.autumn); cartLoad(null); bikeLoad(false); const a = s.cart.position, b = s.bike.position;
-        move(s.cart, [a.x, a.z], CART[0], 3); move(s.bike, [b.x, b.z], BIKE[0], 3); tw(4, (t) => s.lorryAt(-19 - 109 * t, true, true)).then(() => { s.lorry.visible = false; });
-        await tw(4, (t) => s.season(ease(t), 0)); if (me !== run) return false; api.step(T.winterT); api.say(T.winter); await tw(4.5, (t) => s.season(1 - ease(t), ease(t))); if (me !== run) return false; home(); await wait(0.6); }
-      cartLoad(side ? 'basket' : 'crate'); bikeLoad(true); const lor = lorryRun(side ? 11 : 14);
+      if (side) { api.step(T.autumnT); api.say(T.autumn); s.phase = 'autumn'; cartLoad(null); bikeLoad(false); const a = s.cart.position, b = s.bike.position;
+        move(s.cart, [a.x, a.z], CART[0], 2.6); move(s.bike, [b.x, b.z], BIKE[0], 2.6); tw(3, (t) => s.lorryAt(-19 - 109 * t, true, true)).then(() => { s.lorry.visible = false; });
+        await tw(3, (t) => s.season(ease(t), 0)); if (me !== run) return false; api.step(T.winterT); api.say(T.winter); s.phase = 'winter'; await tw(3.5, (t) => s.season(1 - ease(t), ease(t))); if (me !== run) return false; home(); await wait(0.4); }
+      cartLoad(side ? 'basket' : 'crate'); bikeLoad(true); s.phase = `go${side}`; const lor = lorryRun(side ? 8 : 10);
       await Promise.all([move(s.cart, ...CART, side ? 5.4 : 4.6), move(s.bike, ...BIKE, 4.2, 0)]); if (me !== run) return false;
-      cartLoad(null); bikeLoad(false); pop(s.stalls[0].set(side, STALL[0][side])); await pop(s.stalls[2].set(side, 'crate')); api.say(T.early[side]);
-      await lor; if (me !== run) return false; await carry(side); api.say(T.late[side]); await wait(1.6); if (me !== run) return false; }
+      cartLoad(null); bikeLoad(false); pop(s.stalls[0].set(side, STALL[0][side])); await pop(s.stalls[2].set(side, 'crate')); api.say(T.early[side]); s.phase = `first${side}`;
+      await lor; if (me !== run) return false; await carry(side); api.say(T.late[side]); s.phase = `boxes${side}`; await wait(1.3); if (me !== run) return false; }
     s.tags.forEach((t) => { t.hide = true; }); await glide(RESULTS, 2.2); return me === run; };
 
   // ---- the play break: grow a crate of food with the plan the child chose ------------------------------------------------------------
@@ -133,14 +134,16 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     const fits = (q) => open && !q.used && left[sel.id] > 0 && (!tallRule || (sel.tall ? q.tall : !q.tall || freeTall() - 1 >= tallLeft()));
     const draw = () => { slots.forEach((q) => { q.mark.visible = fits(q); }); crops.forEach((c) => { toks[c.id].className = `tok${c === sel && left[c.id] ? ' on' : left[c.id] ? '' : ' used'}`; toks[c.id].querySelector('small').textContent = left[c.id] ? T.left(left[c.id]) : T.placed; }); api.say(say(sel)); };
     crops.forEach((c) => { const b = tok(c, ''); b.onclick = () => { if (left[c.id]) { sel = c; draw(); } }; toks[c.id] = b; }); api.tray(Object.values(toks));
-    slots.forEach((q) => { q.used = false; q.can = () => fits(q); q.on = () => { q.used = true; put(q, sel); left[sel.id]--; beep(560, 0.08); if (!crops.some((c) => left[c.id])) { open = false; draw(); api.tray([]); return res(); } if (!left[sel.id]) sel = crops.find((c) => left[c.id]); draw(); }; }); draw(); });
+    slots.forEach((q) => { q.used = false; q.can = () => fits(q); q.on = () => { q.used = true; put(q, sel); left[sel.id]--; beep(440 + CROPS.indexOf(sel) * 70, 0.1); if (!crops.some((c) => left[c.id])) { open = false; draw(); api.tray([]); return res(); } if (!left[sel.id]) sel = crops.find((c) => left[c.id]); draw(); }; }); draw(); });
   // one big yellow thing to tap, with a sign that nods
   const tapOne = ([x, y, z], w, h, label, name) => new Promise((res) => { let open = true; const m = glowMarks(frame(g, x, y, z, w, h, true, { fill: 0.35, t: Math.max(0.12, w * 0.04), d: Math.max(0.1, w * 0.03) })), pl = plate(s, label, [x, y + h * 1.12, z], 'tap'), go = () => { if (!open) return; open = false; m.visible = false; pl.hide = true; beep(700, 0.12); res(); };
     pl.el.onclick = go; hitBox(s, g, x, y - h * 0.1, z, w * 1.3, h * 1.3, Math.max(1.6, w * 0.3), () => open, go); s.spots[name] = [x, y + h / 2, z]; });
-  const pickAll = (slots, onPick) => new Promise((res) => { let n = slots.filter((q) => q.used).length; slots.forEach((q) => { q.mark.visible = !!q.used; q.can = () => q.used && !q.plant.picked; q.on = () => { q.plant.pick(); q.mark.visible = false; beep(620 + n * 40, 0.08); onPick(); if (--n === 0) res(); }; }); });
-  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : s.spots[name]);
+  const pickAll = (slots, onPick) => new Promise((res) => { let n = slots.filter((q) => q.used).length; slots.forEach((q) => { q.mark.visible = !!q.used; q.can = () => q.used && !q.plant.picked; q.on = () => { q.plant.pick(); q.mark.visible = false; beep(440 + CROPS.indexOf(q.plant.crop) * 70, 0.1); const last = --n === 0; onPick(q).then(() => { if (last) res(); }); }; }); });
+  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : name === 'stall' ? [STALLX[i] - 1.33, 1.25, STALLZ] : s.spots[name]);
 
-  s.playBreak = async (pick, api) => { const me = run; s.pick = pick; s.tags.forEach((t) => { t.hide = true; }); s.show(only(pick)); clearStalls(); home(); cartLoad(null); bikeLoad(false);
+  const fly = (a, b, col) => { const f = blk(g, 0, 0, 0.34, 0.34, 0, 0.34, '', { mat: new THREE.MeshBasicMaterial({ color: col }), shadow: false }); return tw(0.45, (t) => f.position.set(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t + Math.sin(t * Math.PI) * 1.3, a[2] + (b[2] - a[2]) * t)).then(() => { g.remove(f); }); };
+  s.liftAt = [21.3, -13.75];
+  s.playBreak = async (pick, api) => { const me = run; s.pick = pick; s.inBreak = true; const done0 = api.done; api.done = (ps) => { s.inBreak = false; done0(ps); }; s.tags.forEach((t) => { t.hide = true; }); s.show(only(pick)); clearStalls(); home(); cartLoad(null); bikeLoad(false);
     const slots = [s.beds, s.fields, s.shelves][pick], w0 = s.w;
     if (pick === 1) { s.fields.forEach((f) => { f.sown = false; f.g.visible = false; }); s.coldPile.visible = false; } else slots.forEach((q) => { if (q.plant) { q.pg.remove(q.plant.g); q.plant = null; } });
     if (pick === 2) { s.water(0); tw(1.2, (t) => s.lights(1 - 0.92 * t)); } else tw(2.4, (t) => s.season(0, w0 * (1 - ease(t))));
@@ -155,7 +158,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
       await tw(0.8, (t) => s.coldPile.scale.setScalar(Math.max(0.01, 1 - t))); s.coldPile.visible = false; s.coldPile.scale.setScalar(1); api.say(T.off[1]); chime();
       const lor = lorryRun(9); await wait(1.2); await glide(MAIN, 2.4); await lor; if (me !== run) return; await carry(0); s.fields.forEach((f) => { if (f.sown) f.mat.color.set(f.crop.col).lerp(new THREE.Color('#7cc552'), 0.32); });
       return api.done(T.done[1]); }
-    await putAll(slots, crops, api, T.put[pick], (q, c) => { q.plant = mkPlant(q.pg, 0, 0, 0, c, { roots: pick === 2, k: 0 }); }, true); if (me !== run) return;
+    await putAll(slots, crops, api, T.put[pick], (q, c) => { q.plant = mkPlant(q.pg, 0, 0, 0, c, { roots: pick === 2, k: 0 }); const pg = q.plant.g; tw(0.4, (t) => pg.scale.setScalar(Math.max(0.01, back(t)))); }, true); if (me !== run) return;
     api.say(T.aSay[pick]);
     if (pick === 0) { await tapOne([s.barrel[0], 0, s.barrel[2] + 0.75], 1.9, 2.1, T.a[0], 'a'); const drops = slots.filter((q) => q.used).map((q) => [0, 1, 2].map((j) => blk(g, q.x - 0.7 + j * 0.7, q.z, 0.12, 0.12, 3, 0.4, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#39a8ff', 1.2) }), shadow: false }))).flat();
       await tw(2.6, (t) => { drops.forEach((d, j) => { d.position.y = 0.8 + 2.4 * (1 - ((t * 4 + j * 0.37) % 1)); }); slots.forEach((q) => { if (q.used) q.plant.set(ease(t)); }); }); drops.forEach((d) => g.remove(d)); }
@@ -163,7 +166,8 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
       api.say(T.bSay[2]); await tapOne([s.switchAt[0], 0.9, s.switchAt[2] + 0.2], 1.8, 2, T.b[2], 'b'); s.lever.position.y += 0.5; await tw(2.6, (t) => { s.lights(0.08 + 0.92 * ease(t)); slots.forEach((q) => { if (q.used) q.plant.set(0.45 + 0.55 * ease(t)); }); }); }
     if (me !== run) return; api.say(T.ripe[pick]); let n = 0; const crate = pick === 2 ? s.liftCrate : s.cartLoad.crates[0];
     if (pick === 2) { crate.visible = true; crate.fill(0, cols); } else { cartLoad('crate', cols); s.cartLoad.crates.forEach((c) => c.fill(0, cols)); }
-    await pickAll(slots, () => { n++; if (pick === 2) crate.fill(n, cols); else { s.cartLoad.crates[0].fill(Math.min(6, n * 2), cols); s.cartLoad.crates[1].fill(Math.max(0, n * 2 - 6), cols); } }); if (me !== run) return;
+    const got = [], to = pick === 2 ? [s.liftAt[0], s.lift.position.y + 1.4, s.liftAt[1]] : [CART[0][0], 1.2, CART[0][1] + 0.6];
+    await pickAll(slots, (q) => fly([q.x, q.y + 0.6, q.z], to, q.plant.crop.col).then(() => { got.push(colsOf([q.plant.crop])[0]); n++; if (pick === 2) crate.fill(n, got); else { s.cartLoad.crates[0].fill(Math.min(6, n * 2), got.flatMap((c) => [c, c])); s.cartLoad.crates[1].fill(Math.max(0, n * 2 - 6), got.slice(3).flatMap((c) => [c, c])); } })); if (me !== run) return;
     chime(); api.say(T.off[pick]);
     if (pick === 2) { const y0 = s.lift.position.y; await tw(1.6, (t) => { s.lift.position.y = y0 + (s.fy(0) - y0) * ease(t); }); crate.visible = false; bikeLoad(true, cols); await wait(0.5); glide(MAIN, 2.6); await move(s.bike, ...BIKE, 4.4, 0); tw(1.6, (t) => { s.lift.position.y = s.fy(0) + (y0 - s.fy(0)) * ease(t); }); bikeLoad(false); await pop(s.stalls[2].set(1, 'crate', cols)); }
     else { await wait(0.5); glide(MAIN, 2.6); await move(s.cart, ...CART, 4.8); cartLoad(null); await pop(s.stalls[0].set(0, 'crate', cols)); }
@@ -176,7 +180,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     slots.forEach((q) => { if (q.plant) q.plant.regrow(); else q.plant = mkPlant(q.pg, 0, 0, 0, q.tall && tall ? tall : low[n++ % low.length], { roots: pick === 2 }); }); };
   s.town = async (pick) => { const me = run, w0 = s.w, cols = s.crops ? colsOf(s.crops) : DEFCOLS; settle(pick); regrow(pick); glide(MAIN, 1.4); if (w0 > 0.01) await tw(3, (t) => s.season(0, w0 * (1 - ease(t)))); if (me !== run) return;
     const st = s.stalls[pick]; for (const side of [0, 1]) { const o = st.set(side, STALL[pick][side], cols); if (!(pick === 2 && side === 1) && !(pick !== 2 && side === 0)) await pop(o); } await wait(0.6); };
-  s.swap = (pick) => { settle(pick); s.season(0, 0); glide(MAIN, 1); stallsFor(pick, pick === s.pick && s.crops ? colsOf(s.crops) : null); pop(s.stalls[pick].sides.flatMap((o) => [...o.crates, ...o.colds, o.basket].filter((c) => c.visible))); };
+  s.swap = (pick) => { document.getElementById('first').classList.toggle('right', pick === 0); settle(pick); s.season(0, 0); glide(MAIN, 1); stallsFor(pick, pick === s.pick && s.crops ? colsOf(s.crops) : null); pop(s.stalls[pick].sides.flatMap((o) => [...o.crates, ...o.colds, o.basket].filter((c) => c.visible))); };
   s.showResults = () => { s.tags.forEach((t) => { t.hide = true; }); };   // the cards stand under the stalls and carry the tags of the plans
 
   // ---- the recap: winter again, all three places in the town, and a tap on one of them ----------------------------------------------
@@ -188,8 +192,16 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     tw(1.6, (t) => s.season(0, w0 * (1 - t))).then(() => tw(3, (t) => s.season(0, 0, 0.82 * ease(t)))); if (pick === 1) { s.lorryAt(-128, true); tw(16, (t) => s.lorryAt(-128 + 100 * t)); s.lorryRun = true; }
     glide({ eye: [[5, 3, 25.5], [0, 3.1, 26], [-5, 3, 25.5]][pick], at: [[-7, 4.2, -12], [0, 6.4, -14], [8, 5.2, -12]][pick], fov: 43 }, 4); };
 
-  let puffT = 0; s.tick = (t, dt) => { s.flakes(dt); s.puffs(dt); s.lorryPlate.hide = !(s.lorryRun && s.lorry.visible); if (s.lorryRun && s.lorry.visible) { puffT -= dt; if (puffT < 0) { s.puff(); puffT = 0.28; } }
-    s.family.position.y = Math.abs(Math.sin(t * 2)) * 0.04; s.walkers.forEach((w, i) => { w.position.y = 0.06 + Math.abs(Math.sin(t * 2.4 + i)) * 0.05; }); if (s.pick !== 1) s.harvester.position.x = 17 + Math.sin(t * 0.25) * 9; };
+  // ---- things that answer a tap, for a child to find by accident. They rest during the play break, so that they never take a tap meant for a yellow place ----
+  const now = () => performance.now() / 1000, hopOf = (o, t) => { const d = t - (o.userData.hop ?? -9); return d < 0.5 ? Math.sin(d / 0.5 * Math.PI) * 0.6 : 0; }, poke = (x, y, z, w, h, d, fn, can = () => true) => hitBox(s, g, x, y, z, w, h, d, () => !s.inBreak && can(), fn);
+  const note = plate(s, '', [0, 0, 0], 'on'); note.hide = true; let noteN = 0; const say = (text, pos) => { const n = ++noteN; note.el.textContent = text; note.pos.set(...pos); note.hide = false; wait(2.6).then(() => { if (n === noteN) note.hide = true; }); };
+  poke(3.6, 0, 8.3, 4.6, 2.7, 2, () => { s.family.userData.hop = now(); chime(); });
+  s.walkers.forEach((w, i) => poke(w.position.x, 0, w.position.z, 1.6, 2.6, 1.6, () => { w.userData.hop = now(); w.rotation.y += 0.9; beep(500 + i * 110, 0.12); }));
+  s.trees.forEach((tr, i) => poke(tr.at[0], 0, tr.at[1], 4 * tr.at[2], 6.5 * tr.at[2], 4 * tr.at[2], () => { beep(240 + i * 30, 0.2, 'sine'); tw(0.7, (t) => { tr.rotation.z = Math.sin(t * 20) * 0.07 * (1 - t); }); }));
+  s.stalls.forEach((st, i) => [0, 1].forEach((side) => poke(st.x + (side ? 1.33 : -1.33), 0.9, STALLZ, 2.6, 1.3, 1.9, () => { beep(660, 0.1); say(T.note[st.kind[side]], [st.x + (side ? 1.33 : -1.33), 2.3, STALLZ]); }, () => !!st.kind[side])));
+  const lorryHit = poke(0, 0, 0, 4, 4.5, 7, () => { beep(150, 0.35, 'square', 0.06); s.puff(); s.puff(); say(T.note.lorry, [0, s.lorry.position.y + 6 * s.lorry.scale.x, s.lorry.position.z]); }, () => s.lorry.visible);
+  let puffT = 0; s.tick = (t, dt) => { lorryHit.mesh.position.set(0, s.lorry.position.y + 2.2 * s.lorry.scale.x, s.lorry.position.z); lorryHit.mesh.scale.setScalar(s.lorry.scale.x); s.flakes(dt); s.puffs(dt); s.lorryPlate.hide = !(s.lorryRun && s.lorry.visible); if (s.lorryRun && s.lorry.visible) { puffT -= dt; if (puffT < 0) { s.puff(); puffT = 0.28; } }
+    const n = now(); s.family.position.y = Math.abs(Math.sin(t * 2)) * 0.04 + hopOf(s.family, n); s.walkers.forEach((w, i) => { w.position.y = 0.06 + Math.abs(Math.sin(t * 2.4 + i)) * 0.05 + hopOf(w, n); }); if (s.pick !== 1) s.harvester.position.x = 17 + Math.sin(t * 0.25) * 9; };
   return s; }
 
 // ---- 4. hand it all to the kit ---------------------------------------------------------------------------------------------------------

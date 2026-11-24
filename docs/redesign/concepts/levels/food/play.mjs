@@ -1,5 +1,6 @@
 // Plays the Food level through and saves a picture of every step.
 //   node play.mjs <out dir> <width> <height> <plan> <second plan or -1> <speed>
+// A speed below 1 (for example 0.4) plays the animations more slowly. It is used when the recording machine is busy, so that each picture still catches its moment.
 // plan is the plan that the child chooses (0 the community gardens, 1 the big farm far away, 2 the indoor farm).
 // If a second plan is given, the script also presses "Try another plan". RECORD_STOP=3 stops after three pictures, for a quick look.
 import { openLevel } from '../../level-kit/record.mjs';
@@ -12,8 +13,10 @@ const CROP = ['tomato', 'lettuce', 'strawberry'], SLOT = [[0, 2, 4, 5, 7, 6], [0
 const wide = !process.env.FAST;
 await shot('job', 2500); await click('Start'); await shot('ask', 1500); await click(WORD[0]); await shot('ask-word-1', 1500); await click(WORD[1]); await shot('ask-word-2', 1500);
 await click('Ask Florence'); if (wide) await shot('plans-nearest', 1400); await has('Take the food to market'); await shot('plans', 1200);
-await click('Take the food to market'); await shot('test-summer-1', 2600); if (wide) await shot('test-summer-2', 3000); await shot('test-summer-lorry', 6500); await shot('test-summer-boxes', 6000);
-await shot('test-autumn', 4500); await shot('test-winter-snow', 6000); if (wide) await shot('test-winter-1', 4500); await shot('test-winter-lorry', 6000); if (wide) await shot('test-winter-boxes', 5000);
+const phase = (name) => r.until((n) => window.trial.cur.phase === n, name);   // waits for a moment of the test, whatever the speed of the machine
+await click('Take the food to market'); await shot('test-summer-far', 2300); await phase('first0'); await shot('test-summer-first', 300); await tap('stall', 0); await shot('test-tap-crate', 300);
+await shot('test-summer-lorry', 1500); await phase('boxes0'); await shot('test-summer-boxes', 200); await phase('autumn'); await shot('test-autumn', 2200); await phase('winter'); await shot('test-winter-snow', 2600);
+await phase('first1'); await shot('test-winter-first', 300); await phase('boxes1'); await shot('test-winter-boxes', 200);
 await has('Ask again'); await shot('results', 2500); await r.usePlan(P); await r.pause(3400); await shot('break-crops', 600);
 for (const c of CROP) { await r.think(2); await p.click(`[data-crop="${c}"]`); } await shot('break-crops-chosen', 500); await click('Grow these'); await shot('break-places', 900);
 for (const [n, i] of SLOT.entries()) { await tap('slot', i); await r.pause(500); if (n === 1 || n === 3) await shot(`break-placed-${n + 1}`, 400); } await r.pause(P === 1 ? 2600 : 300); await shot('break-a', 900);
