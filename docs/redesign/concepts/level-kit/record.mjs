@@ -28,7 +28,7 @@ export async function openLevel({ page, out, width = 1440, height = 810, speed =
   const pause = (ms) => p.waitForTimeout(ms / speed + (speed > 1 ? 150 : 0));
   const r = { p, close, think, pause,
     // saves the next picture as <out>/<number>-<name>.jpg after waiting ms. RECORD_STOP=4 stops after four pictures, for a quick look
-    async shot(name, ms = 700) { if (timing) { if (look.test(name)) await p.waitForTimeout(ms / speed); return; } await p.waitForTimeout(ms / speed + (speed > 1 ? 250 : 0)); await p.screenshot({ path: `${out}/${String(++n).padStart(2, '0')}-${name}.jpg`, type: 'jpeg', quality: 82 }); console.log(name, await p.evaluate(() => document.getElementById('fps').textContent)); if (n >= +(process.env.RECORD_STOP || process.env.TRIAL_STOP || 999)) { await close(); process.exit(0); } },
+    async shot(name, ms = 700) { if (timing) { if (look.test(name)) await p.waitForTimeout(ms / speed); return; } await p.waitForTimeout(ms / speed + (speed > 1 ? 250 : 0)); await p.screenshot({ path: `${out}/${String(++n).padStart(2, '0')}-${name}.jpg`, type: 'jpeg', quality: 82, timeout: 180000 }); console.log(name, await p.evaluate(() => document.getElementById('fps').textContent)); if (n >= +(process.env.RECORD_STOP || process.env.TRIAL_STOP || 999)) { await close(); process.exit(0); } },
     // presses the button with exactly these words; has() waits until such a button can be pressed
     async click(t) { await think(2); return p.getByRole('button', { name: t, exact: true }).click({ timeout: 180000 }); },
     has: (t) => p.waitForFunction((t) => [...document.querySelectorAll('button')].some((b) => b.textContent === t && !b.disabled), t, { timeout: 180000 }),
