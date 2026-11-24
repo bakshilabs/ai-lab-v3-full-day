@@ -42,13 +42,14 @@ if (what === 'start') {
   if (+from > 1) { n = (+from - 1) * 4 + 1; await remember(Array.from({ length: +from - 1 }, (_, k) => k)); await p.reload(); await p.waitForFunction(() => window.game); await has('Carry on'); await press('Carry on'); } else { await shot('start', 4000); await press('Start'); }
   for (let i = +from - 1; i < 6; i++) { const f = p.frames().find((x) => x !== p.mainFrame()) || (await p.waitForEvent('frameattached'));
     await f.waitForFunction(() => window.trial && [...document.querySelectorAll('button')].some((b) => !b.disabled)); await shot(`level-${i + 1}-opens`, 5000);
-    // If a level's closing picture needs what the child built in the play break, the jump fails. The check then makes every part of that scene fail quietly and jumps again,
-    // so the level still reaches its end, but its closing picture is then not the real one. The log says when this happened
-    const soft = await f.evaluate(() => { const t = window.trial; t.S.pick = t.S.pick ?? 0; try { t.end(); return false; } catch (e) { const s = t.cur; for (const k of Object.keys(s)) if (typeof s[k] === 'function') { const fn = s[k]; s[k] = (...a) => { try { return fn(...a); } catch (e2) { return undefined; } }; } t.end(); return e.message; } });
-    if (soft) console.log(`level ${i + 1}: the closing picture could not be drawn without the play break (${soft}), so it is not the real one`);
+    // A level's closing picture may need what the child built in the play break, and the jump skips the play break. So before the jump the check makes every part of the level's scene
+    // fail quietly. The level then still reaches its end, but its closing picture is not the real one, and the log says for which level this happened
+    await f.evaluate(() => { const t = window.trial, s = t.cur, soft = window.softFails = []; t.S.pick = t.S.pick ?? 0;
+      for (const k of Object.keys(s)) if (typeof s[k] === 'function') { const fn = s[k]; s[k] = (...a) => { try { const r = fn(...a); return r && typeof r.catch === 'function' ? r.catch((e) => { soft.push(e.message); }) : r; } catch (e) { soft.push(e.message); return undefined; } }; }
+      t.end(); });
     // a level may have more than one closing picture: press its own "next" buttons until the game's button shows
     for (let k = 0; k < 6; k++) { if (await f.evaluate(() => [...document.querySelectorAll('button')].some((b) => b.textContent === 'Go on'))) break; await f.locator('#tray button.sun').click(); await p.waitForTimeout(1500); }
-    await shot(`level-${i + 1}-end`, 6000); console.log('done after the end:', await p.evaluate(() => [...window.game.done]));
+    await shot(`level-${i + 1}-end`, 6000); { const soft = await f.evaluate(() => window.softFails); if (soft.length) console.log(`level ${i + 1}: its closing picture could not be drawn without the play break, so the picture of its end is not the real one (${soft[0]})`); } console.log('done after the end:', await p.evaluate(() => [...window.game.done]));
     await f.getByRole('button', { name: 'Go on', exact: true }).click(); await shot(`town-after-level-${i + 1}-building`, 1500);
     if (i < 5) { await has('Carry on'); await shot(`town-after-level-${i + 1}`, 1500); await press('Carry on'); } }
   await has('Next'); await shot('ending-town', 6000); await press('Next'); await shot('ending-jobs', 2500); await press('Back to Eco Town'); await shot('town-all-done', 4000);

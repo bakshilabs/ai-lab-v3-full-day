@@ -34,5 +34,5 @@ body.home .step small { display: block; margin-top: 5px; font: 700 17px/1 var(--
 .bar .ui-progress li { width: 26px; height: 26px; border-width: 2px; border-color: #fff; font-size: 14px; border-radius: 7px; }
 .bar .ui-progress .is-now { width: 30px; height: 30px; font-size: 17px; }
 .app.asleep .view { flex: none; width: 4px; height: 4px; }
-/* a level that is done keeps its tick while it is the one being played or the one that comes next */
-.ui-progress .is-done.is-now { background-color: var(--ui-good); color: transparent; outline: 3px solid var(--ui-sun); outline-offset: 1px; }
+/* a level that is done stays green while it is the one being played, and shows its number in white inside a yellow ring */
+.ui-progress .is-done.is-now { background: var(--ui-good); color: #fff; outline: 3px solid var(--ui-sun); outline-offset: 1px; }

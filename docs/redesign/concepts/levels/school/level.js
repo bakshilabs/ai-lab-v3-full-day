@@ -80,5 +80,5 @@ function valley() { const s = newScene(44, { ...LIGHT, tx: -1, sun: [20, 36, 30]
   return s; }
 
 // ---- 4. hand it all to the kit ----------------------------------------------------------------------------------------------------------
-runLevel({ place: { number: 1, town: 'Eco Town', level: 'School' }, words, plans, results, after, scene: valley,
+runLevel({ place: { number: 6, town: 'Eco Town', level: 'School' }, words, plans, results, after, scene: valley,
   ends: (pick, s) => [{ step: words.endT, say: [words.endSay, words.end], go: () => s.closing(pick) }] });
