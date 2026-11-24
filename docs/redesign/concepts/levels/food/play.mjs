@@ -23,7 +23,7 @@ const phase = (name) => until(([l, n]) => l.indexOf(window.trial.cur.phase) >= l
 const WORD = [['inside the town', 'outdoors in the soil'], ['far away, where there is lots of land', 'outdoors in the soil'], ['inside the town', 'indoors under lights']][P];
 const CROP = ['tomato', 'lettuce', 'strawberry'], SLOT = [[0, 2, 4, 5, 7, 6], [0, 1, 3, 4, 6, 7], [0, 2, 3, 5, 7, 8]][P];
 await snap('job', 1.5); await tap('family'); await snap('job-family-hops', 0.3); await click('Start'); await snap('ask', 1.5); await click(WORD[0]); await snap('ask-word-1', 0.6); await click(WORD[1]); await snap('ask-word-2', 0.6);
-await click('Ask Florence'); await snap('plans-nearest', 1.5); await has('Take the food to market'); await snap('plans', 0.6);
+await click('Ask Florence'); await snap('plans-nearest', 1.5); await has('Take the food to market'); await snap('plans', 0.6); await tap('garden'); await snap('plans-tap-gardens', 0.4);
 await click('Take the food to market'); await snap('test-summer-far', 2.4); await phase('first0'); await snap('test-summer-first', 0.3); await tap('stall', 0); await snap('test-tap-crate', 0.3);
 await snap('test-summer-lorry', 1.2); await phase('boxes0'); await snap('test-summer-boxes', 0.3); await phase('autumn'); await snap('test-autumn', 2.4); await phase('winter'); await snap('test-winter-snow', 3);
 await phase('go1'); await snap('test-winter-far', 2.4); await phase('first1'); await snap('test-winter-first', 0.3); await phase('boxes1'); await snap('test-winter-boxes', 0.3);
