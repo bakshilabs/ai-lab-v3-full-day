@@ -64,8 +64,10 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
   // Each field is the front of two steps of the hill, on one side of the road. From the square only the fronts of the steps can be seen, so the rows of the crop are drawn on them
   const farm = group(g), farmOn = group(farm), FIELD = ['#e8c24a', '#7cc552', '#c9843f', '#b6d94c', '#58a84a', '#f0d368', '#9a6a3a', '#8fd05c'];
   const stripeM = (hex) => { const m = tileMat('stripe', '#ffffff').clone(); m.color.set(hex); return m; };
+  const fieldSnow = new THREE.MeshBasicMaterial({ color: '#eef2f6', transparent: true, opacity: 0, depthWrite: false });
   s.fields = []; for (let j = 0; j < 4; j++) for (const sx of [-1, 1]) { const k = 2 + 2 * j, f = { g: group(farm), mat: stripeM(FIELD[s.fields.length]), k, x: sx < 0 ? -25 : 17, w: sx < 0 ? 42 : 26, y: stepH(k) - 3, z: stepZ(k), sown: true };
     for (const dk of [0, 1]) { texBox(f.g, f.x, stepZ(k + dk) + 0.2, f.w, 0.4, stepH(k + dk) - 3, 3, f.mat, 1.5, 3); }
+    for (const dk of [0, 1]) blk(f.g, f.x, stepZ(k + dk) + 0.43, f.w, 0.06, stepH(k + dk) - 3, 3, '', { mat: fieldSnow, shadow: false });   // snow lies on the fields in winter, and the big farm then sends food from its cold stores
     f.mark = group(farm); for (const dk of [0, 1]) blk(f.mark, f.x, stepZ(k + dk) + 0.5, f.w, 0.3, stepH(k + dk) - 3, 3, '', { mat: soft('#ffdf3d', 0.85), shadow: false }); glowMarks(f.mark); f.mark.visible = false; s.fields.push(f); }
   // the barn and its silos always stand on the hill; the packing shed, the harvester and the lorry belong to the plan
   { const y = stepH(10), z = stepZ(10) - 4; B(farm, -22, z, 20, 7, y, 9, '#c94f3a', { shadow: false }); B(farm, -22, z, 22, 8, y + 9, 1.6, '#7a2f26', { shadow: false }); B(farm, -22, z, 15, 6, y + 10.6, 1.6, '#7a2f26', { shadow: false }); B(farm, -22, z, 8, 4, y + 12.2, 1.4, '#7a2f26', { shadow: false }); B(farm, -22, z + 3.6, 5.5, 0.3, y, 6.4, '#fff4dc', { shadow: false });
@@ -162,7 +164,7 @@ export function buildPlace() { const s = newScene(38, { sun: [-20, 34, 26], haze
   // season(a, w): a is how far into autumn the year is and w how far into winter (each from 0 to 1). evening darkens a summer day
   s.season = (a, w, evening = 0) => { s.a = a; s.w = w; for (const q of seasonal) q.m.color.copy(q.c[0]).lerp(q.c[1], a).lerp(q.c[2], w);
     const air = evening ? drawSky(evening, 0, [SKY[0], EVENING, EVENING]) : drawSky(a, w, SKY); s.scene.fog.color.copy(air); s.sun.color.copy(sunC[0]).lerp(sunC[1], a).lerp(sunC[2], w).lerp(evC, evening); s.sun.intensity = 3.2 - 0.3 * a - 1.2 * w - 1.9 * evening; s.hemi.intensity = 1.4 + 0.15 * w - 0.55 * evening;
-    snowCaps.forEach((c) => { c.visible = w > 0.02; c.scale.y = Math.max(0.01, 0.3 * w); c.position.y = c.userData.y + 0.15 * w; }); flakes.visible = w > 0.04;
+    snowCaps.forEach((c) => { c.visible = w > 0.02; c.scale.y = Math.max(0.01, 0.3 * w); c.position.y = c.userData.y + 0.15 * w; }); flakes.visible = w > 0.04; fieldSnow.opacity = 0.9 * w; fieldSnow.visible = w > 0.01;
     s.beds.forEach((b) => { if (b.plant) b.plant.g.scale.setScalar(Math.max(0.02, 1 - w)); }); s.neighbours.forEach((n, i) => { n.visible = w < 0.5 || i === 0; }); };
   s.flakes = (dt) => { if (!flakes.visible) return; for (const q of FL) { q.y -= q.v * dt; if (q.y < 0) q.y += 18; q.f.position.set(q.x + Math.sin(q.y + q.z) * 0.4, q.y, q.z); q.f.visible = Math.hypot(q.x - s.eye[0], q.y - s.eye[1], q.z - s.eye[2]) > 11 && !(q.z < ZF + 0.6 && q.x > X0 + DX - 0.6 && q.x < X1 + DX + 0.6 && q.y < 3 * FH + 1); } };   /* a flake right in front of the camera would look like a white block, and no snow falls inside the indoor farm */
   s.puffs = (dt) => { for (const q of puffs) { if (q.t > 5) { q.p.visible = false; continue; } q.t += dt; const k = q.k * (1.3 + q.t * 1.1); q.p.scale.set(k, k, k); q.p.position.y += dt * 0.6 * q.k; q.m.opacity = 0.78 * Math.max(0, 1 - q.t / 5); } };

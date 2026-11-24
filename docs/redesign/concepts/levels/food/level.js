@@ -75,7 +75,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   s.shelves.forEach((q, i) => { q.plant = mkPlant(q.pg, 0, 0, 0, crop(i < 3 ? 'tomato' : DEF[i]), { roots: true }); });
   s.water(1); s.show([false, false, false]); s.season(0, 0); s.lorryAt(-128, false);
   // every bed, shelf and field can be tapped when the play break says so
-  for (const q of s.beds) hitBox(s, g, q.x, 0, q.z, 2.9, 2.4, 2.1, () => !!(q.can && q.can()), () => q.on());
+  for (const q of s.beds) hitBox(s, g, q.x, 0, q.z, 2.9, q.tall ? 2.4 : 1.3, 2.1,   /* the front beds only hold low plants, and a low box does not take a tap meant for the bed behind it */ () => !!(q.can && q.can()), () => q.on());
   for (const q of s.shelves) hitBox(s, g, q.x, q.y - 0.3, -13.4, 2.8, q.tall ? 2.8 : 1.9, 2.4, () => !!(q.can && q.can()), () => q.on());
   for (const q of s.fields) hitBox(s, g, q.x, q.y, q.z - 3.5, q.w, 6.4, 9, () => !!(q.can && q.can()), () => q.on());
   // the tags of the plans stand over their places; at the results they move to the stalls
@@ -142,7 +142,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   const tapOne = ([x, y, z], w, h, label, name) => new Promise((res) => { let open = true; const m = glowMarks(frame(g, x, y, z, w, h, true, { fill: 0.35, t: Math.max(0.12, w * 0.04), d: Math.max(0.1, w * 0.03) })), pl = plate(s, label, [x, y + h * 1.12, z], 'tap'), go = () => { if (!open) return; open = false; m.visible = false; pl.hide = true; beep(700, 0.12); res(); };
     pl.el.onclick = go; hitBox(s, g, x, y - h * 0.1, z, w * 1.3, h * 1.3, Math.max(1.6, w * 0.3), () => open, go); s.spots[name] = [x, y + h / 2, z]; });
   const pickAll = (slots, onPick) => new Promise((res) => { let n = slots.filter((q) => q.used).length; slots.forEach((q) => { q.mark.visible = !!q.used; q.can = () => q.used && !q.plant.picked; q.on = () => { q.plant.pick(); q.mark.visible = false; beep(440 + CROPS.indexOf(q.plant.crop) * 70, 0.1); const last = --n === 0; onPick(q).then(() => { if (last) res(); }); }; }); });
-  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : name === 'stall' ? [STALLX[i] - 1.33, 1.25, STALLZ] : name === 'family' ? [3.6, 1.3, 8.7] : name === 'garden' ? [-13.8, 1.2, -6.4] : s.spots[name]);
+  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, s.beds[i].tall ? 1.1 : 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : name === 'stall' ? [STALLX[i] - 1.33, 1.25, STALLZ] : name === 'family' ? [3.6, 1.3, 8.7] : name === 'garden' ? [-13.8, 1.2, -6.4] : s.spots[name]);
 
   const fly = (a, b, col) => { const f = blk(g, 0, 0, 0.34, 0.34, 0, 0.34, '', { mat: new THREE.MeshBasicMaterial({ color: col }), shadow: false }); return tw(0.45, (t) => f.position.set(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t + Math.sin(t * Math.PI) * 1.3, a[2] + (b[2] - a[2]) * t)).then(() => { g.remove(f); }); };
   s.liftAt = [21.3, -13.75];
