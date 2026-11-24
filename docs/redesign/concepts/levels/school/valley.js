@@ -74,7 +74,8 @@ export function buildValley(s) { const g = s.g, G = (hex) => tileMat('grass', he
   const rings = [0, 1, 2].map(() => { const m = new THREE.Mesh(new THREE.RingGeometry(0.965, 1, 72), new THREE.MeshBasicMaterial({ color: '#ffd257', transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide })); m.visible = false; g.add(m); return m; });
 
   // ---- the children, the family's grown-ups at their gate, and the cars ----
-  const kids = KIDS.map((o, i) => { const p = person(g, o); p.scale.setScalar((o.k || 1) * KS); p.home = HOMEX[i]; p.visible = false; return p; });
+  const kids = KIDS.map((o, i) => { const p = person(g, o); p.scale.setScalar((o.k || 1) * KS); p.home = HOMEX[i]; p.visible = false;
+    /* what the walking bus leaves behind: the small flag of the helper the child chose, and an apple from the orchard */ p.pen = group(p, 0, 0, 0); B(p.pen, -0.42, 0.25, 0.06, 0.06, 0.5, 1.5, '#fffaf0'); blk(p.pen, -0.42, -0.02, 0.06, 0.5, 1.62, 0.38, '#fff', { mat: flagMat }); p.pen.visible = false; p.apple = B(p, 0.42, 0.2, 0.22, 0.22, 0.6, 0.22, '#e23b2e', { raw: true }); p.apple.visible = false; return p; });
   const grown = [fig(g, 13.7, 0.1, -5.0, { ...FAMILY[1], k: 1.28 * KS, turn: -0.15, arms: ['down', 'up'] }), fig(g, 10.6, 0.1, -5.1, { ...FAMILY[2], k: 1.33 * KS, turn: 0.2, arms: ['up', 'down'] })];
   const cars = [0, 1, 2, 3, 4, 5].map((n) => { const c = car(g, 0, 0, n); c.scale.setScalar(CS); B(c.kid, 0, 0, 0.42, 0.42, 0, 0.42, '#f1c9a0'); B(c.kid, 0, 0, 0.46, 0.46, 0.34, 0.12, '#3a2a1c'); c.visible = false; return c; }), smoke = puffs(g, 60);
   const marks = group(g, 0, 0, 0);
@@ -88,7 +89,7 @@ export function buildValley(s) { const g = s.g, G = (hex) => tileMat('grass', he
     const T = Math.max(...who.map((q) => q.arr)) + 0.9, bx = X, by = 9.6, sc = schools[SITEX.indexOf(X)];
     function at(t) { for (const [k, m] of rings.entries()) { const r = (t - 0.25 - k * 0.42) * 30; m.visible = r > 0 && r < 62; if (m.visible) { m.position.set(bx, by, -11); m.scale.setScalar(r); m.material.opacity = 0.85 * Math.max(0, 1 - r / 62); } }
       if (sc) sc.bell.rotation.z = Math.sin(t * 9) * 0.55 * Math.max(0, 1 - t / 3.2);
-      for (const q of who) { const p = kids[q.i], door = doors[q.i]; door.scale.x = t > q.ts - 0.35 ? 0.16 : 1; p.vest.visible = !!o.bus && q.walk; p.scale.setScalar((KIDS[q.i].k || 1) * KS);
+      for (const q of who) { const p = kids[q.i], door = doors[q.i]; door.scale.x = t > q.ts - 0.35 ? 0.16 : 1; p.vest.visible = !!o.bus && q.walk; p.pen.visible = !!o.bus && q.walk && !!o.mark && o.mark.helper === q.i; p.apple.visible = !!o.bus && q.walk && !!o.mark && o.mark.took && o.mark.fork === 0; p.scale.setScalar((KIDS[q.i].k || 1) * KS);
         if (q.walk) { p.visible = t >= q.ts || q.i === 6; if (t < q.ts) { p.position.set(q.x + 0.65, 0.1, -4.9); p.rotation.y = 0; p.stride(0, 0); }
           else if (t < q.t1) { const x = q.x + (q.sx - q.x) * (t - q.ts) / (q.t1 - q.ts); p.position.set(x, 0.1 + Math.abs(Math.sin(x * 2.2)) * 0.1, PATHZ); p.rotation.y = q.sx > q.x ? Math.PI / 2 : -Math.PI / 2; p.stride(x * 2.2); }
           else { const k = ease(Math.min(1, (t - q.t1) / 0.5)); p.position.set(q.sx, 0.1 + (q.sy - 0.1) * k + Math.sin(k * Math.PI) * 0.5, PATHZ + (q.sz - PATHZ) * k); p.rotation.y = k < 1 ? Math.PI : 0; p.stride(k * 6, k < 1 ? 1 : 0); } }
@@ -99,12 +100,16 @@ export function buildValley(s) { const g = s.g, G = (hex) => tileMat('grass', he
       return order.filter((q) => q.arr <= t).map((q) => (q.walk ? 'shoe' : 'car')); }
     return { at, T, who, order, kinds: order.map((q) => (q.walk ? 'shoe' : 'car')), walkers: who.filter((q) => q.walk).length }; }
   let now = null;   // the morning that is on show, so that the cars in it keep puffing
-  const clear = () => { now = null; for (const p of kids) p.visible = false; kids[6].visible = true; kids[6].position.set(12.65, 0.1, -4.9); kids[6].rotation.y = 0; kids[6].vest.visible = false; kids[6].stride(0, 0); for (const c of cars) { c.visible = false; c.run = false; } for (const d of doors) d.scale.x = 1; for (const m of rings) m.visible = false; smoke.clear(); marks.clear(); };
+  const clear = () => { now = null; for (const p of kids) { p.visible = false; p.pen.visible = false; p.apple.visible = false; } kids[6].visible = true; kids[6].position.set(12.65, 0.1, -4.9); kids[6].rotation.y = 0; kids[6].vest.visible = false; kids[6].stride(0, 0); for (const c of cars) { c.visible = false; c.run = false; } for (const d of doors) d.scale.x = 1; for (const m of rings) m.visible = false; smoke.clear(); marks.clear(); };
   // plays a morning and gives the kinds of badge in the order of arrival; onBadge is called whenever another child has arrived
   async function morning(X, o = {}) { const me = run, p = plan(X, o); now = p; let n = -1; await tw(p.T, (k) => { if (me !== run) return; const list = p.at(k * p.T); if (list.length !== n) { n = list.length; if (o.onBadge) o.onBadge(list); } }); return p; }
   const settle = (X, o = {}) => { const p = plan(X, o); now = p; p.at(p.T); return p; };
   // the mark the choice leaves: a walking bus stop in the child's colour at the gate of every child who walks
-  const stops = (X) => { marks.clear(); walks(X).forEach((w, i) => { if (!w) return; const x = HOMEX[i] - 0.9; B(marks, x, -4.75, 0.14, 0.14, 0, 2.5, '#fffaf0'); blk(marks, x, -4.75, 0.95, 0.1, 2.5, 0.95, '#fff', { mat: flagMat }); }); };
+  // The way the child chose at the fork stays too: a crate of apples from the orchard beside the school gate, or the ducks that followed the bus
+  const stops = (X, mark) => { marks.clear(); walks(X).forEach((w, i) => { if (!w) return; const x = HOMEX[i] - 0.9; B(marks, x, -4.75, 0.14, 0.14, 0, 2.5, '#fffaf0'); blk(marks, x, -4.75, 0.95, 0.1, 2.5, 0.95, '#fff', { mat: flagMat }); });
+    const sd = walks(X).some((w, i) => !w && HOMEX[i] < X) ? 1 : -1;   // they stand on the side of the gate where no cars queue, so that they are not hidden
+    if (mark && mark.took && mark.fork === 0) { B(marks, X + sd * 5.6, -2.5, 1.9, 1.3, 0, 0.9, '#b98a5a', { tex: 'board' }); for (let k = 0; k < 6; k++) B(marks, X + sd * 5.6 - 0.6 + (k % 3) * 0.6, -2.75 + Math.floor(k / 3) * 0.55, 0.5, 0.5, 0.9, 0.42, '#e23b2e', { raw: true }); }
+    if (mark && mark.took && mark.fork === 1) [1.9, 1.4, 1.2].forEach((k, n) => { const q = duck(marks, X + sd * (4.6 + n * 1.9), 0.08, -2.4 - (n % 2) * 0.5, k); q.rotation.y = 0.2; }); };
   clear();
   let pt = 0; const tick = (t, dt) => { blow(t, 0); spin = Math.max(0, spin - dt); cock.rotation.y += dt * (1.6 + spin * 9); ducks.forEach((d, k) => { d.position.x += dt * 0.5 * (k === 2 ? -1 : 1); d.position.y = -0.25 + Math.sin(t * 2 + k) * 0.04; }); for (const [k, m] of streaks.entries()) { m.position.x += dt * (0.8 + (k % 5) * 0.2); if (m.position.x > 75) m.position.x = -75; }
     for (const sc of schools) sc.flag.rotation.y = Math.sin(t * 5 + sc.position.x) * 0.25; grown.forEach((p, k) => { p.position.y = 0.1 + Math.abs(Math.sin(t * 2.4 + k)) * 0.07; });

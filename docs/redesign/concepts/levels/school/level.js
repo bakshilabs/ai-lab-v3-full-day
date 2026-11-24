@@ -23,7 +23,7 @@ const words = {
   playT: 'Lead the walking bus', next: 'Next', townT: 'A school morning', townHow: 'The school is built, and the bell rings for the first morning.',
   built: '', tryOther: 'Try another plan', chooseOther: 'Choose a different plan to see what happens in the town.', first: 'Your first plan', what: 'What changed?', keepFirst: 'Go back to my first plan', keepThis: 'Keep this plan',
   recapT: 'One more question', recapQ: 'Point to the plan that helped more children walk.', recapYes: 'Yes. Children from the town and from the farms can all walk to that school.', recapNo: 'The school between the town and the farms helped the most. Children from both ends can walk there.',
-  end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again', endT: 'The school bell rings', endSay: 'The bell rings every morning now, and your flag flies on the school.',
+  end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again', endT: 'The school bell rings', endSay: 'The bell rings every morning now, and your flag flies on the school.', endMark: ['A crate of apples from the orchard stands by the gate.', 'The ducks from the pond still come to the gate.'],
   check: 'Promote walking', strip: (n) => `${n} of 12 children walked.`, waiting: 'This plan has not been tested yet.', ringing: 'The bell is ringing.', ringNext: 'Now ring the bell of the next school. Click the bell.', ringSign: 'Ring this bell', here: ['In the town?', 'Between them?', 'By the farms?'] };
 
 // ---- 2. the plans, and what the check finds --------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ const after = (i, s) => { const t = tally(plans[i].site, s), cars = 12 - t.n; re
 const copy = (v) => ({ eye: [...v.eye], at: [...v.at], fov: v.fov });
 function valley() { const s = newScene(44, { ...LIGHT, tx: -1, sun: [20, 36, 30] }), V = buildValley(s), wide = s.scene; Object.assign(s, copy(VIEWS.job), { V, set: [0, 1, 2], minAspect: 1.9, bloom: 0.42 }); setFlag(flagN);
   document.querySelectorAll('.strips').forEach((e) => e.remove()); const strips = document.createElement('div'); strips.className = 'strips'; strips.hidden = true; view.append(strips);
-  const tags = SITEX.map((x, i) => { const t = plate(s, '', [x, i % 2 ? 18.9 : 14.4, -11], 'pl'); t.el.innerHTML = planTag(SITES[i]); t.hide = true; return t; }), board = { hide: true }, names = SITEX.map((x, i) => { const t = plate(s, SITES[i].short, [x, 15.4, -11], 'on'); t.hide = true; return t; });
+  const tags = SITEX.map((x, i) => { const t = plate(s, '', [x, i % 2 ? 18.9 : 14.4, -11], 'pl'); t.el.innerHTML = planTag(SITES[i]); t.hide = true; return t; }), board = { hide: true }, names = SITEX.map((x, i) => { const t = plate(s, SITES[i].short, [x, i === 3 ? 13.1 : 15.4, -11], 'on');   /* the orchard is close to the place in between, so its name sits a little lower */ t.hide = true; return t; });
   const areas = [[-22, 22], [1, 13], [20.25, 21]].map(([x, w], k) => { const a = group(s.g, 0, 0, 0); glowMarks(place(a, x, -6.4, w, 3.6, 0.12)); glowMarks(frame(a, x, 0.1, -8, w, 6.5, true, { fill: 0.3 })); a.visible = false; const p = plate(s, words.here[k], [x, 8.6, -8], 'on'); p.hide = true; return { a, p }; });
   const only = (list) => SITEX.forEach((_, i) => { V.rise(i, list.includes(i) ? 1 : 0); }), hideAll = () => { for (const t of tags) t.hide = true; for (const t of names) t.hide = true; board.hide = true; for (const q of areas) { q.a.visible = false; q.p.hide = true; } for (const p of V.pins) p.visible = false; bellTap = null; ringMark.visible = false; ringSign.hide = true; };
   // the child rings the bell of the second and the third school by hand: a yellow place glows around the bell, and a click on it (or on its sign) rings it
@@ -66,19 +66,21 @@ function valley() { const s = newScene(44, { ...LIGHT, tx: -1, sun: [20, 36, 30]
   s.showResults = () => { strips.hidden = true; board.hide = true; V.clear(); only(s.set); for (const site of s.set) names[site].hide = false; glide(copy(VIEWS.cards), 1.4); };
   // the play break: the walking bus that comes from the right-hand side of the school. Its length follows the plan
   s.playBreak = async (pick, api) => { hideAll(); strips.hidden = true; const X = SITEX[plans[pick].site], w = walks(X), ids = HOMEX.map((x, i) => i).filter((i) => w[i] && HOMEX[i] > X).sort((a, b) => HOMEX[b] - HOMEX[a]), other = HOMEX.map((x, i) => i).filter((i) => w[i] && HOMEX[i] < X), cars = HOMEX.map((x, i) => i).filter((i) => !w[i]).sort((a, b) => Math.abs(HOMEX[a] - X) - Math.abs(HOMEX[b] - X)), n = ids.length + other.length;
-    const bus = walkingBus(s, { ids, other, cars, farm: ids[0] >= 6, doneSay: `${n} children walked to school today${cars.length ? `, and ${cars.length} came by car` : ', and nobody needed a car'}.` }, api);
+    const bus = walkingBus(s, { ids, other, cars, farm: ids[0] >= 6, onMark: (m) => { s.mark = m; }, doneSay: `${n} children walked to school today${cars.length ? `, and ${cars.length} came by car` : ', and nobody needed a car'}.` }, api);
     s.scene = bus.scene; s.busTick = bus.tick; await bus.play(); };
   const near = (X) => ({ eye: [X * 0.75, 4.4, 44], at: [X * 0.75, 6.6, -6], fov: 26 });
-  const show = (pick, pose) => { s.scene = wide; s.busTick = null; hideAll(); const site = plans[pick].site, X = SITEX[site]; V.clear(); only([site]); V.stops(X); if (pose) V.settle(X, { bus: true }); return X; };
-  s.town = async (pick) => { const X = show(pick, false); Object.assign(s, copy(VIEWS.wide)); glide({ eye: [-1, 4.6, 70], at: [-1, 6.4, -4], fov: 26 }, 6); beep(830, 1.4, 'sine', 0.12); await V.morning(X, { bus: true }); await glide(near(X), 2.2); };
+  const show = (pick, pose) => { s.scene = wide; s.busTick = null; hideAll(); const site = plans[pick].site, X = SITEX[site]; V.clear(); only([site]); V.stops(X, s.mark); if (pose) V.settle(X, { bus: true, mark: s.mark }); return X; };
+  s.town = async (pick) => { const X = show(pick, false); Object.assign(s, copy(VIEWS.wide)); glide({ eye: [-1, 4.6, 70], at: [-1, 6.4, -4], fov: 26 }, 6); beep(830, 1.4, 'sine', 0.12); await V.morning(X, { bus: true, mark: s.mark }); await glide(near(X), 2.2); };
   s.swap = (pick) => { const X = show(pick, true), v = near(X); v.at[1] = 8.4; glide(v, 1.2); chime(); };   // a little lower in the picture, so that the sign with the first result does not cover the bell
   // the recap: a tap on one of the three places. Any answer goes on
   s.recap = (answer) => { let open = true; const signs = []; hideAll(); V.clear(); only(s.set); glide(copy(VIEWS.wide), 1.4); s.spot = (name, i) => [SITEX[s.set[i]], 4, -11];
-    s.set.forEach((site, k) => { const ok = site === 2, pl = plate(s, SITES[site].short, [SITEX[site], 15.6, -11], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; names[2].hide = false; beep(ok ? 880 : 300, 0.15); answer(ok); }; signs.push(pl); pl.el.onclick = go; hitBox(s, s.g, SITEX[site], 0, -9, 7, 11, 8, () => open, go); }); };
-  s.closing = (pick) => { const X = show(pick, false); glide({ eye: [X + 12, 3.6, 24], at: [X - 0.5, 6.4, -9], fov: 36 }, 3.5); beep(830, 1.4, 'sine', 0.12); V.morning(X, { bus: true }); };
+    s.set.forEach((site, k) => { const ok = site === 2, pl = plate(s, SITES[site].short, [SITEX[site], site === 3 ? 13.3 : 15.6, -11], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; names[2].hide = false; beep(ok ? 880 : 300, 0.15); answer(ok); }; signs.push(pl); pl.el.onclick = go; hitBox(s, s.g, SITEX[site], 0, -9, 7, 11, 8, () => open, go); }); };
+  s.closing = (pick) => { const X = show(pick, false); glide({ eye: [X + 12, 3.6, 24], at: [X - 0.5, 6.4, -9], fov: 36 }, 3.5); beep(830, 1.4, 'sine', 0.12); V.morning(X, { bus: true, mark: s.mark }); };
   s.tick = (t, dt) => { if (s.busTick) s.busTick(t, dt); else { V.tick(t, dt); for (const q of areas) if (q.a.visible) q.a.position.y = 0.12 + Math.sin(t * 4) * 0.03; if (ringMark.visible) ringMark.scale.setScalar(1 + Math.sin(t * 5) * 0.05); } };
   return s; }
 
+// Inside the whole game (docs/redesign/concepts/game/) the level is held in a frame with ?next= in its address. There the last picture must not say that the trial level has ended
+const FRAMED = window.parent !== window && new URLSearchParams(location.search).has('next');
 // ---- 4. hand it all to the kit ----------------------------------------------------------------------------------------------------------
 runLevel({ place: { number: 6, town: 'Eco Town', level: 'School' }, words, plans, results, after, scene: valley,
-  ends: (pick, s) => [{ step: words.endT, say: [words.endSay, words.end], go: () => s.closing(pick) }] });
+  ends: (pick, s) => [{ step: words.endT, say: [words.endSay, ...(s.mark && s.mark.took ? [words.endMark[s.mark.fork]] : []), ...(FRAMED ? [] : [words.end])], go: () => s.closing(pick ?? 0) }] });
