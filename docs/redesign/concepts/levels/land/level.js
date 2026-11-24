@@ -33,6 +33,7 @@ const words = {
   goesDown: 'The river goes down. It leaves a line of mud.', line: 'The river came up to here',
   home: 'Home', green: 'Town green', left: (n) => `${n} left`, placed: 'Placed', flag: 'Flag colour', family: 'Your family',
   how: ['Choose a place for your family’s home. Look at the mud, the trees and the path first.', 'Now choose places for five neighbours.', 'Now choose a place for the town green.'],
+  afterHillLow: 'The town now stands on the far hill. The homes on the hill stay dry when the river rises. The homes at the foot of the hill are below the line of mud.',
   doneBreak: ['The first homes of Eco Town are marked out.', 'Tap a home if you want to move it.'], here: 'Here',
   // what the people say about their place. On the meadow every place is below the line of mud
   react: { dry: 'A good dry place!', view: 'We can see the whole valley!', tree: 'A tree for shade!', path: 'A short walk to the river!', low: 'The ground is muddy here.', edge: 'The edge is very close.', puddle: 'There is a puddle at our door.' },
@@ -63,8 +64,8 @@ const HUTS = [[[-16, 1.9, 1.3], [-12, 1.9, 1.3], [-8, 1.9, 1.3]], [[0, 0.5, -9],
 const MID = [[-12.5, 1.9, -3.5], [5.5, 0.5, -9.5], [18.5, 5.2, -29.5]];
 // three views of each place: close to the test huts (with room under them for one result card), from above for the play break, and the town when it is built
 const LOOK = [{ eye: [-14.5, 4.4, 14], at: [-14.5, 1.3, 0], fov: 46 }, { eye: [2, 3.6, 6], at: [2, 0.7, -9], fov: 46 }, { eye: [14, 8.2, -14], at: [14, 5.2, -29.5], fov: 46 }];
-const PLAN = [{ eye: [-13, 30, 7], at: [-13, 1.5, -6.5], fov: 34 }, { eye: [6.3, 29, 4], at: [6.3, 0.5, -10.4], fov: 34 }, { eye: [17.5, 42, -7], at: [17.5, 3, -26], fov: 32 }];
-const TOWN = [{ eye: [-13, 7.5, 15], at: [-13, 1.4, -4], fov: 50 }, { eye: [6.3, 6.5, 8.5], at: [6.3, 0.6, -9], fov: 50 }, { eye: [17, 11, -1], at: [17, 3.6, -25], fov: 46 }];
+const PLAN = [{ eye: [-13, 32, 8], at: [-13, 1.5, -6.8], fov: 37 }, { eye: [6.3, 31, 4.5], at: [6.3, 0.5, -10.6], fov: 36 }, { eye: [17.5, 45, -5], at: [17.5, 3, -27.2], fov: 40 }];
+const TOWN = [{ eye: [-13, 7.5, 15], at: [-13, 1.4, -4], fov: 50 }, { eye: [6.3, 6.5, 8.5], at: [6.3, 0.6, -9], fov: 50 }, { eye: [17, 11.5, -1], at: [17, 4.8, -25], fov: 46 }];
 // Fourteen places on each kind of land, for six homes and the town green: [x, height of the ground, z, what kind of place it is].
 // The kinds can be seen in the valley itself: low (below the line of mud), puddle, edge (beside the broken bank), tree, path (beside the path to the river), view (the top of the hill) and dry.
 const SITES = [
@@ -212,15 +213,15 @@ function valley() {
 
   // ---- the play break: the river goes down, and the child chooses places for six homes and the town green, seen from above ------------
   const homes = [], pegs = group(g), flagM = new THREE.MeshLambertMaterial({ color: FLAG[0] }); let green = null, site = 0;
-  const talk = plate(s, '', [0, 0, 0], ''), famSign = plate(s, words.family, [0, 0, 0], 'on'); talk.hide = true; famSign.hide = true; let talkN = 0;
+  const talk = plate(s, '', [0, 0, 0], ''), famSign = plate(s, words.family, [0, 0, 0], 'on'); talk.hide = true; famSign.hide = true;
   const kindOf = (q) => SITES[site][q.i][3], happy = (q) => site !== 1 && !!HAPPY[kindOf(q)], saying = (q) => (site === 1 ? words.reactMeadow : words.react)[kindOf(q)];
   // the people of a home stand at its door: the family at theirs, and one or two neighbours at each of the others. They are glad or worried about their place
   function folk(q) { if (q.folk) g.remove(q.folk); const p = SITES[site][q.i], f = group(g, p[0], p[1], p[2]), ok = happy(q), n = homes.indexOf(q); q.folk = f;
     if (q.family) { FAMILY.forEach((o, k) => fig(f, -1.3 + k * 1.15, 0, 1.75 + (k % 2) * 0.3, { ...o, k: o.k * 1.1, sad: !ok, pack: k ? undefined : '#ffd257', arms: ok ? (k === 1 ? ['down', 'up'] : ['up', 'down']) : ['down', 'down'], turn: (k - 1) * 0.25 })); }
     else { fig(f, -1.1, 0, 1.7, { k: 1.3, shirt: SHIRTS[n % 6], skin: FAMILY[n % 3].skin, hair: FAMILY[(n + 1) % 3].hair, long: n % 2 === 0, sad: !ok, arms: ok ? ['up', 'up'] : ['down', 'down'], turn: 0.2 }); if (n % 2) fig(f, 0.2, 0, 1.9, { k: 0.95, shirt: SHIRTS[(n + 3) % 6], skin: FAMILY[(n + 1) % 3].skin, hair: FAMILY[n % 3].hair, sad: !ok, arms: ok ? ['up', 'down'] : ['down', 'down'], turn: -0.2 }); }
     if (kindOf(q) === 'puddle' || kindOf(q) === 'low') B(f, 0.2, 2.1, 1.5, 0.9, 0.02, 0.05, '#7fb7d6', { unlit: true, shadow: false }); }
-  const say = (q) => { const id = ++talkN, p = SITES[site][q.i]; talk.el.textContent = saying(q); talk.pos.set(p[0], p[1] + 4.6, p[2]); talk.hide = false; tw(4.5, () => {}).then(() => { if (id === talkN) talk.hide = true; }); };
-  const famAt = () => { const q = homes.find((h) => h.family); famSign.hide = !q; if (q) { const p = SITES[site][q.i]; famSign.pos.set(p[0], p[1] + 3.3, p[2]); } };
+  const say = (q) => { const p = SITES[site][q.i]; talk.el.textContent = saying(q); talk.pos.set(p[0], p[1] + 6.2, p[2]); talk.hide = false; };
+  const famAt = () => { const q = homes.find((h) => h.family); famSign.hide = !q; if (q) { const p = SITES[site][q.i]; famSign.pos.set(p[0], p[1] + 3.1, p[2]); } };
   function addHome(i, family) { const n = homes.length, q = build(g, SITES[site][i], { wall: WALL[(n + i) % 4], roof: family ? '#d2553a' : ROOF[1 + (n + i) % 3], door: family ? '#ffd257' : ['#3f78b5', '#c0562f', '#2e9b5a', '#7a5230'][n % 4] }); q.i = i; q.family = family; homes.push(q);
     q.g.scale.setScalar(0.01); tw(0.45, (t) => q.g.scale.setScalar(Math.max(0.01, back(t)))); folk(q); q.folk.scale.setScalar(0.01); tw(0.5, (t) => q.folk.scale.setScalar(Math.max(0.01, back(t)))); (happy(q) ? chime : () => beep(240, 0.2, 'sine'))(); say(q); famAt(); return q; }
   function addGreen(i) { const p = SITES[site][i], t = group(g, p[0], p[1], p[2]); B(t, 0, 0, 3.3, 3.3, 0, 0.08, '#e6d3a1'); B(t, 0, 0, 3, 3, 0, 0.16, '#58b24a', { tex: 'grass' }); B(t, -0.9, 0.7, 0.2, 0.2, 0, 4, '#f6f1e2'); blk(t, 0, 0.7, 1.7, 0.1, 2.85, 1.1, '#fff', { mat: flagM }); B(t, 0.9, -0.7, 0.3, 0.3, 0, 1, '#7a5230', { tex: 'bark' }); B(t, 0.9, -0.7, 1.5, 1.5, 0.9, 1.2, '#4fae47', { tex: 'leaf' }); B(t, 0.6, 1, 1.2, 0.36, 0.16, 0.3, '#a87645');
@@ -248,6 +249,8 @@ function valley() {
 
   // ---- the town, seen from close by. The family now stands at its own home ---------------------------------------------------------------
   const wet = (q) => SITES[site][q.i][1] < HIGH;
+  // Florence's sentence about the town. If the child left homes at the foot of the hill, below the line of mud, she says so
+  s.afterFor = (i) => (i === 2 && homes.some(wet) ? words.afterHillLow : AFTER[i]);
   function settle(pick) { if (s.closeBreak) s.closeBreak(); if (s.lineSign) s.lineSign.hide = true; talk.hide = true; famSign.hide = true; s.still = false; kid.visible = mum.visible = dad.visible = false; brolly.visible = false; homes.forEach((q) => { q.light(true); q.folk.visible = true; }); }
   s.town = async (pick) => { const me = run; settle(pick); toWeather(0.05, 1, 1.5); await glide(TOWN[pick], 2.6); if (me !== run) return; chime(); famAt(); };
   // "Try another plan": the same homes stand on the other land, and the rain falls on them
@@ -261,11 +264,11 @@ function valley() {
   const calm = (sec) => { swapN++; raining = 0; rain.visible = false; rainSound(0, 1); riverSound(0.2, 2); toLevel(0, sec); toWeather(0.05, 1, sec); homes.forEach((q) => { q.folk.visible = true; q.light(true); }); };
 
   // ---- the recap: a tap on the place that stayed dry. Any answer goes on ----------------------------------------------------------------
-  s.recap = (answer) => { s.noPets = true; calm(1.4); glide(V0, 1.6); let open = true; const signs = [];
+  s.recap = (answer) => { s.noPets = true; famSign.hide = true; calm(1.4); glide(V0, 1.6); let open = true; const signs = [];
     s.spot = (name, i) => [MID[i][0], MID[i][1] + 1, MID[i][2]];
     MID.forEach(([x, y, z], i) => { const go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(i === 2 ? 880 : 300, 0.15); if (i === 2) chime(); answer(i === 2); }, pl = plate(s, words.here, [x, y + (i === 2 ? 6 : i === 1 ? 2.8 : 5), z], 'tap'); signs.push(pl); pl.el.onclick = go;
       hitBox(s, g, x, y - 1, z, i === 2 ? 30 : 22, 7, i === 2 ? 16 : 13, () => open, go); }); };
-  s.evening = () => { calm(2); const v = TOWN[site]; glide({ eye: [v.eye[0] + 2.5, v.eye[1] - 1.2, v.eye[2] - 2.5], at: v.at, fov: v.fov - 6 }, 4); };
+  s.evening = () => { calm(2); famAt(); const v = TOWN[site]; glide({ eye: [v.eye[0] + 2.5, v.eye[1] - 1.2, v.eye[2] - 2.5], at: v.at, fov: v.fov - 6 }, 4); };
 
   // ---- every picture ------------------------------------------------------------------------------------------------------------------------
   s.tick = (t, dt) => {
@@ -281,5 +284,5 @@ function valley() {
 
 // ---- 4. hand it all to the kit ---------------------------------------------------------------------------------------------------------
 runLevel({ place: { number: 1, town: 'Eco Town', level: 'Land' }, words, plans, results, evidence: river.el, scene: valley,
-  after: (i) => AFTER[i],
+  after: (i, s) => s.afterFor(i),
   ends: (pick, s) => [{ step: 'Evening in the valley', say: [words.end], go: () => s.evening() }] });
