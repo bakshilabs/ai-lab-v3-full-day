@@ -70,7 +70,7 @@ const K = { morning: { sky: ['#4f8fe0', '#bcd6ee', '#ffe3c2'], u: 0.14, sunP: 2.
   night: { sky: ['#060a22', '#121a48', '#2a3470'], u: 1.2, sunP: 0, sunC: '#ff8f4a', hemi: 0.66, n: 1 }, nightB: { sky: ['#060a22', '#121a48', '#2a3470'], u: -0.14, sunP: 0, sunC: '#ffb48c', hemi: 0.66, n: 1 },
   dawn: { sky: ['#3a4c9c', '#e99aa6', '#ffcf9a'], u: 0.055, sunP: 1.3, sunC: '#ffb48c', hemi: 0.88, n: 0.5 } };
 const HY = 5.65, STRIPES = ['#e0503a', '#3f78b5', '#2e9b5a', '#8a5fc2'], CX = [-26, 0, 26], HX = [-2.6, 2.6, 7.8, 0, 5.2, 10.4], WIDE = { eye: [0, 9.6, 37], at: [0, 7.6, -22], fov: 44 }, CARDS = { eye: [0, 10.4, 37], at: [0, -1.5, -22], fov: 44 };
-const playCam = (h) => ({ eye: [CX[h] * 0.62 + 1, 10.5, 15], at: [CX[h] + 2.4, 9.4, -26], fov: 46 });
+const playCam = (h) => ({ eye: [CX[h] * 0.8 + 1.5, 9.6, 3], at: [CX[h] + 2.4, 8.4, -26], fov: 46 });
 const c0 = new THREE.Color(), c1 = new THREE.Color(), V = (a) => new THREE.Vector3(...a);
 const BEAD = new THREE.BoxGeometry(0.52, 0.52, 0.52), glowM = (hex, k) => new THREE.MeshBasicMaterial({ color: hot(hex, k), fog: false });
 
@@ -177,7 +177,7 @@ function hilltop() {
   const person = (who, x, z, o, scarf) => { const p = fig(fam, x, 0.02, z, { ...FAMILY[who], ...o }); B(p, 0, 0.02, 0.62, 0.4, 1.06, 0.14, scarf); const tail = group(p, 0.3, 1.1, -0.18); B(tail, 0.28, 0, 0.56, 0.1, -0.06, 0.16, scarf); scarves.push(tail); return p; };
   const kid = person(0, -2.5, 0.9, { turn: -0.75, arms: ['up', 'down'], pack: '#ffd257' }, '#ffd257'); person(1, 0.1, 0.2, { turn: -1.05, arms: ['down', 'up'] }, '#e0503a'); person(2, 1.6, 0.9, { turn: -0.5, head: -0.5 }, '#ffffff');
   const famPlate = plate(s, W.family, [4.4, HY + 2.9, 29.6], 'on');
-  const kite = group(g, -5.4, 15.2, 16); { const d = group(kite); d.rotation.z = Math.PI / 4; B(d, 0, 0, 1.9, 0.12, -0.95, 1.9, '#e0503a', { raw: true }); B(d, 0, 0.07, 0.95, 0.06, -0.95, 0.95, '#ffd257', { raw: true, shadow: false }); }
+  const kite = group(g, -5.4, 13.8, 16); { const d = group(kite); d.rotation.z = Math.PI / 4; B(d, 0, 0, 1.9, 0.12, -0.95, 1.9, '#e0503a', { raw: true }); B(d, 0, 0.07, 0.95, 0.06, -0.95, 0.95, '#ffd257', { raw: true, shadow: false }); }
   const tails = [0, 1, 2, 3].map((k) => B(kite, -0.5 - k * 0.55, 0, 0.42, 0.08, -1.7 - k * 0.42, 0.26, ['#ffd257', '#3f78b5', '#ffd257', '#2e9b5a'][k], { raw: true, shadow: false }));
   const stringM = M('#f7f3e8'); let string = null; const hand = [3.9 - 2.5 - 0.28, HY + 1.72, 29.2 + 0.9 + 0.2];
   const walkers = CX.flatMap((cx, h) => [0, 1].map((j) => { const p = fig(g, cx + 14 - j * 28, 0.06, -14.4, { k: 1.4, ...FAMILY[(h + j) % 3], shirt: SHIRTS[(h * 2 + j) % 6], turn: j ? 1.5 : -1.5, pack: j ? '#ffd257' : null }); p.visible = false; return { p, x0: cx + 14 - j * 28, x1: cx + (j ? -3.6 : 6.8) }; }));
@@ -209,7 +209,7 @@ function hilltop() {
   // ---- the play break: place the parts, then run one winter day by hand ---------------------------------------------------------------
   s.playBreak = async (pick, api) => { const me = run, h = pick, c = CFG[pick], cx = CX[h], hs = homes[h], barn = barns[h], nT = TURBS[pick], nR = ROOFS[pick], alive = () => me === run;
     s.playing = true; setTags(false); geese.visible = false; setMoon(null); s.made[pick] = { turbs: [], roofs: [] }; equip([-1, -1, -1].map((_, j) => (j === h ? pick : -1))); setCount(h, 0); for (const row of homes) for (const q of row) { q.lit = false; q.fed = false; } hs.forEach((q) => { q.pip.visible = true; }); const made = s.made[pick]; flows();
-    const from = s.last; glide(playCam(h), 1.8); await tw(1.8, (k) => { if (k < 0.5) look(from[0], from[1], from[2] + (1 - from[2]) * k * 2, from[3]); else look(K.dawn, K.morning, k * 2 - 1); }); if (!alive()) return; setArc({ c: cx * 2.1 + 6, w: 66, top: 44 }, false); look(K.morning, K.morning, 0);
+    const from = s.last; glide(playCam(h), 1.8); await tw(1.8, (k) => { if (k < 0.5) look(from[0], from[1], from[2] + (1 - from[2]) * k * 2, from[3]); else look(K.dawn, K.morning, k * 2 - 1); }); if (!alive()) return; setArc({ c: cx * 0.8 + 1.5 + (cx * 0.2 + 0.9) * 5.3, w: 60, top: 46 }, false); look(K.morning, K.morning, 0);
     let phase = 'setup', sel = nT ? 'turb' : 'roof', step = 0, busy = true, spare = [], sent = 0; const left = { turb: nT, roof: nR }, spots = { turb: [], roof: [] }, T = pick === 1 ? ridgeT : knollT;
     // the tray: the parts to place and the colour of the stripe; later the numbers of the day
     const partBtn = (id) => { const b = document.createElement('button'); b.className = 'part'; b.onclick = () => { if (left[id] && phase === 'setup') { sel = id; drawTray(); } }; return b; }, pb = { turb: partBtn('turb'), roof: partBtn('roof') };
@@ -276,7 +276,7 @@ function hilltop() {
     for (const h of [0, 1, 2]) { lightUp(h, true); paint(); beep(640 + h * 60, 0.06); await wait(0.35); if (me !== run) return; } await tw(2.2, (k) => { look(K.dusk, K.night, k * 0.55); flows(); }); if (CFG[pick].battery && pick === 2) for (const h of [0, 1, 2]) setCount(h, 4); flows(); };
   s.swap = (pick) => { cleanUp(); settle(pick); look(K.dusk, K.night, 0.55); if (s.ham.includes(1)) s.flyGeese(9); };
   // the recap is a tap on the town. Any answer goes on
-  s.recap = (answer) => { const pick = s.ham[0], c = CFG[pick], right = c.off ? 'none' : pick === 0 ? 'none' : c.battery && pick === 2 ? 'bat' : 'turb', spots = []; let open = true; const signs = [];
+  s.recap = (answer) => { barns.forEach((b) => { b.num.hide = true; }); const pick = s.ham[0], c = CFG[pick], right = c.off ? 'none' : pick === 0 ? 'none' : c.battery && pick === 2 ? 'bat' : 'turb', spots = []; let open = true; const signs = [];
     if (pick !== 1) spots.push(['roof', [homes[1][4].x, homes[1][4].y + 6.3, homes[1][4].z]]); if (pick === 1) spots.push(['turb', [0, 24, -66]]); if (pick === 2) spots.push(['turb', [38, 17.5, -50]]); if (c.battery) spots.push(['bat', [barns[1].x, 6.4, barns[1].z]]);
     s.spot = (name, j) => { const q = spots[j][1]; return [q[0], q[1] - 1.5, q[2]]; }; s.recapN = spots.length;
     spots.forEach(([id, p]) => { const pl = plate(s, W.recap[id], p, 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; const ok = id === right; beep(ok ? 880 : 300, 0.15); W.recapYes = right === 'bat' ? W.recapBat : W.recapWind; W.recapNo = right === 'none' ? W.recapNone : right === 'bat' ? W.recapBatNo : W.recapWindNo; answer(ok); }; signs.push(pl); pl.el.onclick = go; hitBox(s, g, p[0], p[1] - 4, p[2], 8, 5, 5, () => open, go); }); };
@@ -285,7 +285,7 @@ function hilltop() {
 
   // ---- every picture: the wind in the kite and the scarves, the turbines, the beads, the geese's wings ----
   s.tick = (t, dt) => { for (const T of [ridgeT, knollT, [near]]) for (const q of T) if (q.g.visible) q.rotor.rotation.z -= dt * (q === near ? 0.9 : 1.7 + 0.5 * q.k);
-    kite.position.set(-5.4 + Math.sin(t * 0.9) * 0.7, 15.2 + Math.sin(t * 1.3) * 0.45, 16); kite.rotation.z = Math.sin(t * 1.7) * 0.14; tails.forEach((m, k) => { m.position.y = -1.7 - k * 0.42 + Math.sin(t * 6 + k) * 0.12; }); if (string) g.remove(string); string = rod(g, hand, [kite.position.x, kite.position.y - 0.9, kite.position.z], 0.05, '#fff', { mat: stringM }); string.castShadow = false;
+    kite.position.set(-5.4 + Math.sin(t * 0.9) * 0.7, 13.8 + Math.sin(t * 1.3) * 0.45, 16); kite.rotation.z = Math.sin(t * 1.7) * 0.14; tails.forEach((m, k) => { m.position.y = -1.7 - k * 0.42 + Math.sin(t * 6 + k) * 0.12; }); if (string) g.remove(string); string = rod(g, hand, [kite.position.x, kite.position.y - 0.9, kite.position.z], 0.05, '#fff', { mat: stringM }); string.castShadow = false;
     scarves.forEach((m, k) => { m.rotation.y = Math.sin(t * 7 + k * 2) * 0.5; m.rotation.z = Math.sin(t * 5 + k) * 0.25; }); fam.position.y = HY + (s.cheer ? Math.abs(Math.sin(t * 5)) * 0.22 : 0); kid.position.y = 0.02 + Math.abs(Math.sin(t * 2.2)) * 0.05;
     for (const st of streams) { const L = st.len[st.len.length - 1], n = st.beads.length; st.beads.forEach((m, i) => { const vis = st.on > 0 && i / n < st.on; m.visible = vis; if (!vis) return; let d = ((t * st.speed / L + i / n) % 1) * L, k = 1; while (k < st.len.length - 1 && st.len[k] < d) k++; m.position.lerpVectors(st.P[k - 1], st.P[k], (d - st.len[k - 1]) / (st.len[k] - st.len[k - 1])); }); }
     if (geese.visible) birds.forEach((b, k) => b.wings.forEach(({ w, sd }) => { w.rotation.x = sd * Math.sin(t * 7 + k) * 0.5; })); if (mark.visible) mark.scale.setScalar(1 + Math.sin(t * 4) * 0.08);
