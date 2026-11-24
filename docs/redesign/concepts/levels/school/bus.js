@@ -27,7 +27,7 @@ const W = {   // every word here is a placeholder. Florence says one short sente
 
 // cfg: ids are the children of this bus in the order they are picked up, other are the children of the bus from the other end, cars are the children who are driven
 export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ? 3 : 2, gates = []; for (let j = 0; j < nb; j++) gates.push(3 + 6 * j); const xf = 3 + 6 * nb; for (let j = 0; j < n - nb; j++) gates.push(xf + 19 + 6 * j);
-  const xc = gates[n - 1] + 5, xs = xc + 11, L = xs + 30, c = cfg.cars.length, m = cfg.other.length, me = run;
+  const xc = gates[n - 1] + 1.3 * n + 5.6,   /* the road is well beyond the place where the teacher stops for the last friend, so nobody stands on it */ xs = xc + 11, L = xs + 30, c = cfg.cars.length, m = cfg.other.length, me = run;
   const b = newScene(56, { ...LIGHT, tx: L / 2 - 4, sun: [-14, 36, 30] }), g = b.g, G = (hex) => tileMat('grass', hex);
   // ---- the ground, the river behind the camera, the path and the land behind ----
   texBox(g, L / 2, -46, L + 160, 108, -1, 1, G(GRASS), 3, 3); B(g, L / 2, 38, L + 160, 60, -1.3, 1.05, '#2b7fd8'); texBox(g, L / 2, 0, L + 80, 1.8, 0, 0.1, tileMat('pave', '#f3dfae'), 0.9, 0.9);
@@ -48,7 +48,8 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
     else toy(fig(g, gx + 1.1, 0.1, -3.2, { k: 1.28, shirt: SHIRTS[(id + 2) % 6], skin: SKIN[(id + 1) % 4], hair: HAIR[id % 5], long: id % 2 === 0, turn: 0.1, arms: ['down', 'up'] }), 1.2, 2.4, (o) => { hop(o); beep(660, 0.1); });
     const mk = group(g, gx, 0, -1.6); glowMarks(place(mk, 0, 0, 2.1, 2.1, 0.1)); const ar = group(mk, 0, 2.5, 0); B(ar, 0, 0, 0.5, 0.5, 0.3, 0.5, '#ffdf3d', { unlit: true, raw: true, shadow: false }); B(ar, 0, 0, 0.26, 0.26, 0, 0.3, '#ffdf3d', { unlit: true, raw: true, shadow: false }); glowMarks(ar); mk.arrow = ar; mk.visible = false; marks.push(mk);
     hitBox(s, g, gx, 0, -1.6, 2.6, 3.4, 2.6, () => want === 'friend' && at === j, () => answer()); });
-  fence(g, -12, xf - 1.4, -2.5, gates); fence(g, xf + 16.6, xc - 0.9, -2.5, gates); for (let k = 0; k < 4; k++) { home(g, -6 - k * 6.2, -8.6, k + 3).scale.setScalar(1.5); tree(g, -9 - k * 6.2, -5.6, 5, AUTUMN[k % 5]); }
+  fence(g, -12, xf - 1.4, -2.5, gates); fence(g, xf + 16.6, xc - 0.9, -2.5, gates); for (let x = gates[n - 1] + 6.4, k = 0; x < xc - 2.5; x += 3.6, k++) tree(g, x, -5.6 - (k % 2) * 1.4, 4.4 + (k % 3) * 0.7, AUTUMN[(k * 2) % 5]);
+  for (let k = 0; k < 4; k++) { home(g, -6 - k * 6.2, -8.6, k + 3).scale.setScalar(1.5); tree(g, -9 - k * 6.2, -5.6, 5, AUTUMN[k % 5]); }
   // ---- the fork: one way goes through the orchard, the other goes over the footbridge by the duck pond. Both are good ----
   const slabs = (pts) => { for (let i = 0; i < pts.length - 1; i++) { const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], len = Math.hypot(x1 - x0, z1 - z0), nn = Math.ceil(len / 0.95); for (let k = 0; k <= nn; k++) texBox(g, x0 + (x1 - x0) * k / nn, z0 + (z1 - z0) * k / nn, 1.5, 1.5, 0, 0.09, tileMat('pave', '#f3dfae'), 0.75, 0.75); } };
   slabs([[xf + 0.5, 0], [xf + 3.5, -4.6], [xf + 12.5, -4.6], [xf + 15.5, 0]]); slabs([[xf + 0.5, 0], [xf + 3.5, 3.6]]); slabs([[xf + 12.5, 3.6], [xf + 15.5, 0]]);
@@ -116,7 +117,7 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
     grow([[xs - 1.6, 0, 0], [xs, 0, -2.5], [xs + 1.8, 0, -4.8], [xs + 5.6 + GAP * n, 0, -4.8]]); took = true;
     for (let j = nb; j < n; j++) { await stopAt(j); if (!live()) return; }
     // the crossing: press the button, wait for the green figure, cross with the teacher
-    await walkTo(dOf(xc - 1.3)); if (!live()) return; at = -1; camOn = false; glide({ eye: [xc - 6, 3.4, 12.5], at: [xc - 3.5, 1.5, -2.5], fov: 40 }, 1.6); press.visible = true; api.say(W.cross); await until('button'); if (!live()) return; press.visible = false; beep(440, 0.12); halt = true; carM.color.set('#ff3b30'); api.say(W.waiting);
+    await walkTo(dOf(xc - 2.6)); if (!live()) return; at = -1; camOn = false; glide({ eye: [xc - 6, 3.4, 12.5], at: [xc - 3.5, 1.5, -2.5], fov: 40 }, 1.6); press.visible = true; api.say(W.cross); await until('button'); if (!live()) return; press.visible = false; beep(440, 0.12); halt = true; carM.color.set('#ff3b30'); api.say(W.waiting);
     for (let k = 0; k < 60; k++) { await wait(0.25); if (!live()) return; if (k >= 5 && !vs.some((v) => v.position.z > STOPZ + 0.6 && v.position.z < 9.5)) break; }
     redM.color.set('#5a2320'); greenM.color.copy(hot('#35e06a', 1.5)); beep(880, 0.12); beep(1100, 0.2); api.say(W.green); await wait(0.5);
     yard = null; const wait2 = (async () => { if (!m) return; lead2.visible = true; for (const p of others) p.visible = true; await tw((c2[c2.length - 1] - 8) / 3.5, (k) => { o2 = k; }); })();
