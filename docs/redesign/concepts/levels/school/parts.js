@@ -6,7 +6,7 @@ import { hot } from '../../level-kit/stage.js';
 
 // ---- the weather of this level: a bright, crisp autumn morning with a high clear sky ----------------------------------------------------
 export const SKY = [['#1763c8', '#58a8ee', '#d9eefc'], ['#1763c8', '#58a8ee', '#d9eefc'], ['#1763c8', '#58a8ee', '#d9eefc']];
-export const LIGHT = { skies: SKY, haze: 0.0042, sunColour: '#fff2d6', sunPower: 3.5, skyLight: '#dbe9ff', groundLight: '#e9c88e', lightPower: 1.35 };
+export const LIGHT = { skies: SKY, haze: 0.0026, sunColour: '#fff2d6', sunPower: 3.5, skyLight: '#dbe9ff', groundLight: '#e9c88e', lightPower: 1.35 };
 export const AUTUMN = ['#f08a24', '#d9472b', '#f2b632', '#e2662a', '#c9a227', '#7fae3c'];
 export const GRASS = '#86bf4c', INK = '#1f2a44';
 

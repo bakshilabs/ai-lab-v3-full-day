@@ -17,12 +17,12 @@ canvas.addEventListener('pointermove', (e) => { if (!drag || !ROPE) return; cons
 addEventListener('pointerup', () => { if (drag && ROPE && ROPE.can()) ROPE.pull(0); drag = null; });
 
 const bell = () => { beep(830, 1.5, 'sine', 0.13); beep(1245, 1.1, 'sine', 0.06); beep(1660, 0.7, 'sine', 0.03); };
-const W = {   // every word here is a placeholder
-  colour: ['This is a walking bus. A teacher and a line of children walk to school together.', 'Choose a colour for the flag and the vests. Then press the yellow button.'], go: 'Set off', swatch: 'Flag and vests',
-  friend: 'A friend is waiting at the gate with a grown-up. Click the friend to join the walking bus.', family: 'Your family is waiting at the gate. Click the child to join the walking bus.', joined: 'The line is getting longer.',
-  fork: 'There are two good ways to school. Click the way you want to take.', ways: ['Through the orchard', 'Over the footbridge'],
-  cross: 'The path crosses a road here. Click the button on the crossing, and wait for the green figure.', waiting: 'The red figure is showing. Everyone waits with the teacher.', green: 'The green figure is showing, and the road is clear. The walking bus crosses with the teacher.',
-  board: 'Every child hangs a badge on the board. A shoe means the child walked. A car means the child was driven.', rope: 'Drag the bell rope down to ring the school bell.',
+const W = {   // every word here is a placeholder. Florence says one short sentence for each step
+  colour: ['This is a walking bus. Choose a colour for the flag and the vests, and then set off.'], go: 'Set off', swatch: 'Flag and vests',
+  friend: 'A friend is waiting at the gate. Click the friend.', family: 'Your family is waiting at the gate. Click the child.', joined: (k, n) => (k === n ? 'Everyone is on the walking bus.' : `${k} of ${n} friends are on the walking bus.`),
+  fork: 'Two good ways lead to school. Click the way you want.', ways: ['Through the orchard', 'Over the footbridge'], took: ['There is an apple for everyone in the orchard.', 'The ducks are following the walking bus.'],
+  cross: 'Click the button on the crossing.', waiting: 'The red figure is showing. Everyone waits with the teacher.', green: 'The green figure is showing. The bus crosses with the teacher.',
+  board: 'Every child hangs a badge. A shoe means walked, and a car means driven.', rope: 'Drag the bell rope down to ring the bell.', end: ['Everyone has an apple from the orchard.', 'The ducks followed you all the way to school.'],
   skip: 'Florence, please walk us there' };
 
 // cfg: ids are the children of this bus in the order they are picked up, other are the children of the bus from the other end, cars are the children who are driven
@@ -36,28 +36,31 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
   texBox(g, L / 2, -44, L + 200, 14, 0, 7, G('#a3c657'), 4, 4); for (let k = 0; k < (L + 80) / 9; k++) { B(g, -40 + k * 9 + hash(k, 8) * 3, -37.4, 7.4, 1.4, 2.4, 4.6, ['#e9c04e', '#b7c94f', '#c98a4a', '#f0d06a'][k % 4], { tex: 'stripe', shadow: false }); tree(g, -40 + k * 9 + hash(k, 9) * 4, -44, 8 + hash(k, 10) * 4, AUTUMN[k % 5]).position.y = 7; }
   B(g, L / 2, -75, L + 260, 30, 0, 13, '#98b96a', { shadow: false }); B(g, L / 2, -120, L + 400, 30, 0, 22, '#a9c2d2', { shadow: false }); for (let k = 0; k < 6; k++) cloud(g, -50 + k * 44 + hash(k, 3) * 20, 34 + hash(k, 2) * 8, -150, 1.4 + hash(k, 1));
   const blow = leaves(g, 46, { w: 34, size: 0.2, y: 0.2, h: 3.2, z0: -5, zd: 11 });
+  // ---- small things that answer a tap, for a child who looks around: grown-ups hop, ducks quack, an apple drops from a tree ----
+  const toy = (o, w, h, fn) => { hitBox(s, o, 0, 0, 0, w / o.scale.x, h / o.scale.y, w / o.scale.x, () => true, () => fn(o)); return o; }, hop = (o, k = 0.45) => { const y0 = o.userData.y0 ??= o.position.y; tw(0.45, (t) => { o.position.y = y0 + Math.sin(t * Math.PI) * k; }); }, quack = () => { beep(520, 0.07, 'square', 0.04); setTimeout(() => beep(410, 0.1, 'square', 0.04), 90); };
+  const fallen = []; const drop = (x, z) => { const a = B(g, x + (Math.random() - 0.5), z, 0.26, 0.26, 3, 0.26, '#e23b2e', { raw: true }); fallen.push({ a, v: 0 }); beep(300, 0.08); }, falls = (dt) => { for (const f of fallen) { if (f.done) continue; f.v += dt * 14; f.a.position.y -= f.v * dt; if (f.a.position.y < 0.23) { f.a.position.y = 0.23; if (f.v > 2) f.v = -f.v * 0.35; else f.done = true; } } };
   // ---- a home, a gate, a walking bus stop and a waiting friend for every child of the bus ----
   const marks = [], walkers = [], waiting = [];
   gates.forEach((gx, j) => { const id = cfg.ids[j], h = home(g, gx - 0.98, -8.6, id, { farm: cfg.farm }); h.scale.setScalar(1.5); B(g, gx, -4.3, 1.2, 4, 0, 0.06, '#e8d9bd', { shadow: false });
     B(g, gx - 1.5, -2.5, 0.12, 0.12, 0, 2.3, '#fffaf0'); blk(g, gx - 1.5, -2.5, 0.8, 0.1, 2.3, 0.8, '#fff', { mat: flagMat }); tree(g, gx + 3.4, -5.4 - (j % 2), 4.6 + (j % 3) * 0.6, AUTUMN[(j * 2 + 1) % 5]);
-    const w = person(g, { ...KIDS[id], arms: ['up', 'down'], turn: 0.25 }, gx, 0.1, -1.6); waiting.push(w); const p = person(g, { ...KIDS[id], vest: true }); p.visible = false; walkers.push(p);
+    const w = person(g, { ...KIDS[id], arms: ['up', 'down'], turn: 0.25 }, gx, 0.1, -1.6); waiting.push(w); const p = person(g, { ...KIDS[id], vest: true }); p.visible = false; walkers.push(p); p.apple = B(p, 0.42, 0.2, 0.2, 0.2, 0.6, 0.2, '#e23b2e', { raw: true }); p.apple.visible = false;
     if (id === 6) { fig(g, gx + 1.2, 0.1, -3.2, { ...FAMILY[1], turn: 0.1, arms: ['down', 'up'] }); fig(g, gx - 0.4, 0.1, -3.4, { ...FAMILY[2], turn: 0.3, arms: ['up', 'down'] }); }
-    else fig(g, gx + 1.1, 0.1, -3.2, { k: 1.28, shirt: SHIRTS[(id + 2) % 6], skin: SKIN[(id + 1) % 4], hair: HAIR[id % 5], long: id % 2 === 0, turn: 0.1, arms: ['down', 'up'] });
+    else toy(fig(g, gx + 1.1, 0.1, -3.2, { k: 1.28, shirt: SHIRTS[(id + 2) % 6], skin: SKIN[(id + 1) % 4], hair: HAIR[id % 5], long: id % 2 === 0, turn: 0.1, arms: ['down', 'up'] }), 1.2, 2.4, (o) => { hop(o); beep(660, 0.1); });
     const mk = group(g, gx, 0, -1.6); glowMarks(place(mk, 0, 0, 2.1, 2.1, 0.1)); const ar = group(mk, 0, 2.5, 0); B(ar, 0, 0, 0.5, 0.5, 0.3, 0.5, '#ffdf3d', { unlit: true, raw: true, shadow: false }); B(ar, 0, 0, 0.26, 0.26, 0, 0.3, '#ffdf3d', { unlit: true, raw: true, shadow: false }); glowMarks(ar); mk.arrow = ar; mk.visible = false; marks.push(mk);
     hitBox(s, g, gx, 0, -1.6, 2.6, 3.4, 2.6, () => want === 'friend' && at === j, () => answer()); });
   fence(g, -12, xf - 1.4, -2.5, gates); fence(g, xf + 16.6, xc - 0.9, -2.5, gates); for (let k = 0; k < 4; k++) { home(g, -6 - k * 6.2, -8.6, k + 3).scale.setScalar(1.5); tree(g, -9 - k * 6.2, -5.6, 5, AUTUMN[k % 5]); }
   // ---- the fork: one way goes through the orchard, the other goes over the footbridge by the duck pond. Both are good ----
   const slabs = (pts) => { for (let i = 0; i < pts.length - 1; i++) { const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], len = Math.hypot(x1 - x0, z1 - z0), nn = Math.ceil(len / 0.95); for (let k = 0; k <= nn; k++) texBox(g, x0 + (x1 - x0) * k / nn, z0 + (z1 - z0) * k / nn, 1.5, 1.5, 0, 0.09, tileMat('pave', '#f3dfae'), 0.75, 0.75); } };
   slabs([[xf + 0.5, 0], [xf + 3.5, -4.6], [xf + 12.5, -4.6], [xf + 15.5, 0]]); slabs([[xf + 0.5, 0], [xf + 3.5, 3.6]]); slabs([[xf + 12.5, 3.6], [xf + 15.5, 0]]);
-  for (let k = 0; k < 6; k++) appleTree(g, xf + 3 + k * 2.1, -7.6 - (k % 2) * 1.6, 4.8 + (k % 3) * 0.4); appleTree(g, xf + 1.6, -4.4, 3.6); appleTree(g, xf + 14.6, -4.6, 3.8);
+  for (let k = 0; k < 6; k++) toy(appleTree(g, xf + 3 + k * 2.1, -7.6 - (k % 2) * 1.6, 4.8 + (k % 3) * 0.4), 2.6, 5, (o) => { hop(o, 0.12); drop(o.position.x, o.position.z + 1.5); }); appleTree(g, xf + 1.6, -4.4, 3.6); appleTree(g, xf + 14.6, -4.6, 3.8);
   for (const [x, z] of [[xf + 6, -6], [xf + 10, -6.2]]) { B(g, x, z, 0.9, 0.7, 0, 0.5, '#b98a5a', { tex: 'board' }); for (let k = 0; k < 4; k++) B(g, x - 0.25 + (k % 2) * 0.5, z - 0.15 + Math.floor(k / 2) * 0.3, 0.26, 0.26, 0.5, 0.2, '#e23b2e', { raw: true }); }
   B(g, xf + 8, 5.4, 9.4, 6.4, 0.0, 0.05, '#3c8de0', { shadow: false }); B(g, xf + 8, 5.4, 9.8, 6.8, 0, 0.03, '#b79a62', { shadow: false });
   texBox(g, xf + 8, 3.6, 9.4, 1.7, 0.32, 0.14, tileMat('board', '#c79a62'), 0.9, 0.9); for (const x of [xf + 3.4, xf + 12.6]) texBox(g, x, 3.6, 0.7, 1.7, 0.1, 0.2, tileMat('board', '#c79a62'), 0.9, 0.9);
   for (let k = 0; k < 6; k++) { B(g, xf + 3.6 + k * 1.76, 2.66, 0.14, 0.14, 0.4, 0.8, '#8a5a34'); if (k < 5) B(g, xf + 4.48 + k * 1.76, 2.66, 1.76, 0.08, 1.05, 0.1, '#8a5a34', { shadow: false }); }
-  const ducks = [duck(g, xf + 6, 0.05, 5.6, 0.9), duck(g, xf + 9.4, 0.05, 6.4, 0.7), duck(g, xf + 7.6, 0.05, 6.9, 0.55)];
+  const ducks = [duck(g, xf + 6, 0.05, 5.6, 0.9), duck(g, xf + 9.4, 0.05, 6.4, 0.7), duck(g, xf + 7.6, 0.05, 6.9, 0.55)]; for (const q of ducks) toy(q, 1.8, 1.5, (o) => { const k0 = o.userData.k0 ??= o.scale.x; tw(0.45, (t) => o.scale.setScalar(k0 * (1 + Math.sin(t * Math.PI) * 0.6))); quack(); });
   const ways = [[xf + 2.6, -3.2], [xf + 2.6, 2.4]].map(([x, z], i) => { const p = group(g, x, 0, z); glowMarks(place(p, 0, 0, 2.6, 2.2, 0.11)); B(p, -1.3, i ? 0.9 : -0.9, 0.14, 0.14, 0, 2.4, '#fffaf0'); B(p, -0.9, i ? 0.9 : -0.9, 1.1, 0.1, 1.7, 0.7, '#fffaf0');
     if (i) { const d = duck(p, -0.9, 1.85, 0.98, 0.5); d.rotation.y = 0; } else { B(p, -0.9, -0.84, 0.4, 0.06, 1.85, 0.4, '#e23b2e', { raw: true }); B(p, -0.86, -0.84, 0.1, 0.06, 2.25, 0.12, '#2e9b5a', { raw: true }); }
-    p.visible = false; const sign = plate(s, W.ways[i], [x, 3.3, z], 'tap'); sign.hide = true; sign.el.onclick = () => { if (want === 'fork') { forkPick = i; answer(); } }; hitBox(s, g, x, 0, z, 3.4, 3, 3, () => want === 'fork', () => { forkPick = i; answer(); }); return { p, sign, at: [x, 0.6, z] }; });
+    p.visible = false; const sign = plate(s, W.ways[i], [x + (i ? 1.2 : -1.2), i ? 2.6 : 5.2, z], 'tap'); sign.hide = true; sign.el.onclick = () => { if (want === 'fork') { forkPick = i; answer(); } }; hitBox(s, g, x, 0, z, 3.4, 3, 3, () => want === 'fork', () => { forkPick = i; answer(); }); return { p, sign, at: [x, 0.6, z] }; });
   // ---- the crossing, with a button, a red figure and a green figure. Cars wait behind the line while the bus crosses ----
   B(g, xc + 2, -40, 4, 96, 0, 0.06, '#8d9299'); for (let z = -84; z < -4; z += 3) B(g, xc + 2, z, 0.14, 1.3, 0.06, 0.02, '#e9e6dc', { shadow: false }); B(g, xc + 2, 0, 4, 2.2, 0.06, 0.03, '#8d9299', { shadow: false });
   for (let k = 0; k < 5; k++) B(g, xc + 0.4 + k * 0.8, 0, 0.46, 2.1, 0.09, 0.03, '#fffdf4', { unlit: true, raw: true, shadow: false }); B(g, xc + 2, -2.2, 3.6, 0.3, 0.06, 0.03, '#fffdf4', { shadow: false });
@@ -87,12 +90,14 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
   const pts = [[-4, 0, 0], [xf + 0.5, 0, 0]], cum = [0]; const grow = (more) => { for (const p of more) { const a = pts[pts.length - 1]; pts.push(p); cum.push(cum[cum.length - 1] + Math.hypot(p[0] - a[0], p[2] - a[2])); } }; cum.push(xf + 4.5);
   const pos = (d) => { d = Math.max(0, Math.min(cum[cum.length - 1], d)); let i = 0; while (i < cum.length - 2 && cum[i + 1] < d) i++; const a = pts[i], q = pts[i + 1], k = (d - cum[i]) / Math.max(0.001, cum[i + 1] - cum[i]); return { x: a[0] + (q[0] - a[0]) * k, y: a[1] + (q[1] - a[1]) * k, z: a[2] + (q[2] - a[2]) * k, turn: Math.atan2(q[0] - a[0], q[2] - a[2]) }; };
   const dOf = (x) => { for (let i = pts.length - 2; i >= 0; i--) if (pts[i][0] <= x) return cum[i] + (cum[i + 1] - cum[i]) * Math.min(1, (x - pts[i][0]) / Math.max(0.001, pts[i + 1][0] - pts[i][0])); return 0; };
-  const GAP = 1.3; let d = dOf(1.2), moving = false, joined = 0, at = -1, want = null, forkPick = 0, auto = false, pending = null, done = false, showSkip = false, started = false, camOn = true, yard = null;
+  const GAP = 1.3; let cheer = 0, took = false, apples = false, said = false, follow = false; let d = dOf(1.2), moving = false, joined = 0, at = -1, want = null, forkPick = 0, auto = false, pending = null, done = false, showSkip = false, started = false, camOn = true, yard = null;
   const answer = () => { want = null; if (pending) pending(); };
   const until = (what) => new Promise((res) => { if (auto) return res(); pending = () => { pending = null; res(); }; want = what; });
   const walkTo = async (to) => { const d0 = d, sec = Math.max(0.3, (to - d0) / 3.3); moving = true; await tw(sec, (k) => { d = d0 + (to - d0) * k; }); moving = false; };
   const poseLine = (t) => { const q = pos(d); lead.position.set(q.x, q.y + 0.1 + (moving ? Math.abs(Math.sin(d * 2.6)) * 0.05 : 0), q.z); lead.rotation.y = moving || !yard ? q.turn : 0.35; lead.stride(d * 2.6, moving ? 1 : 0);
-    for (let j = 0; j < joined; j++) { const p = walkers[j]; if (p.busy) continue; const dj = d - GAP * (j + 1), w = pos(dj); p.position.set(w.x, w.y + 0.1 + (moving ? Math.abs(Math.sin(dj * 2.9 + j)) * 0.06 : 0), w.z); p.rotation.y = moving || !yard ? w.turn : 0.2; p.stride(dj * 2.9 + j, moving ? 1 : 0); } };
+    for (let j = 0; j < joined; j++) { const p = walkers[j]; if (p.busy) continue; const dj = d - GAP * (j + 1), w = pos(dj); p.position.set(w.x, w.y + 0.1 + (moving ? Math.abs(Math.sin(dj * 2.9 + j)) * 0.06 : 0), w.z); p.rotation.y = moving || !yard ? w.turn : 0.2; p.stride(dj * 2.9 + j, moving ? 1 : 0); if (cheer > 0) p.position.y += Math.abs(Math.sin(t * 11 + j)) * 0.25 * cheer;
+      if (took && !forkPick && !p.apple.visible && w.x > xf + 5 + j * 0.3) { p.apple.visible = true; apples = true; beep(700 + j * 60, 0.07); if (!said) { said = true; api.say(W.took[0]); } } }
+    if (took && forkPick && !said && q.x > xf + 9) { said = true; follow = true; quack(); api.say(W.took[1]); } };
 
   // ---- the band: the colours, the button that starts, and Florence's offer after three minutes ----
   const tray = () => { const box = document.createElement('div'), h = document.createElement('div'), sw = document.createElement('div'); h.className = 'sws-h'; h.textContent = W.swatch; sw.className = 'sws four';
@@ -102,13 +107,13 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
   async function play() { const live = () => me === run; s.wants = () => want; s.spot = (name, i = 0) => ({ friend: () => [gates[at], 1.1, -1.6], fork: () => ways[i].at, button: () => [xc - 0.7, 1.1, -1.2], rope: () => ROPE.at() }[name]());
     tw(180, () => {}).then(() => { if (live() && !done) { showSkip = true; tray(); } });
     api.say(W.colour); tray(); await until('go'); if (!live()) return; started = true; tray(); chime();
-    const stopAt = async (j) => { await walkTo(dOf(gates[j]) + GAP * (j + 1) + 0.1); if (!live()) return; at = j; marks[j].visible = true; api.say(cfg.ids[j] === 6 ? W.family : W.friend); await until('friend'); if (!live()) return; marks[j].visible = false; beep(620 + j * 60, 0.1);
-      const p = walkers[j], w0 = waiting[j], to = pos(d - GAP * (j + 1)); w0.visible = false; p.visible = true; p.busy = true; joined = j + 1; await tw(0.6, (k) => { const e = ease(k); p.position.set(gates[j] + (to.x - gates[j]) * e, 0.1 + Math.sin(k * Math.PI) * 0.5, -1.6 + (to.z + 1.6) * e); p.rotation.y = 0.25 + (to.turn - 0.25) * e; }); p.busy = false; chime(); api.say(W.joined); await wait(0.25); };
+    const stopAt = async (j) => { await walkTo(dOf(gates[j]) + GAP * (j + 1) + 1.7); if (!live()) return; at = j; marks[j].visible = true; api.say(cfg.ids[j] === 6 ? W.family : W.friend); await until('friend'); if (!live()) return; marks[j].visible = false; beep(620 + j * 60, 0.1);
+      const p = walkers[j], w0 = waiting[j], to = pos(d - GAP * (j + 1)); w0.visible = false; p.visible = true; p.busy = true; joined = j + 1; const hopH = [0.5, 0.3, 0.75, 0.4, 0.3, 0.9][j % 6], spin = [0, 1, 0, -1, 0, 2][j % 6]; beep([523, 587, 659, 698, 784, 880][j % 6], 0.18); await tw(0.7, (k) => { const e = ease(k); p.position.set(gates[j] + (to.x - gates[j]) * e, 0.1 + Math.abs(Math.sin(k * Math.PI * (j % 3 === 2 ? 2 : 1))) * hopH, -1.6 + (to.z + 1.6) * e); p.rotation.y = 0.25 + (to.turn - 0.25) * e + spin * Math.PI * 2 * e; }); p.busy = false; if (apples) p.apple.visible = true; if (j % 2 || j === n - 1) { cheer = 1; chime(); } api.say(W.joined(j + 1, n)); await wait(0.2); };
     for (let j = 0; j < nb; j++) { await stopAt(j); if (!live()) return; }
     // the fork
-    await walkTo(dOf(xf - 0.4)); if (!live()) return; for (const w of ways) { w.p.visible = true; w.sign.hide = false; } api.say(W.fork); await until('fork'); if (!live()) return; for (const w of ways) { w.p.visible = false; w.sign.hide = true; } beep(700, 0.1);
+    await walkTo(dOf(xf - 0.4)); if (!live()) return; camOn = false; glide({ eye: [xf - 5.5, 3.8, 13], at: [xf + 3.2, 1.0, 0.2], fov: 44 }, 1.4); for (const w of ways) { w.p.visible = true; w.sign.hide = false; } api.say(W.fork); await until('fork'); if (!live()) return; for (const w of ways) { w.p.visible = false; w.sign.hide = true; } beep(700, 0.1); camOn = true;
     grow(forkPick ? [[xf + 3.5, 0, 3.6], [xf + 4.2, 0.36, 3.6], [xf + 11.8, 0.36, 3.6], [xf + 12.5, 0, 3.6], [xf + 15.5, 0, 0]] : [[xf + 3.5, 0, -4.6], [xf + 12.5, 0, -4.6], [xf + 15.5, 0, 0]]);
-    grow([[xs - 1.6, 0, 0], [xs, 0, -2.5], [xs + 1.8, 0, -4.8], [xs + 5.6 + GAP * n, 0, -4.8]]); api.say(W.joined);
+    grow([[xs - 1.6, 0, 0], [xs, 0, -2.5], [xs + 1.8, 0, -4.8], [xs + 5.6 + GAP * n, 0, -4.8]]); took = true;
     for (let j = nb; j < n; j++) { await stopAt(j); if (!live()) return; }
     // the crossing: press the button, wait for the green figure, cross with the teacher
     await walkTo(dOf(xc - 1.3)); if (!live()) return; at = -1; camOn = false; glide({ eye: [xc - 4.5, 3.1, 11.4], at: [xc + 0.6, 1.5, -2.5], fov: 40 }, 1.6); press.visible = true; api.say(W.cross); await until('button'); if (!live()) return; press.visible = false; beep(440, 0.12); halt = true; carM.color.set('#ff3b30'); api.say(W.waiting);
@@ -128,18 +133,18 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
     glide({ eye: [xs + 10.5, 3.3, 9.4], at: [xs + 8.6, 2.6, -6], fov: 46 }, 2.2);
     await tw(3, (k) => { const t = k * 3; ROPE.pull(Math.max(0, 1 - t * 2)); bellG.rotation.z = Math.sin(t * 9) * 0.6 * (1 - k); sc.bell.rotation.z = Math.sin(t * 9) * 0.5 * (1 - k); rings.forEach((q, i) => { const r = (t - i * 0.4) * 9; q.visible = r > 0; q.position.set(bx, 2.8, bz + 0.6); q.scale.setScalar(Math.max(0.01, r)); q.material.opacity = 0.9 * Math.max(0, 1 - r / 24); });
       [...walkers, ...others, ...driven].forEach((p, i) => { if (p.visible) p.position.y = 0.1 + Math.abs(Math.sin(t * 6 + i)) * 0.22 * (1 - k); }); }); if (!live()) return; for (const q of rings) q.visible = false; ROPE = null; done = true; tray(); chime();
-    api.done(cfg.doneSay); }
+    api.done([cfg.doneSay, ...(took ? [W.end[forkPick]] : [])]); }
   // the bus from the other end walks in through the second gate and lines up behind
   let o2 = 0; const R2 = [[xs + 46, 0, 0], [xs + 23.4, 0, 0], [xs + 22, 0, -2.5], [xs + 20.5, 0, -6.6], [xs + 4.4 + GAP * c, 0, -6.6]], c2 = [0]; for (let i = 1; i < R2.length; i++) c2.push(c2[i - 1] + Math.hypot(R2[i][0] - R2[i - 1][0], R2[i][2] - R2[i - 1][2]));
   const pos2 = (dd) => { dd = Math.max(0, Math.min(c2[c2.length - 1], dd)); let i = 0; while (i < c2.length - 2 && c2[i + 1] < dd) i++; const a = R2[i], q = R2[i + 1], k = (dd - c2[i]) / (c2[i + 1] - c2[i]); return { x: a[0] + (q[0] - a[0]) * k, z: a[2] + (q[2] - a[2]) * k, turn: Math.atan2(q[0] - a[0], q[2] - a[2]) }; };
   const poseOther = () => { if (!lead2.visible) return; const T = c2[c2.length - 1], d2 = 8 + (T - 8) * o2, mv = o2 < 1; [lead2, ...others].forEach((p, k) => { const dk = d2 - GAP * k, q = pos2(dk); p.position.set(q.x, 0.1 + (mv ? Math.abs(Math.sin(dk * 2.7 + k)) * 0.05 : 0), q.z); p.rotation.y = mv ? q.turn : 0.1; p.stride(dk * 2.7 + k, mv ? 1 : 0); }); };
 
-  let pt = 0; const tick = (t, dt) => { poseLine(t); poseOther(); blow(t, lead.position.x); smoke.tick(dt); ducks.forEach((q, k) => { q.position.x += Math.sin(t * 0.4 + k * 2) * dt * 0.4; q.position.y = 0.05 + Math.sin(t * 2 + k) * 0.02; });
+  let pt = 0; const tick = (t, dt) => { poseLine(t); poseOther(); blow(t, lead.position.x); smoke.tick(dt); cheer = Math.max(0, cheer - dt * 1.2); falls(dt); ducks.forEach((q, k) => { if (follow) { const w = pos(Math.max(dOf(xf + 5), d - GAP * (joined + 1.7 + k * 0.85))), e = 1 - Math.exp(-dt * 4); q.position.x += (w.x - q.position.x) * e; q.position.z += (w.z - q.position.z) * e; q.position.y = w.y + 0.1 + Math.abs(Math.sin(t * 9 + k)) * 0.06; q.rotation.y = w.turn - Math.PI / 2; } else { q.position.x += Math.sin(t * 0.4 + k * 2) * dt * 0.4; q.position.y = 0.05 + Math.sin(t * 2 + k) * 0.02; } });
     for (const [j, w] of waiting.entries()) if (w.visible) w.position.y = 0.1 + Math.abs(Math.sin(t * 3.2 + j)) * 0.12; for (const mk of marks) if (mk.visible) { mk.arrow.position.y = 2.5 + Math.sin(t * 5) * 0.16; mk.arrow.rotation.y = t * 2; }
     sc.flag.rotation.y = Math.sin(t * 5) * 0.25; if (press.visible) press.scale.setScalar(1 + Math.sin(t * 5) * 0.05);
     // the cars come down the side road. When the button has been pressed they stop behind the line, one behind another
     const sorted = [...vs].sort((a, q) => q.position.z - a.position.z); let rank = 0; for (const v of sorted) { let z = v.position.z + dt * (c ? 6 : 4.2); if (halt && v.position.z <= STOPZ + 0.01) { z = Math.min(z, STOPZ - rank * (v.len + 0.6)); rank++; } if (z > 13) z -= 60; v.idle = z === v.position.z; v.position.z = z; }
     pt += dt; if (pt > 0.4) { pt = 0; if (c) for (const v of vs) smoke.emit(v.position.x + 0.3, 0.8, v.position.z - 2.3, 1.1); }
-    if (camOn) { const q = pos(d - GAP * (joined + 1) * 0.5), k = 1 - Math.exp(-dt * 3), to = [[q.x + 4.6, 2.5, 10.6 + Math.max(0, q.z) * 0.5], [q.x - 1.6, 1.5, q.z - 0.6]]; s.eye = s.eye.map((v, i) => v + (to[0][i] - v) * k); s.at = s.at.map((v, i) => v + (to[1][i] - v) * k); } };
-  const q0 = pos(d); Object.assign(s, { eye: [q0.x + 4.6, 2.5, 10.6], at: [q0.x - 1.6, 1.5, -0.6], fov: 36, minAspect: 1.9, drop: 0 });
+    if (camOn) { const q = pos(d - GAP * (joined + 1) * 0.5), k = 1 - Math.exp(-dt * 3), to = [[q.x + 5.4, 3.0, 12.8 + Math.max(0, q.z) * 0.5], [q.x - 1.0, 1.75, q.z - 0.6]]; s.fov += (36 - s.fov) * k; s.eye = s.eye.map((v, i) => v + (to[0][i] - v) * k); s.at = s.at.map((v, i) => v + (to[1][i] - v) * k); } };
+  const q0 = pos(d); Object.assign(s, { eye: [q0.x + 5.4, 3.0, 12.8], at: [q0.x - 1.0, 1.75, -0.6], fov: 36, minAspect: 1.9, drop: 0 });
   return { scene: b.scene, play, tick }; }

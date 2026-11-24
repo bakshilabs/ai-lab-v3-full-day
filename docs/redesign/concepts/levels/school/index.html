@@ -15,7 +15,8 @@
   .plate.board { padding: 6px 8px; } .plate.board .bdg { width: 28px; height: 28px; }
   /* the strips that keep each finished test on the screen, one for each plan */
   .strips { position: absolute; left: 16px; right: 16px; top: 76px; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; pointer-events: none; }
-  .strip { display: flex; flex-direction: column; gap: 5px; padding: 8px 12px 9px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 16px/1.2 var(--ui-body); animation: pop .3s var(--ui-ease-pop) both; }
+  .strips[hidden] { display: none; }
+  .strip { display: flex; flex-direction: column; gap: 5px; padding: 8px 12px 9px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 16px/1.2 var(--ui-body); }
   .strip.wait { background: rgba(255, 250, 240, .55); border-style: dashed; box-shadow: none; color: var(--ui-ink-soft); } .strip.now { background: #fff3c9; }
   .sws.four { grid-template-columns: repeat(4, 42px); }
   @media (max-width: 1100px), (max-height: 700px) { .bdg { width: 19px; height: 19px; } .plate.board .bdg { width: 22px; height: 22px; } .strips { top: 62px; gap: 8px; } .strip { padding: 5px 8px 6px; font-size: 13px; gap: 3px; } .sws.four { grid-template-columns: repeat(4, 32px); } }
