@@ -6,7 +6,7 @@
 // path "look" only takes one picture of each view, for a quick check.
 import { openLevel } from '../../level-kit/record.mjs';
 const [out = 'pictures/run', width = 1440, height = 810, path = 'park', speed = 1] = process.argv.slice(2);
-const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed, query: '&walk=3' }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
+const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed, query: `&walk=${3 * speed}` }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
 const N = 7, cell = (c, row) => c + row * N, pick = (kind) => r.p.evaluate((k) => [...document.querySelectorAll('.tok')].find((b) => b.textContent.startsWith(k)).click(), kind);
 // lays pieces: each step is [kind, column, row]
 const lay = async (steps, every = 0) => { let n = 0, last = ''; for (const [kind, c, row] of steps) { if (kind !== last) { await pick(kind); last = kind; await r.pause(150); } await tap('cell', cell(c, row)); await r.pause(350); if (every && ++n % every === 0) await shot(`play-${String(n).padStart(2, '0')}`, 900); } };
@@ -45,5 +45,5 @@ if (path === 'park') {
 await has('Next'); await shot('play-done', 3000); await click('Next'); await has('Try another plan'); await shot('town', 2500);
 if (path === 'loop') { r.tryStart(); await click('Try another plan'); await shot('other-plans', 900); await r.usePlan(2); await shot('what-changed', 3000); await click('Go back to my first plan'); await shot('first-kept', 2500); r.tryEnd(); }
 await click('Next'); await shot('recap', 2600); await tap('panel', path === 'loop' ? 1 : 2); await shot('recap-answer', 900);
-await click('Next'); await shot('end-walk-1', 3500); await shot('end-walk-2', 4000); await shot('end-shops', 7500);
+await click('Next'); await shot('end-walk-1', 5000 * speed); await shot('end-walk-2', 9000 * speed); await shot('end-shops', 30000 * speed);
 await r.report(); await r.close();

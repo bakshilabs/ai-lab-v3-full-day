@@ -12,7 +12,7 @@ const { N, key, cOf, rOf, cx: X, cz: Z, GATES, SHOP } = BD;
 const DX = [0, -1, 0, 1], DZ = [1, 0, -1, 0];
 const T = (g, x, z, w, d, y, h, kind, hex, U = 1.6, V = 1.6) => texBox(g, x, z, w, d, y, h, tileMat(kind, tone(hex)), U, V);
 const NS = { shadow: false };
-// "?walk=3" makes the opening of the shops and each morning's walk three times as long. It is only for the script that takes the pictures, because the machine that
+// "?walk=3" makes the opening of the shops, each morning's walk and the last walk three times as long. It is only for the script that takes the pictures, because the machine that
 // records draws about one picture a second and would otherwise never catch anybody on the way
 const WALK = +new URLSearchParams(location.search).get('walk') || 1;
 
@@ -324,7 +324,7 @@ export function makePlace(W, hooks) {
   s.walkHome = async (pick) => { const me = run; nb.visible = false; const m = settle(pick); quiet(); famPlate.hide = true; granPlate.hide = true; const h = m.hs[granI], way = (h.joined ? h.way : m.hs[0].way).map(mid), pts = [...way.slice(-5), [0, 10.6], [0.5, 2]], withGran = m.walk[granI];
     const gr = people[granI]; family.rotation.y = 0; family.scale.setScalar(1);
     const tmp = { position: new THREE.Vector3(), rotation: { y: 0 } };
-    await tw(11, (k) => { const u = ease(k); along(tmp, pts, u, 0.1); family.position.copy(tmp.position); family.rotation.y = tmp.rotation.y - 0.5; if (withGran) { const q = { position: gr.position, rotation: gr.rotation }; along(q, pts, Math.min(1, u + 0.07), 0.1); gr.position.x += 1.3; }
+    await tw(11 * WALK, (k) => { const u = ease(k); along(tmp, pts, u, 0.1); family.position.copy(tmp.position); family.rotation.y = tmp.rotation.y - 0.5; if (withGran) { const q = { position: gr.position, rotation: gr.rotation }; along(q, pts, Math.min(1, u + 0.07), 0.1); gr.position.x += 1.3; }
       const L = lengthOf(pts), d = (o) => { const t = { position: new THREE.Vector3(), rotation: { y: 0 } }; along(t, pts, Math.max(0, Math.min(1, u + o / L))); return t.position; }, b0 = d(-7), a0 = d(7);
       s.eye = [b0.x - 0.6, 2.3, b0.z]; s.at = [a0.x, 1.5, a0.z]; s.fov = 50; });
     if (me !== run) return; family.rotation.y = 0; if (withGran) gr.rotation.y = Math.PI / 2; glide(VIEW.shops, 2.4); };

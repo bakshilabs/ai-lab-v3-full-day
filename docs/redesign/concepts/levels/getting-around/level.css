@@ -21,3 +21,4 @@
 .app:has(.over .card) .postcards { display: none; }
 /* the sign that keeps the first result in view stays small, so that it never covers the shops */
 .first { max-width: 340px; font-size: 14px; } .first span { align-items: flex-start; } .first .mbar i { width: 6px; height: 10px; }
+.first span:not(.pl) { display: block; position: relative; padding-right: 30px; } .first span:not(.pl) .mark { position: absolute; right: 0; top: 0; }
