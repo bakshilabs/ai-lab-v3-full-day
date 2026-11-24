@@ -28,40 +28,43 @@ Things that answer a tap: the kite, the family, the tall turbine, the snowman, t
 
 **Two repairs for the whole game.** The corner chip already showed the right number, 5. The last picture no longer says that it is the end of the trial level when the level is held in a frame with `?next=` in its address. Standing alone it still says so.
 
+**Finished by a second designer (24 Nov 2026).** The first designer of this round was stopped before its recordings were done. The second designer ran the level again on three full paths, looked at every picture, and made three more changes. First, the five geese flew so close together that from the side they merged into one long white shape, which looked more like an aeroplane than a flock; they are now spread out and staggered up and down, so that five birds can be counted. Second, the wind farm's play break had been moved so far back that the row of yellow places was a set of thin, faint columns on the horizon and the geese's pond was a tiny smudge; the camera now looks up the slope from nearer with a wider view, so that the six homes, the row of places, the pond and the sky above the ridge are all in the picture and the places are bigger. The flock that waits at dusk now waits fully in the picture and sets off from where it waits. Third, the button that moves time back says "Move the moon back" once the moon is up, because Florence says "Drag the moon" then.
+
 **Small things.** The kite now flies to the right of the family, so that its string no longer crosses the middle neighbourhood. In the play break the top of the sun's path is lower, so that the yellow mark does not go under the title. `dev.mjs` was rewritten as a quick-look script that jumps to one part of the level.
 
 ## How to check and record
 
 `node play.mjs <out> <width> <height> <word 0-2> <word 0-2> <plan 0-2> <second plan or -1> <speed> <extras>` from this folder. The extras are letters: `a` presses "Ask again" once, `b` goes back to the first plan after trying another, `k` keeps the turbines turning for the geese (without it they are stopped), and `m` moves the sun back once.
 
-`node dev.mjs <out> <part> <plan> <word> <word> <width> <height> <options> <speed>` jumps straight to one part (`night`, `place`, `dusk` or `town`). A speed of 0.2 plays the animations five times more slowly. This is the only way to photograph the geese in flight on the recording machine, because a picture takes many seconds to save there and the flight lasts about five seconds.
+`node dev.mjs <out> <part> <plan> <word> <word> <width> <height> <options> <speed>` jumps straight to one part (`night`, `place`, `dusk` or `town`). Put `fx` in the options for the lighting effects and `keep` to keep the turbines turning. A speed of 0.2 or 0.25 plays the animations more slowly. On the recording machine the page draws about one picture every few seconds, so the ordinary recordings almost never catch the geese in the air, and even the slowed quick looks catch them only at the start of a flight. What the recordings do show is the dotted trail, which stays, and the small picture on each card.
 
-The recorded paths are in `pictures/`:
+The recorded paths in `pictures/` were all made on the finished code of this round:
 
-- `wind-sun-battery-1440` is the good plan at 1440 wide (words "the sun and the wind together" and "save the spare power in a battery", plan 3).
-- `solar-then-another-plan-1024` is the solar roofs plan at 1024 wide, then "Try another plan" and "Keep this plan".
-- `wind-farm-ask-again-1024` is the wind farm plan at 1024 wide, with "Ask again" pressed once, "Move the sun back" pressed once, the turbines stopped for the geese, then "Try another plan" and "Go back to my first plan".
-- `geese-slowed-1440` holds a few pictures of the wind farm's night in the test, played five times more slowly so that the geese are caught in flight.
+- `wind-sun-battery-1440` is the good plan at 1440 by 810 (words "the sun and the wind together" and "save the spare power in a battery", plan 3), from the job to the closing picture.
+- `solar-then-another-plan-1024` is the solar roofs plan at 1024 by 640 (words "only the sun" and "save the spare power in a battery"), with a panel put in the shade and moved, the panel on the clock tower, a tap on a dark home, then "Try another plan", the good plan, and "Keep this plan".
+- `wind-farm-ask-again-1024` is the wind farm plan at 1024 by 640 (words "only the wind" and "waste the spare power"), with "Ask again" pressed once, a turbine put beside the pond and moved, "Move the sun back", "Stop the turbines", then "Try another plan", the solar roofs plan, and "Go back to my first plan".
+- `geese-slowed` holds four single pictures: the geese over the wind farm in the test at 1440, the flock waiting at dusk in the play break, and the trail after "Keep them turning" (an arch over the row) and after "Stop the turbines" (a straight line through it).
 
 ## Things learned
 
 - Never put a `//` comment in the middle of one of the long lines of `level.js`: it cuts off the rest of the line. Use `/* */` inside a line.
 - The scratchpad folder is shared with the other designers. Give log files and picture folders a name that nobody else will use.
-- When the machine is busy, opening the page can take more than thirty seconds and the recording then stops at once. Start it again.
-- The times that the recorder prints are far too long when six recordings run at once (it printed 43 and 53 minutes). On a quiet machine the first build's solar path came to 10.6 minutes for a typical child. The level has not been timed again on a quiet machine since the rework.
+- When the machine is busy, opening the page can take more than thirty seconds. Start it again.
+- The times that the recorder prints are far too long when several recordings run at once (40 to 48 minutes this time). On a quiet machine the first build's solar path came to 10.6 minutes for a typical child. The level has not been timed on a quiet machine since the rework.
 
 ## What was run and what was not
 
-Run in this round, with pictures looked at: the good plan at 1440; the solar roofs plan at 1024 with a panel put in the shade and moved, the panel on the clock tower, a tap on a dark home, "Try another plan" and "Keep this plan"; the wind farm plan at 1024 with "Ask again", a turbine put beside the pond and moved, "Move the sun back", "Stop the turbines", "Try another plan" and "Go back to my first plan". "Keep them turning" was run once in a quick look without the lighting effects.
+Run in this round, with every picture looked at: the three full paths listed above; slowed quick looks of the wind farm's night in the test and of the dusk question with "Keep them turning", before and after the changes; and the level opened inside a frame with `?next=` in its address, where it loaded without errors, the corner chip showed 5, and the condition that leaves out "the end of the trial level" was true.
 
-Not run: the level inside the frame of the whole game (the change to the last picture is two lines, but it was not looked at there); the second words "switch the power off at night" with any plan; Florence's offer to finish the day after three minutes; a day that is started with a panel left in the shade; the wind and sun plan without a battery in the play break; any window smaller than 1024 by 640. No sound was heard, because the recordings are silent.
+Not run: the whole game page itself; the last picture of the level while framed (only the condition was checked, not the picture); the second words "switch the power off at night" with any plan; Florence's offer to finish the day after three minutes; a day that is started with a panel left in the shade; the wind and sun plan without a battery in the play break; any window smaller than 1024 by 640. No sound was heard, because the recordings are silent.
 
 ## What is still weak
 
-- On the recording machine the geese in flight are caught only in the slowed pictures. In the ordinary recordings the dotted trail and the small picture on the card are what show them.
-- In the wide view of the town the geese are far away, and they are still small there.
+- The geese in flight are seen only in a moment of each flight on the recording machine. On a classroom computer they should fly smoothly, but nobody has watched that yet.
+- In the wide views of the town the geese are far away and small. The close view of each neighbourhood in the test is where they can be seen well.
 - The choice about the geese at dusk is made with two buttons in the band, not with a tap in the town.
-- The place on the clock tower is small, and in the solar neighbourhood a lamp post stands partly in front of it. It can still be tapped.
-- The tall pines that give the shade hide part of one turbine place in the wind and sun neighbourhood.
-- The dark night of the solar plan is still dark and quiet. That is what the plan does, and the level does not hide it.
+- The place on the clock tower is small, and a lamp post stands partly in front of it in the solar neighbourhood. It can still be tapped.
+- In the wind farm's play break the front homes are cut by the band at the bottom of the picture. Their lit windows can be seen, but their doors cannot.
+- The dark night of the solar plan is still dark and quiet. That is what the plan does, and the level does not hide it, but the child's only things to do there are to tap a dark home and move on.
+- With the words "only the sun" and "save the spare power in a battery", the solar plan has a battery that never fills, because six roofs make only the six beads the homes need. That is true and Florence says so, but a child may wonder why the battery is there.
 - "Try another plan" still has no play break of its own (the kit shows the second plan in the town at once).
