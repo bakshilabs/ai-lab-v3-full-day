@@ -42,4 +42,20 @@ node check.mjs join 1440 810 3         from the start page through all six level
 node check.mjs join 1440 810 3 4       the same, starting at level 4 with levels 1 to 3 remembered as done
 ```
 
-The second command does not play the levels. In each level it jumps straight to the closing pictures with `window.trial.end()`, which exists for this check only. Its pictures prove the way from one level to the next, and not the levels themselves.
+node check.mjs sandbox 1440 810 3      the game inside a sandboxed frame in which the browser refuses to remember anything, as on a published page
+```
+
+The second command does not play the levels. In each level it jumps straight to the closing pictures with `window.trial.end()`, which exists for this check only. Its pictures prove the way from one level to the next, and not the levels themselves. The Homes level cannot draw its closing picture without the home that the child builds in the play break, so the check lets that scene fail quietly, and the picture of the end of Homes is not the real one. The log says so when it happens.
+
+## What works, as checked on 24 November 2026
+
+The whole way was checked in the pre-installed Chromium at 1440 by 810: the start page, level 1 opening from "Start", and then for each of the six levels the last closing picture with "Go on", the town with the new place built, and "Carry on" opening the next level. After level 6 the school is built and the ending follows by itself, then the jobs, then the town with all six places done. The start page also opens when the browser refuses to remember anything, and the game runs inside a sandboxed frame. No request left the folder tree, and no page reported an error. Levels 1 and 2 were checked against commit `69d3266`, and levels 3 to 6, the ending and the sandboxed frame against the files as they stood at commit `73f16c8` and `f2d3cf2`, while four levels were still being finished by other agents. The pictures are in `pictures/start-1440/`, `pictures/join-1440/` and `pictures/sandbox-1440/`.
+
+## What is weak or left to do
+
+- The game has not been played through by hand from the first press to the last, because the check jumps to the end of each level. A level that stops before its last closing picture would stop the game there, although the bar always leads back to the town.
+- Each level still shows its own chip at the top left with a number in it, and some levels show the number of the town (1) there, which sits oddly beside "Level 2 of 6" in the bar. Each level also says on its last picture that it is the end of the trial level. Both belong to the levels, which this folder must not change.
+- Going back to the town with the bar in the middle of a level loses the child's place in that level without asking.
+- The game was looked at only at 1440 by 810. Smaller windows have style rules but were not looked at.
+- The places in the town are the same whatever plan the child chose in a level. A level does not tell the game which plan was chosen, so the mark on the town is "this place is built" and not "this is my plan".
+- The sandboxed check serves every file with a header that lets a frame without an origin load it. The place where the game is published must do the same, or the scripts and fonts will not load there.
