@@ -28,6 +28,23 @@ Things that answer a tap: the kite, the family, the tall turbine, the snowman, t
 
 The two recorded paths are `pictures/wind-sun-battery-1440` (words 2 and 1, plan 2) and `pictures/solar-then-another-plan-1024` (words 0 and 0, plan 0, then plan 2).
 
-## What is left or weak
+- A pine stood in front of the sun's yellow mark in the solar neighbourhood and took its tap, so the solar day could not go past the afternoon. Pines no longer take taps while the mark is showing.
+- The geese's pond in the wind and sun play break was hidden behind the tree of lights and the clock. It is now at the left end of the row of places, where it can be seen (near places 0 and 1).
+- The title of the last card is cleared when another neighbourhood starts to play.
 
-See the end of this file; it is updated after the last recording.
+## Things learned
+
+- Never put a `//` comment in the middle of one of the long lines of `level.js`: it cuts off the rest of the line. A comment of that kind removed the close camera of the look step for a while. Use `/* */` inside a line.
+- Other agents on the shared machine sometimes stop every process called `play.mjs`. Record from a copy with another name (the import of `record.mjs` then needs its full path).
+- When the machine is busy the recorder's shots fall behind the animation, so the pictures of the look step can miss the geese. A separate slow check showed them bending up and over the long row of turbines.
+- The times the recorder prints depend on how busy the machine is. On a quiet machine the solar path with "Try another plan" came to 10.6 minutes for a typical child.
+
+## What is left or weak (after the last recording, 24 Nov 2026)
+
+- With the solar plan the play break is thin: six panels go on six roofs, so the only choices are the stripe colour and moving the sun. It ends with a dark night and Florence's "Try another plan". The wind farm plan has the choice of places and the geese, but no battery to work.
+- The geese are small and dark against the night sky in the test, and small by the pond in the play break.
+- The kite string crosses the middle neighbourhood in the wide view.
+- At night the family in front are dim.
+- The wind farm path (plan 1) and the second words "switch the power off at night" were not recorded in this pass. "Ask again", "Move the sun back", "Go back to my first plan" and Florence's offer to finish the day were not pressed in this pass.
+- No sound was heard: the recordings are silent.
+- `dev.mjs` is out of date and could be removed.
