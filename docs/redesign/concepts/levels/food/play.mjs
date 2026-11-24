@@ -41,7 +41,7 @@ if (P === 2) { await stage('b'); await snap('break-b', 0.3); await tap('b'); awa
 if (P !== 1) { await stage('pick'); await snap('break-ripe', 0.3); for (const [n, i] of SLOT.entries()) { await tap('slot', i); await vwait(0.3); if (n === 2) await snap('break-picking', 0); } await stage('off'); await snap('break-off', 1.2); await snap('break-delivery', 5.4); }
 // the second half: the winter side of the stall, in the way of each plan
 if (P === 1) { await stage('b'); await snap('break-boxes', 2.6); await tap('box', 3); await vwait(1.2); await tap('box', 5); await snap('break-boxes-two-kept', 1.2); await tap('box', 0); await snap('break-boxes-kept', 0.5);
-  await stage('off'); await snap('break-lorry-day-1', 2.2); await snap('break-lorry-day-3', 4.6); await stage('winter'); await snap('break-summer-boxes', 0.2); await stage('c'); await snap('break-snow', 0.4); await tap('c'); await snap('break-cold-store-open', 1);
+  await stage('off'); await snap('break-lorry-day-1', 2.2); await snap('break-lorry-day-3', 4.6); await stage('winter'); await snap('break-summer-boxes', 0.2); await stage('c'); await snap('break-snow', 0.4); await tap('c'); await snap('break-cold-store-open', 2.2);
   await stage('off2'); await snap('break-lorry-winter', 6.5); }
 if (P === 0) { await stage('w-place'); await snap('break-autumn', 0.4); await p.click('[data-crop="cabbage"]'); await snap('break-cover-crop', 0.3); await tap('slot', 5); await snap('break-cover', 0.8); await stage('c'); await snap('break-snow', 0.4); await tap('c'); await snap('break-basket', 0.9);
   await stage('off2'); await snap('break-delivery-winter', 5.4); }

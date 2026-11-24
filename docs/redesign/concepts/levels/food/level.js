@@ -196,7 +196,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
       // winter: the fields are under snow, and the boxes that the child kept come out of the cold store
       api.say(T.turn[1]); s.stage = 'winter'; tw(2.6, (t) => s.lorryAt(-19 - 109 * t, true, true)).then(() => s.lorryAt(-128, true)); s.puffClear(); glide(FARMWINTER, 2.6); await yearTurn(); if (me !== run) return;
       api.say(T.cSay[1]); s.stage = 'c'; await tapOne([16, s.shed[1], s.shed[2] + 0.5], 20, 8, T.c[1], 'c');
-      kept.forEach((j, n) => { const b = boxes[j]; b.visible = true; b.position.set(n * 2.6, 0, 0); b.scale.setScalar(2.6); }); s.coldPile.visible = true; await pop(kept.map((j) => boxes[j])); await wait(0.8); if (me !== run) return;
+      kept.forEach((j, n) => { const b = boxes[j]; b.visible = true; b.position.set(n * 2.6, 0, 0); b.scale.setScalar(2.6); }); s.coldPile.visible = true; const cg = glide({ eye: [25, 37.4, -106], at: [24, 36.9, -131], fov: 38 }, 1.6); await pop(kept.map((j) => boxes[j])); await cg; await wait(1.0); if (me !== run) return;   // close to the shed again, so the boxes that the child kept are big, with the waiting lorry out of the picture
       api.say(T.off2[1]); chime(); s.stage = 'off2'; await tw(0.7, (t) => kept.forEach((j) => boxes[j].scale.setScalar(Math.max(0.01, 2.6 * (1 - t))))); s.coldPile.visible = false;
       lor = lorryRun(8, -128, -19, true); await wait(1.2); await glide(MAIN, 2.4); await lor; if (me !== run) return; s.made[1] = { kind: 'cold', cols: kept.map((j) => bc[j]) }; await carry(1, s.made[1].cols); if (me !== run) return;
       return api.done(T.done[1]); }
