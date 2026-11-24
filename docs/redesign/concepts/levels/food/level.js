@@ -46,7 +46,7 @@ const T = { nearest: 'Nearest to your words', autumnT: 'Autumn comes', winterT: 
   off2: [['The handcart takes one small basket across the square.'], ['The lorry sets off again on the long road.'], ['The cargo bike takes the winter crates across the square.']],
   wave: 'Hello!', glow: 'Warm and light inside',
   ripe: [['Tap each bed to pick the food.'], [], ['The plants are ripe, with no soil and no sunshine. Tap each shelf to pick the food.']],
-  off: [['The handcart takes the food across the square.'], ['The lorry sets off on the long road to the town.'], ['The grower loads the cargo bike.']],
+  off: [['The handcart takes the food across the square.'], ['The lorry sets off on the long road to the town.'], ['The cargo bike takes the food across the square.']],
   done: [['Your stall had full crates in summer. In winter it has one small basket, which you grew under the cover.'], ['Both sides of your stall have cold boxes. All of the food came a long way, and the lorry caused pollution.'], ['Both sides of your stall are full. You grew fresh food in the summer and in the snow.']],
   endT: 'A summer evening', endSay: [['The gardens are full, and the neighbours are picking food for supper.'], ['The lorry from the big farm is on its way with tomorrow\'s food.'], ['The indoor farm glows across the square, with your crops on its shelves.']] };
 
@@ -253,7 +253,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   // the closing picture: a summer evening in the square, with the plan the child chose
   s.evening = (pick) => { const w0 = s.w; settle(pick); s.tags.forEach((t) => { t.hide = true; }); stallsFor(pick);
     tw(1.6, (t) => s.season(0, w0 * (1 - t))).then(() => tw(3, (t) => s.season(0, 0, 0.82 * ease(t)))); if (pick === 1) { s.lorryPlate.el.textContent = T.lorry; s.lorryAt(-128, true); tw(16, (t) => s.lorryAt(-128 + 100 * t)); s.lorryRun = true; }
-    glide({ eye: [[5, 3, 25.5], [0, 3.1, 26], [-5, 3, 25.5]][pick], at: [[-7, 4.2, -12], [0, 6.4, -14], [8, 5.2, -12]][pick], fov: 43 }, 4); };
+    glide({ eye: [[5, 3, 25.5], [0, 3.1, 26], [-1.5, 3.2, 25.5]][pick], at: [[-7, 4.2, -12], [0, 6.4, -14], [8, 5.2, -12]][pick], fov: 43 }, 4); };
 
   // ---- things that answer a tap, for a child to find by accident. They rest during the play break, so that they never take a tap meant for a yellow place ----
   const now = () => performance.now() / 1000, hopOf = (o, t) => { const d = t - (o.userData.hop ?? -9); return d < 0.5 ? Math.sin(d / 0.5 * Math.PI) * 0.6 : 0; }, poke = (x, y, z, w, h, d, fn, can = () => true) => hitBox(s, g, x, y, z, w, h, d, () => !s.inBreak && can(), fn);
