@@ -66,7 +66,7 @@ export function makeHome(parent, o) {
   const doorX = 0.25 * w, doorMat = new THREE.MeshLambertMaterial({ color: o.doorC }), door = group(leaves[1].lg, doorX - w / 2, 0, 0); blk(door, 0, -T / 2, 1.6, T + 0.12, 0, 2.45, '#fff', { mat: doorMat }); blk(door, -0.5, 0.08, 0.18, 0.1, 1.15, 0.18, '#ffd257', { shadow: false, mat: flat('#ffd257') }); door.visible = vis;
   m.door = door; m.doorMat = doorMat; if (!vis) { m.doorMark = group(g, doorX, Y0, d / 2 + 0.2); frame(m.doorMark, 0, 0, 0, 1.9, 2.7, true); m.doorMark.visible = false; }
   // Five places in the front wall each have a small window. A big window can take the place of two of them. Behind each is a shaft of sunlight, which is shown only if the sun reaches that window
-  const shaftM = soft('#fff3a8', 0.15), patchM = flat('#fff3b0');
+  const shaftM = soft('#fff3a8', 0.08), patchM = flat('#fff3b0');
   for (const [x, f] of [[-0.25 * w, 0], [-0.25 * w, 1], [0.25 * w, 1], [-0.25 * w, 2], [0.25 * w, 2]]) { const lf = leaves[x < 0 ? 0 : 1], y = YF[f] - Y0, sm = small(lf, x, y + 1, 1), p = group(lf.lg, x - lf.sx * w / 2, y + 0.55, 0), gm = new THREE.MeshBasicMaterial({ color: GLASS, map: patTex('pane') });
     blk(p, 0, -T / 2, 2.25, T + 0.1, 0, 1.85, '#fbfbf7', { mat: white }); blk(p, 0, -T / 2, 1.9, T + 0.18, 0.17, 1.51, GLASS, { shadow: false, mat: gm }); blk(p, 0, -T / 2, 0.12, T + 0.22, 0.17, 1.51, '#fbfbf7', { shadow: false, mat: white }); p.visible = false;
     const q = { p, gm, sm, f, fy: YF[f], at: [x, YF[f], d / 2 - T - 1.35], c: [x, YF[f] + 1.5, d / 2 + 0.3], on: false };

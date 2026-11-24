@@ -8,7 +8,7 @@ const r = await openLevel({ page: 'concepts/trial/index.html', out, width: W, he
 await shot('job', 1500); await click('Start'); await shot('ask');
 await click(['the sunny side', 'the shady side'][side]); await shot('ask-side'); await click('Ask Florence'); await has('Bring the winter night'); await shot('plans');
 await click('Bring the winter night'); await shot('test-a', 2600); await shot('test-b', 2600); await shot('test-c', 2600); await has('Ask again'); await shot('results', 2600);
-await tap('sample', 1); await shot('look-closer', 2200); await click('Show all three'); await shot('results-again', 1500);
+await until(() => window.trial.cur.samplesReady()); await tap('sample', 1); await shot('look-closer', 2200); await click('Show all three'); await shot('results-again', 1500);
 await r.usePlan(plan); await until(() => document.querySelector('.tok')); await shot('build-0', 900);
 const idle = () => until(() => window.trial.cur.isBusy && !window.trial.cur.isBusy()), put = async (name, i, ms = 500) => { await idle(); await tap(name, i); await pause(ms); await idle(); };
 // the ground floor: the frame, then the walls and the insulation wall by wall (a brick home takes its insulation before its inside wall, and the first timber home has none)
