@@ -67,10 +67,10 @@ const after = (i) => (i === 2 && CFG[2].battery ? W.after2 : `${lightText(i)} ${
 // u is where the sun is on its low winter path, from 0 (rising on the left) to 1 (setting on the right). n is how much of the night has come
 const K = { morning: { sky: ['#4f8fe0', '#bcd6ee', '#ffe3c2'], u: 0.14, sunP: 2.6, sunC: '#ffe0b0', hemi: 1.25, n: 0 }, midday: { sky: ['#3f8fe2', '#a9d2f2', '#f1f1e6'], u: 0.5, sunP: 3.1, sunC: '#fff3dc', hemi: 1.45, n: 0 },
   afternoon: { sky: ['#4078cc', '#c2c6e0', '#ffd49a'], u: 0.84, sunP: 2.9, sunC: '#ffc27a', hemi: 1.15, n: 0 }, late: { sky: ['#3d6cc0', '#d3bfcf', '#ffc680'], u: 0.83, sunP: 2.8, sunC: '#ffb96c', hemi: 1.1, n: 0.05 },
-  sunset: { sky: ['#2c3c86', '#d9836a', '#ffb04a'], u: 0.965, sunP: 1.5, sunC: '#ff8f4a', hemi: 0.9, n: 0.42 }, dusk: { sky: ['#141c56', '#4d4a92', '#d9785e'], u: 1.07, sunP: 0, sunC: '#ff8f4a', hemi: 0.64, n: 0.82 },
-  night: { sky: ['#060a22', '#121a48', '#2a3470'], u: 1.2, sunP: 0, sunC: '#ff8f4a', hemi: 0.66, n: 1 }, nightB: { sky: ['#060a22', '#121a48', '#2a3470'], u: -0.14, sunP: 0, sunC: '#ffb48c', hemi: 0.66, n: 1 },
+  sunset: { sky: ['#2c3c86', '#d9836a', '#ffb04a'], u: 0.965, sunP: 1.5, sunC: '#ff8f4a', hemi: 0.9, n: 0.42 }, dusk: { sky: ['#141c56', '#4d4a92', '#d9785e'], u: 1.07, sunP: 0, sunC: '#ff8f4a', hemi: 0.8, n: 0.82 },
+  night: { sky: ['#060a22', '#121a48', '#2a3470'], u: 1.2, sunP: 0, sunC: '#ff8f4a', hemi: 0.98, n: 1 }, nightB: { sky: ['#060a22', '#121a48', '#2a3470'], u: -0.14, sunP: 0, sunC: '#ffb48c', hemi: 0.98, n: 1 },
   dawn: { sky: ['#3a4c9c', '#e99aa6', '#ffcf9a'], u: 0.055, sunP: 1.3, sunC: '#ffb48c', hemi: 0.88, n: 0.5 } };
-const HY = 5.65, STRIPES = ['#e0503a', '#3f78b5', '#2e9b5a', '#8a5fc2'], CX = [-26, 0, 26], HX = [-2.6, 2.6, 7.8, 0, 5.2, 10.4], WIDE = { eye: [0, 9.6, 37], at: [0, 7.6, -22], fov: 44 }, CARDS = { eye: [0, 12.5, 37], at: [0, -6.5, -22], fov: 44 };
+const HY = 5.65, STRIPES = ['#e0503a', '#3f78b5', '#2e9b5a', '#8a5fc2'], CX = [-26, 0, 26], HX = [-2.6, 2.6, 7.8, 0, 5.2, 10.4], WIDE = { eye: [0, 9.6, 37], at: [0, 7.6, -22], fov: 44 }, CARDS = { eye: [0, 12.5, 37], at: [0, -6.5, -22], fov: 44 }, LOOKC = { eye: [0, 11.5, 37], at: [0, -2.5, -22], fov: 44 };   // LOOKC lifts the town clear of the one card of the look step
 const playCam = (h) => ({ eye: [CX[h] * 0.8 + 1.5, 11, 5], at: [CX[h] + 2.4, 6.6, -26], fov: 46 });
 const c0 = new THREE.Color(), c1 = new THREE.Color(), V = (a) => new THREE.Vector3(...a);
 const BEAD = new THREE.BoxGeometry(0.52, 0.52, 0.52), glowM = (hex, k) => new THREE.MeshBasicMaterial({ color: hot(hex, k), fog: false });
@@ -115,7 +115,7 @@ function hilltop() {
   const SKYDAY = new THREE.Color('#e2ecff'), SKYNIGHT = new THREE.Color('#6d7ed0'), GRDAY = new THREE.Color('#e6c69a'), GRNIGHT = new THREE.Color('#222b52');
   function look(A, Bk, k, o = {}) { s.last = [A, Bk, k, o]; const L = (a, b) => a + (b - a) * k, u = o.u ?? L(A.u, Bk.u), n = L(A.n, Bk.n), sunP = L(A.sunP, Bk.sunP), p = arcAt(u); s.n = n; s.u = u;
     s.scene.fog.color.copy(drawSky(k, 0, [A.sky, Bk.sky, Bk.sky])); sunBox.position.set(...p); sunBox.visible = u > -0.2 && u < 1.2; c0.set(A.sunC).lerp(c1.set(Bk.sunC), k); sunM.color.copy(c0).multiplyScalar(2.3);
-    if (sunP > 0.2) { s.sun.color.copy(c0); s.sun.intensity = sunP; s.sun.position.set(p[0] * 0.55, Math.max(9, p[1] * 0.75), -112); } else { s.sun.color.set('#a9bcff'); s.sun.intensity = 0.2 + 0.5 * n; s.sun.position.set(-34, 70, -70); }
+    if (sunP > 0.2) { s.sun.color.copy(c0); s.sun.intensity = sunP; s.sun.position.set(p[0] * 0.55, Math.max(9, p[1] * 0.75), -112); } else { s.sun.color.set('#a9bcff'); s.sun.intensity = 0.25 + 0.85 * n; s.sun.position.set(-34, 70, -70); }
     s.sun.target.position.set(0, 0, -20); s.hemi.intensity = L(A.hemi, Bk.hemi); s.hemi.color.copy(SKYDAY).lerp(SKYNIGHT, n); s.hemi.groundColor.copy(GRDAY).lerp(GRNIGHT, n); fill.intensity = 0.8 * (1 - n);
     starM.opacity = Math.max(0, n * 1.6 - 0.6); cloudM.color.copy(c1.set('#ffffff')).lerp(s.scene.fog.color, 0.35 + 0.4 * n); cloudM.opacity = 0.9 - 0.55 * n; paint(); }
   const setMoon = (u) => { moonBox.visible = u !== null && u > -0.05 && u < 1.03; if (u !== null) moonBox.position.set(...arcAt(u)); s.moonU = u; };
@@ -216,6 +216,8 @@ function hilltop() {
   const tags = CX.map((cx) => { const t = plate(s, '', [cx + 2.6, 13.2, -24], 'pl'); t.hide = true; return t; });
   const setTags = (show, tap) => tags.forEach((t, h) => { const p = plans[h]; t.el.className = `plate pl${CFG[h].mine ? ' mine' : ''}${tap && tap(h) ? ' tap' : ''}`; t.el.innerHTML = `${p.icon}<span><b>${p.lines[0]}</b><b>${p.lines[1]}</b></span>`; t.hide = !show; });
 
+  // in the look step the tags sit low, on the lanes, so that they stay clear of the pills at the top when the camera lifts the town above a card
+  const tagsLow = (low) => tags.forEach((t, h) => t.pos.set(CX[h] + 2.6, low ? 1.4 : 13.2, low ? -11 : -24));
   // ---- the hooks that the order of the steps calls ------------------------------------------------------------------------------------
   s.words = (list) => { setWords(list); };
   s.showPlans = async (list) => { const me = run; setWords(list); famPlate.hide = true; s.made = {}; equip([-1, -1, -1]);
@@ -237,13 +239,13 @@ function hilltop() {
     if (n < 6) { says([c.off ? W.lights.off : h === 0 ? W.dusk : W.tTwo]); await part(t, 0.6); if (!ok()) return; t += 0.6 / T; for (let i = 5; i >= n; i--) { homes[h][i].lit = false; paint(); beep(220, 0.08, 'sine', 0.05); await part(t, 0.26); if (!ok()) return; t += 0.26 / T; } await part(t, 0.8); if (!ok()) return; t += 0.8 / T; }
     if (h === 1) { if (n === 6) says([W.t3]); await Promise.all([s.flyGeese(4.4, { half: 52, bend: true, up: 6, y: 21 }), part(t, 4.4)]); }
     if (h === 2) { const n0 = barns[2].n, drain = c.battery && n0 > 2; if (drain) says([W.t4]); await Promise.all([s.flyGeese(4.4, { half: 52, c: CX[2] - 4, bend: false, y: 21 }), tw(4.4, (k) => { sky(k0, t + k * 4.4 / T); if (!drain) return; const m = Math.max(2, n0 - Math.floor(k * 1.25 * (n0 - 2) + 0.01)); if (m !== barns[2].n) { setCount(2, m); beep(520 - m * 30, 0.1); } })]); }
-    if (!ok()) return; glide(WIDE, 1.3); await wait(1.0); if (!ok()) return; lookBusy = false; setTags(true, canTap); s.seen(h); }
+    if (!ok()) return; glide(LOOKC, 1.3); await wait(1.0); if (!ok()) return; lookBusy = false; setTags(true, canTap); s.seen(h); }
   CX.forEach((cx, h) => { hitBox(s, g, cx + 1.5, 0, -23, 24, 13, 14, () => s.looking && !lookBusy, () => visit(h)); tags[h].el.onclick = () => visit(h); });
-  s.look = (seen) => { s.looking = true; s.seen = seen; lanes.forEach((m, h) => { m.visible = !done[h]; }); setTags(true, canTap); s.spot = (name, i) => [CX[i] + 5.2, 7.5, -28]; s.isBusy = () => lookBusy; };
+  s.look = (seen) => { tagsLow(true); s.looking = true; s.seen = seen; lanes.forEach((m, h) => { m.visible = !done[h]; }); setTags(true, canTap); s.spot = (name, i) => [CX[i] + 5.2, 7.5, -28]; s.isBusy = () => lookBusy; };
   // every card at once: whatever the child has not tapped is settled first, and the first light of the morning comes
-  s.showResults = () => { s.looking = false; lookBusy = false; lanes.forEach((m) => { m.visible = false; }); walkers.forEach((w) => { w.p.visible = false; }); for (const h of [0, 1, 2]) if (!done[h]) { done[h] = true; lightUp(h, true); if (h === 2 && CFG[2].battery) setCount(2, 2); } s.geeseN++; geese.visible = false; glide(CARDS, 1.4); setTags(false); tw(2.2, (k) => { look(K.nightB, K.dawn, ease(k) * 0.3); flows(); setMoon(0.9 + 0.1 * k); }); };
+  s.showResults = () => { tagsLow(false); s.looking = false; lookBusy = false; lanes.forEach((m) => { m.visible = false; }); walkers.forEach((w) => { w.p.visible = false; }); for (const h of [0, 1, 2]) if (!done[h]) { done[h] = true; lightUp(h, true); if (h === 2 && CFG[2].battery) setCount(2, 2); } s.geeseN++; geese.visible = false; glide(CARDS, 1.4); setTags(false); tw(2.2, (k) => { look(K.nightB, K.dawn, ease(k) * 0.3); flows(); setMoon(0.9 + 0.1 * k); }); };
   // "Ask again" comes back to the afternoon, with the valley empty
-  const reset = () => { s.looking = false; s.playing = false; lookBusy = false; lanes.forEach((m) => { m.visible = false; }); walkers.forEach((w) => { w.p.visible = false; }); for (const row of homes) for (const q of row) { q.lit = false; q.fed = false; } s.made = {}; equip([-1, -1, -1]); setTags(false); setMoon(null); s.geeseN = (s.geeseN || 0) + 1; geese.visible = false; glide(WIDE, 1.2); look(K.late, K.late, 0); };
+  const reset = () => { tagsLow(false); s.looking = false; s.playing = false; lookBusy = false; lanes.forEach((m) => { m.visible = false; }); walkers.forEach((w) => { w.p.visible = false; }); for (const row of homes) for (const q of row) { q.lit = false; q.fed = false; } s.made = {}; equip([-1, -1, -1]); setTags(false); setMoon(null); s.geeseN = (s.geeseN || 0) + 1; geese.visible = false; glide(WIDE, 1.2); look(K.late, K.late, 0); };
   // a word that is tapped shows in the place at once: the sun flares, or a gust catches the kite and the tall turbine
   s.wordTapped = (gap, k) => { if (gap === 0) { if (k !== 1) { beep(880, 0.12, 'sine'); tw(0.9, (q) => sunBox.scale.setScalar(1 + Math.sin(Math.PI * q) * 0.55)); } if (k !== 0) { s.gust = performance.now() + 2600; beep(180, 0.5, 'sawtooth', 0.03); tw(0.9, (q) => { s.spin = ease(q) * Math.PI * 2; }); } } else beep([300, 660, 240][k], 0.12, k === 1 ? 'sine' : 'triangle'); };
   s.asking = () => { famPlate.hide = true; if (s.ham.some((p) => p >= 0)) reset(); };
@@ -322,8 +324,8 @@ function hilltop() {
 
   // ---- the town: the plan the child chose now runs every neighbourhood, seen as evening falls ----
   const cleanUp = () => { s.onClock = null; extras.forEach((x) => { x.g.visible = true; }); s.playing = false; s.setting = false; s.looking = false; for (const f of flocks) if (f) f.g.visible = false; s.dragStart = null; mark.visible = false; for (const row of homes) for (const q of row) { q.pip.visible = false; q.waver.visible = false; q.fed = false; } setTags(false); };
-  const withBat = (pick) => pick === 2 && CFG[2].battery, settle = (pick) => { showExtras(withBat(pick)); equip([pick, pick, pick]); for (const h of [0, 1, 2]) { setCount(h, CFG[pick].battery ? (pick === 2 ? 4 : 0) : 0); lightUp(h, true); } flows(); };
-  s.town = async (pick) => { const me = run; cleanUp(); showExtras(false); const from = s.last; equip([pick, pick, pick]); for (const h of [0, 1, 2]) { setCount(h, CFG[pick].battery && pick === 2 ? CELLS : 0); lightUp(h, false); } glide(WIDE, 2); setArc({ c: 0, w: 92, top: 62 }, false); setMoon(null);
+  const withBat = (pick) => pick === 2 && CFG[2].battery, settle = (pick) => { showExtras(withBat(pick)); equip([pick, pick, pick]); barns.forEach((b) => { b.num.hide = true; }); for (const h of [0, 1, 2]) { setCount(h, CFG[pick].battery ? (pick === 2 ? 4 : 0) : 0); lightUp(h, true); } flows(); };
+  s.town = async (pick) => { const me = run; cleanUp(); showExtras(false); const from = s.last; equip([pick, pick, pick]); barns.forEach((b) => { b.num.hide = true; }); for (const h of [0, 1, 2]) { setCount(h, CFG[pick].battery && pick === 2 ? CELLS : 0); lightUp(h, false); } glide(WIDE, 2); setArc({ c: 0, w: 92, top: 62 }, false); setMoon(null);
     await tw(2, (k) => look(from[1], K.late, ease(k), { u: 0.055 + (K.late.u - 0.055) * ease(k) })); if (me !== run) return; flows(); await tw(4, (k) => { if (k < 0.6) look(K.late, K.sunset, k / 0.6); else look(K.sunset, K.dusk, (k - 0.6) / 0.4); flows(); }); if (me !== run) return;
     for (const h of [0, 1, 2]) { lightUp(h, true); paint(); beep(640 + h * 60, 0.06); await wait(0.35); if (me !== run) return; } await tw(2.2, (k) => { look(K.dusk, K.night, k * 0.55); flows(); }); if (me !== run) return; if (withBat(pick)) { for (const h of [0, 1, 2]) setCount(h, 4 - (s.extras.length ? 1 : 0)); showExtras(true); if (s.extras.length) chime(); } flows(); };
   s.swap = (pick) => { cleanUp(); settle(pick); look(K.dusk, K.night, 0.55); if (s.ham.includes(1)) s.flyGeese(9); };
