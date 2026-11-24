@@ -42,8 +42,15 @@ export function runLevel(L) { const W = L.words, gaps = W.sentence.filter((p) =>
   function recap() { const s = cur; firstSign(null); if (!s.recap) return end(0); ui({ step: W.recapT, say: W.recapQ, tray: [], over: '' }); s.recap((ok) => ui({ step: W.recapT, say: ok ? W.recapYes : W.recapNo, tray: [btn(W.next, 'sun', () => end(0))], over: null })); }
   // the closing pictures: L.ends(pick, scene) gives a list of { step, say, go, next }. go() shows the picture, and next is the words on the button that leads to the picture after it
   function end(k) { const s = cur, beats = L.ends ? L.ends(S.pick, s) : [], b = beats[k] || { step: W.level, say: W.end }, last = k >= beats.length - 1; if (b.go) b.go();
-    ui({ step: b.step, say: b.say, tray: [btn(last ? W.replay : b.next, 'sun', last ? job : () => end(k + 1))], over: '' }); }
+    ui({ step: b.step, say: b.say, tray: last && NEXT ? [btn(W.replay, '', job), btn(NEXT, 'sun', () => tell('next'))] : [btn(last ? W.replay : b.next, 'sun', last ? job : () => end(k + 1))], over: '' }); if (last) tell('end'); }
+  // The one hook for the whole game (docs/redesign/concepts/game/), added on 24 Nov 2026. It does nothing for a level that is opened by itself.
+  // Only when the level is held in a frame by another page AND its address has "?next=<words>", the last closing picture gets a second, yellow button with those words,
+  // and "Play again" becomes the quiet button beside it. The level tells the page that holds it { ecoTownLevel: 'end' } when the last closing picture shows,
+  // and { ecoTownLevel: 'next' } when the child presses the new button. It sends nothing else, and it reads nothing from the other page
+  const NEXT = window.parent !== window ? new URLSearchParams(location.search).get('next') : null, tell = (what) => { if (!NEXT) return; try { window.parent.postMessage({ ecoTownLevel: what, level: L.place.level }, '*'); } catch (e) { /* the game page is not there */ } };
   $('over').addEventListener('click', (e) => { const b = e.target.closest('[data-plan]'); if (b) choose(+b.dataset.plan); });
   job(); start();
   // for the script that plays the level through and takes the pictures (record.mjs)
-  window.trial = { S, job, ask, plans, choose, get cur() { return cur; } }; window.trialProject = project; return window.trial; }
+  window.trial = { S, job, ask, plans, choose, end: () => end(0), get cur() { return cur; } };
+  // end() jumps to the closing pictures: it is for checking the whole game only
+  window.trialProject = project; return window.trial; }

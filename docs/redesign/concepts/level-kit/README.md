@@ -169,3 +169,13 @@ The recording machine draws in software, at about one picture each second, so a 
 No public name or behaviour of the kit has changed. Two changes were made inside `record.mjs` only, because the recording machine is shared and is sometimes very slow: every press and every wait is now given three minutes before it gives up, and so is the saving of each picture. A recording script needs no change for this.
 
 One thing is worth knowing if a button in your level moves, for example a button that nods to invite a tap. The browser used for recording waits for a button to stop moving before it presses it, so press such a button in your recording script with `r.p.click(selector, { force: true })`.
+
+### One hook for the whole game (24 November 2026)
+
+The six levels are joined into one game by the page in `../game/`. That page opens each level in a frame, and it needed one small addition to `flow.js`. Nothing changes for a level that is opened by itself, and no level has to change anything.
+
+- When a level is held in a frame by another page, and its address also has `?next=<words>`, the last closing picture gets a second, yellow button with those words. "Play again" stays, as the quiet button beside it. Without both of these conditions the last picture has only "Play again", exactly as before.
+- In that same case the level sends the page that holds it two small messages with `postMessage`: `{ ecoTownLevel: 'end', level }` when the last closing picture shows, and `{ ecoTownLevel: 'next', level }` when the child presses the new button. It sends nothing else and reads nothing from the other page.
+- `window.trial` has one more entry, `end()`, which jumps straight to the closing pictures. It is only for the script that checks the whole game (`../game/check.mjs`), and nothing in a level calls it.
+
+After any edit to a file in this folder, check that the file still parses (copy it to a name that ends in `.mjs` and run `node --check` on it) and that a level page still loads by itself, before doing anything else. The first version of this hook left a comment in the middle of the last line of `flow.js`, which cut off the end of the file and stopped every level for a short time.
