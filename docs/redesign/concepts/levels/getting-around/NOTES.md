@@ -33,6 +33,10 @@ The level plays from the job to "Play again" with no errors in the page. It was 
 - The postcards in the band are small at 1024 by 640.
 - Nobody has played this with a real mouse at full speed. The recording machine draws about one picture a second, so the feel of the walking and of laying pieces has only been judged from single pictures.
 - Sound has not been heard at all.
+- When the child taps a plan in the recap where not everyone walked, Florence says "Look again at the postcards", but no postcards are on the screen at that step. The words should be changed, or the postcards shown again.
+- When Gran comes by car, the last walk passes very close to the tubs of tulips and the parked cars, so the picture on the way is crowded. The last picture itself is clear.
+- In the pictures at 1440 by 810 the machine was so slow that the three "walking" pictures show people who have already arrived. The pictures at 1024 by 640 do show people on the way.
+- The recording script estimated about ten minutes for a fast reader and about thirteen for a typical child who also tries another plan. That run played every walk three times as slowly as the real level, so the real time should be a little shorter.
 
 ## What was learned
 
