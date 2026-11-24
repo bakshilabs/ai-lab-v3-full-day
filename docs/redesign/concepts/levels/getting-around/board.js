@@ -1,5 +1,5 @@
 // The ground between the homes and the shops, as a board of seven squares by seven. This file is only the rules of the board:
-// which squares can take a path, how the three kinds of path piece fit together, which homes are joined to the shops, and how
+// which squares can take a path, how the paths that the child draws join up, which homes are joined to the shops, and how
 // long each family's walk is. It draws nothing and needs no other file, so it can be checked with Node (see check-board.mjs).
 //
 // A square is (c, r). c runs from 0 at the left of the picture to 6 at the right, and r from 0 beside the shops to 6 at the far homes.
@@ -15,9 +15,12 @@ export const GATES = [
   { id: 'L1', c: 0, r: 0, side: 3 }, { id: 'L2', c: 0, r: 2, side: 3 }, { id: 'L3', c: 0, r: 4, side: 3 }, { id: 'L4', c: 0, r: 6, side: 3 },
   { id: 'R1', c: 6, r: 0, side: 1 }, { id: 'R2', c: 6, r: 2, side: 1 }, { id: 'R3', c: 6, r: 4, side: 1 }, { id: 'R4', c: 6, r: 6, side: 1 },
   { id: 'F1', c: 1, r: 6, side: 0 }, { id: 'F2', c: 5, r: 6, side: 0, gran: true }];
-// the ten old trees in the middle, the five of them that are lost when the park is put somewhere else, and the stream
-export const TREES = [[3, 1], [1, 1], [5, 1], [1, 2], [3, 2], [5, 2], [1, 5], [2, 5], [4, 5], [5, 5]].map(([c, r]) => key(c, r));
-export const OAK = key(3, 1), UNPROTECTED = [[1, 1], [5, 1], [1, 5], [5, 5], [3, 2]].map(([c, r]) => key(c, r)), STREAM_R = 3;
+// The ten old trees: a grove round the old oak on the near side of the stream, and a grove on the far side. No path can cross the middle, so every way to the far homes
+// bends round the trees and crosses the stream by the one bridge. The five trees that are lost when the park is put somewhere else are listed too.
+export const TREES = [[3, 1], [3, 2], [2, 2], [4, 2], [2, 5], [3, 5], [4, 5], [2, 6], [3, 6], [4, 6]].map(([c, r]) => key(c, r));
+export const OAK = key(3, 1), UNPROTECTED = [[2, 2], [4, 2], [3, 5], [2, 6], [4, 6]].map(([c, r]) => key(c, r)), STREAM_R = 3;
+// the two places where the one footbridge of the park plan can go: on the left, or on the right, which is Gran's side
+export const BRIDGES = [1, 5];
 const onStreet = (c, r) => c % 2 === 1 || r % 2 === 0, onRing = (c, r) => c === 0 || c === N - 1 || r === 0 || r === N - 1;
 
 // Which old trees each plan keeps. plan: 0 is the grid of streets, 1 the winding loop, 2 the paths through a park. parkMid is true when the child asked for the park in the middle.
@@ -35,69 +38,49 @@ export function ground(plan, parkMid) {
     let t = 'free';
     if (plan === 0) t = !onStreet(c, r) ? 'off' : r === STREAM_R ? 'road-bridge' : 'free';
     else if (plan === 1) t = !onRing(c, r) ? 'off' : r === STREAM_R ? 'bridge' : 'free';
-    else t = r === STREAM_R ? (c === 2 || c === 4 ? 'bridge' : 'stream') : kept.has(key(c, r)) ? 'tree' : 'free';
+    else t = r === STREAM_R ? (BRIDGES.includes(c) ? 'bridge' : 'stream') : kept.has(key(c, r)) ? 'tree' : 'free';
     g[key(c, r)] = t;
   }
   return g;
 }
 
-// ---- the path pieces -------------------------------------------------------------------------------------------------------
-// A piece is { kind, sides }: sides is a list of four true or false values, one for each side that the path leaves the square by.
-const rot = (s, n) => s.map((_, i) => s[(i - n + 4) % 4]);
-export const SHAPES = {
-  straight: [[true, false, true, false], [false, true, false, true]],
-  bend: [0, 1, 2, 3].map((n) => rot([true, true, false, false], n)),
-  fork: [0, 1, 2, 3].map((n) => rot([true, true, false, true], n)),
-  cross: [[true, true, true, true]],
-  bridge: [[true, false, true, false]] };
+// ---- drawing the paths ------------------------------------------------------------------------------------------------------
+// A paved square is { kind, sides }: kind is 'path' or 'bridge', and sides is a list of four true or false values, one for each side that the path leaves the square by.
+// The child draws: each new square is joined to the square the child came from, so the paths take their own shape and nothing has to be turned.
 export const kindOf = (sides) => { const n = sides.filter(Boolean).length; return n === 4 ? 'cross' : n === 3 ? 'fork' : n === 2 && sides[0] === sides[2] ? 'straight' : n === 2 ? 'bend' : 'end'; };
-const same = (a, b) => a.every((v, i) => v === b[i]);
-
-// A board in play: the ground, and the piece on each square (or nothing)
-export function newBoard(plan, parkMid) { return { plan, ground: ground(plan, parkMid), cells: [] }; }
-const gateAt = (c, r, side) => (c === SHOP.c && r === SHOP.r && side === SHOP.side) || GATES.some((g) => g.c === c && g.r === r && g.side === side);
-const takes = (b, k, kind) => { const t = b.ground[k]; return kind === 'bridge' ? t === 'bridge' : kind === 'straight' ? t === 'free' || t === 'road-bridge' : t === 'free'; };
-// Does a piece with these sides fit on square (c, r)? Every side the path leaves by must lead somewhere: to a gate, to an empty square that can take a piece, or to a piece
-// whose path comes to meet it. A neighbour's path must never run into the side of this piece. And the piece must join the shops' gate or a piece that is already there.
-export function fits(b, c, r, kind, sides) {
-  if (!takes(b, key(c, r), kind)) return false;
-  let joined = false;
-  for (let s = 0; s < 4; s++) {
-    const c2 = c + DC[s], r2 = r + DR[s], inside = c2 >= 0 && c2 < N && r2 >= 0 && r2 < N, other = inside ? b.cells[key(c2, r2)] : null;
-    if (sides[s]) {
-      if (gateAt(c, r, s)) { if (c === SHOP.c && r === SHOP.r && s === SHOP.side) joined = true; continue; }
-      if (!inside) return false;
-      if (other) { if (!other.sides[OPP[s]]) return false; joined = true; continue; }
-      const t = b.ground[key(c2, r2)];
-      if (t === 'off' || t === 'tree' || t === 'stream') return false;
-      if ((t === 'bridge' || t === 'road-bridge') && s % 2 === 1) return false;       // a bridge is only crossed along the path, never from the side
-    } else if (other && other.sides[OPP[s]]) return false;
-  }
-  return joined;
+const SHOPK = key(SHOP.c, SHOP.r), inside = (c, r) => c >= 0 && c < N && r >= 0 && r < N, next = (k, s) => { const c = cOf(k) + DC[s], r = rOf(k) + DR[s]; return inside(c, r) ? key(c, r) : -1; };
+const bridgey = (t) => t === 'bridge' || t === 'road-bridge';
+// may a path run from square k out of side s into the next square? A bridge is only crossed along the path, never from the side
+const runs = (b, k, s) => { const k2 = next(k, s); return k2 >= 0 && !(s % 2 && (bridgey(b.ground[k]) || bridgey(b.ground[k2]))); };
+// A board in play: the ground, the paved squares, and the young trees that the child planted (on the grid board only)
+export function newBoard(plan, parkMid) { return { plan, ground: ground(plan, parkMid), cells: [], young: [] }; }
+// can this empty square take paving?
+export const paves = (b, k) => k >= 0 && !b.cells[k] && (b.ground[k] === 'free' || b.ground[k] === 'road-bridge');
+// the sides of square k on which a paved square lies that a path may run to
+const paved = (b, k) => [0, 1, 2, 3].filter((s) => runs(b, k, s) && b.cells[next(k, s)]);
+// the empty squares where the path can grow now: the square beside the shops, and every square beside a paved one
+export function frontier(b) { const out = []; for (let k = 0; k < N * N; k++) if (paves(b, k) && (k === SHOPK || paved(b, k).length)) out.push(k); return out; }
+// joins two paved squares that lie side by side. It gives back true if they were not joined before
+export function link(b, k, k2) { const s = [0, 1, 2, 3].find((q) => next(k, q) === k2); if (s === undefined || !b.cells[k] || !b.cells[k2] || !runs(b, k, s) || b.cells[k].sides[s]) return false; b.cells[k].sides[s] = true; b.cells[k2].sides[OPP[s]] = true; return true; }
+// Paves square k and joins it to the square the child came from. Without one, it is joined to the paved neighbour that is nearest to the shops.
+// A gate on the square is joined by itself, and so is a bridge that lies straight ahead or behind
+export function pave(b, k, from = -1) {
+  if (!paves(b, k)) return false; const near = paved(b, k); if (k !== SHOPK && !near.length) return false;
+  const { steps } = reach(b), best = [...near].sort((p, q) => (steps[next(k, p)] ?? 99) - (steps[next(k, q)] ?? 99))[0], s0 = near.find((s) => next(k, s) === from) ?? best;
+  b.cells[k] = { kind: 'path', sides: [false, false, false, false] }; if (s0 !== undefined) link(b, k, next(k, s0));
+  for (const s of near) if (b.cells[next(k, s)].kind === 'bridge') link(b, k, next(k, s));
+  if (k === SHOPK) b.cells[k].sides[SHOP.side] = true; for (const g of GATES) if (key(g.c, g.r) === k) b.cells[k].sides[g.side] = true;
+  return true;
 }
-// every way a piece of this kind fits on a square, best first. The best way joins the most paths and gates, and then points its open ends towards homes that are not joined yet
-export function ways(b, c, r, kind) {
-  const here = b.cells[key(c, r)]; b.cells[key(c, r)] = null;
-  const ok = SHAPES[kind].filter((s) => fits(b, c, r, kind, s)), want = distToUnjoined(b);
-  const score = (sides) => { let n = 0; for (let s = 0; s < 4; s++) if (sides[s]) { const c2 = c + DC[s], r2 = r + DR[s]; if (gateAt(c, r, s)) n += 6; else if (b.cells[key(c2, r2)]) n += 10; else n += 1 / (1 + (want[key(c2, r2)] ?? 99)); } return n; };
-  b.cells[key(c, r)] = here;
-  return ok.map((s) => [score(s), s]).sort((p, q) => q[0] - p[0]).map((p) => p[1]);
-}
-// Where can a piece of this kind go now? It gives the empty squares it fits on, and the squares whose piece could be swapped for it
-export function places(b, kind) {
-  const out = [];
-  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { const p = b.cells[key(c, r)]; if (p && p.kind === kind) continue; if (ways(b, c, r, kind).length) out.push(key(c, r)); }
-  return out;
-}
-// Lays a piece, or swaps the piece that is there for one of another kind. It gives back the kind that came off the square, if any
-export function lay(b, c, r, kind) { const w = ways(b, c, r, kind); if (!w.length) return false; const old = b.cells[key(c, r)]; b.cells[key(c, r)] = { kind, sides: w[0] }; return old ? old.kind : true; }
-// takes the piece off a square and gives back its kind
-export function lift(b, c, r) { const p = b.cells[key(c, r)]; if (!p) return false; b.cells[key(c, r)] = null; return p.kind; }
-// Turns the piece on a square to the next way it fits. It gives back false if it fits only one way
-export function turn(b, c, r) {
-  const p = b.cells[key(c, r)]; if (!p) return false; const w = ways(b, c, r, p.kind); if (w.length < 2) return false;
-  const i = w.findIndex((s) => same(s, p.sides)); p.sides = w[(i + 1) % w.length]; return true;
-}
+// takes the paving, or the bridge, off a square and gives back its kind
+export function unpave(b, k) { const p = b.cells[k]; if (!p) return false; for (let s = 0; s < 4; s++) { const o = b.cells[next(k, s)]; if (o) o.sides[OPP[s]] = false; } b.cells[k] = null; return p.kind; }
+// the column the bridge is in, or -1; the places it could go; and laying it (which moves it, because there is only one)
+export const bridgeAt = (b) => { const k = b.cells.findIndex((p) => p && p.kind === 'bridge'); return k < 0 ? -1 : cOf(k); };
+export const bridgePlaces = (b) => b.ground.map((t, k) => (t === 'bridge' && !b.cells[k] ? k : -1)).filter((k) => k >= 0);
+export function setBridge(b, k) { if (b.ground[k] !== 'bridge' || b.cells[k]) return false; const old = bridgeAt(b); if (old >= 0) unpave(b, key(old, STREAM_R));
+  b.cells[k] = { kind: 'bridge', sides: [false, false, false, false] }; for (const s of [0, 2]) link(b, k, next(k, s)); return true; }
+// where a young tree can be planted on the grid board: the blocks between the streets that have no old tree
+export const youngPlaces = (b) => (b.plan !== 0 ? [] : b.ground.map((t, k) => (t === 'off' && rOf(k) !== STREAM_R && !TREES.includes(k) && !b.young.includes(k) ? k : -1)).filter((k) => k >= 0));
 
 // ---- who is joined, and how far they walk --------------------------------------------------------------------------------------
 // Walks out from the shops' gate along the pieces. It gives, for every square that is reached, the number of squares walked and the square before it
@@ -112,25 +95,18 @@ export function reach(b) {
 // For each home: is it joined, how many squares is the walk, and which squares does it pass (from the home to the shops)
 export function homes(b) {
   const { steps, from } = reach(b);
-  return GATES.map((g) => { const k = key(g.c, g.r), p = b.cells[k], joined = !!p && p.sides[g.side] && steps[k] !== undefined, way = []; if (joined) for (let q = k; q !== undefined; q = from[q]) way.push(q); return { ...g, joined, steps: joined ? steps[k] : null, way }; });
+  return GATES.map((g) => { const k = key(g.c, g.r), p = b.cells[k], joined = !!p && steps[k] !== undefined, way = []; if (joined) for (let q = k; q !== undefined; q = from[q]) way.push(q); return { ...g, joined, steps: joined ? steps[k] : null, way }; });
 }
-// how far each empty square is from the nearest home that is not joined yet, counted over squares that can take a piece
-function distToUnjoined(b) {
-  const d = [], q = []; for (const h of homes(b)) if (!h.joined) { const k = key(h.c, h.r); if (d[k] === undefined) { d[k] = 0; q.push(k); } }
-  while (q.length) { const k = q.shift(), c = cOf(k), r = rOf(k); for (let s = 0; s < 4; s++) { const c2 = c + DC[s], r2 = r + DR[s]; if (c2 < 0 || c2 >= N || r2 < 0 || r2 >= N) continue; const k2 = key(c2, r2), t = b.ground[k2]; if (d[k2] !== undefined || t === 'off' || t === 'tree' || t === 'stream') continue; d[k2] = d[k] + 1; q.push(k2); } }
-  return d;
-}
-
 // ---- Florence's own drawing of each plan ------------------------------------------------------------------------------------------
 // Florence's paths for a plan, as a board that is already laid. The grid has a pavement along every street. The loop is one long street around the park, which crosses
-// the stream once. The park plan has the shortest paths from the shops to every gate, bent around the trees, over one bridge. bridgeAt picks the bridge (the column it is in).
-export function florence(plan, parkMid, bridgeAt = null) {
-  const b = newBoard(plan, parkMid), open = (k) => { const t = b.ground[k]; return t === 'free' || t === 'road-bridge' || (t === 'bridge' && cOf(k) === (bridgeAt ?? (plan === 1 ? 0 : 2))); };
+// the stream once. The park plan has the shortest paths from the shops to every gate, bent around the trees, over one bridge. bridgeCol picks the bridge (the column it is in). Florence puts it on Gran's side in the park plan.
+export function florence(plan, parkMid, bridgeCol = null) {
+  const b = newBoard(plan, parkMid), open = (k) => { const t = b.ground[k]; return t === 'free' || t === 'road-bridge' || (t === 'bridge' && cOf(k) === (bridgeCol ?? (plan === 1 ? 0 : 5))); };
   const link = new Map(), join = (k, s) => { if (!link.has(k)) link.set(k, [false, false, false, false]); link.get(k)[s] = true; };
   const step = (k, s) => { const c = cOf(k) + DC[s], r = rOf(k) + DR[s]; if (c < 0 || c >= N || r < 0 || r >= N) return null; const k2 = key(c, r); if (!open(k2)) return null; if (b.ground[k2] !== 'free' && s % 2 === 1) return null; if (b.ground[k] !== 'free' && s % 2 === 1) return null; return k2; };
   if (plan === 2) {   // the shortest paths, which share their first stretches
     const d = [], from = [], q = [key(SHOP.c, SHOP.r)]; d[q[0]] = 0;
-    while (q.length) { const k = q.shift(); for (const s of [0, 3, 1, 2]) { const k2 = step(k, s); if (k2 === null || d[k2] !== undefined) continue; d[k2] = d[k] + 1; from[k2] = [k, s]; q.push(k2); } }
+    while (q.length) { const k = q.shift(); for (const s of [3, 1, 0, 2]) { const k2 = step(k, s); if (k2 === null || d[k2] !== undefined) continue; d[k2] = d[k] + 1; from[k2] = [k, s]; q.push(k2); } }
     for (const g of GATES) for (let k = key(g.c, g.r); from[k]; k = from[k][0]) { join(from[k][0], from[k][1]); join(k, OPP[from[k][1]]); }
   } else for (let k = 0; k < N * N; k++) { if (!open(k)) continue; for (let s = 0; s < 4; s++) { const k2 = step(k, s); if (k2 !== null) { join(k, s); join(k2, OPP[s]); } } }
   join(key(SHOP.c, SHOP.r), SHOP.side); for (const g of GATES) join(key(g.c, g.r), g.side);
@@ -140,11 +116,8 @@ export function florence(plan, parkMid, bridgeAt = null) {
 // How many squares a family will walk before they take the car instead. It depends on the paths the child asked for:
 // 0 long and winding (every square is a longer walk), 1 short and direct, 2 beside the busy road (people like the walk less)
 // The footpaths of the third plan cross the middle away from the cars, so the walk is pleasant whichever kind of path the child asked for.
-export const LIMIT = [7, 13, 8], limitOf = (plan, style) => (plan === 2 ? 13 : LIMIT[style]);
+export const LIMIT = [7, 13, 8], limitOf = (plan, style) => (plan === 2 ? 17 : LIMIT[style]);
 export const walkers = (b, style) => homes(b).map((h) => h.joined && h.steps <= limitOf(b.plan, style));
-// the pieces the child is given for a plan: what Florence's own drawing needs, and a few more, but fewer than there are squares
-export function stock(plan, parkMid) {
-  if (plan === 0) return { straight: 16, bend: 8, fork: 10, bridge: 0 };
-  const n = { straight: 0, bend: 0, fork: 0, cross: 0, bridge: 0, end: 0 }; for (const p of florence(plan, parkMid).cells) if (p) n[p.kind]++;
-  return { straight: n.straight + 3, bend: n.bend + 3, fork: n.fork + n.cross * 2 + 2, bridge: 1 };
-}
+// What the child is given for a plan. There is less paving than there are squares, so two homes often have to share one path, and there is only one bridge.
+// On the grid board the streets have road bridges already, and the child has four young trees for six empty places.
+export const stock = (plan) => (plan === 0 ? { pave: 33, bridge: 0, young: 4 } : plan === 1 ? { pave: 22, bridge: 1, young: 0 } : { pave: 28, bridge: 1, young: 0 });

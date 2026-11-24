@@ -45,7 +45,7 @@ const T = { nearest: 'Nearest to your words', autumnT: 'Autumn comes', winterT: 
   c: ['Pick', 'Open the cold store', 'Pick and send'], cSay: [['Snow lies on every bed but one. Tap the winter cover to pick the food.'], ['Snow covers the fields now, and nothing grows there. Tap the cold store to send the boxes that you kept.'], ['Every shelf is ripe, and it is snowing. Tap the lift to pick the food and send it.']],
   off2: [['The handcart takes one small basket across the square.'], ['The lorry sets off again on the long road.'], ['The cargo bike takes the winter crates across the square.']],
   wave: 'Hello!', glow: 'Warm and light inside',
-  ripe: [['Tap each bed to pick the food.'], [], ['It snows outside, and the plants grow anyway. Tap each shelf to pick the food.']],
+  ripe: [['Tap each bed to pick the food.'], [], ['The plants are ripe, with no soil and no sunshine. Tap each shelf to pick the food.']],
   off: [['The handcart takes the food across the square.'], ['The lorry sets off on the long road to the town.'], ['The grower loads the cargo bike.']],
   done: [['Your stall had full crates in summer. In winter it has one small basket, which you grew under the cover.'], ['Both sides of your stall have cold boxes. All of the food came a long way, and the lorry caused pollution.'], ['Both sides of your stall are full. You grew fresh food in the summer and in the snow.']],
   endT: 'A summer evening', endSay: [['The gardens are full, and the neighbours are picking food for supper.'], ['The lorry from the big farm is on its way with tomorrow\'s food.'], ['The indoor farm glows across the square, with your crops on its shelves.']] };

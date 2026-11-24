@@ -3,7 +3,7 @@
 // Everything here belongs to this level. The page, Florence's band, the order of the steps and the block style come from ../../level-kit/.
 // The left of the picture is +x and the camera looks along +z, away from the shops' forecourt and towards the homes.
 import { THREE, blk, group, hash, fig, tone, M, B, texBox, tileMat, patTex, FAMILY, familyGroup, SHIRTS, SKIN, HAIR } from '../../level-kit/blocks.js';
-import { run, glide, tw, wait, ease, back, plate, hitBox, hot, glowMarks, newScene, canvas, view } from '../../level-kit/stage.js';
+import { run, cur, cam, glide, tw, wait, ease, back, plate, hitBox, hot, glowMarks, newScene, canvas, view } from '../../level-kit/stage.js';
 import { beep, chime } from '../../level-kit/sound.js';
 import * as BD from './board.js';
 
@@ -28,7 +28,7 @@ export const VIEW = {
   ask: { eye: [-11, 11.5, -21], at: [-3, 0, 25], fov: 46 },
   board: { eye: [-1.6, 4.2, -6.5], at: [-1.6, 3.9, 7.5], fov: 38 },
   test: { eye: [-7.5, 10.5, -14], at: [2, 0.5, 17], fov: 46 },
-  play: { eye: [0, 37, -2], at: [0, 0, 28.3], fov: 45 },
+  play: { eye: [0, 37, -2], at: [0, 0, 32.5], fov: 47 },
   shops: { eye: [-6.5, 2.6, -9], at: [9, 2.4, 1.5], fov: 44 } };
 
 // ---- small things made of blocks ----------------------------------------------------------------------------------------------------------
@@ -154,7 +154,8 @@ export function makePlace(W, hooks) {
   const ZONES = [[0, 66, 35, 10], [-47, 30, 15, 29], [0, 28.5, 26, 26]], zonePlate = plate(s, W.parkHere, [0, 3, 0], 'on'); zonePlate.hide = true;
   const outline = group(g); const drawOutline = (i) => { outline.clear(); const [x, z, w, d] = ZONES[i], n = Math.round(w / 2.4), m = Math.round(d / 2.4), mat = M('#ffdf3d', { unlit: true, raw: true });
     for (let k = 0; k < n; k++) for (const sz of [-1, 1]) blk(outline, x - w / 2 + (k + 0.5) * w / n, z + sz * d / 2, w / n * 0.6, 0.5, i < 2 ? 0.5 : 0.02, 0.22, '#ffdf3d', { shadow: false, mat }); for (let k = 0; k < m; k++) for (const sx of [-1, 1]) blk(outline, x + sx * w / 2, z - d / 2 + (k + 0.5) * d / m, 0.5, d / m * 0.6, i < 2 ? 0.5 : 0.02, 0.22, '#ffdf3d', { shadow: false, mat });
-    glowMarks(outline); zonePlate.pos.set(x, i === 2 ? 3 : 7, z + (i === 2 ? -9 : 0)); };
+    glowMarks(outline); zoneSign(i, W.parkHere); };
+  const zoneSign = (i, words) => { const [x, , z] = [ZONES[i][0], 0, ZONES[i][1]]; zonePlate.el.textContent = words; zonePlate.pos.set(x, i === 2 ? 3 : 5, z + (i === 2 ? -9 : 0)); zonePlate.hide = false; };
 
   // ---- the path pieces --------------------------------------------------------------------------------------------------------------------
   // Paving that belongs to the child's own paths takes the colour the child chose; everything else is cream.
@@ -181,6 +182,7 @@ export function makePlace(W, hooks) {
     b.cells.forEach((p, k) => { if (p) drawPiece(layer, k, p, { road, wig, mat: own ? mine : stone, bridgeLike: p.kind === 'bridge' || b.ground[k] === 'road-bridge' }); });
     // the last stretch from the first square to the forecourt
     if (b.cells[key(SHOP.c, SHOP.r)]) texBox(layer, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, own ? mine : stone, 1.5, 1.5);
+    for (const k of b.young || []) youngTree(layer, X(cOf(k)), Z(rOf(k)), k).scale.setScalar(2.1);
     if (s.style === 2) for (let i = 0; i < 3; i++) { const l = lorry(layer); l.visible = false; lorries.push({ l, i }); } }
   // the middle of a square, as a point on the ground
   const mid = (k) => [X(cOf(k)), Z(rOf(k))];
@@ -206,9 +208,9 @@ export function makePlace(W, hooks) {
   const atHome = () => { GATES.forEach((q, i) => { people[i].position.set(doorPt[i][0], 0, doorPt[i][1]); people[i].rotation.y = homeAt[i][2]; people[i].visible = true; cars[i].visible = false; homes[i].userData.gate.rotation.y = 0; }); granPlate.hide = true; };
   const openGate = (i, k) => { homes[i].userData.gate.rotation.y = -1.5 * k; };
   // the land as it is before anything is built: every old tree, nobody out yet
-  function bare() { layer.clear(); lorries = []; setTrees(BD.TREES); zone[0].visible = zone[1].visible = false; atHome(); s.shown = -1; }
+  function bare() { layer.clear(); lorries = []; setTrees(BD.TREES); zone[0].visible = zone[1].visible = false; zonePlate.hide = true; atHome(); s.shown = -1; }
   // draws plan i on the ground at once
-  function showPlan(i) { const m = model(i); drawBoard(m.b, !!(s.child && s.child.plan === i)); setTrees(BD.keptTrees(i, s.park === 2)); zone[0].visible = s.park === 0; zone[1].visible = s.park === 1; s.shown = i; return m; }
+  function showPlan(i) { const m = model(i); drawBoard(m.b, !!(s.child && s.child.plan === i)); setTrees(BD.keptTrees(i, s.park === 2)); zone[0].visible = s.park === 0; zone[1].visible = s.park === 1; if (s.park === 2) zonePlate.hide = true; else zoneSign(s.park, W.newPark); s.shown = i; return m; }
   // the order in which people reach the shops, and where each stands or parks
   function places(m) { const order = m.hs.map((h, i) => [h.steps ?? 99, i]).sort((a, b) => a[0] - b[0]).map((p) => p[1]); let w = 0, c = 0; const at = []; for (const i of order) at[i] = m.walk[i] ? { slot: i === granI ? 10 : w++ } : { spot: c++ }; return at; }
   // everybody where they end up, at once: for the town and for "Try another plan"
@@ -240,6 +242,10 @@ export function makePlace(W, hooks) {
     if (road) { line(17, '#1f2a44'); line(13, s.style === 2 ? '#5f636c' : '#fff3d0'); if (s.style !== 2) line(6, '#aeb2ba'); } else { line(12, '#1f2a44'); line(7, '#fff3d0'); }
     for (const k of BD.TREES) { const cc = cOf(k), r = rOf(k), big = k === BD.OAK ? 15 : 11; if (kept.has(k)) { x.fillStyle = '#ff8fbe'; x.strokeStyle = '#1f2a44'; x.lineWidth = 3; x.beginPath(); x.arc(px(cc), py(r), big, 0, 7); x.fill(); x.stroke(); x.fillStyle = '#ffe3ee'; x.beginPath(); x.arc(px(cc) - 3, py(r) - 3, big / 2.4, 0, 7); x.fill(); } else { x.strokeStyle = '#8a5a3c'; x.lineWidth = 3; x.fillStyle = '#e8c99a'; x.beginPath(); x.arc(px(cc) + 12, py(r) + 12, 5, 0, 7); x.fill(); x.stroke(); } }
     GATES.forEach((q, j) => { const hx = px(q.c) + [0, 1, 0, -1][q.side] * 30, hy = py(q.r) - [1, 0, -1, 0][q.side] * 30; x.fillStyle = '#fffaf0'; x.strokeStyle = '#1f2a44'; x.lineWidth = 3; x.fillRect(hx - 9, hy - 7, 18, 16); x.strokeRect(hx - 9, hy - 7, 18, 16); x.fillStyle = DOORS[j]; x.beginPath(); x.moveTo(hx - 13, hy - 6); x.lineTo(hx, hy - 17); x.lineTo(hx + 13, hy - 6); x.fill(); x.stroke(); });
+    // the new park, when the child asked for it somewhere else: a small green patch with young trees at the far edge, or across the river on the right
+    if (s.park !== 2) { const [qx, qy, qw, qh] = s.park === 0 ? [134, 5, 116, 22] : [352, 58, 27, 62]; x.fillStyle = '#8fd468'; x.strokeStyle = '#1f2a44'; x.lineWidth = 3; x.fillRect(qx, qy, qw, qh); x.strokeRect(qx, qy, qw, qh);
+      for (let q = 0; q < 4; q++) { x.fillStyle = '#ff8fbe'; x.beginPath(); x.arc(s.park === 0 ? qx + 16 + q * 28 : qx + qw / 2, s.park === 0 ? qy + qh / 2 : qy + 10 + q * 14, 5, 0, 7); x.fill(); x.stroke(); }
+      if (s.park === 1) { x.fillStyle = '#6cc3ee'; x.fillRect(338, 8, 8, 320); } }
     x.strokeStyle = '#1f2a44'; x.lineWidth = 8; x.strokeRect(0, 0, 384, 384); tex.needsUpdate = true; }
   const tagPl = [0, 1, 2].map((i) => { const t = plate(s, '', [2.55 - i * 3.55, i === 1 ? 5.25 : 5.85, 7.3], 'pl'); t.el.innerHTML = hooks.tag(i); t.hide = true; return t; });
 
@@ -267,11 +273,11 @@ export function makePlace(W, hooks) {
   // ---- the hooks that the order of the steps calls ---------------------------------------------------------------------------------------
   const sample = group(g);
   // (the white lines of the board are made further down, before the play break)   // a short stretch of path beside the forecourt that shows the kind of path the child is asking for
-  s.asking = () => { bare(); quiet(); nb.visible = false; for (const t of tagPl) t.hide = true; famPlate.hide = true; granHome.hide = false; hooks.clear(); s.child = null; glide(VIEW.ask, 1.6); };
+  s.asking = () => { s.pen = null; granHome.el.textContent = W.granHome; granHome.el.classList.remove('on'); granHome.pos.set(homeAt[granI][0], 8.6, homeAt[granI][1]); bare(); quiet(); nb.visible = false; for (const t of tagPl) t.hide = true; famPlate.hide = true; granHome.hide = false; hooks.clear(); s.child = null; glide(VIEW.ask, 1.6); };
   s.words = (list) => { s.style = list[0] ?? 1; s.park = list[1] ?? 2; sample.clear(); outline.clear(); zonePlate.hide = true;
-    if (list[0] !== undefined) { const b = BD.newBoard(2, true); b.cells[key(3, 0)] = { kind: 'bend', sides: [false, true, true, false] }; b.cells[key(4, 0)] = { kind: 'straight', sides: [false, true, false, true] }; b.cells[key(5, 0)] = { kind: 'bend', sides: [true, false, false, true] }; b.cells[key(5, 1)] = { kind: 'straight', sides: [true, false, true, false] }; const road = s.style === 2 ? 2 : 0; b.cells.forEach((p, k) => { if (p) drawPiece(sample, k, p, { road, wig: s.style === 0, mat: stone }); }); texBox(sample, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, stone, 1.5, 1.5); if (road) { const l = lorry(sample); l.position.set(X(4) + 0.3, 0.05, Z(0)); l.rotation.y = Math.PI / 2; } trees.get(key(5, 1)).visible = false; } else trees.get(key(5, 1)).visible = true;
-    if (list[1] !== undefined) { drawOutline(s.park); zonePlate.hide = false; granHome.hide = true; } };
-  s.showPlans = async () => { const me = run; sample.clear(); outline.clear(); zonePlate.hide = true; granHome.hide = true; bare(); [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(0.01); glide(VIEW.board, 1.5); await wait(0.9);
+    if (list[0] !== undefined) { const b = BD.newBoard(2, true); b.cells[key(3, 0)] = { kind: 'bend', sides: [false, true, true, false] }; b.cells[key(4, 0)] = { kind: 'straight', sides: [false, true, false, true] }; b.cells[key(5, 0)] = { kind: 'bend', sides: [true, false, false, true] }; b.cells[key(5, 1)] = { kind: 'straight', sides: [true, false, true, false] }; const road = s.style === 2 ? 2 : 0; b.cells.forEach((p, k) => { if (p) drawPiece(sample, k, p, { road, wig: s.style === 0, mat: stone }); }); texBox(sample, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, stone, 1.5, 1.5); if (road) { const l = lorry(sample); l.position.set(X(4) + 0.3, 0.05, Z(0)); l.rotation.y = Math.PI / 2; } }
+    if (list[1] !== undefined) { drawOutline(s.park); granHome.hide = true; } hooks.park(s.park); };
+  s.showPlans = async () => { const me = run; sample.clear(); outline.clear(); zonePlate.hide = true; granHome.hide = true; bare(); [0, 1, 2].forEach(drawMap); tagPl.forEach((t, i) => { t.el.innerHTML = hooks.tag(i); }); nb.visible = true; for (const m of maps) m.m.scale.setScalar(0.01); glide(VIEW.board, 1.5); await wait(0.9);
     for (const i of [0, 1, 2]) { if (me !== run) return; beep(420 + i * 90, 0.08); tagPl[i].hide = false; await tw(0.4, (k) => maps[i].m.scale.setScalar(Math.max(0.01, back(k)))); } };
   s.test = async (api) => { const me = run; for (const t of tagPl) t.hide = true; await glide(VIEW.test, 1.5); if (me !== run) return false; nb.visible = false;
     // the shutters roll up, the awnings come out and the bells ring
@@ -282,55 +288,86 @@ export function makePlace(W, hooks) {
   // ---- the play break: the child fits path pieces together on the board -------------------------------------------------------------------------
   lines.visible = false; for (let i = 0; i <= N; i++) { B(lines, 17.5 - i * 5, 28.5, 0.1, 35, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); B(lines, 0, 11 + i * 5, 35, 0.1, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); }
   const marks = []; const markAt = (k) => { if (!marks[k]) { const m = group(g, X(cOf(k)), 0.2, Z(rOf(k))), y = M('#ffdf3d', { unlit: true, raw: true, op: 0.86 }), ink = M('#1f2a44', { unlit: true, raw: true }); blk(m, 0, 0, 4.3, 4.3, 0, 0.06, '#ffdf3d', { shadow: false, mat: y }); for (let q = 0; q < 4; q++) for (const e of [-1, 1]) { blk(m, -1.6 + q * 1.07, e * 2.15, 0.6, 0.2, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); blk(m, e * 2.15, -1.6 + q * 1.07, 0.2, 0.6, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); } glowMarks(m); marks[k] = m; } return marks[k]; };
-  s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick, s.park === 2), state = GATES.map(() => 'home'), toks = {}; let sel = (pick === 2 ? ['fork', 'bend', 'straight'] : ['straight', 'fork', 'bend']).find((kd) => BD.places(b, kd).length) || 'fork', told = '', finished = false, slotN = 0;
-    s.child = { plan: pick, board: b }; quiet(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; glide(VIEW.play, 1.8);
+  // The child draws the paths: press a yellow square and drag, or tap one square at a time. Each new square joins the square the child came from, so nothing has to be turned.
+  // There is less paving than there are squares, and only one bridge, which has two places. On the grid board there are four young trees for six places.
+  const ray = new THREE.Raycaster(), v2 = new THREE.Vector2();
+  const cellAt = (e) => { const r = canvas.getBoundingClientRect(); v2.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(v2, cam); const o = ray.ray.origin, d = ray.ray.direction; if (d.y >= -0.001) return -1;
+    const t = -o.y / d.y, c = Math.round((15 - (o.x + d.x * t)) / BD.CELL), r2 = Math.round((o.z + d.z * t - 13.5) / BD.CELL); return c >= 0 && c < N && r2 >= 0 && r2 < N ? key(c, r2) : -1; };
+  canvas.addEventListener('pointerdown', (e) => { if (cur !== s || !s.pen || e.button) return; const k = cellAt(e); if (k < 0) return; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* the press still works */ } s.pen.down(k); });
+  canvas.addEventListener('pointermove', (e) => { if (cur !== s || !s.pen) return; const k = cellAt(e); view.classList.toggle('can', k >= 0 && s.pen.can(k)); if (e.buttons & 1) s.pen.move(k); });
+  for (const n of ['pointerup', 'pointercancel']) canvas.addEventListener(n, () => { if (cur === s && s.pen) s.pen.up(); });
+  s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick), state = GATES.map(() => 'home'), toks = {}; let sel = 'pave', told = '', finished = false, slotN = 0, nextBtn = null, last = -1, down = false, stuck = -1;
+    s.child = { plan: pick, board: b }; s.pen = null; granHome.el.textContent = W.granHome; granHome.el.classList.add('on'); granHome.pos.set(homeAt[granI][0], 4.2, 47.6); quiet(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; zonePlate.hide = true; glide(VIEW.play, 1.8);
     GATES.forEach((q, i) => { people[i].position.set(gatePt[i][0] + DX[q.side] * 0.9, 0, gatePt[i][1] + DZ[q.side] * 0.9); people[i].rotation.y = Math.atan2(-DX[q.side], -DZ[q.side]); });
-    const kinds = ['straight', 'bend', 'fork', ...(left.bridge ? ['bridge'] : []), 'lift'];
-    const targets = () => (sel === 'lift' ? b.cells.map((p, k) => (p ? k : -1)).filter((k) => k >= 0) : left[sel] > 0 ? BD.places(b, sel) : []);
-    const show = () => { const tg = new Set(targets().filter((k) => sel === 'lift' ? false : !b.cells[k])); marks.forEach((m, k) => { if (m) m.visible = false; }); for (const k of tg) markAt(k).visible = true;
-      for (const kd of kinds) { const el = toks[kd]; el.className = `tok mini${kd === sel ? ' on' : ''}${kd !== 'lift' && !left[kd] ? ' used' : ''}`; if (kd !== 'lift') el.querySelector('small').textContent = W.left(left[kd]); }
-      const hs = BD.homes(b), joined = hs.filter((h) => h.joined).length, n = tg.size;
-      const how = sel === 'lift' ? W.liftHow : !left[sel] ? W.noneLeft : n ? W.pieceHow[sel] : b.cells.some(Boolean) ? W.noPlace : W.firstPiece;
-      api.say(finished ? [doneSay(), W.doneHow] : [told || W.joined(joined), how]); };
-    const doneSay = () => (state.every((q) => q === 'walked') ? W.doneAll : W.doneSome); let nextBtn = null;
+    const kinds = ['pave', ...(left.bridge ? ['bridge'] : []), ...(left.young ? ['young'] : []), 'lift'];
+    const targets = () => (sel === 'pave' ? (left.pave > 0 ? BD.frontier(b) : []) : sel === 'bridge' ? BD.bridgePlaces(b) : sel === 'young' ? (left.young > 0 ? BD.youngPlaces(b) : []) : []);
+    const walkWords = (hs) => { const g = hs[granI].steps + 1, far = Math.max(...hs.map((h) => h.steps)) + 1; return W.walks(g, far); };
+    const doneSay = (hs) => (state.every((q) => q === 'walked') ? [W.doneAll, walkWords(hs)] : [W.doneSome, W.doneHow]);
+    const show = () => { const tg = new Set(targets()); marks.forEach((m) => { if (m) m.visible = false; }); for (const k of tg) markAt(k).visible = true;
+      for (const kd of kinds) { const el = toks[kd], n = kd === 'lift' ? 1 : left[kd]; el.className = `tok mini${kd === sel ? ' on' : ''}${kd !== 'lift' && kd !== 'bridge' && !n ? ' used' : ''}`; if (kd !== 'lift') el.querySelector('small').textContent = kd === 'bridge' && !n ? W.laid : W.left(n); }
+      const hs = BD.homes(b), joined = hs.filter((h) => h.joined).length, how = sel === 'pave' ? (left.pave ? W.how.pave : W.noneLeft) : sel === 'bridge' ? (left.bridge ? W.how.bridge : W.how.bridgeMove) : sel === 'young' ? (left.young ? W.how.young : W.how.youngNone) : W.how.lift;
+      api.say(finished ? doneSay(hs) : [told || W.joined(joined), how]); };
     // what happens at each home when the paths change: a family whose walk is short enough sets off for the shops; if the way is too long, the car comes out
-    const react = () => { const hs = BD.homes(b); drawBoard(b, true); hs.forEach((h, i) => { const within = h.joined && h.steps <= BD.limitOf(pick, s.style);
+    const react = () => { const hs = BD.homes(b); drawBoard(b, true); granHome.el.textContent = hs[granI].joined ? W.granWalk(hs[granI].steps + 1) : W.granHome; hs.forEach((h, i) => { const within = h.joined && h.steps <= BD.limitOf(pick, s.style);
         if (within && state[i] !== 'walked') { state[i] = 'walked'; cars[i].visible = false; people[i].visible = true; openGate(i, 1); const sl = h.gran ? 10 : slotN++ % 10, pts = walkWay(i, h.way, sl); tw(2 + lengthOf(pts) * 0.07, (k) => along(people[i], pts, k, 0.14)).then(() => faceShops(people[i], sl)); told = h.gran ? W.granWalks : W.homeWalks; beep(660, 0.1); setTimeout(() => beep(880, 0.12), 110); }
         else if (h.joined && !within && state[i] === 'home') { state[i] = 'car'; openGate(i, 1); cars[i].visible = true; cars[i].position.set(backPt[i][0], 0, backPt[i][1]); cars[i].rotation.y = homeAt[i][2]; told = W.tooFar; beep(200, 0.15, 'sawtooth', 0.04); }
         else if (!h.joined && state[i] === 'car') { state[i] = 'home'; cars[i].visible = false; } });
-      const all = hs.every((h) => h.joined); if (all && !finished) { finished = true; chime(); api.done([doneSay(), W.doneHow]); nextBtn = document.querySelector('#tray .btn.sun'); setTray(); } else if (!all && finished) { finished = false; setTray(); } show(); };
-    const act = (k) => { const c = cOf(k), r = rOf(k), p = b.cells[k]; told = '';
-      if (sel === 'lift') { const kd = BD.lift(b, c, r); if (kd) { left[kd === 'cross' ? 'fork' : kd]++; beep(300, 0.08); } }
-      else if (p && p.kind === sel) { if (BD.turn(b, c, r)) beep(520, 0.06); else told = W.oneWay; }
-      else if (left[sel] > 0) { const old = BD.lay(b, c, r, sel); if (old) { left[sel]--; if (typeof old === 'string') left[old === 'cross' ? 'fork' : old]++; beep({ straight: 440, bend: 520, fork: 620, bridge: 300 }[sel] + (k % 4) * 25, 0.09, sel === 'bridge' ? 'sine' : 'triangle'); if (sel === 'bridge') { setTimeout(() => beep(240, 0.2, 'sine', 0.08), 90); burst(X(c), Z(r), 10, 2.5); if (!left.bridge) sel = 'straight'; } for (let sd = 0; sd < 4; sd++) { const k2 = key(c + BD.DC[sd], r + BD.DR[sd]); if (c + BD.DC[sd] >= 0 && c + BD.DC[sd] < N && trees.has(k2) && trees.get(k2).visible) burst(X(cOf(k2)), Z(rOf(k2)), 8); } } else told = W.noFit; }
-      react(); };
-    for (let k = 0; k < N * N; k++) hitBox(s, g, X(cOf(k)), 0, Z(rOf(k)), 4.9, 0.7, 4.9, () => me === run && s.child && s.child.board === b && (sel === 'lift' ? !!b.cells[k] : !!b.cells[k] || (left[sel] > 0 && BD.ways(b, cOf(k), rOf(k), sel).length > 0)), () => act(k));
-    // the tray: one button for each kind of piece, one to take a piece back, the colours of the paving, and a quiet button that shows one way to do it
+      const all = hs.every((h) => h.joined); if (all && !finished) { finished = true; chime(); api.done(doneSay(hs)); nextBtn = document.querySelector('#tray .btn.sun'); setTray(); } else if (!all && finished) { finished = false; setTray(); } show(); };
+    const petals = (k) => { for (let sd = 0; sd < 4; sd++) { const c = cOf(k) + BD.DC[sd], r = rOf(k) + BD.DR[sd], k2 = key(c, r); if (c >= 0 && c < N && r >= 0 && r < N && trees.has(k2) && trees.get(k2).visible) burst(X(c), Z(r), 8); } };
+    // one press on square k with the thing that is chosen. from is the square the child dragged out of. It gives back true if the path may go on from k
+    const act = (k, from = -1) => { const p = b.cells[k], t = b.ground[k]; told = '';
+      if (sel === 'lift') { const kd = BD.unpave(b, k), y = b.young.indexOf(k); if (kd) { left[kd === 'bridge' ? 'bridge' : 'pave']++; beep(300, 0.08); } else if (y >= 0) { b.young.splice(y, 1); left.young++; beep(300, 0.08); } else return false; react(); return true; }
+      if (sel === 'bridge') { if (!BD.setBridge(b, k)) return false; left.bridge = 0; sel = 'pave'; told = W.bridgeLaid; beep(300, 0.1, 'sine'); setTimeout(() => beep(240, 0.2, 'sine', 0.08), 90); burst(X(cOf(k)), Z(rOf(k)), 10, 2.5); react(); return true; }
+      if (sel === 'young') { const y = b.young.indexOf(k); if (y >= 0) { b.young.splice(y, 1); left.young++; beep(300, 0.08); } else if (left.young > 0 && BD.youngPlaces(b).includes(k)) { b.young.push(k); left.young--; beep(740, 0.1, 'sine'); burst(X(cOf(k)), Z(rOf(k)), 10, 3); } else return false; react(); return true; }
+      if (p) { if (from >= 0 && BD.link(b, k, from)) { beep(560, 0.05); react(); } return true; }
+      if (t === 'tree') { told = W.treeHere; burst(X(cOf(k)), Z(rOf(k)), 14); show(); return false; }
+      if (t === 'bridge' || t === 'stream') { told = left.bridge || t === 'bridge' ? W.needBridge : W.streamHere; show(); return false; }
+      if (!BD.paves(b, k)) return false;
+      if (!left.pave) { told = W.noneLeft; beep(200, 0.1, 'sawtooth', 0.03); show(); return false; }
+      if (!BD.pave(b, k, from)) return false; left.pave--; beep(440 + (k % 5) * 30, 0.07, 'triangle'); petals(k); react(); return true; };
+    // while the button is held, the path follows the mouse from square to square
+    const towards = (a, k) => { const dc = cOf(k) - cOf(a), dr = rOf(k) - rOf(a); return Math.abs(dc) >= Math.abs(dr) ? key(cOf(a) + Math.sign(dc), rOf(a)) : key(cOf(a), rOf(a) + Math.sign(dr)); };
+    s.pen = { can: (k) => (sel === 'lift' ? !!b.cells[k] || b.young.includes(k) : sel === 'pave' ? !!b.cells[k] || (left.pave > 0 && BD.frontier(b).includes(k)) : targets().includes(k) || (sel === 'young' && b.young.includes(k))),
+      down: (k) => { if (me !== run || !s.child || s.child.board !== b) return; down = true; last = k; stuck = -1; act(k); },
+      move: (k) => { if (!down || k < 0 || k === last || sel === 'bridge' || sel === 'young' || me !== run) return; let n = 0; while (last !== k && n++ < 8) { const nx = towards(last, k); if (nx === stuck) break; if (sel === 'lift') act(nx); else if (!act(nx, b.cells[last] ? last : -1)) { stuck = nx; break; } stuck = -1; last = nx; } },
+      up: () => { down = false; last = -1; stuck = -1; } };
+    // the tray: the paving, the bridge, the young trees, one button to take things back, the colours of the paving, and a quiet button that shows one way to do it
     for (const kd of kinds) { const el = document.createElement('button'); el.innerHTML = `${hooks.pieceIcon(kd)}<span>${W.piece[kd]}<small></small></span>`; el.onclick = () => { sel = kd; told = ''; show(); }; toks[kd] = el; }
     const sw = document.createElement('div'); sw.innerHTML = `<div class="sws-h">${W.colour}</div>`; const row = document.createElement('div'); row.className = 'sws three'; sw.append(row);
     PAVINGS.forEach((hex, i) => { const el = document.createElement('button'); el.className = `sw${i === s.paving ? ' on' : ''}`; el.style.background = hex; el.setAttribute('aria-label', W.colours[i]); el.onclick = () => { s.paving = i; mine.color.set(tone(hex)); [...row.children].forEach((q, j) => q.classList.toggle('on', j === i)); beep(600 + i * 80, 0.06); }; row.append(el); }); mine.color.set(tone(PAVINGS[s.paving]));
-    const help = hooks.btn(W.showMe, '', () => { const at = b.cells.findIndex((p) => p && p.kind === 'bridge'), f = BD.florence(pick, s.park === 2, at >= 0 ? cOf(at) : null); b.cells = f.cells; for (const kd of ['straight', 'bend', 'fork', 'bridge']) left[kd] = 0; told = W.shown; react(); });
+    // "Show me one way" keeps everything the child has drawn and adds what is missing from Florence's own drawing, over the child's bridge
+    const help = hooks.btn(W.showMe, '', () => { const at = BD.bridgeAt(b), f = BD.florence(pick, s.park === 2, at >= 0 ? at : null);
+      f.cells.forEach((p, k) => { if (!p) return; const q = b.cells[k]; if (q) q.sides = q.sides.map((v, i) => v || p.sides[i]); else b.cells[k] = { kind: p.kind === 'bridge' ? 'bridge' : 'path', sides: [...p.sides] }; });
+      left.pave = Math.max(0, BD.stock(pick).pave - b.cells.filter((p) => p && p.kind !== 'bridge').length); if (BD.bridgeAt(b) >= 0) left.bridge = 0; if (sel === 'bridge') sel = 'pave'; told = W.shown; react(); });
     const setTray = () => api.tray([...kinds.map((kd) => toks[kd]), sw, ...(finished && nextBtn ? [nextBtn] : [help])]);
-    s.spot = (name, i) => (name === 'cell' ? [X(i % N), 0.3, Z(Math.floor(i / N))] : [0, 0, 0]);
-    s.playState = () => ({ joined: BD.homes(b).filter((h) => h.joined).length, left: { ...left } });
+    s.spot = (name, i) => (name === 'cell' ? [X(i % N), 0.1, Z(Math.floor(i / N))] : [0, 0, 0]);
+    s.playState = () => ({ joined: BD.homes(b).filter((h) => h.joined).length, walked: state.filter((q) => q === 'walked').length, left: { ...left }, steps: BD.homes(b).map((h) => h.steps) });
     await wait(1.2); if (me !== run) return; setTray(); show(); };
 
   // ---- the town, another plan, the recap and the end --------------------------------------------------------------------------------------
-  const endPlay = () => { lines.visible = false; marks.forEach((m) => { if (m) m.visible = false; }); granHome.hide = true; };
+  const endPlay = () => { s.pen = null; view.classList.remove('can'); lines.visible = false; marks.forEach((m) => { if (m) m.visible = false; }); granHome.hide = true; };
   s.town = async (pick) => { endPlay(); const m = settle(pick); ambient(m); await glide(VIEW.test, 2); };
   s.swap = (pick) => { endPlay(); const m = settle(pick); ambient(m); };
-  s.recap = (answer) => { let open = true; quiet(); for (const p of [...people, ...cars]) if (p.position.z < 9.5) p.visible = false; granPlate.hide = true; [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
+  s.recap = (answer) => { let open = true; quiet(); zonePlate.hide = true; famPlate.hide = true; hooks.showCards(); for (const p of [...people, ...cars]) if (p.position.z < 9.5) p.visible = false; granPlate.hide = true; [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
     s.spot = (name, i) => [2.55 - i * 3.55, 2.9, 7.3];
-    [0, 1, 2].forEach((i) => { const ok = s.model(i).walkers === GATES.length, pl = plate(s, W.short[i], [2.55 - i * 3.55, 5.75, 7.3], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(ok ? 880 : 300, 0.15); const any = [0, 1, 2].filter((j) => s.model(j).walkers === GATES.length); W.recapYes = W.recapYesOf(W.short[i]); W.recapNo = any.length ? W.recapNoOf(any.map((j) => W.short[j])) : W.recapNone; answer(ok); };
+    [0, 1, 2].forEach((i) => { const ok = s.model(i).walkers === GATES.length, pl = plate(s, W.short[i], [2.55 - i * 3.55, i === 1 ? 6.45 : 5.75, 7.3], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(ok ? 880 : 300, 0.15); const any = [0, 1, 2].filter((j) => s.model(j).walkers === GATES.length); W.recapYes = W.recapYesOf(W.short[i]); W.recapNo = any.length ? W.recapNoOf(W.short[i], any.map((j) => W.short[j])) : W.recapNone; answer(ok); };
       signs.push(pl); pl.el.onclick = go; hitBox(s, nb, 3.55 - i * 3.55, 1.1, -0.2, 3.5, 3.5, 0.6, () => open, go); }); };
+  // For the last picture, when some families came by car: the cars stand in one neat row in front of the shops, where they hide the goods, and the way in from the path stays clear.
+  // Gran stands beside her car and waves, and the people who walked stand where no car is.
+  const STAND = [[8.4, -7.2], [7, -9.4], [8.6, -11], [-3.2, 8.6], [-5.2, 7.4], [-7.4, 8.8], [-8.6, 6.2], [-4.4, 5], [-9.4, -1], [-7.5, -4]];
+  function tidy(m) { const drivers = GATES.map((q, j) => j).filter((j) => !m.walk[j]); if (!drivers.length) return; let w = 0; drivers.sort((a, b2) => (a === granI ? -1 : b2 === granI ? 1 : 0));
+    drivers.forEach((j, n) => { cars[j].position.set(5, 0, 6.6 - n * 3.05); cars[j].rotation.y = Math.PI / 2; });
+    const lowest = 6.6 - (drivers.length - 1) * 3.05 - 2.2, free = STAND.filter(([x, z]) => x < 2 || z < lowest);
+    GATES.forEach((q, j) => { if (!m.walk[j] || j === granI) return; const at = free[w++ % free.length]; people[j].position.set(at[0], 0, at[1]); people[j].rotation.y = at[0] > 2 ? Math.PI / 2 : 2.2; });
+    if (!m.walk[granI]) { const gr = people[granI]; gr.visible = true; gr.position.set(1.5, 0, -1.5); gr.rotation.y = -0.28; } }
   // the last picture: the family and Gran walk the last stretch of the path to the shops, with the camera low behind them
-  s.walkHome = async (pick) => { const me = run; nb.visible = false; const m = settle(pick); quiet(); famPlate.hide = true; granPlate.hide = true; const h = m.hs[granI], way = (h.joined ? h.way : m.hs[0].way).map(mid), pts = [...way.slice(-5), [0, 10.6], [0.5, 2]], withGran = m.walk[granI];
+  s.walkHome = async (pick) => { const me = run; nb.visible = false; const m = settle(pick); tidy(m); quiet(); famPlate.hide = true; granPlate.hide = true; zonePlate.hide = true; const h = m.hs[granI], way = (h.joined ? h.way : m.hs[0].way).map(mid), pts = [...way.slice(-5), [0, 10.6], [0.5, 2]], withGran = m.walk[granI];
     const gr = people[granI]; family.rotation.y = 0; family.scale.setScalar(1);
     const tmp = { position: new THREE.Vector3(), rotation: { y: 0 } };
     await tw(11 * WALK, (k) => { const u = ease(k); along(tmp, pts, u, 0.1); family.position.copy(tmp.position); family.rotation.y = tmp.rotation.y - 0.5; if (withGran) { const q = { position: gr.position, rotation: gr.rotation }; along(q, pts, Math.min(1, u + 0.07), 0.1); gr.position.x += 1.3; }
       const L = lengthOf(pts), d = (o) => { const t = { position: new THREE.Vector3(), rotation: { y: 0 } }; along(t, pts, Math.max(0, Math.min(1, u + o / L))); return t.position; }, b0 = d(-7), a0 = d(7);
       s.eye = [b0.x - 0.6, 2.3, b0.z]; s.at = [a0.x, 1.5, a0.z]; s.fov = 50; });
-    if (me !== run) return; family.rotation.y = 0; if (withGran) gr.rotation.y = Math.PI / 2; glide(VIEW.shops, 2.4); };
+    if (me !== run) return; family.rotation.y = 0; if (withGran) gr.rotation.y = Math.PI / 2; else { granPlate.el.textContent = W.gran; granPlate.pos.set(gr.position.x, 3.1, gr.position.z); granPlate.hide = false; } glide(VIEW.shops, 2.4); };
   // for the script that records the level
   s.spot = (name) => (name === 'tree' ? [X(3), 4, Z(1)] : name === 'bell' ? [9.2, 2, shops[1].zc] : [0, 0, 0]);
   s.start = () => { bare(); shops.forEach((sh) => sh.set(0)); granHome.hide = false; };

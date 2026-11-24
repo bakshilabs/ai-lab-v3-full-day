@@ -24,3 +24,5 @@
 .first > span:not(.pl) { display: block; position: relative; padding-right: 30px; } .first > span:not(.pl) .mark { position: absolute; right: 0; top: 0; }
 /* the meter inside that sign keeps its own width, and does not stretch across the sign */
 .first .mbar { display: inline-flex; justify-content: flex-start; gap: 2px; }
+/* in that sign the two lines of the plan's tag stand one above the other */
+.first .pl span { display: block; } .first .pl b { display: block; }
