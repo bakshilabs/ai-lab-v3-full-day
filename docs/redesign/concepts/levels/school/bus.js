@@ -19,7 +19,7 @@ addEventListener('pointerup', () => { if (drag && ROPE && ROPE.can()) ROPE.pull(
 const bell = () => { beep(830, 1.5, 'sine', 0.13); beep(1245, 1.1, 'sine', 0.06); beep(1660, 0.7, 'sine', 0.03); };
 const W = {   // every word here is a placeholder. Florence says one short sentence for each step
   colour: ['This is a walking bus. Choose a colour for the flag and the vests, and then set off.'], go: 'Set off', swatch: 'Flag and vests',
-  friend: 'A friend is waiting at the gate. Click the friend.', family: 'Your family is waiting at the gate. Click the child.', joined: (k, n) => (k === n ? 'Everyone is on the walking bus.' : `${k} of ${n} friends are on the walking bus.`),
+  friend: 'A friend is waiting at the gate. Click the friend.', family: 'Your family is waiting at the gate. Click the child.', joined: (k, n) => (k === n ? 'Everyone is on the walking bus.' : k === 1 ? 'The first friend is on the walking bus.' : `${k} of ${n} friends are on the walking bus.`),
   fork: 'Two good ways lead to school. Click the way you want.', ways: ['Through the orchard', 'Over the footbridge'], took: ['There is an apple for everyone in the orchard.', 'The ducks are following the walking bus.'],
   cross: 'Click the button on the crossing.', waiting: 'The red figure is showing. Everyone waits with the teacher.', green: 'The green figure is showing. The bus crosses with the teacher.',
   board: 'Every child hangs a badge. A shoe means walked, and a car means driven.', rope: 'Drag the bell rope down to ring the bell.', end: ['Everyone has an apple from the orchard.', 'The ducks followed you all the way to school.'],
