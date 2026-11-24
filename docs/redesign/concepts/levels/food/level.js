@@ -48,7 +48,7 @@ const T = { nearest: 'Nearest to your words', autumnT: 'Autumn comes', winterT: 
   ripe: [['Tap each bed to pick the food.'], [], ['The plants are ripe, with no soil and no sunshine. Tap each shelf to pick the food.']],
   off: [['The handcart takes the food across the square.'], ['The lorry sets off on the long road to the town.'], ['The cargo bike takes the food across the square.']],
   done: [['Your stall had full crates in summer. In winter it has one small basket, which you grew under the cover.'], ['Both sides of your stall have cold boxes. All of the food came a long way, and the lorry caused pollution.'], ['Both sides of your stall are full. You grew fresh food in the summer and in the snow.']],
-  endT: 'A summer evening', endSay: [['The gardens are full, and the neighbours are picking food for supper.'], ['The lorry from the big farm is on its way with tomorrow\'s food.'], ['The indoor farm glows across the square, with your crops on its shelves.']] };
+  endT: 'A summer evening', endSay: [['The gardens are full, and the neighbours are picking food for supper.'], ['The lorry from the big farm is on its way with tomorrow\'s food.'], ['The indoor farm glows across the square, with fresh food on its shelves.']] };
 
 // ---- 2. the plans, in the order in which they stand in the square from left to right, and what the checks find ----------------------
 const INK = '#1f2a44', svg = (inner) => `<svg class="tagpic" viewBox="0 0 44 36" aria-hidden="true">${inner}</svg>`;

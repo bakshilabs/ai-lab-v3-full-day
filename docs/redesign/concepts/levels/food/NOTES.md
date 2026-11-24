@@ -23,13 +23,16 @@ In the first build the child grew one crate of food, and the only real decision 
 
 - **The indoor farm.** The child chooses three crops, puts six trays on nine shelves, turns on the water and the lights, picks the food and sends the cargo bike to the summer side of the stall, as before. Then snow falls outside. Nothing changes inside, and the picked trays grow again by themselves, because the water and the lights are still on. Three shelves are still empty. The child fills them for the winter and may choose a different crop for each one, from four low crops. One tap on the lift picks all nine shelves, and the cargo bike fills the winter side of the stall with crates in the child's own mix.
 - **The community gardens.** The child plants, waters, picks and sends the handcart to the summer side, as before. Then autumn comes and the summer plants are over. The gardens have one winter cover, a low frame of glass. The child chooses one of three winter crops (carrots, cabbages or leeks) and one of eight beds for it. The snow comes and lies on every bed but that one. The child picks the food, and the handcart takes one small basket of it to the winter side. This is the dash of the "Food all year" check, seen from the inside: one bed is all that grows in the snow.
-- **The big farm far away.** The child chooses three of five crops that keep for months in the cold (carrots, cabbages, potatoes, onions and apples), sows six of eight fields and starts the harvester. The camera then goes close to the shed, where two farm workers stand beside six cold boxes. Each box has a band in the colour of its crop. The child taps three boxes into the cold store for the winter, and so decides which food the town will have in the snow. The other three go on the lorry, and the sign over the lorry counts "Day 1", "Day 2" and "Day 3" on the long road. Then snow covers the fields, the child opens the cold store, and the lorry makes the long journey again with the boxes that were kept.
+- **The big farm far away.** The child chooses three of five crops that keep for months in the cold (carrots, cabbages, potatoes, red onions and apples), sows six of eight fields and starts the harvester. The camera then goes close to the shed, where two farm workers stand beside six cold boxes. Each box has a band in the colour of its crop. The child taps three boxes into the cold store for the winter, and so decides which food the town will have in the snow. The other three go on the lorry, and the sign over the lorry counts "Day 1", "Day 2" and "Day 3" on the long road. Then snow covers the fields, the child opens the cold store, and the lorry makes the long journey again with the boxes that were kept.
 
 The decisions in the play break are now these: which three crops; where each one goes; and, for the winter, which crop fills the empty shelves, or which winter crop goes under the one cover and on which bed, or which three boxes are kept. Each of them shows on the child's stall, and the stall keeps it in the town, on "Try another plan" and in the closing picture.
 
 ### Finished by the second designer
 
-- **The big farm grows food that keeps.** The first designer of the round noted that the cold store rested on a simplification, because lettuce, strawberries and tomatoes are not kept in cold stores for months. The big farm now has crops of its own, carrots, cabbages, potatoes, onions and apples, which really are kept that way, and Florence says so when the child chooses: "The big farm grows food that keeps for months in the cold." The gardens and the indoor farm keep their summer crops. This also removes the two reds of tomatoes and strawberries that were hard to tell apart on the cold boxes, and makes the big farm's play break look different from the other two.
+- **The big farm grows food that keeps.** The first designer of the round noted that the cold store rested on a simplification, because lettuce, strawberries and tomatoes are not kept in cold stores for months. The big farm now has crops of its own, carrots, cabbages, potatoes, red onions and apples, which really are kept that way, and Florence says so when the child chooses: "The big farm grows food that keeps for months in the cold." The gardens and the indoor farm keep their summer crops. This also removes the two reds of tomatoes and strawberries that were hard to tell apart on the cold boxes, and makes the big farm's play break look different from the other two.
+- When the child opens the cold store in winter, the camera now comes close to the shed again, so the three boxes that the child kept are big. Before, they were tiny in the far view of the snowy farm.
+- In the closing picture of the indoor farm, the camera has moved a little, so that the tomato plants on the ground floor no longer stand over the heads of the family like hats.
+- The sentence "The grower loads the cargo bike." came after the bike had already crossed the square. It now says "The cargo bike takes the food across the square."
 - The recorder `play.mjs` can now press "Keep this plan" after "Try another plan" (put `KEEP=1` in front of the command), so that path has been run once.
 - The play break of the indoor farm now begins in summer, so its words for the ripe shelves no longer speak of snow (this one line was saved by the first designer just before it was stopped).
 
@@ -45,19 +48,23 @@ The decisions in the play break are now these: which three crops; where each one
 
 ## What was run in this round, and what was not
 
-All three plans were played from the job to the last picture with `play.mjs`, with the lighting effects on:
+The first designer's recording of the indoor farm at 1440 wide had been cut off after eight pictures, and its recording of the big farm stopped before the recap. Both paths were recorded again from the job to the last picture by the second designer, with the lighting effects on and with the final code, and every picture was looked at:
 
-- the indoor farm at 1440 by 810 (`pictures/indoor-farm-1440/`);
-- the gardens at 1024 by 640, followed by "Try another plan" with the big farm and "Go back to my first plan" (`pictures/gardens-then-big-farm-1024/`);
-- the big farm at 1024 by 640, followed by "Try another plan" with the indoor farm and "Go back to my first plan" (`pictures/big-farm-then-indoor-farm-1024/`). This run also shows the ending for the big farm plan, which the first build had not run again.
+- the indoor farm, which is good on every check, at 1440 by 810 (`pictures/indoor-farm-1440/`);
+- the big farm at 1024 by 640, followed by "Try another plan" with the indoor farm and "Keep this plan" (`pictures/big-farm-then-indoor-farm-1024/`). This shows the big farm's play break with its new crops, and the closing picture after a second plan is kept.
 
-The corner chip and the closing words were checked with a small script that holds the level in a frame with `?next=Go on`, for all three plans, and once standing alone.
+The folder `pictures/gardens-then-big-farm-1024/` is the first designer's recording of the gardens, made in this round before the second designer's changes. Its gardens play break is unchanged since, but its "Try another plan" pictures show the big farm before the change of crops.
+
+Quick checks without the lighting effects were also run of the big farm's play break (to see the new crops, the boxes and the close view of the cold store) and of the indoor farm to its closing picture.
 
 These were not run:
 
-- "Keep this plan" after "Try another plan". Every run pressed "Go back to my first plan".
+- "Go back to my first plan" in the final code (it was run by the first designer in this round).
 - "Ask again", and "Play again" in the middle of the play break.
-- The level inside the real page of the whole game (`../../game/`). Only a plain frame was used.
+- The level held in a frame with `?next=`. The first designer checked the corner chip and the closing words that way in this round; the second designer read the code, which has not changed since, and did not run it again.
+- The level inside the real page of the whole game (`../../game/`).
+- Red onions and cabbages at the big farm were not chosen in any recording. Red onions were given their colour after the final recordings had loaded the page.
+- Two small things were changed after the final recordings and are not in their pictures: the onions became red onions with a purple band, and the closing sentence of the indoor farm now says "with fresh food on its shelves" instead of "with your crops on its shelves", because a child who keeps the indoor farm after "Try another plan" did not grow its crops.
 - Nobody has played the level by hand with a mouse in a real browser at full speed, and nobody has listened to its sound.
 
 ## How to record
@@ -66,7 +73,7 @@ Run these from this folder. Each takes between twenty minutes and more than an h
 
     node play.mjs pictures/indoor-farm-1440 1440 810 2 -1
     node play.mjs pictures/gardens-then-big-farm-1024 1024 640 0 1
-    node play.mjs pictures/big-farm-then-indoor-farm-1024 1024 640 1 2
+    KEEP=1 node play.mjs pictures/big-farm-then-indoor-farm-1024 1024 640 1 2
 
 The last two numbers are the plan the sample child chooses and the plan it tries afterwards (0 is the gardens, 1 is the big farm, 2 is the indoor farm, and -1 means that it does not try another). For a quick look at the play break alone, put `SKIP=1 QUERY='&plain' STEP=500` in front of the command: it goes from the job straight to the play break, with the lighting effects off.
 
@@ -95,6 +102,6 @@ The last two numbers are the plan the sample child chooses and the plan it tries
 
 **Does it need more activities or scenes?** No. It has the square, three places to grow food, a year of weather, and a play break in two halves. What it needs now is to be played by real children, and then to be trimmed where they lose interest, most likely in the big farm's play break.
 
-**Is the designer proud of the work?** Yes for the gardens and the indoor farm, with one reservation for the big farm. The winter cover in the gardens and the three empty shelves of the indoor farm make the child do with their own hands what the check "Food all year" found, and the stall shows it afterwards. The big farm's cold store works as play, but it rests on a simplification about which foods keep, which is written above for the owner to judge.
+**Is the designer proud of the work?** Yes. The winter cover in the gardens and the three empty shelves of the indoor farm make the child do with their own hands what the check "Food all year" found, and the stall shows it afterwards. The big farm's cold store now holds food that really keeps, so its play break is true as well as playable. The big farm is still the plainest of the three to look at.
 
 **Is the designer impressed by the experience a child gets?** By the place and by the test, yes: the far farm is truly far, and the year turns in front of the child. By the play break, more than before, but not fully. It is still a chain of taps on yellow places, the result cards still do not change with the child's words, and nobody has yet played it by hand at full speed or listened to it.
