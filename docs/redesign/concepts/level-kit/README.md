@@ -163,3 +163,9 @@ The recording machine draws in software, at about one picture each second, so a 
 - Every word on the screen is a placeholder until the owner's words are in, and the label that says so stays on the page. Do not call any outside service to write words.
 - The classrooms have fast computers, so do not hold back the look: soft shadows, glow and the other lighting effects are wanted.
 - Each level must look and feel different from the others and from Homes. The camera is down among the people, the people have faces and are doing something, and the child is inside a small human story.
+
+## Changes since the levels started to use the kit
+
+No public name or behaviour of the kit has changed. Two changes were made inside `record.mjs` only, because the recording machine is shared and is sometimes very slow: every press and every wait is now given three minutes before it gives up, and so is the saving of each picture. A recording script needs no change for this.
+
+One thing is worth knowing if a button in your level moves, for example a button that nods to invite a tap. The browser used for recording waits for a button to stop moving before it presses it, so press such a button in your recording script with `r.p.click(selector, { force: true })`.
