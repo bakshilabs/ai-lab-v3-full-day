@@ -1,0 +1,36 @@
+/* The look of the start page of the game, on top of the kit's own style sheet: the title, the signs over the six places, the six squares that show
+   which levels are done, the cards of the jobs at the end, and the narrow bar that stays above a level while it is played. */
+.top .chip { display: none; }                                         /* the title already says where we are */
+body.home .step { margin: 0 auto 0 0; border-radius: 26px; padding: 12px 34px 15px; font-size: 42px; }
+body.home .step small { display: block; margin-top: 5px; font: 700 17px/1 var(--ui-body); text-align: center; }
+/* the sign over a place: its number, its name and, when it is done, a tick and the word for it. The place that comes next is yellow and nods */
+.plate.lv { display: flex; align-items: center; gap: 8px; padding: 5px 12px 6px 6px; pointer-events: auto; cursor: pointer; font-size: 19px; }
+.plate.lv .n { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ui-ink); color: #fff; font: 800 20px/1 var(--ui-display); }
+.plate.lv.on .n { background: var(--ui-ink); }
+.plate.lv.is-done .n { background: var(--ui-good); }
+.plate.lv small { margin-top: 3px; font-size: 13px; }
+.plate.lv .mark { width: 24px; height: 24px; font-size: 15px; font-style: normal; }
+.plate.lv:hover { outline: 4px solid var(--ui-sun); outline-offset: 2px; }
+.plate.lv.off { pointer-events: none; }
+/* the six squares come from tokens.css (.ui-progress); here they only get a caption */
+.prog { display: flex; align-items: center; gap: 10px; font: 700 16px/1.2 var(--ui-body); color: var(--ui-ink-soft); }
+.btn.small { min-height: 44px; padding: 6px 14px; font: 700 17px/1.1 var(--ui-body); box-shadow: 0 4px 0 var(--ui-ink); }
+/* the cards of the jobs, at the end of the hour */
+.card.job { flex-direction: row; align-items: center; gap: 14px; }
+.card.job svg { flex: none; width: 64px; height: 64px; }
+.card.job p { font: 600 19px/1.3 var(--ui-body); } .card.job p b { display: block; font: 800 22px/1.2 var(--ui-display); margin-bottom: 2px; }
+.over .head { grid-column: 1 / -1; justify-self: start; pointer-events: auto; padding: 8px 16px 9px; background: var(--ui-paper); border: 3px solid var(--ui-ink); border-radius: 14px; box-shadow: var(--ui-shadow-rest); font: 700 19px/1.25 var(--ui-body); }
+@media (max-height: 700px), (max-width: 1100px) { body.home .step { font-size: 32px; padding: 8px 24px 10px; } .card.job svg { width: 44px; height: 44px; } .card.job p { font-size: 15px; } .card.job p b { font-size: 18px; } .plate.lv { font-size: 16px; } .plate.lv .n { width: 28px; height: 28px; font-size: 17px; } }
+
+/* While a level is played it fills the page, under a narrow bar with the way back to the town and the six squares. The town behind it is put to sleep: its picture is made tiny, so that the computer draws only the level */
+.play { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; background: #fffaf0; pointer-events: auto; }
+.play[hidden] { display: none; }
+.play iframe { flex: 1; min-height: 0; width: 100%; border: 0; display: block; }
+.bar { flex: none; display: flex; align-items: center; gap: 14px; height: 44px; padding: 0 12px; background: var(--ui-ink); color: #fff; font: 700 16px/1 var(--ui-body); }
+.bar button { height: 32px; padding: 0 14px; background: var(--ui-paper); border: 0; border-radius: 999px; font: 800 16px/1 var(--ui-display); color: var(--ui-ink); cursor: pointer; }
+.bar button:hover { background: var(--ui-sun); } .bar button:focus-visible { outline: 3px solid var(--ui-sun); outline-offset: 2px; }
+.bar .where { margin-left: auto; } .bar .where b { font: 800 17px/1 var(--ui-display); }
+.bar .ui-progress { height: 34px; padding: 0 4px; gap: 4px; border: 0; box-shadow: none; background: none; }
+.bar .ui-progress li { width: 26px; height: 26px; border-width: 2px; border-color: #fff; font-size: 14px; border-radius: 7px; }
+.bar .ui-progress .is-now { width: 30px; height: 30px; font-size: 17px; }
+.app.asleep .view { flex: none; width: 4px; height: 4px; }
