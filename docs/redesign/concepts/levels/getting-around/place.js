@@ -201,6 +201,8 @@ export function makePlace(W, hooks) {
   const layout = (i) => (s.child && s.child.plan === i ? s.child.board : BD.florence(i, s.park === 2));
   const model = (i) => { const b = layout(i), hs = BD.homes(b), walk = BD.walkers(b, s.style); return { b, hs, walk, walkers: walk.filter(Boolean).length, kept: BD.keptTrees(i, s.park === 2).length }; };
   s.model = (i) => { const b = BD.florence(i, s.park === 2), walk = BD.walkers(b, s.style); return { walkers: walk.filter(Boolean).length, kept: BD.keptTrees(i, s.park === 2).length }; };
+  // what is in the town now: the child's own paths for the plan the child built, Florence's drawing for any other plan
+  s.now = (i) => { const m = model(i); return { walkers: m.walkers, kept: m.kept, gran: m.walk[granI] }; };
   const atHome = () => { GATES.forEach((q, i) => { people[i].position.set(doorPt[i][0], 0, doorPt[i][1]); people[i].rotation.y = homeAt[i][2]; people[i].visible = true; cars[i].visible = false; homes[i].userData.gate.rotation.y = 0; }); granPlate.hide = true; };
   const openGate = (i, k) => { homes[i].userData.gate.rotation.y = -1.5 * k; };
   // the land as it is before anything is built: every old tree, nobody out yet
@@ -280,7 +282,7 @@ export function makePlace(W, hooks) {
   // ---- the play break: the child fits path pieces together on the board -------------------------------------------------------------------------
   lines.visible = false; for (let i = 0; i <= N; i++) { B(lines, 17.5 - i * 5, 28.5, 0.1, 35, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); B(lines, 0, 11 + i * 5, 35, 0.1, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); }
   const marks = []; const markAt = (k) => { if (!marks[k]) { const m = group(g, X(cOf(k)), 0.2, Z(rOf(k))), y = M('#ffdf3d', { unlit: true, raw: true, op: 0.86 }), ink = M('#1f2a44', { unlit: true, raw: true }); blk(m, 0, 0, 4.3, 4.3, 0, 0.06, '#ffdf3d', { shadow: false, mat: y }); for (let q = 0; q < 4; q++) for (const e of [-1, 1]) { blk(m, -1.6 + q * 1.07, e * 2.15, 0.6, 0.2, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); blk(m, e * 2.15, -1.6 + q * 1.07, 0.2, 0.6, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); } glowMarks(m); marks[k] = m; } return marks[k]; };
-  s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick, s.park === 2), state = GATES.map(() => 'home'), toks = {}; let sel = pick === 2 ? 'fork' : 'straight', told = '', finished = false, slotN = 0;
+  s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick, s.park === 2), state = GATES.map(() => 'home'), toks = {}; let sel = (pick === 2 ? ['fork', 'bend', 'straight'] : ['straight', 'fork', 'bend']).find((kd) => BD.places(b, kd).length) || 'fork', told = '', finished = false, slotN = 0;
     s.child = { plan: pick, board: b }; quiet(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; glide(VIEW.play, 1.8);
     GATES.forEach((q, i) => { people[i].position.set(gatePt[i][0] + DX[q.side] * 0.9, 0, gatePt[i][1] + DZ[q.side] * 0.9); people[i].rotation.y = Math.atan2(-DX[q.side], -DZ[q.side]); });
     const kinds = ['straight', 'bend', 'fork', ...(left.bridge ? ['bridge'] : []), 'lift'];

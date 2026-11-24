@@ -36,7 +36,7 @@ const W = {
   tryOther: 'Try another plan', chooseOther: 'Choose a different plan to see it in the town.', first: 'Your first plan', what: 'What changed?', keepFirst: 'Go back to my first plan', keepThis: 'Keep this plan',
   recapT: 'One more question', recapQ: 'Point to a plan where everyone walked to the shops.', recapYes: '', recapNo: '',
   recapYesOf: (p) => `Yes. With ${p.toLowerCase()}, everyone walked to the shops.`, recapNoOf: (ps) => `Look again at the postcards. Everyone walked with ${ps.map((p) => p.toLowerCase()).join(' and with ')}.`, recapNone: 'In this test, no plan let everyone walk. Short and direct paths make the walk easier.',
-  endT: 'The walk to the shops', endSay: ['Your family walks the path to the shops, under the blossom.'], end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again',
+  endT: 'The walk to the shops', endSay: ['Your family and Gran walk the path to the shops, under the blossom.'], endCar: ['Your family walks to the shops. Gran comes the long way round by car.'], end: 'This is the end of the trial level. Thank you for playing.', replay: 'Play again',
   gran: 'Gran', granCar: 'Gran, in her car', granHome: 'Gran’s home', family: 'Your family', parkHere: 'The park',
   postcard: 'Postcard' };
 
@@ -74,5 +74,5 @@ const hooks = { tag: (i) => `${plans[i].icon}<span><b>${esc(plans[i].lines[0])}<
   shutter: () => new Promise((res) => { const b = btn(W.take, 'sun', () => { b.disabled = true; res(); }); setTray([cards, b]); }), clear: () => { shots.fill(''); drawCards(); } };
 
 runLevel({ place: { number: 1, town: 'Eco Town', level: 'Getting around' }, words: W, plans, results, evidence: cards, scene: () => makePlace(W, hooks),
-  after: (i, s) => { const m = s.model(i); return `${W.afterWalk(m.walkers)} ${W.afterTrees(m.kept)}`; },
-  ends: (pick, s) => [{ step: W.endT, say: [...W.endSay, W.end], go: () => s.walkHome(pick) }] });
+  after: (i, s) => { const m = s.now(i); return `${W.afterWalk(m.walkers)} ${W.afterTrees(m.kept)}`; },
+  ends: (pick, s) => [{ step: W.endT, say: [...(s.now(pick).gran ? W.endSay : W.endCar), W.end], go: () => s.walkHome(pick) }] });
