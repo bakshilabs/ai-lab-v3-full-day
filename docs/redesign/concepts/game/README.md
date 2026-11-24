@@ -40,8 +40,6 @@ Run these from this folder. The machine that records draws in software, so the s
 node check.mjs start 1440 810          the start page with nothing done, three done and all done, and the ending
 node check.mjs join 1440 810 3         from the start page through all six levels to the ending
 node check.mjs join 1440 810 3 4       the same, starting at level 4 with levels 1 to 3 remembered as done
-```
-
 node check.mjs sandbox 1440 810 3      the game inside a sandboxed frame in which the browser refuses to remember anything, as on a published page
 ```
 
