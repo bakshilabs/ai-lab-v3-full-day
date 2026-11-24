@@ -1,7 +1,7 @@
 // Plays the Food level through and saves a picture of every step.
 //   node play.mjs <out dir> <width> <height> <plan> <second plan or -1>
 // plan is the plan that the child chooses (0 the community gardens, 1 the big farm far away, 2 the indoor farm).
-// If a second plan is given, the script also presses "Try another plan". RECORD_STOP=3 stops after three pictures, for a quick look.
+// If a second plan is given, the script also presses "Try another plan", and then "Go back to my first plan", or "Keep this plan" when KEEP=1 is set. RECORD_STOP=3 stops after three pictures, for a quick look.
 // For a quick check of the play break only: SKIP=1 goes from the job straight to the play break, and QUERY='&plain' turns the lighting effects off.
 //
 // The recording machine is shared and can take several seconds to draw one picture, so the script gives the page a clock of its own: every
@@ -24,7 +24,7 @@ const PH = ['go0', 'first0', 'boxes0', 'autumn', 'winter', 'go1', 'first1', 'box
 const phase = (name) => until(([l, n]) => l.indexOf(window.trial.cur.phase) >= l.indexOf(n), [PH, name]), stage = (name) => until(([l, n]) => l.indexOf(window.trial.cur.stage) >= l.indexOf(n), [ST, name]);
 // the words of the sample child, which are nearest to the plan it will choose, and the crops and places it uses
 const WORD = [['inside the town', 'outdoors in the soil'], ['far away, where there is lots of land', 'outdoors in the soil'], ['inside the town', 'indoors under lights']][P];
-const CROP = ['tomato', 'lettuce', 'strawberry'], SLOT = [[0, 2, 4, 5, 7, 6], [0, 1, 3, 4, 6, 7], [0, 2, 3, 5, 7, 8]][P];
+const CROP = P === 1 ? ['carrot', 'potato', 'apple'] : ['tomato', 'lettuce', 'strawberry'], SLOT = [[0, 2, 4, 5, 7, 6], [0, 1, 3, 4, 6, 7], [0, 2, 3, 5, 7, 8]][P];
 if (process.env.SKIP) { await snap('job', 1.5); await p.evaluate((i) => { window.trial.choose(i); }, P); } else {
 await snap('job', 1.5); await tap('family'); await snap('job-family-hops', 0.3); await click('Start'); await snap('ask', 1.5); await click(WORD[0]); await snap('ask-word-1', 0.6); await click(WORD[1]); await snap('ask-word-2', 0.6);
 await click('Ask Florence'); await snap('plans-nearest', 1.5); await has('Take the food to market'); await snap('plans', 0.6); await tap('garden'); await snap('plans-tap-gardens', 0.4);
@@ -48,5 +48,5 @@ if (P === 0) { await stage('w-place'); await snap('break-autumn', 0.4); await p.
 if (P === 2) { await stage('winter'); await snap('break-snow-comes', 3.4); await stage('w-place'); await snap('break-winter-shelves', 0.4); await tap('slot', 1); await vwait(0.5); await p.click('[data-crop="pepper"]'); await tap('slot', 4); await vwait(0.5); await tap('slot', 6); await snap('break-winter-placed', 0.6);
   await stage('c'); await snap('break-winter-ripe', 0.4); await tap('c'); await snap('break-winter-picking', 0.9); await stage('off2'); await snap('break-winter-off', 2.4); await snap('break-delivery-winter', 4.6); }
 await has('Next'); await snap('break-done', 0.6); await click('Next'); await has('Try another plan'); await snap('town', 1.2); await tap('stall', P); await snap('town-tap-stall', 0.4);
-if (+other >= 0) { await click('Try another plan'); await snap('other-plans', 1); await r.usePlan(+other); await snap('what-changed', 2.2); await click('Go back to my first plan'); await snap('first-kept', 2.2); }
+if (+other >= 0) { await click('Try another plan'); await snap('other-plans', 1); await r.usePlan(+other); await snap('what-changed', 2.2); if (process.env.KEEP) { await click('Keep this plan'); await snap('second-kept', 2.2); } else { await click('Go back to my first plan'); await snap('first-kept', 2.2); } }
 await click('Next'); await snap('recap', 3.6); await tap('answer', 2); await snap('recap-answer', 0.6); await click('Next'); await snap('end', 6.5); await r.close();
