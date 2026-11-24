@@ -12,10 +12,12 @@ const r = await openLevel({ page: 'concepts/levels/food/index.html', out, width:
 p.setDefaultTimeout(600000);
 await p.evaluate((step) => { let v = performance.now(), last = -1; const raf = window.requestAnimationFrame.bind(window); performance.now = () => v; window.vpause = false;
   window.requestAnimationFrame = (fn) => raf((t) => { if (t !== last) { last = t; if (!window.vpause) v += step; } fn(v); }); window.vnow = () => v; }, STEP);
+// The script saves its pictures by itself and tries again if the busy machine takes too long, because the helper gives up after three minutes
+let shots = 0; const save = async (name) => { const file = `${out}/${String(++shots).padStart(2, '0')}-${name}.jpg`; for (let k = 0; ; k++) { try { await p.screenshot({ path: file, type: 'jpeg', quality: 82, timeout: 600000 }); break; } catch (e) { if (k >= 3) throw e; } } console.log(name); if (shots >= +(process.env.RECORD_STOP || 999)) { await r.close(); process.exit(0); } };
 const until = (fn, arg) => p.waitForFunction(fn, arg, { timeout: 900000 });
 const vwait = async (sec) => { const t = await p.evaluate(() => window.vnow()); await until((t1) => window.vnow() >= t1, t + sec * 1000); };   // waits in the page's own time
 // the page's time stands still while a picture is taken, so that the picture shows the moment it is named after
-const snap = async (name, sec = 0.6) => { await vwait(sec); await p.evaluate(() => { window.vpause = true; }); await p.waitForTimeout(400); await shot(name, 0); await p.evaluate(() => { window.vpause = false; }); };
+const snap = async (name, sec = 0.6) => { await vwait(sec); await p.evaluate(() => { window.vpause = true; }); await p.waitForTimeout(400); await save(name); await p.evaluate(() => { window.vpause = false; }); };
 // waits until the test, or the play break, has reached a moment or gone past it
 const PH = ['go0', 'first0', 'boxes0', 'autumn', 'winter', 'go1', 'first1', 'boxes1'], ST = ['crops', 'place', 'a', 'b', 'pick', 'off'];
 const phase = (name) => until(([l, n]) => l.indexOf(window.trial.cur.phase) >= l.indexOf(n), [PH, name]), stage = (name) => until(([l, n]) => l.indexOf(window.trial.cur.stage) >= l.indexOf(n), [ST, name]);
