@@ -116,7 +116,7 @@ export function walkingBus(s, cfg, api) { const n = cfg.ids.length, nb = n > 3 ?
     grow([[xs - 1.6, 0, 0], [xs, 0, -2.5], [xs + 1.8, 0, -4.8], [xs + 5.6 + GAP * n, 0, -4.8]]); took = true;
     for (let j = nb; j < n; j++) { await stopAt(j); if (!live()) return; }
     // the crossing: press the button, wait for the green figure, cross with the teacher
-    await walkTo(dOf(xc - 1.3)); if (!live()) return; at = -1; camOn = false; glide({ eye: [xc - 4.5, 3.1, 11.4], at: [xc + 0.6, 1.5, -2.5], fov: 40 }, 1.6); press.visible = true; api.say(W.cross); await until('button'); if (!live()) return; press.visible = false; beep(440, 0.12); halt = true; carM.color.set('#ff3b30'); api.say(W.waiting);
+    await walkTo(dOf(xc - 1.3)); if (!live()) return; at = -1; camOn = false; glide({ eye: [xc - 6, 3.4, 12.5], at: [xc - 3.5, 1.5, -2.5], fov: 40 }, 1.6); press.visible = true; api.say(W.cross); await until('button'); if (!live()) return; press.visible = false; beep(440, 0.12); halt = true; carM.color.set('#ff3b30'); api.say(W.waiting);
     for (let k = 0; k < 60; k++) { await wait(0.25); if (!live()) return; if (k >= 5 && !vs.some((v) => v.position.z > STOPZ + 0.6 && v.position.z < 9.5)) break; }
     redM.color.set('#5a2320'); greenM.color.copy(hot('#35e06a', 1.5)); beep(880, 0.12); beep(1100, 0.2); api.say(W.green); await wait(0.5);
     yard = null; const wait2 = (async () => { if (!m) return; lead2.visible = true; for (const p of others) p.visible = true; await tw((c2[c2.length - 1] - 8) / 3.5, (k) => { o2 = k; }); })();
