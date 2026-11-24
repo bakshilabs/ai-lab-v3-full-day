@@ -9,7 +9,7 @@
 .pc i { background: var(--ui-paper-dim); border: 2px dashed var(--ui-ink-soft); }
 .pc.new { animation: drop .5s var(--ui-ease-pop) both; } @keyframes drop { from { transform: translateY(-60px) rotate(-8deg); opacity: 0; } }
 .pc:disabled { cursor: default; color: var(--ui-ink-soft); }
-.card .pcimg { display: block; width: 100%; aspect-ratio: 2.3; object-fit: cover; object-position: 50% 62%; border: 3px solid var(--ui-ink); border-radius: 8px; }
+.card .pcimg { display: block; width: 100%; aspect-ratio: 3.1; object-fit: cover; object-position: 50% 58%; border: 3px solid var(--ui-ink); border-radius: 8px; }
 .pcbig { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: rgba(31, 42, 68, .55); cursor: pointer; }
 .pcbig figure { margin: 0; padding: 12px 12px 8px; background: #fff; border: 4px solid var(--ui-ink); border-radius: 12px; box-shadow: var(--ui-shadow-rest); transform: rotate(-1.5deg); max-width: 78%; font: 800 22px/1.2 var(--ui-display); text-align: center; }
 .pcbig img { display: block; max-width: 100%; max-height: 60vh; border-radius: 4px; margin-bottom: 6px; }
@@ -17,3 +17,5 @@
 .tok.mini { width: 92px; }
 .tray.wide { align-items: flex-end; }
 @media (max-width: 1100px), (max-height: 700px) { .pc { width: 104px; font-size: 11px; padding: 3px 3px 2px; } .tok.mini { width: 78px; } .sws.three { grid-template-columns: repeat(3, 32px); gap: 5px; } }
+/* once the result cards carry the postcards, the small ones in the band are not needed */
+.app:has(.over .card) .postcards { display: none; }
