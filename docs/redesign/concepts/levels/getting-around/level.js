@@ -21,7 +21,7 @@ const W = {
   choose: 'People or cars at the shops? Blossom or stumps? Choose a plan.', again: 'Ask again', use: 'Use this plan',
   checks: ['Promote walking', 'Nature'], walked: (n) => `${n} of 10 homes walked`, kept: (n) => `${n} of 10 old trees stayed`,
   walkAll: ['Everyone walked to the shops.', 'Everyone walked to the shops.', 'Everyone walked across the middle to the shops.'], walkSome: 'People from the far homes took their cars.',
-  nature: { cut: 'Most of the old trees were cut down.', half: 'Half of the old trees were cut down. The new park has only young trees.', loop: 'The wide park stayed in the middle.', park: 'The park stayed in the middle.' },
+  nature: { cut: 'Most of the old trees were cut down.', half: 'Half of the old trees were cut down. The new park has only young trees.', loop: 'The wide park stayed in the middle.', park: 'The park stayed in the middle.', bend: 'Every old tree stayed. The paths bend round them.' },
   playT: 'Fit the paths together', next: 'Next',
   piece: { straight: 'Straight', bend: 'Bend', fork: 'Fork', bridge: 'Bridge', lift: 'Take back' }, left: (n) => `${n} left`, colour: 'Paving colour', colours: ['Cream', 'Clay', 'Slate'],
   joined: (n) => (n ? `${n} of 10 homes are joined to the shops.` : 'Join every home to the shops.'),
@@ -53,7 +53,7 @@ const plans = [{ name: 'A grid of streets', lines: ['A grid of streets', 'A path
 const walkMark = (n) => (n === 10 ? 'g' : n >= 8 ? 'f' : 'p'), treeMark = (n) => (n >= 9 ? 'g' : n >= 4 ? 'f' : 'p');
 const results = (i, s) => { const m = s.model(i);
   return [{ check: W.checks[0], evidence: meter(m.walkers, W.walked(m.walkers)), text: m.walkers === 10 ? W.walkAll[i] : W.walkSome, mark: walkMark(m.walkers) },
-    { check: W.checks[1], evidence: meter(m.kept, W.kept(m.kept)), text: m.kept >= 9 ? (i === 1 ? W.nature.loop : W.nature.park) : m.kept >= 4 ? W.nature.half : W.nature.cut, mark: treeMark(m.kept) }]; };
+    { check: W.checks[1], evidence: meter(m.kept, W.kept(m.kept)), text: m.kept >= 9 ? (i === 1 ? W.nature.loop : s.park === 2 ? W.nature.park : W.nature.bend) : m.kept >= 4 ? W.nature.half : W.nature.cut, mark: treeMark(m.kept) }]; };
 
 // ---- the postcards of the three mornings ---------------------------------------------------------------------------------------------------
 // They stay in Florence's band from the test until a plan is chosen, and each result card carries its own. A tap on a postcard shows it large.

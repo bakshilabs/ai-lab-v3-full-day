@@ -22,9 +22,10 @@ const onStreet = (c, r) => c % 2 === 1 || r % 2 === 0, onRing = (c, r) => c === 
 
 // Which old trees each plan keeps. plan: 0 is the grid of streets, 1 the winding loop, 2 the paths through a park. parkMid is true when the child asked for the park in the middle.
 // The grid needs the room for its streets, so it keeps only the trees that stand between them, wherever the park is.
+// The footpaths of the third plan bend round every old tree, so that plan keeps them all wherever the child put the park: one plan is always good on every check.
 export function keptTrees(plan, parkMid) {
   if (plan === 0) return TREES.filter((k) => !onStreet(cOf(k), rOf(k)));
-  return parkMid ? [...TREES] : TREES.filter((k) => !UNPROTECTED.includes(k));
+  return parkMid || plan === 2 ? [...TREES] : TREES.filter((k) => !UNPROTECTED.includes(k));
 }
 // What each square of the board is for a plan: 'free' takes a path piece, 'bridge' takes the bridge (or a straight piece where the grid already has road bridges),
 // 'stream' and 'tree' and 'off' take nothing
@@ -138,8 +139,9 @@ export function florence(plan, parkMid, bridgeAt = null) {
 }
 // How many squares a family will walk before they take the car instead. It depends on the paths the child asked for:
 // 0 long and winding (every square is a longer walk), 1 short and direct, 2 beside the busy road (people like the walk less)
-export const LIMIT = [7, 13, 8];
-export const walkers = (b, style) => homes(b).map((h) => h.joined && h.steps <= LIMIT[style]);
+// The footpaths of the third plan cross the middle away from the cars, so the walk is pleasant whichever kind of path the child asked for.
+export const LIMIT = [7, 13, 8], limitOf = (plan, style) => (plan === 2 ? 13 : LIMIT[style]);
+export const walkers = (b, style) => homes(b).map((h) => h.joined && h.steps <= limitOf(b.plan, style));
 // the pieces the child is given for a plan: what Florence's own drawing needs, and a few more, but fewer than there are squares
 export function stock(plan, parkMid) {
   if (plan === 0) return { straight: 16, bend: 8, fork: 10, bridge: 0 };

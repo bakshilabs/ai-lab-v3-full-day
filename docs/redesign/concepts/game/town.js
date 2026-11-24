@@ -73,7 +73,7 @@ function plot(g) { B(g, 0, 0, PW, PD, 0, 0.1, '#c79a66'); B(g, 0, 0, PW - 0.6, P
 export function makeTown({ built = new Set(), next = 0, dusk = false, onPick = () => {} } = {}) {
   const s = newScene(30, { sun: dusk ? [-30, 14, 16] : [-16, 30, 18], skies: [DAY, DUSK, NIGHT], haze: 0.0075, sunColour: dusk ? '#ffb07a' : '#ffe7c2', sunPower: dusk ? 2.3 : 3.2, lightPower: dusk ? 1.05 : 1.4, skyLight: dusk ? '#c9c2ee' : '#e2ecff' }), g = s.g;
   if (dusk) s.scene.fog.color.copy(drawSky(0.86, 0.12, [DAY, DUSK, NIGHT]));
-  Object.assign(s, { eye: [0, 19, 41], at: [0, 3, -3], fov: 28, minAspect: 2.05, drop: 0.6, spin: [], bloom: dusk ? 0.75 : 0.5 });
+  Object.assign(s, { eye: [0, 19, 41], at: [0, 2.3, -3], fov: 28, minAspect: 2.05, drop: 0.6, spin: [], bloom: dusk ? 0.75 : 0.5 });
   // the ground: the low meadow in front, the higher ground behind it with a bank of earth, the river in the foreground, and far hills
   B(g, 0, 20, 160, 80, -1, 1, '#74c45a'); B(g, 0, EDGE - 30, 160, 60, 0, UP, '#6dbb55'); B(g, 0, EDGE + 0.06, 160, 0.14, 0, UP - 0.16, '#a9743f', { shadow: false });
   B(g, 0, -11.5, 13, 8, UP, 0.02, '#6dbb55');

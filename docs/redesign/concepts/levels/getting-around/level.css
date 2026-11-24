@@ -3,7 +3,7 @@
 .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 2; }
 .flash.go { animation: flash .5s ease-out; } @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
 .postcards { display: flex; gap: 10px; align-items: flex-end; }
-.pc { position: relative; width: 150px; padding: 5px 5px 4px; background: #fff; border: 3px solid var(--ui-ink); border-radius: 8px; box-shadow: 0 4px 0 var(--ui-shade); font: 800 14px/1.15 var(--ui-display); text-align: center; cursor: pointer; }
+.pc { position: relative; width: 160px; padding: 5px 5px 4px; background: #fff; border: 3px solid var(--ui-ink); border-radius: 8px; box-shadow: 0 4px 0 var(--ui-shade); font: 800 13px/1.15 var(--ui-display); text-align: center; cursor: pointer; white-space: nowrap; }
 .pc:nth-child(1) { transform: rotate(-2deg); } .pc:nth-child(3) { transform: rotate(2deg); }
 .pc img, .pc i { display: block; width: 100%; aspect-ratio: 2.1; object-fit: cover; border-radius: 3px; margin-bottom: 3px; }
 .pc i { background: var(--ui-paper-dim); border: 2px dashed var(--ui-ink-soft); }
@@ -16,9 +16,9 @@
 .sws.three { grid-template-columns: repeat(3, 42px); }
 .tok.mini { width: 92px; }
 .tray.wide { align-items: flex-end; }
-@media (max-width: 1100px), (max-height: 700px) { .pc { width: 104px; font-size: 11px; padding: 3px 3px 2px; } .tok.mini { width: 78px; } .sws.three { grid-template-columns: repeat(3, 32px); gap: 5px; } }
+@media (max-width: 1100px), (max-height: 700px) { .pc { width: 112px; font-size: 9.5px; padding: 3px 3px 2px; } .tok.mini { width: 78px; } .sws.three { grid-template-columns: repeat(3, 32px); gap: 5px; } }
 /* once the result cards carry the postcards, the small ones in the band are not needed */
 .app:has(.over .card) .postcards { display: none; }
 /* the sign that keeps the first result in view stays small, so that it never covers the shops */
 .first { max-width: 340px; font-size: 14px; } .first span { align-items: flex-start; } .first .mbar i { width: 6px; height: 10px; }
-.first span:not(.pl) { display: block; position: relative; padding-right: 30px; } .first span:not(.pl) .mark { position: absolute; right: 0; top: 0; }
+.first > span:not(.pl) { display: block; position: relative; padding-right: 30px; } .first > span:not(.pl) .mark { position: absolute; right: 0; top: 0; }

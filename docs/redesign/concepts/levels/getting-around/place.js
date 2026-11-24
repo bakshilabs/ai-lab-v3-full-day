@@ -28,7 +28,7 @@ export const VIEW = {
   ask: { eye: [-11, 11.5, -21], at: [-3, 0, 25], fov: 46 },
   board: { eye: [-1.6, 4.2, -6.5], at: [-1.6, 3.9, 7.5], fov: 38 },
   test: { eye: [-7.5, 10.5, -14], at: [2, 0.5, 17], fov: 46 },
-  play: { eye: [0, 33, -5.5], at: [0, 0, 27.5], fov: 42 },
+  play: { eye: [0, 37, -2], at: [0, 0, 28.3], fov: 45 },
   shops: { eye: [-6.5, 2.6, -9], at: [9, 2.4, 1.5], fov: 44 } };
 
 // ---- small things made of blocks ----------------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ export function makePlace(W, hooks) {
   }
   const layer = group(g); let lorries = [];
   // draws a whole board of pieces. plan decides whether the pieces are streets or footpaths; the child's words decide whether they wind and whether the road is busy
-  function drawBoard(b, own = false) { layer.clear(); lorries = []; const road = s.style === 2 ? 2 : b.plan === 2 ? 0 : 1, wig = s.style === 0;
+  function drawBoard(b, own = false) { layer.clear(); lorries = []; const road = b.plan === 2 ? 0 : s.style === 2 ? 2 : 1, wig = s.style === 0;
     b.cells.forEach((p, k) => { if (p) drawPiece(layer, k, p, { road, wig, mat: own ? mine : stone, bridgeLike: p.kind === 'bridge' || b.ground[k] === 'road-bridge' }); });
     // the last stretch from the first square to the forecourt
     if (b.cells[key(SHOP.c, SHOP.r)]) texBox(layer, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, own ? mine : stone, 1.5, 1.5);
@@ -231,7 +231,7 @@ export function makePlace(W, hooks) {
   // ---- the board of Florence's three plans, as three small maps on a notice board ----------------------------------------------------------
   const nb = group(g, -1, 0, 7.5); nb.visible = false; for (const x of [-5.3, 5.3]) B(nb, x, 0, 0.3, 0.3, 0, 4.9, '#8a5a3c'); B(nb, 0, 0, 11.2, 0.24, 0.9, 3.9, '#b98a52', { tex: 'board' }); B(nb, 0, 0, 11.8, 0.9, 4.8, 0.24, '#d2553a'); B(nb, 0, 0, 11, 0.6, 5.04, 0.2, '#d2553a');
   const maps = [0, 1, 2].map((i) => { const c = document.createElement('canvas'); c.width = c.height = 384; const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.BoxGeometry(3.3, 3.3, 0.1), new THREE.MeshBasicMaterial({ map: tex })); m.position.set(3.55 - i * 3.55, 2.85, -0.17); nb.add(m); B(nb, 3.55 - i * 3.55, -0.13, 3.5, 0.06, 1.1, 3.5, '#fffaf0', NS); return { c, tex, m }; });
-  function drawMap(i) { const { c, tex } = maps[i], x = c.getContext('2d'), b = BD.florence(i, s.park === 2), kept = new Set(BD.keptTrees(i, s.park === 2)), S = 44, px = (cc) => 38 + cc * S + S / 2, py = (r) => 330 - r * S - S / 2 - 14, road = s.style === 2 || i !== 2;
+  function drawMap(i) { const { c, tex } = maps[i], x = c.getContext('2d'), b = BD.florence(i, s.park === 2), kept = new Set(BD.keptTrees(i, s.park === 2)), S = 44, px = (cc) => 38 + cc * S + S / 2, py = (r) => 330 - r * S - S / 2 - 14, road = i !== 2;
     x.fillStyle = '#c4ea9c'; x.fillRect(0, 0, 384, 384); x.fillStyle = '#f1e4c8'; x.fillRect(60, 330, 264, 54); x.fillStyle = '#6cc3ee'; x.fillRect(0, py(3) - 7, 384, 14);
     ['#3f78b5', '#d9453c', '#2e9b5a'].forEach((col, q) => { x.fillStyle = col; x.fillRect(74 + q * 82, 346, 70, 30); x.fillStyle = '#fffaf0'; for (let k = 0; k < 4; k++) x.fillRect(74 + q * 82 + 9 + k * 18, 346, 8, 12); });
     const line = (w, col) => { x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; b.cells.forEach((p, k) => { if (!p) return; const cc = cOf(k), r = rOf(k); for (let sd = 0; sd < 4; sd++) if (p.sides[sd]) { x.beginPath(); x.moveTo(px(cc), py(r)); const ex = px(cc) + [0, 1, 0, -1][sd] * S / 2, ey = py(r) - [1, 0, -1, 0][sd] * S / 2; if (s.style === 0) x.quadraticCurveTo((px(cc) + ex) / 2 + (sd % 2 ? 0 : 9), (py(r) + ey) / 2 + (sd % 2 ? 9 : 0), ex, ey); else x.lineTo(ex, ey); x.stroke(); } }); x.beginPath(); x.moveTo(px(3), py(0)); x.lineTo(px(3), 334); x.stroke(); };
@@ -258,7 +258,8 @@ export function makePlace(W, hooks) {
   // a few extra people stroll along the paths of the plan that is in the town, and lorries drive along a busy road
   const extra = [0, 1, 2, 3].map((i) => { const p = fig(g, 0, 0, 0, { k: 0.95 + (i % 2) * 0.3, shirt: SHIRTS[(i + 3) % 6], legs: '#4a556e', skin: SKIN[(i + 1) % 4], hair: HAIR[i % 5], cap: i % 2 ? null : '#e9ad1c', bag: i % 2 ? '#2e9b5a' : null }); p.visible = false; return p; });
   function ambient(m) { ambN++; strollers = []; const ok = m ? m.hs.map((h, i) => (m.walk[i] ? i : -1)).filter((i) => i >= 0) : []; extra.forEach((p, i) => { p.visible = !!ok.length; if (!ok.length) return; const j = ok[(i * 3 + 1) % ok.length], pts = [gatePt[j], ...m.hs[j].way.map(mid), [0, 10.6], [-4 + i * 1.6, 5]]; strollers.push({ o: p, pts, back: pts, v: 0.045 + i * 0.012, ph: i * 0.55 }); });
-    if (m) for (const q of lorries) { const far = m.hs.filter((h) => h.joined).sort((a, b) => b.steps - a.steps)[q.i % 3]; q.pts = far && far.way.length > 2 ? far.way.slice(0, -1).map(mid).map(([x, z]) => [x + 0.5, z + 0.5]) : null; } }
+    if (m) for (const q of lorries) { const far = m.hs.filter((h) => h.joined).sort((a, b) => b.steps - a.steps)[q.i % 3]; q.pts = m.b.plan === 2 ? RING : far && far.way.length > 2 ? far.way.slice(0, -1).map(mid).map(([x, z]) => [x + 0.5, z + 0.5]) : null; } }
+  const RING = [[29.4, -2], [29.4, 58.9], [-29.4, 58.9], [-29.4, 4]];   // with the paths through the park, the lorries of a busy road stay on the road round the outside
   const quiet = () => { strollers = []; for (const p of extra) p.visible = false; };
 
   // ---- the hooks that the order of the steps calls ---------------------------------------------------------------------------------------
@@ -291,7 +292,7 @@ export function makePlace(W, hooks) {
       api.say(finished ? [doneSay(), W.doneHow] : [told || W.joined(joined), how]); };
     const doneSay = () => (state.every((q) => q === 'walked') ? W.doneAll : W.doneSome); let nextBtn = null;
     // what happens at each home when the paths change: a family whose walk is short enough sets off for the shops; if the way is too long, the car comes out
-    const react = () => { const hs = BD.homes(b); drawBoard(b, true); hs.forEach((h, i) => { const within = h.joined && h.steps <= BD.LIMIT[s.style];
+    const react = () => { const hs = BD.homes(b); drawBoard(b, true); hs.forEach((h, i) => { const within = h.joined && h.steps <= BD.limitOf(pick, s.style);
         if (within && state[i] !== 'walked') { state[i] = 'walked'; cars[i].visible = false; people[i].visible = true; openGate(i, 1); const sl = h.gran ? 10 : slotN++ % 10, pts = walkWay(i, h.way, sl); tw(2 + lengthOf(pts) * 0.07, (k) => along(people[i], pts, k, 0.14)).then(() => faceShops(people[i], sl)); told = h.gran ? W.granWalks : W.homeWalks; beep(660, 0.1); setTimeout(() => beep(880, 0.12), 110); }
         else if (h.joined && !within && state[i] === 'home') { state[i] = 'car'; openGate(i, 1); cars[i].visible = true; cars[i].position.set(backPt[i][0], 0, backPt[i][1]); cars[i].rotation.y = homeAt[i][2]; told = W.tooFar; beep(200, 0.15, 'sawtooth', 0.04); }
         else if (!h.joined && state[i] === 'car') { state[i] = 'home'; cars[i].visible = false; } });

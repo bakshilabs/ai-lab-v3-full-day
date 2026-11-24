@@ -22,7 +22,7 @@ const W = {   // every word here is a placeholder. Florence says one short sente
   friend: 'A friend is waiting at the gate. Click the friend.', family: 'Your family is waiting at the gate. Click the child.', joined: (k, n) => (k === n ? 'Everyone is on the walking bus.' : k === 1 ? 'The first friend is on the walking bus.' : `${k} of ${n} friends are on the walking bus.`),
   fork: 'Two good ways lead to school. Click the way you want.', ways: ['Through the orchard', 'Over the footbridge'], took: ['There is an apple for everyone in the orchard.', 'The ducks are following the walking bus.'],
   cross: 'Click the button on the crossing.', waiting: 'The red figure is showing. Everyone waits with the teacher.', green: 'The green figure is showing. The bus crosses with the teacher.',
-  board: 'Every child hangs a badge. A shoe means walked, and a car means driven.', rope: 'Drag the bell rope down to ring the bell.', end: ['Everyone has an apple from the orchard.', 'The ducks followed you all the way to school.'],
+  board: 'Every child hangs a badge. A shoe means walked, and a car means driven.', rope: 'Drag the bell rope down to ring the bell.', end: ['The walking bus picked apples in the orchard.', 'The ducks followed you all the way to school.'],
   skip: 'Florence, please walk us there' };
 
 // cfg: ids are the children of this bus in the order they are picked up, other are the children of the bus from the other end, cars are the children who are driven
