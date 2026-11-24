@@ -5,21 +5,21 @@
 // path "look" only takes one picture of each view, for a quick check.
 import { openLevel } from '../../level-kit/record.mjs';
 const [out = 'pictures/run', width = 1440, height = 810, path = 'park', speed = 1] = process.argv.slice(2);
-const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed, query: '&hold' }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
+const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
 const N = 7, cell = (c, row) => c + row * N, pick = (kind) => r.p.evaluate((k) => [...document.querySelectorAll('.tok')].find((b) => b.textContent.startsWith(k)).click(), kind);
 // lays pieces: each step is [kind, column, row]
 const lay = async (steps, every = 0) => { let n = 0, last = ''; for (const [kind, c, row] of steps) { if (kind !== last) { await pick(kind); last = kind; await r.pause(150); } await tap('cell', cell(c, row)); await r.pause(350); if (every && ++n % every === 0) await shot(`play-${String(n).padStart(2, '0')}`, 900); } };
 const WORDS = { park: ['short and direct', 'in the middle of the town'], loop: ['beside the busy road', 'at the far edge of the town'] }[path] || ['short and direct', 'in the middle of the town'];
 
-await shot('job', 2500); await click('Start'); await shot('ask', 2600);
+await shot('job', 2500); await tap('tree'); await shot('job-tree-tapped', 900); await click('Start'); await shot('ask', 2600);
 await click(WORDS[0]); await shot('ask-paths', 900); await click(WORDS[1]); await shot('ask-park', 900);
 await click('Ask Florence'); await has('Open the shops'); await shot('plans', 900);
-await click('Open the shops'); await shot('test-opening', 3300);
-for (const i of [0, 1, 2]) { await r.until(() => !!window.gaNext); await r.p.evaluate(() => { const f = window.gaNext; window.gaNext = null; f(); }); await shot(`test-${i + 1}-start`, 2400); await shot(`test-${i + 1}-walking`, 2600); await r.until((i) => document.querySelectorAll('.pc img').length >= i + 1, i); await shot(`test-${i + 1}-postcard`, 400); }
+await click('Open the shops'); await shot('test-opening', 3300); await tap('bell'); await shot('test-bell-tapped', 300);
+for (const i of [0, 1, 2]) { await shot(`test-${i + 1}-walking`, 3200); await has('Take the postcard'); await shot(`test-${i + 1}-arrived`, 400); await click('Take the postcard'); await r.until((i) => document.querySelectorAll('.pc img').length >= i + 1, i); await shot(`test-${i + 1}-postcard`, 300); }
 await has('Ask again'); await shot('results', 1200);
 if (path === 'look') { await r.close(); process.exit(0); }
 if (path === 'park') {
-  await r.p.click('.pc:nth-child(3)'); await shot('postcard-large', 600); await r.p.click('.pcbig');
+  await r.p.click('.card:nth-child(3) .pcimg'); await shot('postcard-large', 600); await r.p.click('.pcbig');
   await r.usePlan(2); await r.pause(3200); await shot('play-start', 800);
   await pick('Straight'); await shot('play-wrong-piece', 500); await pick('Fork'); await shot('play-fork', 500);
   // the child forks beside the shops, goes left of the old tree and joins the four near homes

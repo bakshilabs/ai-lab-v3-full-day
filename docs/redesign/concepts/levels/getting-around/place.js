@@ -25,7 +25,7 @@ export const VIEW = {
   ask: { eye: [-11, 11.5, -21], at: [-3, 0, 25], fov: 46 },
   board: { eye: [-1.6, 4.2, -6.5], at: [-1.6, 3.9, 7.5], fov: 38 },
   test: { eye: [-7.5, 10.5, -14], at: [2, 0.5, 17], fov: 46 },
-  play: { eye: [0, 35, -8.5], at: [0, 0, 26.5], fov: 46 },
+  play: { eye: [0, 33, -5.5], at: [0, 0, 27.5], fov: 42 },
   shops: { eye: [-6.5, 2.6, -9], at: [9, 2.4, 1.5], fov: 44 } };
 
 // ---- small things made of blocks ----------------------------------------------------------------------------------------------------------
@@ -212,8 +212,8 @@ export function makePlace(W, hooks) {
   // one morning: every door opens, and each family walks to the shops or takes the car
   async function morning(i) { const me = run, m = showPlan(i), at = places(m); atHome(); granPlate.hide = false; beep(700, 0.08);
     const jobs = GATES.map(async (q, j) => { await wait(0.25 + hash(j, 8) * 0.7); openGate(j, 1);
-      if (m.walk[j]) { const pts = walkWay(j, m.hs[j].way, at[j].slot), sec = 2.6 + lengthOf(pts) * 0.085; await tw(sec, (k) => { along(people[j], pts, k, 0.14); if (j === granI) { granPlate.pos.copy(people[j].position); granPlate.pos.y += 2.9; } }); faceShops(people[j], at[j].slot); beep(880 + j * 30, 0.05, 'sine', 0.04); }
-      else { people[j].visible = false; cars[j].visible = true; const pts = driveWay(j, at[j].spot), sec = 3.4 + lengthOf(pts) * 0.035; await tw(sec, (k) => { along(cars[j], pts, ease(k) * 0.999); if (j === granI) { granPlate.pos.copy(cars[j].position); granPlate.pos.y += 3; } }); beep(150, 0.12, 'sawtooth', 0.03); } });
+      if (m.walk[j]) { const pts = walkWay(j, m.hs[j].way, at[j].slot), sec = 2 + lengthOf(pts) * 0.06; await tw(sec, (k) => { along(people[j], pts, k, 0.14); if (j === granI) { granPlate.pos.copy(people[j].position); granPlate.pos.y += 2.9; } }); faceShops(people[j], at[j].slot); beep(880 + j * 30, 0.05, 'sine', 0.04); }
+      else { people[j].visible = false; cars[j].visible = true; const pts = driveWay(j, at[j].spot), sec = 2.6 + lengthOf(pts) * 0.028; await tw(sec, (k) => { along(cars[j], pts, ease(k) * 0.999); if (j === granI) { granPlate.pos.copy(cars[j].position); granPlate.pos.y += 3; } }); beep(150, 0.12, 'sawtooth', 0.03); } });
     granPlate.el.textContent = m.walk[granI] ? W.gran : W.granCar; await Promise.all(jobs); if (me !== run) return false;
     if (m.walk[granI]) { chime(); await tw(0.7, (k) => { family.position.y = Math.abs(Math.sin(k * Math.PI * 2)) * 0.35; }); }
     return me === run; }
@@ -236,12 +236,18 @@ export function makePlace(W, hooks) {
     for (const k of BD.TREES) { const cc = cOf(k), r = rOf(k), big = k === BD.OAK ? 15 : 11; if (kept.has(k)) { x.fillStyle = '#ff8fbe'; x.strokeStyle = '#1f2a44'; x.lineWidth = 3; x.beginPath(); x.arc(px(cc), py(r), big, 0, 7); x.fill(); x.stroke(); x.fillStyle = '#ffe3ee'; x.beginPath(); x.arc(px(cc) - 3, py(r) - 3, big / 2.4, 0, 7); x.fill(); } else { x.strokeStyle = '#8a5a3c'; x.lineWidth = 3; x.fillStyle = '#e8c99a'; x.beginPath(); x.arc(px(cc) + 12, py(r) + 12, 5, 0, 7); x.fill(); x.stroke(); } }
     GATES.forEach((q, j) => { const hx = px(q.c) + [0, 1, 0, -1][q.side] * 30, hy = py(q.r) - [1, 0, -1, 0][q.side] * 30; x.fillStyle = '#fffaf0'; x.strokeStyle = '#1f2a44'; x.lineWidth = 3; x.fillRect(hx - 9, hy - 7, 18, 16); x.strokeRect(hx - 9, hy - 7, 18, 16); x.fillStyle = DOORS[j]; x.beginPath(); x.moveTo(hx - 13, hy - 6); x.lineTo(hx, hy - 17); x.lineTo(hx + 13, hy - 6); x.fill(); x.stroke(); });
     x.strokeStyle = '#1f2a44'; x.lineWidth = 8; x.strokeRect(0, 0, 384, 384); tex.needsUpdate = true; }
-  const tagPl = [0, 1, 2].map((i) => { const t = plate(s, '', [2.55 - i * 3.55, 5.75, 7.3], 'pl'); t.el.innerHTML = hooks.tag(i); t.hide = true; return t; });
+  const tagPl = [0, 1, 2].map((i) => { const t = plate(s, '', [2.55 - i * 3.55, i === 1 ? 5.25 : 5.85, 7.3], 'pl'); t.el.innerHTML = hooks.tag(i); t.hide = true; return t; });
 
   // ---- drifting petals, and the things that move by themselves ------------------------------------------------------------------------------
   const PN = 110, petalM = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.03, 0.16), new THREE.MeshBasicMaterial({ color: hot('#ffd9e8', 1.15) }), PN), dummy = new THREE.Object3D(), petal = Array.from({ length: PN }, (_, i) => ({ x: (hash(i, 31) - 0.5) * 56, z: -18 + hash(i, 32) * 66, y: hash(i, 33) * 12, v: 0.5 + hash(i, 34) * 0.7, ph: hash(i, 35) * 6 }));
   petalM.frustumCulled = false; g.add(petalM);
-  let strollers = [], ambN = 0;
+  const lines = group(g); let strollers = [], ambN = 0, burstN = 0;
+  const burst = (x, z, n = 16, y = 5) => { for (let q = 0; q < n; q++) { const p = petal[burstN++ % PN]; p.x = x + (hash(burstN, 1) - 0.5) * 3.4; p.z = z + (hash(burstN, 2) - 0.5) * 3.4; p.y = y - 2 + hash(burstN, 3) * 3; } };
+  const hop = (o, h = 0.5) => { if (o.userData.hop) return; o.userData.hop = true; const y0 = o.position.y; tw(0.45, (k) => { o.position.y = y0 + Math.sin(k * Math.PI) * h; }).then(() => { o.userData.hop = false; }); };
+  for (const k of BD.TREES) hitBox(s, g, X(cOf(k)), 1.5, Z(rOf(k)), 4, 5, 4, () => trees.get(k).visible && !lines.visible, () => { burst(X(cOf(k)), Z(rOf(k)), 22); beep(980 + (k % 5) * 60, 0.12, 'sine', 0.05); });
+  shops.forEach((sh, i) => hitBox(s, g, 9.2, 0, sh.zc, 1.6, 4, 6.6, () => !lines.visible, () => { sh.ring = 1; beep(1320, 0.2, 'sine', 0.07); setTimeout(() => beep(1760, 0.25, 'sine', 0.05), 120); if (sh.keeper.visible) hop(sh.keeper, 0.4); }));
+  people.forEach((p, i) => hitBox(s, p, 0, 0, 0, 1.5, 2.4, 1.5, () => p.visible && !lines.visible, () => { hop(p); beep(520 + i * 45, 0.1); }));
+  hitBox(s, family, 0, 0, -0.5, 3.6, 2.6, 2.4, () => family.visible, () => { hop(family, 0.4); beep(700, 0.1); setTimeout(() => beep(930, 0.12), 100); });
   s.tick = (t, dt) => { if (snapWant) { const r = snapWant; snapWant = null; takeNow(r); } petal.forEach((p, i) => { p.y -= p.v * dt; if (p.y < 0.05) p.y = 9 + hash(i, t) * 4; dummy.position.set(p.x + Math.sin(t * 0.7 + p.ph) * 0.9, p.y, p.z + Math.cos(t * 0.5 + p.ph) * 0.6); dummy.rotation.set(t * p.v + p.ph, p.ph, t * 0.8 + p.ph); dummy.updateMatrix(); petalM.setMatrixAt(i, dummy.matrix); }); petalM.instanceMatrix.needsUpdate = true;
     for (const sh of shops) { sh.bell.rotation.x = Math.sin(t * 9) * 0.5 * (sh.ring || 0); sh.ring = Math.max(0, (sh.ring || 0) - dt * 0.7); }
     for (const q of strollers) { const k = (t * q.v + q.ph) % 2, u = k < 1 ? k : 2 - k; along(q.o, k < 1 ? q.pts : q.back, k < 1 ? u : 1 - u, 0.12); }
@@ -253,7 +259,8 @@ export function makePlace(W, hooks) {
   const quiet = () => { strollers = []; for (const p of extra) p.visible = false; };
 
   // ---- the hooks that the order of the steps calls ---------------------------------------------------------------------------------------
-  const sample = group(g);   // a short stretch of path beside the forecourt that shows the kind of path the child is asking for
+  const sample = group(g);
+  // (the white lines of the board are made further down, before the play break)   // a short stretch of path beside the forecourt that shows the kind of path the child is asking for
   s.asking = () => { bare(); quiet(); nb.visible = false; for (const t of tagPl) t.hide = true; famPlate.hide = true; granHome.hide = false; hooks.clear(); s.child = null; glide(VIEW.ask, 1.6); };
   s.words = (list) => { s.style = list[0] ?? 1; s.park = list[1] ?? 2; sample.clear(); outline.clear(); zonePlate.hide = true;
     if (list[0] !== undefined) { const b = BD.newBoard(2, true); b.cells[key(3, 0)] = { kind: 'bend', sides: [false, true, true, false] }; b.cells[key(4, 0)] = { kind: 'straight', sides: [false, true, false, true] }; b.cells[key(5, 0)] = { kind: 'bend', sides: [true, false, false, true] }; b.cells[key(5, 1)] = { kind: 'straight', sides: [true, false, true, false] }; const road = s.style === 2 ? 2 : 0; b.cells.forEach((p, k) => { if (p) drawPiece(sample, k, p, { road, wig: s.style === 0, mat: stone }); }); texBox(sample, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, stone, 1.5, 1.5); if (road) { const l = lorry(sample); l.position.set(X(4) + 0.3, 0.05, Z(0)); l.rotation.y = Math.PI / 2; } trees.get(key(5, 1)).visible = false; } else trees.get(key(5, 1)).visible = true;
@@ -263,11 +270,11 @@ export function makePlace(W, hooks) {
   s.test = async (api) => { const me = run; for (const t of tagPl) t.hide = true; await glide(VIEW.test, 1.5); if (me !== run) return false; nb.visible = false;
     // the shutters roll up, the awnings come out and the bells ring
     await tw(1.5, (k) => shops.forEach((sh, i) => sh.set(Math.max(0, Math.min(1, ease(k) * 1.4 - i * 0.2))))); shops.forEach((sh) => { sh.set(1); sh.ring = 1; }); chime(); await wait(0.6); if (me !== run) return false;
-    for (const i of [0, 1, 2]) { if (new URLSearchParams(location.search).has('hold')) await new Promise((res) => { window.gaNext = res; }); api.step(W.short[i]); api.say(W.morning[i]); if (!await morning(i)) return false; await wait(0.5); flash(); const url = await snap(); if (me !== run) return false; hooks.postcard(i, url); await wait(1.1); if (me !== run) return false; }
+    for (const i of [0, 1, 2]) { api.step(W.short[i]); api.say(W.morning[i]); if (!await morning(i)) return false; api.say(W.takeHow); await hooks.shutter(); if (me !== run) return false; flash(); const url = await snap(); if (me !== run) return false; hooks.postcard(i, url); await wait(0.9); if (me !== run) return false; }
     return true; };
 
   // ---- the play break: the child fits path pieces together on the board -------------------------------------------------------------------------
-  const lines = group(g); lines.visible = false; for (let i = 0; i <= N; i++) { B(lines, 17.5 - i * 5, 28.5, 0.1, 35, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); B(lines, 0, 11 + i * 5, 35, 0.1, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); }
+  lines.visible = false; for (let i = 0; i <= N; i++) { B(lines, 17.5 - i * 5, 28.5, 0.1, 35, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); B(lines, 0, 11 + i * 5, 35, 0.1, 0.03, 0.03, '#ffffff', { ...NS, unlit: true, op: 0.55 }); }
   const marks = []; const markAt = (k) => { if (!marks[k]) { const m = group(g, X(cOf(k)), 0.2, Z(rOf(k))), y = M('#ffdf3d', { unlit: true, raw: true, op: 0.86 }), ink = M('#1f2a44', { unlit: true, raw: true }); blk(m, 0, 0, 4.3, 4.3, 0, 0.06, '#ffdf3d', { shadow: false, mat: y }); for (let q = 0; q < 4; q++) for (const e of [-1, 1]) { blk(m, -1.6 + q * 1.07, e * 2.15, 0.6, 0.2, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); blk(m, e * 2.15, -1.6 + q * 1.07, 0.2, 0.6, 0, 0.1, '#1f2a44', { shadow: false, mat: ink }); } glowMarks(m); marks[k] = m; } return marks[k]; };
   s.playBreak = async (pick, api) => { const me = run, b = BD.newBoard(pick, s.park === 2), left = BD.stock(pick, s.park === 2), state = GATES.map(() => 'home'), toks = {}; let sel = pick === 2 ? 'fork' : 'straight', told = '', finished = false, slotN = 0;
     s.child = { plan: pick, board: b }; quiet(); showPlan(pick); atHome(); lines.visible = true; granHome.hide = false; glide(VIEW.play, 1.8);
@@ -289,7 +296,7 @@ export function makePlace(W, hooks) {
     const act = (k) => { const c = cOf(k), r = rOf(k), p = b.cells[k]; told = '';
       if (sel === 'lift') { const kd = BD.lift(b, c, r); if (kd) { left[kd === 'cross' ? 'fork' : kd]++; beep(300, 0.08); } }
       else if (p && p.kind === sel) { if (BD.turn(b, c, r)) beep(520, 0.06); else told = W.oneWay; }
-      else if (left[sel] > 0) { const old = BD.lay(b, c, r, sel); if (old) { left[sel]--; if (typeof old === 'string') left[old === 'cross' ? 'fork' : old]++; beep(440 + (k % 5) * 40, 0.09); } else told = W.noFit; }
+      else if (left[sel] > 0) { const old = BD.lay(b, c, r, sel); if (old) { left[sel]--; if (typeof old === 'string') left[old === 'cross' ? 'fork' : old]++; beep({ straight: 440, bend: 520, fork: 620, bridge: 300 }[sel] + (k % 4) * 25, 0.09, sel === 'bridge' ? 'sine' : 'triangle'); if (sel === 'bridge') { setTimeout(() => beep(240, 0.2, 'sine', 0.08), 90); burst(X(c), Z(r), 10, 2.5); } for (let sd = 0; sd < 4; sd++) { const k2 = key(c + BD.DC[sd], r + BD.DR[sd]); if (c + BD.DC[sd] >= 0 && c + BD.DC[sd] < N && trees.has(k2) && trees.get(k2).visible) burst(X(cOf(k2)), Z(rOf(k2)), 8); } } else told = W.noFit; }
       react(); };
     for (let k = 0; k < N * N; k++) hitBox(s, g, X(cOf(k)), 0, Z(rOf(k)), 4.9, 0.7, 4.9, () => me === run && s.child && s.child.board === b && (sel === 'lift' ? !!b.cells[k] : !!b.cells[k] || (left[sel] > 0 && BD.ways(b, cOf(k), rOf(k), sel).length > 0)), () => act(k));
     // the tray: one button for each kind of piece, one to take a piece back, the colours of the paving, and a quiet button that shows one way to do it
@@ -306,7 +313,7 @@ export function makePlace(W, hooks) {
   const endPlay = () => { lines.visible = false; marks.forEach((m) => { if (m) m.visible = false; }); granHome.hide = true; };
   s.town = async (pick) => { endPlay(); const m = settle(pick); ambient(m); await glide(VIEW.test, 2); };
   s.swap = (pick) => { endPlay(); const m = settle(pick); ambient(m); };
-  s.recap = (answer) => { let open = true; quiet(); [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
+  s.recap = (answer) => { let open = true; quiet(); for (const p of [...people, ...cars]) if (p.position.x > -7.6 && p.position.x < 4.7 && p.position.z < 9.5) p.visible = false; granPlate.hide = true; [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
     s.spot = (name, i) => [2.55 - i * 3.55, 2.9, 7.3];
     [0, 1, 2].forEach((i) => { const ok = s.model(i).walkers === GATES.length, pl = plate(s, W.short[i], [2.55 - i * 3.55, 5.75, 7.3], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(ok ? 880 : 300, 0.15); const any = [0, 1, 2].filter((j) => s.model(j).walkers === GATES.length); W.recapYes = W.recapYesOf(W.short[i]); W.recapNo = any.length ? W.recapNoOf(any.map((j) => W.short[j])) : W.recapNone; answer(ok); };
       signs.push(pl); pl.el.onclick = go; hitBox(s, nb, 3.55 - i * 3.55, 1.1, -0.2, 3.5, 3.5, 0.6, () => open, go); }); };
@@ -319,7 +326,7 @@ export function makePlace(W, hooks) {
       s.eye = [b0.x - 0.6, 2.3, b0.z]; s.at = [a0.x, 1.5, a0.z]; s.fov = 50; });
     if (me !== run) return; family.rotation.y = 0; if (withGran) gr.rotation.y = Math.PI / 2; glide(VIEW.shops, 2.4); };
   // for the script that records the level
-  s.spot = () => [0, 0, 0];
+  s.spot = (name) => (name === 'tree' ? [X(3), 4, Z(1)] : name === 'bell' ? [9.2, 2, shops[1].zc] : [0, 0, 0]);
   s.start = () => { bare(); shops.forEach((sh) => sh.set(0)); granHome.hide = false; };
   s.start();
   return s;

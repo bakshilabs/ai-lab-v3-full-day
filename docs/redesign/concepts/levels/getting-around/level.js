@@ -4,32 +4,32 @@
 // The page, Florence's band, the order of the steps, the result cards and the block style come from the shared kit in ../../level-kit/.
 // This file holds the words, the plans and the results. place.js holds the place, and board.js the rules of the board.
 // Every word below is a placeholder written for this trial. Nothing here is part of the game.
-import { meter, btn, esc, $ } from '../../level-kit/shell.js';
+import { meter, btn, esc, $, setTray } from '../../level-kit/shell.js';
 import { runLevel } from '../../level-kit/flow.js';
 import { makePlace } from './place.js';
 
 // ---- the words (placeholders) -----------------------------------------------------------------------------------------------------------
 const W = {
   level: 'The way to the shops',
-  job: ['It is Saturday morning. Your family is meeting Gran at the shops.', 'Old blossom trees grow between the homes and the shops. Can everyone walk there, and can the trees stay?'], start: 'Start',
+  job: ['Your family is meeting Gran at the shops.', 'Can everyone walk there, and can the old blossom trees stay?'], start: 'Start',
   askT: 'Your sentence', askHow: 'Tap a word for each gap. Then ask Florence to suggest plans.', ask: 'Ask Florence',
   sentence: ['Plan the streets so people can reach the shops on foot and leave space for nature. Make the paths', ['long and winding', 'short and direct', 'beside the busy road'], 'and put the park', ['at the far edge of the town', 'on the other side of the river', 'in the middle of the town'], '.'],
-  plansSay: ([a, b]) => [`Here are three plans, with paths that are ${a} and the park ${b}.`, 'Press the button to test them. Who walks to the shops, and which trees stay?'], test: 'Open the shops',
-  testT: 'The shops open', watch: 'The shutters go up and the bell rings.',
+  plansSay: ([a, b]) => [`Here are three plans, with paths ${a} and the park ${b}.`, 'Press the button to test them.'], test: 'Open the shops',
+  testT: 'The shops open', watch: 'The shutters go up and the bells ring.', take: 'Take the postcard', takeHow: 'Everyone is here. Take a postcard of this morning.',
   short: ['The grid of streets', 'The winding loop', 'The paths through the park'],
-  morning: [['On the first morning the town has a grid of streets.', 'Who walks to the shops? Which trees are still there?'], ['On the second morning the town has one long loop.', 'Who walks to the shops? Which trees are still there?'], ['On the third morning the town has paths through the middle.', 'Who walks to the shops? Which trees are still there?']],
-  choose: 'Look at the three postcards. Are there people or cars in front of the shops? Is there blossom or are there stumps? Which plan will you use?', again: 'Ask again', use: 'Use this plan',
+  morning: ['First morning: a grid of streets. Who walks to the shops?', 'Second morning: one winding loop. Who walks to the shops?', 'Third morning: paths through the middle. Who walks to the shops?'],
+  choose: 'People or cars at the shops? Blossom or stumps? Choose a plan.', again: 'Ask again', use: 'Use this plan',
   checks: ['Promote walking', 'Nature'], walked: (n) => `${n} of 10 homes walked`, kept: (n) => `${n} of 10 old trees stayed`,
   walkAll: ['Everyone walked to the shops.', 'Everyone walked to the shops.', 'Everyone walked across the middle to the shops.'], walkSome: 'People from the far homes took their cars.',
   nature: { cut: 'Most of the old trees were cut down.', half: 'Half of the old trees were cut down. The new park has only young trees.', loop: 'The wide park stayed in the middle.', park: 'The park stayed in the middle.' },
   playT: 'Fit the paths together', next: 'Next',
   piece: { straight: 'Straight', bend: 'Bend', fork: 'Fork', bridge: 'Bridge', lift: 'Take back' }, left: (n) => `${n} left`, colour: 'Paving colour', colours: ['Cream', 'Clay', 'Slate'],
-  joined: (n) => (n ? `${n} of 10 homes are joined to the shops.` : 'Join every home to the shops. Start at the yellow square beside the shops.'),
-  pieceHow: { straight: 'Tap a yellow square to lay a straight piece.', bend: 'Tap a yellow square to lay a bend.', fork: 'Tap a yellow square to lay a fork. A fork lets one path serve two homes.', bridge: 'Tap one of the yellow squares on the stream to put the bridge there. There is only one bridge.' },
+  joined: (n) => (n ? `${n} of 10 homes are joined to the shops.` : 'Join every home to the shops.'),
+  pieceHow: { straight: 'Tap a yellow square to lay a straight piece.', bend: 'Tap a yellow square to lay a bend.', fork: 'Tap a yellow square to lay a fork. A fork serves two homes.', bridge: 'There is only one bridge. Tap a yellow square on the stream.' },
   firstPiece: 'This piece does not fit beside the shops. Try another kind of piece.', noPlace: 'This piece fits nowhere now. Try another kind, or tap a piece on the board to swap it for this one.', noneLeft: 'You have none of these left. Choose another kind, or take a piece back.',
   liftHow: 'Tap a piece on the board to take it back.', oneWay: 'This piece only fits one way here.', noFit: 'That piece does not fit there.',
-  homeWalks: 'This home is joined, and the walk is short. Off they go to the shops.', granWalks: 'Gran’s home is joined, and the walk is short. Here she comes.', tooFar: 'This home is joined, but the way is long, so they will take the car. A shorter way would let them walk.',
-  doneAll: 'Every home is joined, and everyone walks to the shops.', doneSome: 'Every home is joined. For some homes the way is long, so they still take the car.', doneHow: 'You can still change a piece or the colour. Press Next when you are ready.',
+  homeWalks: 'A home is joined. Off they go to the shops.', granWalks: 'Gran’s home is joined. Here she comes.', tooFar: 'This way is long, so they will take the car. A shorter way would let them walk.',
+  doneAll: 'Every home is joined, and everyone walks to the shops.', doneSome: 'Every home is joined. For some homes the way is long, so they still take the car.', doneHow: 'Press Next when you are ready.',
   showMe: 'Show me one way', shown: 'Here is one way to do it. You can still change it.',
   townT: 'The neighbourhood is built', townHow: 'The streets and paths are being built.', built: 'The neighbourhood is built with the plan you chose.', yours: 'Your paths',
   afterWalk: (n) => (n === 10 ? 'Everyone has a short walk to the shops.' : `People from ${10 - n} homes take their cars to the shops.`), afterTrees: (n) => (n >= 9 ? 'The old trees are still there.' : n >= 4 ? 'Half of the old trees are gone.' : 'Most of the old trees are gone.'),
@@ -62,14 +62,16 @@ function drawCards(fresh = -1) { cards.replaceChildren(...shots.map((url, i) => 
 function big(i) { if (!shots[i]) return; const el = document.createElement('div'); el.className = 'pcbig'; el.innerHTML = `<figure><img alt="" src="${shots[i]}">${esc(W.short[i])}</figure>`; el.onclick = () => el.remove(); $('view').append(el); }
 drawCards();
 // the kit's result cards have no place for a picture, so the postcard is put on each card as soon as the cards are drawn
-new MutationObserver(() => { for (const card of $('over').querySelectorAll('.card')) { if (card.querySelector('.pcimg')) continue; const i = plans.findIndex((p) => card.querySelector('h3').textContent.startsWith(p.lines[0])); if (i < 0 || !shots[i]) continue; const im = document.createElement('img'); im.className = 'pcimg'; im.alt = ''; im.src = shots[i]; card.querySelector('h3').after(im); } }).observe($('over'), { childList: true });
+new MutationObserver(() => { for (const card of $('over').querySelectorAll('.card')) { if (card.querySelector('.pcimg')) continue; const i = plans.findIndex((p) => card.querySelector('h3').textContent.startsWith(p.lines[0])); if (i < 0 || !shots[i]) continue; const im = document.createElement('img'); im.className = 'pcimg'; im.alt = ''; im.src = shots[i]; im.onclick = () => big(i); card.querySelector('h3').after(im); } }).observe($('over'), { childList: true });
 
 // ---- small pictures for the buttons of the path pieces ------------------------------------------------------------------------------------
 const tile = (d, extra = '') => `<svg viewBox="0 0 44 40" aria-hidden="true"><rect x="5" y="3" width="34" height="34" rx="4" fill="#c4ea9c" stroke="${INK}" stroke-width="2.5"/><path d="${d}" fill="none" stroke="${INK}" stroke-width="11"/><path d="${d}" fill="none" stroke="#fff3d0" stroke-width="6.5"/>${extra}</svg>`;
 const PIECE = { straight: tile('M22 4V36'), bend: tile('M22 4V20H38'), fork: tile('M6 20H38M22 20V4'), bridge: tile('M22 4V36', `<path d="M6 15h32v10H6z" fill="#6cc3ee" opacity=".9"/><path d="M15 6v28M29 6v28" stroke="#d2553a" stroke-width="3"/><path d="M18.5 6h7v28h-7z" fill="#c9975a"/>`), lift: `<svg viewBox="0 0 44 40" aria-hidden="true"><path d="M22 34V12M12 20L22 9l10 11" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>` };
 
-const hooks = { tag: (i) => `${plans[i].icon}<span><b>${esc(plans[i].lines[0])}</b><b>${esc(plans[i].lines[1])}</b></span>`, pieceIcon: (kd) => PIECE[kd], btn,
-  postcard: (i, url) => { shots[i] = url; drawCards(i); }, clear: () => { shots.fill(''); drawCards(); } };
+const hooks = { tag: (i) => `${plans[i].icon}<span><b>${esc(plans[i].lines[0])}</b></span>`, pieceIcon: (kd) => PIECE[kd], btn,
+  postcard: (i, url) => { shots[i] = url; drawCards(i); setTray([cards]); },
+  // the child takes each postcard: one yellow button, which the test waits for
+  shutter: () => new Promise((res) => { const b = btn(W.take, 'sun', () => { b.disabled = true; res(); }); setTray([cards, b]); }), clear: () => { shots.fill(''); drawCards(); } };
 
 runLevel({ place: { number: 1, town: 'Eco Town', level: 'Getting around' }, words: W, plans, results, evidence: cards, scene: () => makePlace(W, hooks),
   after: (i, s) => { const m = s.model(i); return `${W.afterWalk(m.walkers)} ${W.afterTrees(m.kept)}`; },
