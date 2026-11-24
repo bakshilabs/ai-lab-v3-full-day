@@ -233,7 +233,7 @@ function hilltop() {
     await tw(4.6, (k) => (k < 0.62 ? look(K.late, K.sunset, k / 0.62) : look(K.sunset, K.dusk, (k - 0.62) / 0.38))); if (me !== run) return false; flows();
     walkers.forEach((w, j) => { w.p.visible = true; w.p.position.x = w.x0; tw(0.4, (k) => w.p.scale.setScalar(1.4 * Math.max(0.01, back(k)))); }); return me === run; };
   async function visit(h) { const me = run, c = CFG[h], ok = () => me === run && s.looking; if (lookBusy || !s.looking) return; beep(520 + h * 90, 0.08); if (done[h]) return s.seen(h);
-    lookBusy = true; $('over').innerHTML = ''; $('step').textContent = W.lookT;   // the title of the last card must not stay up while another part of the town plays glide(testCam(h), 1.2);
+    lookBusy = true; $('over').innerHTML = ''; $('step').textContent = W.lookT; /* the title of the last card must not stay up while another part of the town plays */ glide(testCam(h), 1.2);
     done[h] = true; lanes[h].visible = false; setTags(true, canTap); const k0 = nightN++, n = litAt(h), ws = walkers.filter((w) => w.h === h), T = 2.4 + (n < 6 ? 0.6 + (6 - n) * 0.26 + 0.8 : 0) + (h ? 4.4 : 0), part = (a, sec) => tw(sec, (k) => sky(k0, a + k * sec / T)); let t = 0;
     says([W.t2]); await tw(2.4, (k) => { sky(k0, k * 2.4 / T); ws.forEach((w, j) => { w.p.position.x = w.x0 + (w.x1 - w.x0) * ease(k); w.p.position.y = 0.06 + Math.abs(Math.sin(k * 16 + j)) * 0.14; }); let ch = false; homes[h].forEach((q, i) => { if (!q.lit && k > 0.3 + i * 0.11) { q.lit = true; ch = true; } }); if (ch) { paint(); beep(700, 0.04, 'sine', 0.04); } }); if (!ok()) return; ws.forEach((w) => { w.p.visible = false; }); t = 2.4 / T;
     // the homes that have no power go dark again, one after another
