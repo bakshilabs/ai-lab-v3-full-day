@@ -41,13 +41,45 @@ The band under the picture shows only what matters at each moment: the one part 
 
 - `trial.js` holds the words, the street, the test, the plans and results, and the play break.
 - `home.js` is the dollhouse. It gained `setRooms`, which swaps the living room and the bedrooms, and `setRoof`, which changes the colour of the roof.
-- `play.mjs` plays the level through and saves the pictures. It is run as `node play.mjs <folder> [width] [height] [side 0 or 1] [middle floor L or B] [plan 0 to 2]`. It now adds `&gate` to the address. With `&gate`, the level stops at a few named moments in the middle of an animation until the script has taken its picture. This was needed because the recording machine was shared by six recordings and drew less than one picture each second, so pictures taken by the clock missed the test altogether. Without `&gate` in the address the level never waits.
+- `play.mjs` plays the level through and saves the pictures. It is run as `node play.mjs <folder> [width] [height] [side 0 or 1] [middle floor L or B] [plan 0 to 2]`. It tells the browser to wait up to five minutes for the page and for the level to appear, because the kit's helper allows only half a minute and the shared machine sometimes needs longer. It now adds `&gate` to the address. With `&gate`, the level stops at a few named moments in the middle of an animation until the script has taken its picture. This was needed because the recording machine was shared by six recordings and drew less than one picture each second, so pictures taken by the clock missed the test altogether. Without `&gate` in the address the level never waits.
 - The kit in `../level-kit/` was not changed.
 
 ## What was run, and what was not
 
-RUN_SECTION
+The designer who began this round was stopped before any of its changes had been confirmed by a finished recording. A second designer finished the round on the same day. It played the level through from start to finish four times, and every run reached the last closing picture with no error from the page.
+
+- The good plan at 1440 by 810: the sunny side, the living room chosen for the middle floor, the timber home with a lot of insulation, then "Try another plan" with the brick home and back to the first plan, and the recap answered with the wrong side, to show that it does not block. The pictures are in `pictures/sunny-timber-lot-1440/`.
+- Another plan at 1024 by 640: the shady side, the bedrooms chosen for the middle floor, the brick home with some insulation, then "Try another plan" with the timber home with no insulation and back to the first plan, and the recap answered with the right side. The pictures are in `pictures/shady-brick-1024/`.
+- The folder `pictures/sunny-timber-none-1440/` held pictures of the first build, which no longer match the level, and it was removed. The older folders whose names begin with `before-and-after` are kept as a record of earlier owner decisions.
+- Two earlier runs of the same two paths found the faults listed below, which were then repaired before the two recordings above were made.
+- The level was also opened inside a frame with `?next=Go on`, as the whole game opens it, and taken straight to its closing picture with `window.trial.end()`. The chip showed 3, the last picture did not say that the trial level had ended, the buttons were "Play again" and "Go on", and the page told the frame that the level had ended.
+
+Every picture of both recordings was looked at in full. These faults were found in the earlier runs and repaired:
+
+- The tags of the three plans overlapped at 1024 by 768, so that "Timber home" on the first tag was hidden. They now stand further apart. The sign "Brick kiln" was cut off by the right edge of the picture on the shady side, and now stands a little further in.
+- On the results, the edges of the signs under the open homes and of the sign "Brick kiln" showed between the cards. They are now hidden while the cards are up, because the cards say the same.
+- The signs "Living room" and "Bedrooms" stayed over the home after the front wall had closed it, where the rooms cannot be seen. They now go when the front wall goes on, and they stand a little lower, inside their rooms.
+- In the closing picture of a warm home, the sign "Warm" was hidden under the band when the camera came close to the beds. It now stands above the beds.
+
+These were not run: the third plan on either side (the timber home with no insulation was seen only as the second try, and never through its own play break, which is shorter because it has no insulation); "Ask again"; closing and opening the front wall a second time; the whole game played by hand from Land to School; and any real Windows computer. The recording machine was shared by six recordings and drew at most one picture each second, so the times that the script prints are far too long and say nothing about how long a child takes. No fair estimate of the length was made in this round.
 
 ## What still stands in the way
 
-WEAK_SECTION
+- The places where the materials are made, the sawmill and the kiln, are plain boxes with no people working there. The meter carries the test, and the place itself does little.
+- The warm air that rises through the home is drawn as a column of orange cubes. It tells the story while the home is built, but in the closing picture of the family asleep it looks like clutter in the attic.
+- A snowflake that falls close to the camera in the night street is drawn as a large white block.
+- On a screen as narrow as 1024 by 640, the sign "No insulation" under the first open home touches the left edge of the picture during the test.
+- On a screen as narrow as 1024 by 640 the result cards cover most of the town, as they do in every level, because the cards come from the shared kit.
+- "Play again" is on the band from the first moment of the closing picture, so a child can leave before the camera reaches the family's home. The button comes from the shared kit.
+- The two real decisions in the play break, which floor goes in the middle and whose wall gets its insulation first, are good ones, but the rest of the building is still one tap for each part. A child who only follows the yellow places can finish without thinking.
+- The owner has not given the words for brick on the meter, so the brick card only says how far the meter rose.
+
+## Answers to the owner's four questions (24 November 2026, at the end of this round)
+
+Is the level long enough? I think so. A child builds a home of three floors and an attic, sees it furnished, builds the street and spends a winter night in it, and that is a full level. No fair measurement of its length could be made on the shared machine, so this is a judgement and not a number.
+
+Does it need more activities or scenes? It does not need more scenes. The one thing I would add is a little more life in the sawmill and the kiln, so that the test is as rich to look at as the play break.
+
+Am I proud of my work? Mostly, yes. The dollhouse, the family by their cold walls, and the choice of which floor is warmest make a real lesson that a child can see. I am less proud of the materials scene and of the column of warm air in the closing picture.
+
+Am I impressed by the experience a child gets? Yes, by the moment the front wall opens on the home the child built and the family is in the rooms the child chose. The level is weaker between those moments, where much of the building is following the yellow places.

@@ -3,9 +3,9 @@
 // With a last argument of 1 it takes no pictures and waits only where a child would stop to look, so that the time it prints is a fairer estimate.
 // The browser, the pictures, the presses and the taps come from the shared helper in ../level-kit/record.mjs; this file is only the path through Homes.
 import { openLevel } from '../level-kit/record.mjs';
-// When several recordings share the machine, the page can take longer than half a minute to open, which is all the helper allows. The helper must not be changed, so the browser it uses is told here to wait five minutes for a page
+// When several recordings share the machine, the page can take longer than half a minute to open, which is all the helper allows. The helper must not be changed, so the browser it uses is told here to wait five minutes for a page, and for the level to appear in it
 import { createRequire } from 'module';
-{ const { chromium } = createRequire('/')('playwright'), launch = chromium.launch.bind(chromium); chromium.launch = async (o) => { const b = await launch(o), np = b.newPage.bind(b); b.newPage = async (x) => { const p = await np(x); p.setDefaultNavigationTimeout(300000); return p; }; return b; }; }
+{ const { chromium } = createRequire('/')('playwright'), launch = chromium.launch.bind(chromium); chromium.launch = async (o) => { const b = await launch(o), np = b.newPage.bind(b); b.newPage = async (x) => { const p = await np(x); p.setDefaultNavigationTimeout(300000); p.setDefaultTimeout(300000); return p; }; return b; }; }
 const [out, W = 1440, H = 810, side = 0, mid = 'L', plan = 0, speed = 1, timing = 0] = process.argv.slice(2);   // a speed above 1 is for quick checks only: the times printed are then wrong
 const r = await openLevel({ page: 'concepts/trial/index.html', out, width: W, height: H, speed: +speed, timing: !!+timing, look: /^(night|home-tour|test)/, query: `&gate${process.env.TRIAL_Q || ''}` }), { shot, click, has, tap, think, pause, until } = r;
 // held() waits until the level has stopped at a named moment in the middle of an animation, takes the picture and lets the level go on; pass() lets it go on without a picture
