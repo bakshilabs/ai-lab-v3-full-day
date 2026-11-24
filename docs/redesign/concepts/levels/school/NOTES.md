@@ -26,7 +26,13 @@ In a quick check with a speed above 1, the second or third bell may ring by itse
 - The play break has six clicks on friends in a row when the school is in the middle. Only the fork is a real decision.
 - The mark of the fork (apples or ducks) is not shown again in the town step or the closing picture.
 - The outline's trodden path to the school and the grey bay for cars outside the gate are not built.
-- Sound could not be judged on the recording machine.
+- Sound could not be judged on the recording machine, and neither could the movement of the camera beside the walking bus, because the machine draws about one picture a second. In one recorded picture (`bus-way-a` at 1440 by 810) the camera had not caught up with the bus. This should be looked at on a real computer.
+
+## What was fixed on 24 November 2026
+
+- The walking bus used to walk on over the road while it stopped for its last friend, so the teacher and the children stood on the road with cars passing. The road is now well beyond the last gate, and the teacher waits a few steps back from the kerb, so the button on the crossing can be seen and nobody is on the road before the green figure shows.
+- The tags of the plans and the sign "Through the orchard" no longer sit under the title in a small window.
+- The pill in the top left now says level 6.
 
 ## What was learned
 
