@@ -139,7 +139,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
   const tapOne = ([x, y, z], w, h, label, name) => new Promise((res) => { let open = true; const m = glowMarks(frame(g, x, y, z, w, h, true, { fill: 0.35, t: Math.max(0.12, w * 0.04), d: Math.max(0.1, w * 0.03) })), pl = plate(s, label, [x, y + h * 1.12, z], 'tap'), go = () => { if (!open) return; open = false; m.visible = false; pl.hide = true; beep(700, 0.12); res(); };
     pl.el.onclick = go; hitBox(s, g, x, y - h * 0.1, z, w * 1.3, h * 1.3, Math.max(1.6, w * 0.3), () => open, go); s.spots[name] = [x, y + h / 2, z]; });
   const pickAll = (slots, onPick) => new Promise((res) => { let n = slots.filter((q) => q.used).length; slots.forEach((q) => { q.mark.visible = !!q.used; q.can = () => q.used && !q.plant.picked; q.on = () => { q.plant.pick(); q.mark.visible = false; beep(440 + CROPS.indexOf(q.plant.crop) * 70, 0.1); const last = --n === 0; onPick(q).then(() => { if (last) res(); }); }; }); });
-  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : name === 'stall' ? [STALLX[i] - 1.33, 1.25, STALLZ] : s.spots[name]);
+  s.spots = {}; s.spot = (name, i) => (name === 'slot' ? (s.pick === 1 ? [s.fields[i].x, s.fields[i].y + 1.5, s.fields[i].z + 0.6] : s.pick === 0 ? [s.beds[i].x, 0.7, s.beds[i].z] : [s.shelves[i].x, s.shelves[i].y + 0.6, -13.3]) : name === 'answer' ? s.answers[i] : name === 'stall' ? [STALLX[i] - 1.33, 1.25, STALLZ] : name === 'family' ? [3.6, 1.3, 8.7] : s.spots[name]);
 
   const fly = (a, b, col) => { const f = blk(g, 0, 0, 0.34, 0.34, 0, 0.34, '', { mat: new THREE.MeshBasicMaterial({ color: col }), shadow: false }); return tw(0.45, (t) => f.position.set(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t + Math.sin(t * Math.PI) * 1.3, a[2] + (b[2] - a[2]) * t)).then(() => { g.remove(f); }); };
   s.liftAt = [21.3, -13.75];
@@ -148,27 +148,27 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     if (pick === 1) { s.fields.forEach((f) => { f.sown = false; f.g.visible = false; }); s.coldPile.visible = false; } else slots.forEach((q) => { if (q.plant) { q.pg.remove(q.plant.g); q.plant = null; } });
     if (pick === 2) { s.water(0); tw(1.2, (t) => s.lights(1 - 0.92 * t)); } else tw(2.4, (t) => s.season(0, w0 * (1 - ease(t))));
     api.say([[T.spring], [T.farmGo], [T.cleared]][pick]); await glide(VIEW[pick], 2.4); if (me !== run) return;
-    const crops = await chooseCrops(api); s.crops = crops; const cols = colsOf(crops);
+    s.stage = 'crops'; const crops = await chooseCrops(api); s.crops = crops; const cols = colsOf(crops); s.stage = 'place';
     if (pick === 1) {   // the big farm: sow six of eight fields, start the harvester, pack the cold boxes
       await putAll(slots, crops, api, T.put[1], (f, c) => { f.sown = true; f.crop = c; f.g.visible = true; f.mat.color.set(c.col).lerp(new THREE.Color('#7cc552'), 0.72); }, false);
       await tw(2.2, (t) => s.fields.forEach((f) => { if (f.sown) f.mat.color.set(f.crop.col).lerp(new THREE.Color('#7cc552'), 0.72 - 0.4 * ease(t)); })); if (me !== run) return;
-      api.say(T.aSay[1]); const hv = s.harvester; await tapOne([hv.position.x, hv.position.y, hv.position.z + 3.2], 13, 7, T.a[1], 'a');
+      api.say(T.aSay[1]); s.stage = 'a'; const hv = s.harvester; await tapOne([hv.position.x, hv.position.y, hv.position.z + 3.2], 13, 7, T.a[1], 'a');
       for (const k of [8, 6, 4, 2]) { hv.position.set(32, 3 * (k + 1), -50 - 8 * k - 2.2); await tw(1.1, (t) => { hv.position.x = 32 - 80 * t; s.fields.forEach((f) => { if (f.sown && f.k === k && Math.abs(f.x - hv.position.x) < 6) f.mat.color.set('#d9c27a'); }); }); if (me !== run) return; }
-      s.coldPile.visible = true; await pop(s.coldPile.children); api.say(T.bSay[1]); await tapOne([16, s.shed[1], s.shed[2] + 0.5], 20, 8, T.b[1], 'b');
-      await tw(0.8, (t) => s.coldPile.scale.setScalar(Math.max(0.01, 1 - t))); s.coldPile.visible = false; s.coldPile.scale.setScalar(1); api.say(T.off[1]); chime();
+      s.coldPile.visible = true; await pop(s.coldPile.children); api.say(T.bSay[1]); s.stage = 'b'; await tapOne([16, s.shed[1], s.shed[2] + 0.5], 20, 8, T.b[1], 'b');
+      await tw(0.8, (t) => s.coldPile.scale.setScalar(Math.max(0.01, 1 - t))); s.coldPile.visible = false; s.coldPile.scale.setScalar(1); api.say(T.off[1]); chime(); s.stage = 'off';
       const lor = lorryRun(9); await wait(1.2); await glide(MAIN, 2.4); await lor; if (me !== run) return; await carry(0); s.fields.forEach((f) => { if (f.sown) f.mat.color.set(f.crop.col).lerp(new THREE.Color('#7cc552'), 0.32); });
       return api.done(T.done[1]); }
     await putAll(slots, crops, api, T.put[pick], (q, c) => { q.plant = mkPlant(q.pg, 0, 0, 0, c, { roots: pick === 2, k: 0 }); const pg = q.plant.g; tw(0.4, (t) => pg.scale.setScalar(Math.max(0.01, back(t)))); }, true); if (me !== run) return;
-    api.say(T.aSay[pick]);
+    api.say(T.aSay[pick]); s.stage = 'a';
     if (pick === 0) { await tapOne([s.barrel[0], 0, s.barrel[2] + 0.75], 1.9, 2.1, T.a[0], 'a'); const drops = slots.filter((q) => q.used).map((q) => [0, 1, 2].map((j) => blk(g, q.x - 0.7 + j * 0.7, q.z, 0.12, 0.12, 3, 0.4, '', { mat: new THREE.MeshBasicMaterial({ color: hot('#39a8ff', 1.2) }), shadow: false }))).flat();
       await tw(2.6, (t) => { drops.forEach((d, j) => { d.position.y = 0.8 + 2.4 * (1 - ((t * 4 + j * 0.37) % 1)); }); slots.forEach((q) => { if (q.used) q.plant.set(ease(t)); }); }); drops.forEach((d) => g.remove(d)); }
     else { await tapOne(s.tank, 1.9, 2.5, T.a[2], 'a'); await tw(2.4, (t) => { s.water(t); slots.forEach((q) => { if (q.used) q.plant.set(0.45 * ease(t)); }); }); if (me !== run) return;
-      api.say(T.bSay[2]); await tapOne([s.switchAt[0], 0.9, s.switchAt[2] + 0.2], 1.8, 2, T.b[2], 'b'); s.lever.position.y += 0.5; await tw(2.6, (t) => { s.lights(0.08 + 0.92 * ease(t)); slots.forEach((q) => { if (q.used) q.plant.set(0.45 + 0.55 * ease(t)); }); }); }
-    if (me !== run) return; api.say(T.ripe[pick]); let n = 0; const crate = pick === 2 ? s.liftCrate : s.cartLoad.crates[0];
+      api.say(T.bSay[2]); s.stage = 'b'; await tapOne([s.switchAt[0], 0.9, s.switchAt[2] + 0.2], 1.8, 2, T.b[2], 'b'); s.lever.position.y += 0.5; await tw(2.6, (t) => { s.lights(0.08 + 0.92 * ease(t)); slots.forEach((q) => { if (q.used) q.plant.set(0.45 + 0.55 * ease(t)); }); }); }
+    if (me !== run) return; api.say(T.ripe[pick]); s.stage = 'pick'; let n = 0; const crate = pick === 2 ? s.liftCrate : s.cartLoad.crates[0];
     if (pick === 2) { crate.visible = true; crate.fill(0, cols); } else { cartLoad('crate', cols); s.cartLoad.crates.forEach((c) => c.fill(0, cols)); }
     const got = [], to = pick === 2 ? [s.liftAt[0], s.lift.position.y + 1.4, s.liftAt[1]] : [CART[0][0], 1.2, CART[0][1] + 0.6];
     await pickAll(slots, (q) => fly([q.x, q.y + 0.6, q.z], to, q.plant.crop.col).then(() => { got.push(colsOf([q.plant.crop])[0]); n++; if (pick === 2) crate.fill(n, got); else { s.cartLoad.crates[0].fill(Math.min(6, n * 2), got.flatMap((c) => [c, c])); s.cartLoad.crates[1].fill(Math.max(0, n * 2 - 6), got.slice(3).flatMap((c) => [c, c])); } })); if (me !== run) return;
-    chime(); api.say(T.off[pick]);
+    chime(); api.say(T.off[pick]); s.stage = 'off';
     if (pick === 2) { const y0 = s.lift.position.y; await tw(1.6, (t) => { s.lift.position.y = y0 + (s.fy(0) - y0) * ease(t); }); crate.visible = false; bikeLoad(true, cols); await wait(0.5); glide(MAIN, 2.6); await move(s.bike, ...BIKE, 4.4, 0); tw(1.6, (t) => { s.lift.position.y = s.fy(0) + (y0 - s.fy(0)) * ease(t); }); bikeLoad(false); await pop(s.stalls[2].set(1, 'crate', cols)); }
     else { await wait(0.5); glide(MAIN, 2.6); await move(s.cart, ...CART, 4.8); cartLoad(null); await pop(s.stalls[0].set(0, 'crate', cols)); }
     if (me !== run) return; api.done(T.done[pick]); };
