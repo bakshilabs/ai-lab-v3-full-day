@@ -36,6 +36,7 @@ In the first build the third plan was always called "Paths through a park" and k
 - The corner chip shows 2, which is this level's place in the game.
 - Inside the whole game (held in a frame, with `?next=` in the address) the last picture does not say that it is the end of the trial level. Opened by itself it still says so.
 - The play break of the grid of streets is now in the pictures, because the second recorded path uses the grid.
+- Florence only says "A shorter way would let them walk" when a shorter way really exists on that board. On the grid and the loop, when the child asked for long and winding paths, the far homes are too far whatever the child draws, and she then says that the home is a long way round with this plan. Before this change she promised a shorter way that did not exist, which broke the rule that she is never wrong. `board.js` has a new rule, `bestSteps`, for the shortest walk each home could ever have.
 
 ## The rules of the results
 
@@ -48,7 +49,13 @@ In the first build the third plan was always called "Paths through a park" and k
 
 ## What was run, and what was not
 
-RUN-SECTION
+The round was begun by one designer, who was stopped part-way for a reason that had nothing to do with the level, and finished by a second. The second designer checked the first one's changes by recording both paths again from the start, looked at every picture, and made two more repairs (the honest sentence about the car, and the name of the third plan on the empty postcards, which said "The paths through the park" during the test even when the park was elsewhere).
+
+- `node check-board.mjs` passes. It checks the rules of the board, including that the third plan is good on both checks whatever the child asks for.
+- The first path was recorded in full at 1440 by 810 into `pictures/park-direct-middle-1440/` (39 pictures). It asks for short and direct paths and the park in the middle, takes a large look at one postcard, uses the paths through the park, draws the paths with the bridge on the left (Gran's walk is 13 squares and the longest walk 14), moves the bridge to Gran's side (Gran's walk becomes 9 squares), takes back the two squares that are no longer needed, picks the clay paving, and goes on to the town, the recap and the walk to the shops. Every family walks.
+- The second path was recorded in full at 1024 by 640 into `pictures/grid-winding-far-1024/` (34 pictures). It asks for long and winding paths and the park at the far edge, uses the grid of streets, draws the paths, plants the four young trees, sees four families take the car, presses "Try another plan", looks at the paths between the old trees and goes back to the grid, answers the recap wrongly, and ends with Gran coming by car.
+- The old pictures of the first build's loop path were removed, because they showed the board of thirty pieces that no longer exists.
+- No run went through the winding loop's board, "Show me one way", the message that all the paving is used, a park across the river, or a second "Ask again". No run used a real mouse at full speed. Sound was not heard. The level was not opened inside the whole game; the chip and the closing words were checked only in the code.
 
 ## What still stands in the way
 
@@ -59,6 +66,15 @@ RUN-SECTION
 - The boards of the grid and the loop are still thinner than the park board. On the grid the paving is not really scarce, and the young trees are a small extra. On the loop the bridge is the only decision.
 - The postcards in the band are still small at 1024 by 640.
 - The level is still short. One more activity would have to be a new idea of the owner's, for example crossings for the grid or a second scene at the bridge.
+- The board is seen from high above, like a map on a table. That suits drawing paths, but the families who set off along them are very small there, so the reward of seeing them walk is weaker on the board than in the town afterwards.
+- On the grid board the yellow squares on the unused streets stay lit after every home is joined. They are honest, because paving can still go there, but they make the finished board look unfinished.
+
+## Answers to the owner's four questions, at the end of the round
+
+- Is the level long enough? Not quite. A child who reads at an ordinary pace and tries another plan would take roughly ten to fifteen minutes, judged from the number of steps and words, because the recorded times are stretched many times over by the slow machine. The play break is now the longest step, which is right.
+- Does it need more activities or scenes? One more would help, best of all on the grid and the loop, whose boards are thinner than the park board. That needs the owner's word, because the round is over.
+- Is the designer proud of it? Proud of the park board: drawing the paths and moving the one bridge between Gran's side and the far families' side is a real decision with a visible result, and Florence never says that either choice is wrong. Less proud of the grid and loop boards, which still have little to decide.
+- Is the designer impressed by the experience a child gets? By the town, the test with the postcards and the walk at the end, yes. By the feel of dragging a path, it cannot yet say, because nobody has tried it with a real mouse at full speed.
 
 ## What was learned
 

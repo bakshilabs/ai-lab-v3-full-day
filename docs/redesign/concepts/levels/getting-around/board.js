@@ -121,3 +121,9 @@ export const walkers = (b, style) => homes(b).map((h) => h.joined && h.steps <= 
 // What the child is given for a plan. There is less paving than there are squares, so two homes often have to share one path, and there is only one bridge.
 // On the grid board the streets have road bridges already, and the child has four young trees for six empty places.
 export const stock = (plan) => (plan === 0 ? { pave: 33, bridge: 0, young: 4 } : plan === 1 ? { pave: 22, bridge: 1, young: 0 } : { pave: 28, bridge: 1, young: 0 });
+// The shortest walk each home could ever have on this board, over any of the bridge places. Florence uses it so that she only says "a shorter way would let them walk"
+// when a shorter way really exists. On the grid and the loop, with long and winding paths, the far homes cannot walk however the child draws.
+export function bestSteps(plan, parkMid) {
+  const cols = plan === 0 ? [null] : plan === 1 ? [0, N - 1] : BRIDGES;
+  return GATES.map((g, i) => Math.min(...cols.map((c) => { const h = homes(florence(plan, parkMid, c))[i]; return h.joined ? h.steps : 99; })));
+}

@@ -29,7 +29,7 @@ const W = {
     young: 'There are four young trees and six places. Tap a yellow square to plant one.', youngNone: 'All four young trees are planted. Tap one to take it back.', lift: 'Tap a square of path, the bridge or a young tree to take it back.' },
   noneLeft: 'All the paving is used. Take back a square that you do not need. Two homes can share one path.', treeHere: 'An old tree stands here. The path bends round it.', needBridge: 'A path cannot cross the stream by itself. Choose the bridge.', streamHere: 'The bridge cannot go here.',
   bridgeLaid: 'The bridge is in place. Now draw the path up to it and over it.',
-  homeWalks: 'A home is joined. Off they go to the shops.', granWalks: 'Gran’s home is joined. Here she comes.', tooFar: 'This way is long, so they will take the car. A shorter way would let them walk.',
+  homeWalks: 'A home is joined. Off they go to the shops.', granWalks: 'Gran’s home is joined. Here she comes.', tooFar: 'This way is long, so they will take the car. A shorter way would let them walk.', tooFarAll: 'This home is a long way round with this plan, so they will take the car.',
   doneAll: 'Everyone walks to the shops. Press Next when you are ready.', doneSome: 'Every home is joined. For some homes the way is long, so they still take the car.', doneHow: 'Press Next when you are ready.',
   walks: (g, far) => (g >= far ? `Gran has the longest walk. It is ${g} squares long.` : `Gran’s walk is ${g} squares long. The longest walk is ${far} squares long.`),
   showMe: 'Show me one way', shown: 'Here is one way to finish it. Your own paths are still there.',
@@ -79,7 +79,7 @@ const PIECE = { pave: sq(`<path d="M22 37V20H39" fill="none" stroke="${INK}" str
 const hooks = { tag: (i) => `${plans[i].icon}<span><b>${esc(plans[i].lines[0])}</b></span>`, pieceIcon: (kd) => PIECE[kd], btn,
   postcard: (i, url) => { shots[i] = url; drawCards(i); setTray([cards]); },
   // the child takes each postcard: one yellow button, which the test waits for
-  park: (i) => { const t = THIRD[i ?? 2]; plans[2].lines = t.lines; plans[2].name = t.lines[0]; W.short[2] = t.short; }, showCards: () => setTray([cards]),
+  park: (i) => { const t = THIRD[i ?? 2]; plans[2].lines = t.lines; plans[2].name = t.lines[0]; W.short[2] = t.short; drawCards(); }, showCards: () => setTray([cards]),
   shutter: () => new Promise((res) => { const b = btn(W.take, 'sun', () => { b.disabled = true; res(); }); setTray([cards, b]); }), clear: () => { shots.fill(''); drawCards(); } };
 
 // Inside the whole game the level is held in a frame and has "?next=" in its address. The last picture then does not say that it is the end of a trial level.
