@@ -2,10 +2,11 @@
 //   node play.mjs <out folder> <width> <height> <path> [speed]
 // path "park" asks for short and direct paths and the park in the middle, uses the paths through the park, and lays the pieces one by one.
 // path "loop" asks for paths beside the busy road and the park at the far edge, uses the winding loop, and then tries another plan.
+// The opening of the shops and the walks are played three times as slowly ("&walk=3"), so that the slow recording machine catches people on the way.
 // path "look" only takes one picture of each view, for a quick check.
 import { openLevel } from '../../level-kit/record.mjs';
 const [out = 'pictures/run', width = 1440, height = 810, path = 'park', speed = 1] = process.argv.slice(2);
-const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
+const r = await openLevel({ page: 'concepts/levels/getting-around/index.html', out, width, height, speed: +speed, query: '&walk=3' }), { shot, click, has, tap } = r; r.p.setDefaultTimeout(240000);
 const N = 7, cell = (c, row) => c + row * N, pick = (kind) => r.p.evaluate((k) => [...document.querySelectorAll('.tok')].find((b) => b.textContent.startsWith(k)).click(), kind);
 // lays pieces: each step is [kind, column, row]
 const lay = async (steps, every = 0) => { let n = 0, last = ''; for (const [kind, c, row] of steps) { if (kind !== last) { await pick(kind); last = kind; await r.pause(150); } await tap('cell', cell(c, row)); await r.pause(350); if (every && ++n % every === 0) await shot(`play-${String(n).padStart(2, '0')}`, 900); } };
@@ -14,8 +15,8 @@ const WORDS = { park: ['short and direct', 'in the middle of the town'], loop: [
 await shot('job', 2500); await tap('tree'); await shot('job-tree-tapped', 900); await click('Start'); await shot('ask', 2600);
 await click(WORDS[0]); await shot('ask-paths', 900); await click(WORDS[1]); await shot('ask-park', 900);
 await click('Ask Florence'); await has('Open the shops'); await shot('plans', 900);
-await click('Open the shops'); await shot('test-opening', 3300); await tap('bell'); await shot('test-bell-tapped', 300);
-for (const i of [0, 1, 2]) { await shot(`test-${i + 1}-walking`, 3200); await has('Take the postcard'); await shot(`test-${i + 1}-arrived`, 400); await click('Take the postcard'); await r.until((i) => document.querySelectorAll('.pc img').length >= i + 1, i); await shot(`test-${i + 1}-postcard`, 300); }
+await click('Open the shops'); await shot('test-opening', 2600); await tap('bell'); await shot('test-bell-tapped', 300);
+for (const i of [0, 1, 2]) { await shot(`test-${i + 1}-walking`, i ? 4500 : 2500); await has('Take the postcard'); await shot(`test-${i + 1}-arrived`, 400); await click('Take the postcard'); await r.until((i) => document.querySelectorAll('.pc img').length >= i + 1, i); await shot(`test-${i + 1}-postcard`, 300); }
 await has('Ask again'); await shot('results', 1200);
 if (path === 'look') { await r.close(); process.exit(0); }
 if (path === 'park') {

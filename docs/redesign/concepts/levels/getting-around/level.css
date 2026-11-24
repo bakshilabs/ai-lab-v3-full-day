@@ -19,3 +19,5 @@
 @media (max-width: 1100px), (max-height: 700px) { .pc { width: 104px; font-size: 11px; padding: 3px 3px 2px; } .tok.mini { width: 78px; } .sws.three { grid-template-columns: repeat(3, 32px); gap: 5px; } }
 /* once the result cards carry the postcards, the small ones in the band are not needed */
 .app:has(.over .card) .postcards { display: none; }
+/* the sign that keeps the first result in view stays small, so that it never covers the shops */
+.first { max-width: 340px; font-size: 14px; } .first span { align-items: flex-start; } .first .mbar i { width: 6px; height: 10px; }

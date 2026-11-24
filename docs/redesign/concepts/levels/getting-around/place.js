@@ -12,6 +12,9 @@ const { N, key, cOf, rOf, cx: X, cz: Z, GATES, SHOP } = BD;
 const DX = [0, -1, 0, 1], DZ = [1, 0, -1, 0];
 const T = (g, x, z, w, d, y, h, kind, hex, U = 1.6, V = 1.6) => texBox(g, x, z, w, d, y, h, tileMat(kind, tone(hex)), U, V);
 const NS = { shadow: false };
+// "?walk=3" makes the opening of the shops and each morning's walk three times as long. It is only for the script that takes the pictures, because the machine that
+// records draws about one picture a second and would otherwise never catch anybody on the way
+const WALK = +new URLSearchParams(location.search).get('walk') || 1;
 
 // ---- colours: a spring morning in pink, cream, fresh green and awning red ------------------------------------------------------------
 const GRASS = '#8fd468', GRASS2 = '#7cc65c', BLOSSOM = ['#ffc4dc', '#ffe3ee', '#ff9fc6', '#fff4f8'], BARK = '#7b5136', PAVE = '#efe0bf', ROAD = '#9ea2aa', BUSY = '#5f636c';
@@ -151,7 +154,7 @@ export function makePlace(W, hooks) {
   const ZONES = [[0, 66, 35, 10], [-47, 30, 15, 29], [0, 28.5, 26, 26]], zonePlate = plate(s, W.parkHere, [0, 3, 0], 'on'); zonePlate.hide = true;
   const outline = group(g); const drawOutline = (i) => { outline.clear(); const [x, z, w, d] = ZONES[i], n = Math.round(w / 2.4), m = Math.round(d / 2.4), mat = M('#ffdf3d', { unlit: true, raw: true });
     for (let k = 0; k < n; k++) for (const sz of [-1, 1]) blk(outline, x - w / 2 + (k + 0.5) * w / n, z + sz * d / 2, w / n * 0.6, 0.5, i < 2 ? 0.5 : 0.02, 0.22, '#ffdf3d', { shadow: false, mat }); for (let k = 0; k < m; k++) for (const sx of [-1, 1]) blk(outline, x + sx * w / 2, z - d / 2 + (k + 0.5) * d / m, 0.5, d / m * 0.6, i < 2 ? 0.5 : 0.02, 0.22, '#ffdf3d', { shadow: false, mat });
-    glowMarks(outline); zonePlate.pos.set(x, i === 2 ? 3 : 5, z + (i === 2 ? -9 : 0)); };
+    glowMarks(outline); zonePlate.pos.set(x, i === 2 ? 3 : 7, z + (i === 2 ? -9 : 0)); };
 
   // ---- the path pieces --------------------------------------------------------------------------------------------------------------------
   // Paving that belongs to the child's own paths takes the colour the child chose; everything else is cream.
@@ -212,8 +215,8 @@ export function makePlace(W, hooks) {
   // one morning: every door opens, and each family walks to the shops or takes the car
   async function morning(i) { const me = run, m = showPlan(i), at = places(m); atHome(); granPlate.hide = false; beep(700, 0.08);
     const jobs = GATES.map(async (q, j) => { await wait(0.25 + hash(j, 8) * 0.7); openGate(j, 1);
-      if (m.walk[j]) { const pts = walkWay(j, m.hs[j].way, at[j].slot), sec = 2 + lengthOf(pts) * 0.06; await tw(sec, (k) => { along(people[j], pts, k, 0.14); if (j === granI) { granPlate.pos.copy(people[j].position); granPlate.pos.y += 2.9; } }); faceShops(people[j], at[j].slot); beep(880 + j * 30, 0.05, 'sine', 0.04); }
-      else { people[j].visible = false; cars[j].visible = true; const pts = driveWay(j, at[j].spot), sec = 2.6 + lengthOf(pts) * 0.028; await tw(sec, (k) => { along(cars[j], pts, ease(k) * 0.999); if (j === granI) { granPlate.pos.copy(cars[j].position); granPlate.pos.y += 3; } }); beep(150, 0.12, 'sawtooth', 0.03); } });
+      if (m.walk[j]) { const pts = walkWay(j, m.hs[j].way, at[j].slot), sec = (2 + lengthOf(pts) * 0.06) * WALK; await tw(sec, (k) => { along(people[j], pts, k, 0.14); if (j === granI) { granPlate.pos.copy(people[j].position); granPlate.pos.y += 2.9; } }); faceShops(people[j], at[j].slot); beep(880 + j * 30, 0.05, 'sine', 0.04); }
+      else { people[j].visible = false; cars[j].visible = true; const pts = driveWay(j, at[j].spot), sec = (2.6 + lengthOf(pts) * 0.028) * WALK; await tw(sec, (k) => { along(cars[j], pts, ease(k) * 0.999); if (j === granI) { granPlate.pos.copy(cars[j].position); granPlate.pos.y += 3; } }); beep(150, 0.12, 'sawtooth', 0.03); } });
     granPlate.el.textContent = m.walk[granI] ? W.gran : W.granCar; await Promise.all(jobs); if (me !== run) return false;
     if (m.walk[granI]) { chime(); await tw(0.7, (k) => { family.position.y = Math.abs(Math.sin(k * Math.PI * 2)) * 0.35; }); }
     return me === run; }
@@ -255,7 +258,7 @@ export function makePlace(W, hooks) {
   // a few extra people stroll along the paths of the plan that is in the town, and lorries drive along a busy road
   const extra = [0, 1, 2, 3].map((i) => { const p = fig(g, 0, 0, 0, { k: 0.95 + (i % 2) * 0.3, shirt: SHIRTS[(i + 3) % 6], legs: '#4a556e', skin: SKIN[(i + 1) % 4], hair: HAIR[i % 5], cap: i % 2 ? null : '#e9ad1c', bag: i % 2 ? '#2e9b5a' : null }); p.visible = false; return p; });
   function ambient(m) { ambN++; strollers = []; const ok = m ? m.hs.map((h, i) => (m.walk[i] ? i : -1)).filter((i) => i >= 0) : []; extra.forEach((p, i) => { p.visible = !!ok.length; if (!ok.length) return; const j = ok[(i * 3 + 1) % ok.length], pts = [gatePt[j], ...m.hs[j].way.map(mid), [0, 10.6], [-4 + i * 1.6, 5]]; strollers.push({ o: p, pts, back: pts, v: 0.045 + i * 0.012, ph: i * 0.55 }); });
-    if (m) for (const q of lorries) { const far = m.hs.filter((h) => h.joined).sort((a, b) => b.steps - a.steps)[q.i % 3]; q.pts = far ? [...far.way.map(mid), [0, 10.6]].map(([x, z]) => [x + 0.6, z]) : null; } }
+    if (m) for (const q of lorries) { const far = m.hs.filter((h) => h.joined).sort((a, b) => b.steps - a.steps)[q.i % 3]; q.pts = far && far.way.length > 2 ? far.way.slice(0, -1).map(mid).map(([x, z]) => [x + 0.5, z + 0.5]) : null; } }
   const quiet = () => { strollers = []; for (const p of extra) p.visible = false; };
 
   // ---- the hooks that the order of the steps calls ---------------------------------------------------------------------------------------
@@ -264,12 +267,12 @@ export function makePlace(W, hooks) {
   s.asking = () => { bare(); quiet(); nb.visible = false; for (const t of tagPl) t.hide = true; famPlate.hide = true; granHome.hide = false; hooks.clear(); s.child = null; glide(VIEW.ask, 1.6); };
   s.words = (list) => { s.style = list[0] ?? 1; s.park = list[1] ?? 2; sample.clear(); outline.clear(); zonePlate.hide = true;
     if (list[0] !== undefined) { const b = BD.newBoard(2, true); b.cells[key(3, 0)] = { kind: 'bend', sides: [false, true, true, false] }; b.cells[key(4, 0)] = { kind: 'straight', sides: [false, true, false, true] }; b.cells[key(5, 0)] = { kind: 'bend', sides: [true, false, false, true] }; b.cells[key(5, 1)] = { kind: 'straight', sides: [true, false, true, false] }; const road = s.style === 2 ? 2 : 0; b.cells.forEach((p, k) => { if (p) drawPiece(sample, k, p, { road, wig: s.style === 0, mat: stone }); }); texBox(sample, 0, 10.6, road ? 5.2 : 2, 1.2, 0.02, 0.16, stone, 1.5, 1.5); if (road) { const l = lorry(sample); l.position.set(X(4) + 0.3, 0.05, Z(0)); l.rotation.y = Math.PI / 2; } trees.get(key(5, 1)).visible = false; } else trees.get(key(5, 1)).visible = true;
-    if (list[1] !== undefined) { drawOutline(s.park); zonePlate.hide = false; } };
+    if (list[1] !== undefined) { drawOutline(s.park); zonePlate.hide = false; granHome.hide = true; } };
   s.showPlans = async () => { const me = run; sample.clear(); outline.clear(); zonePlate.hide = true; granHome.hide = true; bare(); [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(0.01); glide(VIEW.board, 1.5); await wait(0.9);
     for (const i of [0, 1, 2]) { if (me !== run) return; beep(420 + i * 90, 0.08); tagPl[i].hide = false; await tw(0.4, (k) => maps[i].m.scale.setScalar(Math.max(0.01, back(k)))); } };
   s.test = async (api) => { const me = run; for (const t of tagPl) t.hide = true; await glide(VIEW.test, 1.5); if (me !== run) return false; nb.visible = false;
     // the shutters roll up, the awnings come out and the bells ring
-    await tw(1.5, (k) => shops.forEach((sh, i) => sh.set(Math.max(0, Math.min(1, ease(k) * 1.4 - i * 0.2))))); shops.forEach((sh) => { sh.set(1); sh.ring = 1; }); chime(); await wait(0.6); if (me !== run) return false;
+    await tw(1.5 * WALK, (k) => shops.forEach((sh, i) => sh.set(Math.max(0, Math.min(1, ease(k) * 1.4 - i * 0.2))))); shops.forEach((sh) => { sh.set(1); sh.ring = 1; }); chime(); await wait(0.6); if (me !== run) return false;
     for (const i of [0, 1, 2]) { api.step(W.short[i]); api.say(W.morning[i]); if (!await morning(i)) return false; api.say(W.takeHow); await hooks.shutter(); if (me !== run) return false; flash(); const url = await snap(); if (me !== run) return false; hooks.postcard(i, url); await wait(0.9); if (me !== run) return false; }
     return true; };
 
@@ -296,7 +299,7 @@ export function makePlace(W, hooks) {
     const act = (k) => { const c = cOf(k), r = rOf(k), p = b.cells[k]; told = '';
       if (sel === 'lift') { const kd = BD.lift(b, c, r); if (kd) { left[kd === 'cross' ? 'fork' : kd]++; beep(300, 0.08); } }
       else if (p && p.kind === sel) { if (BD.turn(b, c, r)) beep(520, 0.06); else told = W.oneWay; }
-      else if (left[sel] > 0) { const old = BD.lay(b, c, r, sel); if (old) { left[sel]--; if (typeof old === 'string') left[old === 'cross' ? 'fork' : old]++; beep({ straight: 440, bend: 520, fork: 620, bridge: 300 }[sel] + (k % 4) * 25, 0.09, sel === 'bridge' ? 'sine' : 'triangle'); if (sel === 'bridge') { setTimeout(() => beep(240, 0.2, 'sine', 0.08), 90); burst(X(c), Z(r), 10, 2.5); } for (let sd = 0; sd < 4; sd++) { const k2 = key(c + BD.DC[sd], r + BD.DR[sd]); if (c + BD.DC[sd] >= 0 && c + BD.DC[sd] < N && trees.has(k2) && trees.get(k2).visible) burst(X(cOf(k2)), Z(rOf(k2)), 8); } } else told = W.noFit; }
+      else if (left[sel] > 0) { const old = BD.lay(b, c, r, sel); if (old) { left[sel]--; if (typeof old === 'string') left[old === 'cross' ? 'fork' : old]++; beep({ straight: 440, bend: 520, fork: 620, bridge: 300 }[sel] + (k % 4) * 25, 0.09, sel === 'bridge' ? 'sine' : 'triangle'); if (sel === 'bridge') { setTimeout(() => beep(240, 0.2, 'sine', 0.08), 90); burst(X(c), Z(r), 10, 2.5); if (!left.bridge) sel = 'straight'; } for (let sd = 0; sd < 4; sd++) { const k2 = key(c + BD.DC[sd], r + BD.DR[sd]); if (c + BD.DC[sd] >= 0 && c + BD.DC[sd] < N && trees.has(k2) && trees.get(k2).visible) burst(X(cOf(k2)), Z(rOf(k2)), 8); } } else told = W.noFit; }
       react(); };
     for (let k = 0; k < N * N; k++) hitBox(s, g, X(cOf(k)), 0, Z(rOf(k)), 4.9, 0.7, 4.9, () => me === run && s.child && s.child.board === b && (sel === 'lift' ? !!b.cells[k] : !!b.cells[k] || (left[sel] > 0 && BD.ways(b, cOf(k), rOf(k), sel).length > 0)), () => act(k));
     // the tray: one button for each kind of piece, one to take a piece back, the colours of the paving, and a quiet button that shows one way to do it
@@ -313,7 +316,7 @@ export function makePlace(W, hooks) {
   const endPlay = () => { lines.visible = false; marks.forEach((m) => { if (m) m.visible = false; }); granHome.hide = true; };
   s.town = async (pick) => { endPlay(); const m = settle(pick); ambient(m); await glide(VIEW.test, 2); };
   s.swap = (pick) => { endPlay(); const m = settle(pick); ambient(m); };
-  s.recap = (answer) => { let open = true; quiet(); for (const p of [...people, ...cars]) if (p.position.x > -7.6 && p.position.x < 4.7 && p.position.z < 9.5) p.visible = false; granPlate.hide = true; [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
+  s.recap = (answer) => { let open = true; quiet(); for (const p of [...people, ...cars]) if (p.position.z < 9.5) p.visible = false; granPlate.hide = true; [0, 1, 2].forEach(drawMap); nb.visible = true; for (const m of maps) m.m.scale.setScalar(1); glide(VIEW.board, 1.6); const signs = [];
     s.spot = (name, i) => [2.55 - i * 3.55, 2.9, 7.3];
     [0, 1, 2].forEach((i) => { const ok = s.model(i).walkers === GATES.length, pl = plate(s, W.short[i], [2.55 - i * 3.55, 5.75, 7.3], 'tap'), go = () => { if (!open) return; open = false; for (const q of signs) q.hide = true; beep(ok ? 880 : 300, 0.15); const any = [0, 1, 2].filter((j) => s.model(j).walkers === GATES.length); W.recapYes = W.recapYesOf(W.short[i]); W.recapNo = any.length ? W.recapNoOf(any.map((j) => W.short[j])) : W.recapNone; answer(ok); };
       signs.push(pl); pl.el.onclick = go; hitBox(s, nb, 3.55 - i * 3.55, 1.1, -0.2, 3.5, 3.5, 0.6, () => open, go); }); };
