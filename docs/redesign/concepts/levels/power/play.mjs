@@ -9,12 +9,16 @@ const r = await openLevel({ page: 'concepts/levels/power/index.html', out, width
 const idle = () => until(() => window.trial.cur.isBusy && !window.trial.cur.isBusy()), at = (name) => r.p.evaluate((name) => { const rect = document.getElementById('c').getBoundingClientRect(); return window.trialProject(...window.trial.cur.spot(name, 0), rect); }, name);
 await shot('job', 1500); await click('Start'); await shot('ask'); await click(SUN[w0]); await shot('ask-first-word'); await click(SPARE[w1]); await shot('ask-both-words'); await click('Ask Florence'); await has('Keep the lights on'); await shot('plans', 900);
 // the test: sunset, the families come home, the geese, the long night, first light
-await click('Keep the lights on'); await shot('test-1-sun-low', 2600); await shot('test-2-sunset', 2600); await shot('test-3-lights-on', 3300); await shot('test-4-dark-homes', 2600); await shot('test-5-geese', 3400); await shot('test-6-geese-bend', 2300); await shot('test-7-night', 4300); await shot('test-8-battery', 3600); await has('Ask again'); await shot('results', 2200);
+await click('Keep the lights on'); await shot('test-1-sun-low', 1200); await shot('test-2-sunset', 1800); await shot('test-3-lights-on', 1900); await shot('test-4-dark-homes', 1300); await shot('test-5-geese', 1900); await shot('test-6-geese-bend', 1500); await shot('test-7-night', 2000); await shot('test-8-battery', 2200); await has('Show all three'); await shot('look-0', 1200);
+for (const i of [0, 2, 1]) { await tap('ham', i); await shot(`look-${i + 1}`, 1800); } await click('Show all three'); await shot('results', 2200);
 // the play break: place the parts and choose a stripe, then run the day
 await r.usePlan(+plan); await idle(); await shot('place-0', 700);
-const nT = [0, 6, 4][plan], nR = [6, 0, 4][plan], turbs = +plan === 1 ? [0, 1, 3, 4, 6, 7] : [0, 2, 3, 5], roofs = +plan === 0 ? [0, 1, 2, 3, 4, 5] : [0, 2, 3, 5];
-for (let i = 0; i < nT; i++) { await tap('turb', turbs[i]); await pause(450); if (i === 1) await shot('place-turbines', 300); }
-if (nR) { if (nT) await shot('place-roofs-0', 500); await r.p.click('[aria-label="Blue stripe"]'); await pause(300); for (let i = 0; i < nR; i++) { await tap('roof', roofs[i]); await pause(450); if (i === 1) await shot('place-roofs', 300); } } else await r.p.click('[aria-label="Green stripe"]');
+const nT = [0, 6, 4][plan], nR = [6, 0, 4][plan], turbs = +plan === 1 ? [2, 3, 4, 5, 6, 0] : [0, 2, 3, 5], roofs = +plan === 0 ? [0, 1, 2, 3, 4, 5] : [0, 2, 3, 5];
+// the last turbine goes beside the pond, the geese fly off, and the child moves it to another place
+for (let i = 0; i < nT; i++) { await tap('turb', turbs[i]); await pause(500); if (i === 1) await shot('place-turbines', 300); }
+if (nT) { await shot('place-geese-away', 1500); await tap('turb', turbs[nT - 1]); await shot('place-geese-back', 1900); await tap('turb', +plan === 1 ? 7 : 1); await pause(500); }
+if (nR) { if (nT) await shot('place-roofs-0', 500); await r.p.click('[aria-label="Blue stripe"]'); await pause(300); for (let i = 0; i < nR; i++) { await tap('roof', roofs[i]); await pause(500); if (i === 1) await shot('place-roofs', 300); } } else await r.p.click('[aria-label="Green stripe"]');
+await shot('place-ready', 900); await click('Start the day');
 const NAMES = ['morning', 'midday', 'afternoon', 'evening', 'night'];
 for (let k = 0; k < 5; k++) { await idle(); await shot(`day-${k + 1}-${NAMES[k]}`, 700);
   if (await r.p.evaluate(() => window.trial.cur.canSave())) { await tap('barn', 0); await pause(1500); await idle(); await shot(`day-${k + 1}-saved`, 400); }
