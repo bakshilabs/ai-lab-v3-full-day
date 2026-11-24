@@ -6,7 +6,7 @@ import { tw, wait, ease, back, run, plate, hitBox, glowMarks, glide, hot } from 
 import { meter, btn } from '../../level-kit/shell.js';
 import { beep, chime } from '../../level-kit/sound.js';
 import { runLevel } from '../../level-kit/flow.js';
-import { buildPlace, mkPlant, CROPS, WINTER, crop, MAIN, STALLX, STALLZ } from './place.js';
+import { buildPlace, mkPlant, CROPS, WINTER, FIELD, crop, MAIN, STALLX, STALLZ } from './place.js';
 
 // ---- 1. the words (placeholders) -------------------------------------------------------------------------------------------------------
 const WHERE = ['far away, where there is lots of land', 'at the edge of the town', 'inside the town'], HOW = ['outdoors in the soil', 'under glass', 'indoors under lights'];
@@ -28,7 +28,7 @@ const T = { nearest: 'Nearest to your words', autumnT: 'Autumn comes', winterT: 
   autumn: 'The year moves on.', winter: 'Snow falls. Food sets off again.',
   early: ['The handcart and the cargo bike are here already. Tap a crate to see when it was picked.', 'The cargo bike is full again. The handcart has one small basket.'],
   late: ['The lorry is here at last, with cold boxes. Tap a box.', 'The lorry brings plenty of cold boxes in winter too.'],
-  pick3: ['Choose three crops to grow.'], growThese: 'Grow these', tall: 'A tall plant', low: 'A low plant', left: (n) => (n === 1 ? '1 left' : `${n} left`), placed: 'All placed', here: 'Here',
+  pick3: ['Choose three crops to grow.'], pickField: ['The big farm grows food that keeps for months in the cold. Choose three crops to grow.'], growThese: 'Grow these', tall: 'A tall plant', low: 'A low plant', left: (n) => (n === 1 ? '1 left' : `${n} left`), placed: 'All placed', here: 'Here',
   put: [(c) => [`Tap a yellow bed to plant ${c.name.toLowerCase()}.`, c.tall ? 'Tall plants go in the back row, so that they do not shade the others.' : ''],
     (c) => [`Tap a yellow field to sow ${c.name.toLowerCase()}.`],
     (c) => [`Tap a yellow shelf for a tray of ${c.name.toLowerCase()}.`, c.tall ? 'Tall plants only fit the tall shelves on the ground floor.' : '']],
@@ -75,7 +75,7 @@ const nearest = (w) => (w[0] === 0 ? 1 : w[1] === 0 ? 0 : 2);
 const RESULTS = { eye: [0, 8.2, 23.5], at: [0, -3.3, 8], fov: 40 };
 const VIEW = [{ eye: [-13.8, 5.6, 3.6], at: [-13.8, 0.2, -8.6], fov: 40 }, { eye: [0, 15, -18], at: [0, 25, -112], fov: 46 }, { eye: [15.4, 5.5, 6.5], at: [15.4, 5.35, -14], fov: 39 }];
 const only = (i) => [0, 1, 2].map((k) => k === i || i < 0);
-const colsOf = (list) => list.map((c) => ({ tomato: '#ea3d2d', lettuce: '#8fd86c', strawberry: '#e8284c', pepper: '#f6b81e', herbs: '#37b061' }[c.id]));
+const colsOf = (list) => list.map((c) => ({ tomato: '#ea3d2d', lettuce: '#8fd86c', strawberry: '#e8284c', pepper: '#f6b81e', herbs: '#37b061' }[c.id] || c.col));
 const DEFCOLS = ['#ea3d2d', '#8fd86c', '#f6b81e'];
 
 function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = [];
@@ -140,8 +140,8 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
 
   // ---- the play break: grow a crate of food with the plan the child chose ------------------------------------------------------------
   const tok = (c, small) => { const b = document.createElement('button'); b.className = 'tok'; b.dataset.crop = c.id; b.innerHTML = `<svg viewBox="0 0 44 40" aria-hidden="true"><circle cx="22" cy="${c.tall ? 12 : 22}" r="9" fill="${c.col}" stroke="${INK}" stroke-width="2.5"/><path d="M22 ${c.tall ? 21 : 31}v${c.tall ? 16 : 6}" stroke="#2e9b5a" stroke-width="4" stroke-linecap="round"/></svg><span>${c.name}<small>${small}</small></span>`; return b; };
-  const chooseCrops = (api) => new Promise((res) => { const on = new Set(), go = btn(T.growThese, 'sun', () => res(CROPS.filter((c) => on.has(c.id)))); go.disabled = true;
-    const toks = CROPS.map((c) => { const b = tok(c, c.tall ? T.tall : T.low); b.onclick = () => { if (on.has(c.id)) on.delete(c.id); else if (on.size < 3) on.add(c.id); else return; beep(480 + on.size * 80, 0.07); b.classList.toggle('on', on.has(c.id)); go.disabled = on.size !== 3; }; return b; }); api.say(T.pick3); api.tray([...toks, go]); });
+  const chooseCrops = (api, list = CROPS, say = T.pick3) => new Promise((res) => { const on = new Set(), go = btn(T.growThese, 'sun', () => res(list.filter((c) => on.has(c.id)))); go.disabled = true;
+    const toks = list.map((c) => { const b = tok(c, list === FIELD ? '' : c.tall ? T.tall : T.low); b.onclick = () => { if (on.has(c.id)) on.delete(c.id); else if (on.size < 3) on.add(c.id); else return; beep(480 + on.size * 80, 0.07); b.classList.toggle('on', on.has(c.id)); go.disabled = on.size !== 3; }; return b; }); api.say(say); api.tray([...toks, go]); });
   // The child chooses a crop and taps a yellow place for it. There are two of each crop and more places than that. Tall plants only fit the tall places,
   // and a low plant is never offered the last tall place that a tall plant still needs, so the child can never get stuck
   const putAll = (slots, crops, api, say, put, tallRule) => new Promise((res) => { const left = Object.fromEntries(crops.map((c) => [c.id, 2])), toks = {}; let sel = crops[0], open = true;
@@ -181,7 +181,7 @@ function square() { const s = buildPlace(), g = s.g; s.crops = null; s.words0 = 
     if (pick === 1) { s.fields.forEach((f) => { f.sown = false; f.g.visible = false; }); s.coldPile.visible = false; } else slots.forEach((q) => { if (q.plant) { q.pg.remove(q.plant.g); q.plant = null; } });
     if (pick === 2) { s.water(0); tw(1.2, (t) => s.lights(1 - 0.92 * t)); } tw(2.4, (t) => s.season(0, w0 * (1 - ease(t))));   // every play break starts in the warm half of the year and ends in the snow
     api.say([[T.spring], [T.farmGo], [T.cleared]][pick]); await glide(VIEW[pick], 2.4); if (me !== run) return;
-    s.stage = 'crops'; const crops = await chooseCrops(api); s.crops = crops; const cols = colsOf(crops); s.stage = 'place';
+    s.stage = 'crops'; const crops = await chooseCrops(api, pick === 1 ? FIELD : CROPS, pick === 1 ? T.pickField : T.pick3); s.crops = crops; const cols = colsOf(crops); s.stage = 'place';
     if (pick === 1) {   // the big farm: sow six of eight fields, start the harvester, choose three boxes for the cold store, and send the lorry twice
       await putAll(slots, crops, api, T.put[1], (f, c) => { f.sown = true; f.crop = c; f.g.visible = true; f.mat.color.set(c.col).lerp(new THREE.Color('#7cc552'), 0.72); }, false);
       await tw(2.2, (t) => s.fields.forEach((f) => { if (f.sown) f.mat.color.set(f.crop.col).lerp(new THREE.Color('#7cc552'), 0.72 - 0.4 * ease(t)); })); if (me !== run) return;

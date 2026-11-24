@@ -1,6 +1,6 @@
 # Food level: notes for whoever works on it next
 
-These notes say what works, what is left and what was learned. They were last updated on 24 November 2026, at the end of the one round of rework that the owner allowed.
+These notes say what works, what is left and what was learned. They were last updated on 24 November 2026, at the end of the one round of rework that the owner allowed. The round was begun by one designer, who was stopped part-way, and finished by a second.
 
 ## What the level is
 
@@ -23,9 +23,15 @@ In the first build the child grew one crate of food, and the only real decision 
 
 - **The indoor farm.** The child chooses three crops, puts six trays on nine shelves, turns on the water and the lights, picks the food and sends the cargo bike to the summer side of the stall, as before. Then snow falls outside. Nothing changes inside, and the picked trays grow again by themselves, because the water and the lights are still on. Three shelves are still empty. The child fills them for the winter and may choose a different crop for each one, from four low crops. One tap on the lift picks all nine shelves, and the cargo bike fills the winter side of the stall with crates in the child's own mix.
 - **The community gardens.** The child plants, waters, picks and sends the handcart to the summer side, as before. Then autumn comes and the summer plants are over. The gardens have one winter cover, a low frame of glass. The child chooses one of three winter crops (carrots, cabbages or leeks) and one of eight beds for it. The snow comes and lies on every bed but that one. The child picks the food, and the handcart takes one small basket of it to the winter side. This is the dash of the "Food all year" check, seen from the inside: one bed is all that grows in the snow.
-- **The big farm far away.** The child sows six of eight fields and starts the harvester, as before. The camera then goes close to the shed, where two farm workers stand beside six cold boxes. Each box has a band in the colour of its crop. The child taps three boxes into the cold store for the winter, and so decides which food the town will have in the snow. The other three go on the lorry, and the sign over the lorry counts "Day 1", "Day 2" and "Day 3" on the long road. Then snow covers the fields, the child opens the cold store, and the lorry makes the long journey again with the boxes that were kept.
+- **The big farm far away.** The child chooses three of five crops that keep for months in the cold (carrots, cabbages, potatoes, onions and apples), sows six of eight fields and starts the harvester. The camera then goes close to the shed, where two farm workers stand beside six cold boxes. Each box has a band in the colour of its crop. The child taps three boxes into the cold store for the winter, and so decides which food the town will have in the snow. The other three go on the lorry, and the sign over the lorry counts "Day 1", "Day 2" and "Day 3" on the long road. Then snow covers the fields, the child opens the cold store, and the lorry makes the long journey again with the boxes that were kept.
 
 The decisions in the play break are now these: which three crops; where each one goes; and, for the winter, which crop fills the empty shelves, or which winter crop goes under the one cover and on which bed, or which three boxes are kept. Each of them shows on the child's stall, and the stall keeps it in the town, on "Try another plan" and in the closing picture.
+
+### Finished by the second designer
+
+- **The big farm grows food that keeps.** The first designer of the round noted that the cold store rested on a simplification, because lettuce, strawberries and tomatoes are not kept in cold stores for months. The big farm now has crops of its own, carrots, cabbages, potatoes, onions and apples, which really are kept that way, and Florence says so when the child chooses: "The big farm grows food that keeps for months in the cold." The gardens and the indoor farm keep their summer crops. This also removes the two reds of tomatoes and strawberries that were hard to tell apart on the cold boxes, and makes the big farm's play break look different from the other two.
+- The recorder `play.mjs` can now press "Keep this plan" after "Try another plan" (put `KEEP=1` in front of the command), so that path has been run once.
+- The play break of the indoor farm now begins in summer, so its words for the ripe shelves no longer speak of snow (this one line was saved by the first designer just before it was stopped).
 
 ### Smaller changes
 
@@ -66,13 +72,12 @@ The last two numbers are the plan the sample child chooses and the plan it tries
 
 ## What is left, and what is weak
 
-- **The cold store is a simplification that the owner should know about.** The first build already said that the big farm sends food in winter "from its huge fields and its cold stores", and the play break now makes the child do it. Apples, carrots and cabbages really are kept in cold stores for months. Lettuce, strawberries and tomatoes are not, and in real life a far farm sends those in winter because it is somewhere warmer or grows them under glass. The level lets the child put any of its five crops in the cold store. If the owner wants this to be exact, the big farm needs crops of its own that keep, or the far farm must be in a warmer place.
+- The big farm's winter food now comes only from the cold store. In real life a far farm may also send food grown somewhere warmer or under glass. The level does not show that, which keeps the story simple.
 - All three plans always appear, so the child's words only decide which plan appears first with the yellow sign "Nearest to your words". The results on the cards do not change with the words. This was not changed in this round.
 - The winter cover in the gardens is made of glass, and one of the word buttons is "under glass", which leads to the indoor farm. A child could ask why the gardens do not simply have more covers. The level answers only that the gardens have one.
 - In the far view of the big farm in winter, the cold store is a small target, although its sign can be tapped as well.
 - The big farm is still the plainest of the three play breaks to look at, because most of it happens far away.
 - The play break is now about twice as long as before. Whether a child of eight stays with it to the end has to be seen with real children.
-- On the cold boxes the band of the tomatoes and the band of the strawberries are two reds that are hard to tell apart. A child who grows both cannot easily see which box is which.
 - The play break is still made of taps on yellow places. It has more to decide than before, but nothing in it asks for skill or gives a surprise.
 - While a recording runs, the grey pollution behind the lorry fades more slowly than everything else moves, so some pictures show more of it than a child would see.
 

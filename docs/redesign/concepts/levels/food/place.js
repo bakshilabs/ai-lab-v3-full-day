@@ -17,6 +17,10 @@ export const CROPS = [{ id: 'tomato', name: 'Tomatoes', tall: true, col: '#e23b2
   { id: 'pepper', name: 'Peppers', col: '#f2b21c' }, { id: 'herbs', name: 'Herbs', col: '#2f9a58' }];
 // the three crops that can be sown under the winter cover of the gardens, each with the two colours of a basket of it
 export const WINTER = [{ id: 'carrot', name: 'Carrots', col: '#f08a2a', basket: ['#f08a2a', '#2f7a48'] }, { id: 'cabbage', name: 'Cabbages', col: '#9fd67a', basket: ['#9fd67a', '#5fae5a'] }, { id: 'leek', name: 'Leeks', col: '#f4f4e6', basket: ['#f4f4e6', '#3f9a58'] }];
+// the crops of the big farm's fields. They are the kinds of food that really keep for months in a cold store, so the boxes that the child keeps
+// for the winter are true to life
+export const FIELD = [{ id: 'carrot', name: 'Carrots', col: '#f08a2a' }, { id: 'cabbage', name: 'Cabbages', col: '#9fd67a' }, { id: 'potato', name: 'Potatoes', col: '#c9a066' },
+  { id: 'onion', name: 'Onions', col: '#e0b04a' }, { id: 'apple', name: 'Apples', col: '#d8403a', tree: true }];
 export const crop = (id) => CROPS.find((c) => c.id === id);
 // A row of plants about 2 wide. set(k) grows it from a seedling (0) to ripe (1), and pick() takes the food away and leaves the plant bare.
 // roots adds white roots that hang under the tray, for plants that grow in water
@@ -28,6 +32,9 @@ export function mkPlant(parent, x, y, z, c, o = {}) { const g = group(parent, x,
   else if (c.id === 'carrot') for (const dx of [-0.8, -0.27, 0.27, 0.8]) { for (const [ox, oz] of [[-0.09, 0], [0.09, 0.06], [0, -0.08]]) B(leaves, dx + ox, oz, 0.07, 0.07, 0.1, 0.46, L2); blk(fruit, dx, 0, 0.2, 0.2, 0, 0.16, c.col, { mat: GL('#f08a2a'), shadow: false }); }
   else if (c.id === 'cabbage') for (const dx of [-0.7, 0, 0.7]) { B(leaves, dx, 0, 0.6, 0.56, 0, 0.16, '#3f8a4a'); blk(fruit, dx, 0, 0.42, 0.4, 0.12, 0.34, c.col, { mat: GL('#a8dc82'), shadow: false }); blk(fruit, dx, 0, 0.26, 0.26, 0.46, 0.1, c.col, { mat: GL('#c4ec9c'), shadow: false }); }
   else if (c.id === 'leek') for (const dx of [-0.8, -0.27, 0.27, 0.8]) { for (const sx of [-1, 1]) { const f = B(leaves, dx + sx * 0.1, 0, 0.09, 0.2, 0.3, 0.5, sx < 0 ? L : '#2f8a4c'); f.rotation.z = -sx * 0.3; } blk(fruit, dx, 0, 0.13, 0.13, 0, 0.36, c.col, { mat: GL('#f6f6ea'), shadow: false }); }
+  else if (c.id === 'potato') for (const dx of [-0.7, 0, 0.7]) { B(leaves, dx, 0, 0.62, 0.56, 0, 0.36, '#3f8a4a'); B(leaves, dx, 0, 0.4, 0.36, 0.36, 0.14, L2); for (const s of [-1, 1]) blk(fruit, dx + s * 0.3, 0.3, 0.22, 0.2, 0, 0.16, c.col, { mat: GL('#c9a066'), shadow: false }); }
+  else if (c.id === 'onion') for (const dx of [-0.8, -0.27, 0.27, 0.8]) { for (const sx of [-1, 1]) B(leaves, dx + sx * 0.06, 0, 0.06, 0.06, 0.24, 0.5, L2); blk(fruit, dx, 0, 0.26, 0.26, 0, 0.26, c.col, { mat: GL('#e0b04a'), shadow: false }); }
+  else if (c.id === 'apple') for (const dx of [-0.6, 0.6]) { B(leaves, dx, 0, 0.14, 0.14, 0, 0.8, '#6b4a2e'); B(leaves, dx, 0, 0.9, 0.8, 0.7, 0.7, L); B(leaves, dx, 0, 0.6, 0.56, 1.4, 0.3, L2); for (const [ox, oy] of [[-0.36, 0.9], [0.34, 1.05], [0, 1.2]]) blk(fruit, dx + ox, 0.38, 0.2, 0.2, oy, 0.2, c.col, { mat: GL('#e2463c'), shadow: false }); }
   else for (const dx of [-0.75, -0.25, 0.25, 0.75]) { B(leaves, dx, 0, 0.3, 0.34, 0, 0.3, '#2f8a4c'); blk(fruit, dx, 0, 0.4, 0.44, 0.3, 0.32, c.col, { mat: GL('#37b061'), shadow: false }); blk(fruit, dx, 0.05, 0.24, 0.26, 0.62, 0.16, c.col, { mat: GL('#62cf7c'), shadow: false }); }
   if (o.roots) for (let j = 0; j < 7; j++) blk(g, -0.9 + j * 0.3, 0.1 * ((j % 3) - 1), 0.06, 0.06, -0.52 - hash(j, x) * 0.1, 0.4 + hash(j, x) * 0.1, '#ffffff', { mat: GL('#ffffff'), shadow: false });
   q.set = (k) => { q.k = k; const sc = 0.22 + 0.78 * k; leaves.scale.setScalar(sc); fruit.scale.setScalar(sc); fruit.visible = !q.picked && (k > 0.9 || c.id === 'lettuce' || c.id === 'herbs'); };
