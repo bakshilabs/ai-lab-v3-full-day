@@ -97,7 +97,7 @@ function hilltop() {
   for (let k = 0; k < 22; k++) B(g, -13 + Math.sin(k * 0.7) * 1.6, 19 - k * 1.95, 3.4, 2.2, 0, 0.06, '#7db6dc', { ...NO_SH, raw: true });   // the river, between the first two neighbourhoods
   for (let k = 0; k < 11; k++) { const z = 8 - k * 2.9; B(g, 13 + hash(k, 41) * 0.5, z, 1.7, 2.7, 0, 1.3 + hash(k, 42) * 0.5, ['#5e9a62', '#6aa76a'][k % 2]); B(g, 13, z, 1.3, 2.2, 1.4, 0.14, '#ffffff', NO_SH); }   // the hedge, between the last two
   const pine = (x, z, k = 1) => { const y = gy(z), p = group(g, x, y, z); B(p, 0, 0, 0.4 * k, 0.4 * k, 0, 1.1 * k, '#6b4a2e'); [[2.6, 1.3], [2.0, 1.2], [1.3, 1.2], [0.7, 0.9]].forEach(([w, h], j) => { B(p, 0, 0, w * k, w * k, (0.9 + j * 1.05) * k, h * k, ['#3f7f5a', '#3a7654'][j % 2]); }); const cap = B(p, 0, 0, 0.8 * k, 0.8 * k, 5.0 * k, 0.14 * k, '#ffffff', NO_SH), y0 = cap.position.y; hitBox(s, p, 0, 0, 0, 2.8 * k, 5.4 * k, 2.8 * k, () => !s.looking && !s.setting && !mark.visible /* a pine in front of the yellow mark of the sun must not take its tap */, () => { beep(1100, 0.05, 'sine', 0.05); tw(0.7, (q) => { cap.position.y = y0 + Math.sin(Math.PI * q) * 1.5 * k; cap.rotation.z = q * Math.PI * 2; p.rotation.z = Math.sin(q * Math.PI * 4) * 0.05 * (1 - q); }); }); };
-  for (const [x, z, k] of [[-44, -26, 1.2], [-41, -30, 0.9], [-34, -48, 1.3], [-22, -50, 1], [-6, -49, 1.2], [9, -50, 1], [22, -48, 1.3], [-52, -50, 1.1], [58, -30, 1.2], [-58, -14, 1.3], [-50, -8, 1], [52, -6, 1.2]]) pine(x, z, k);
+  for (const [x, z, k] of [[-44, -26, 1.2], [-41, -30, 0.9], [-34, -48, 1.3], [-6, -49, 1.2], [9, -50, 1], [14, -49, 1.3], [-52, -50, 1.1], [58, -30, 1.2], [-58, -14, 1.3], [-50, -8, 1], [52, -6, 1.2]]) pine(x, z, k);
   for (const [x, z, k] of [[-16.5, 22.6, 1.25], [-19.6, 23.4, 0.9], [15.5, 23, 1.1], [18.4, 22.5, 1.35]]) { const p = group(g, x, HY - 4, z); B(p, 0, 0, 0.4 * k, 0.4 * k, 0, 1.4 * k, '#6b4a2e'); [[2.6, 1.3], [2.0, 1.2], [1.3, 1.2], [0.7, 0.9]].forEach(([w, h], j) => B(p, 0, 0, w * k, w * k, (1.2 + j * 1.05) * k, h * k, ['#3f7f5a', '#356e4e'][j % 2])); }
 
   // ---- the sky: the sun on its low winter path, the moon, the stars and a few clouds ----
@@ -207,8 +207,9 @@ function hilltop() {
   hitBox(s, fam, -0.4, 0, 0.6, 6, 3, 2.4, idle, () => { s.hop = performance.now() + 1400; chime(); });
   hitBox(s, g, -10.4, HY - 2, 21.5, 3.2, 22, 3.2, idle, () => { s.gust = performance.now() + 2600; beep(180, 0.5, 'sawtooth', 0.03); });
   hitBox(s, snow, 0, 0, 0, 1.8, 2.8, 1.8, idle, () => { beep(660, 0.08); tw(0.7, (k) => { hat.position.y = 2.1 + Math.sin(Math.PI * k) * 0.9; hat.rotation.z = Math.sin(Math.PI * k) * 0.5; }); });
+  // (each pond is placed where the camera of the play break can see it: no pine, home or clock stands in front of it)
   // geese rest by a pond at one end of each row of places. A turbine put beside the pond sends them away, and they come back when it is moved
-  const flocks = [null, [-27.5, 10, -62.2, [0, 1]], [51, 7.9, -46.4, [4, 5]]].map((f) => { if (!f) return null; const [x, y, z, near] = f, fg = group(g, x, y, z), dark = new THREE.MeshBasicMaterial({ color: '#2b3352' }), pale = new THREE.MeshBasicMaterial({ color: '#f4f1ea' }); B(g, x, z + 1.6, 6.4, 2, y, 0.07, '#7db6dc', { ...NO_SH, raw: true }).visible = true;
+  const flocks = [null, [-27.5, 10, -62.2, [0, 1]], [22, 7, -48, [0, 1]]].map((f) => { if (!f) return null; const [x, y, z, near] = f, fg = group(g, x, y, z), dark = new THREE.MeshBasicMaterial({ color: '#2b3352' }), pale = new THREE.MeshBasicMaterial({ color: '#f4f1ea' }); B(g, x, z + 1.6, 6.4, 2, y, 0.07, '#7db6dc', { ...NO_SH, raw: true }).visible = true;
     for (const [dx, dz, t] of [[-1.8, 0, 0.3], [0.2, -0.5, -0.4], [1.9, 0.2, 0.2]]) { const b = group(fg, dx, 0, dz); b.rotation.y = t; B(b, 0, 0, 1.5, 0.7, 0.15, 0.75, '#fff', { mat: dark }); B(b, 0.75, 0, 0.3, 0.3, 0.7, 0.95, '#fff', { mat: dark }); B(b, 0.85, 0, 0.5, 0.32, 1.5, 0.3, '#fff', { mat: pale }); for (const sd of [-1, 1]) B(b, 0, sd * 0.5, 1.1, 0.5, 0.75, 0.1, '#fff', { mat: dark }); }
     fg.visible = false; return { g: fg, x, y, z, near, away: false }; });
   const setFlock = (p, away) => { const f = flocks[p]; if (!f || f.away === away) return false; f.away = away; const a = f.g.position.clone(), to = new THREE.Vector3(f.x + (away ? 26 : 0), f.y + (away ? 20 : 0), f.z - (away ? 8 : 0)); f.g.visible = true; for (const q of [0, 1, 2]) setTimeout(() => beep(away ? 330 : 440, 0.12, 'square', 0.03), q * 160); tw(1.6, (k) => { f.g.position.lerpVectors(a, to, ease(k)); f.g.position.y += Math.sin(Math.PI * k) * 3; }).then(() => { f.g.visible = !f.away; }); return true; };
@@ -216,8 +217,8 @@ function hilltop() {
   const tags = CX.map((cx) => { const t = plate(s, '', [cx + 2.6, 13.2, -24], 'pl'); t.hide = true; return t; });
   const setTags = (show, tap) => tags.forEach((t, h) => { const p = plans[h]; t.el.className = `plate pl${CFG[h].mine ? ' mine' : ''}${tap && tap(h) ? ' tap' : ''}`; t.el.innerHTML = `${p.icon}<span><b>${p.lines[0]}</b><b>${p.lines[1]}</b></span>`; t.hide = !show; });
 
-  // in the look step the tags sit low, on the lanes, so that they stay clear of the pills at the top when the camera lifts the town above a card
-  const tagsLow = (low) => tags.forEach((t, h) => t.pos.set(CX[h] + 2.6, low ? 1.4 : 13.2, low ? -11 : -24));
+  // in the look step the tags sit lower, just above the roofs, so that they stay clear of the pills at the top when the camera lifts the town above a card
+  const tagsLow = (low) => tags.forEach((t, h) => t.pos.set(CX[h] + 2.6, low ? 10.7 : 13.2, -24));
   // ---- the hooks that the order of the steps calls ------------------------------------------------------------------------------------
   s.words = (list) => { setWords(list); };
   s.showPlans = async (list) => { const me = run; setWords(list); famPlate.hide = true; s.made = {}; equip([-1, -1, -1]);

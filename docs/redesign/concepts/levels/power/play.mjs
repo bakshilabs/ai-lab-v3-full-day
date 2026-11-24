@@ -14,10 +14,10 @@ for (const [n, i] of [0, 1, 2].entries()) { const name = ['solar', 'wind', 'wind
 await click('Show all three'); await shot('results', 2800);
 // the play break: place the parts and choose a stripe, then run the day
 await r.usePlan(+plan); await idle(); await shot('place-0', 700);
-const nT = [0, 6, 4][plan], nR = [6, 0, 4][plan], turbs = +plan === 1 ? [2, 3, 4, 5, 6, 0] : [0, 2, 3, 5], roofs = +plan === 0 ? [0, 1, 2, 3, 4, 5] : [0, 2, 3, 5];
+const nT = [0, 6, 4][plan], nR = [6, 0, 4][plan], turbs = +plan === 1 ? [2, 3, 4, 5, 6, 0] : [2, 3, 5, 0], roofs = +plan === 0 ? [0, 1, 2, 3, 4, 5] : [0, 2, 3, 5];
 // the last turbine goes beside the pond, the geese fly off, and the child moves it to another place
 for (let i = 0; i < nT; i++) { await tap('turb', turbs[i]); await pause(500); if (i === 1) await shot('place-turbines', 300); }
-if (nT) { await shot('place-geese-away', 1500); await tap('turb', turbs[nT - 1]); await shot('place-geese-back', 1900); await tap('turb', +plan === 1 ? 7 : 1); await pause(500); }
+if (nT) { await shot('place-geese-away', 1500); await tap('turb', turbs[nT - 1]); await shot('place-geese-back', 1900); await tap('turb', +plan === 1 ? 7 : 4); await pause(500); }
 if (nR) { if (nT) await shot('place-roofs-0', 500); await r.p.click('[aria-label="Blue stripe"]'); await pause(300); for (let i = 0; i < nR; i++) { await tap('roof', roofs[i]); await pause(500); if (i === 1) await shot('place-roofs', 300); } } else await r.p.click('[aria-label="Green stripe"]');
 await shot('place-ready', 900); await click('Start the day');
 const NAMES = ['morning', 'midday', 'afternoon', 'evening', 'night'];
