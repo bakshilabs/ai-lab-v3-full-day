@@ -28,6 +28,10 @@ In a quick check with a speed above 1, the second or third bell may ring by itse
 - The outline's trodden path to the school and the grey bay for cars outside the gate are not built.
 - Sound could not be judged on the recording machine, and neither could the movement of the camera beside the walking bus, because the machine draws about one picture a second. In one recorded picture (`bus-way-a` at 1440 by 810) the camera had not caught up with the bus. This should be looked at on a real computer.
 
+## How long it takes
+
+The time could not be measured properly, because the recording machine was shared and drew about one picture a second. Its estimate was 13 to 16 minutes, but most of that was the machine waiting. Counting the lengths of the animations in the code gives about two minutes of animation, about one minute of clicking and about three minutes of reading for a typical child, so the level probably takes six to eight minutes on a real computer. That is a little short of the ten minutes asked for, and it should be timed with a child.
+
 ## What was fixed on 24 November 2026
 
 - The walking bus used to walk on over the road while it stopped for its last friend, so the teacher and the children stood on the road with cars passing. The road is now well beyond the last gate, and the teacher waits a few steps back from the kerb, so the button on the crossing can be seen and nobody is on the road before the green figure shows.
