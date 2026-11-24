@@ -64,7 +64,7 @@ const HUTS = [[[-16, 1.9, 1.3], [-12, 1.9, 1.3], [-8, 1.9, 1.3]], [[0, 0.5, -9],
 const MID = [[-12.5, 1.9, -3.5], [5.5, 0.5, -9.5], [18.5, 5.2, -29.5]];
 // three views of each place: close to the test huts (with room under them for one result card), from above for the play break, and the town when it is built
 const LOOK = [{ eye: [-14.5, 4.4, 14], at: [-14.5, 1.3, 0], fov: 46 }, { eye: [2, 3.6, 6], at: [2, 0.7, -9], fov: 46 }, { eye: [14, 8.2, -14], at: [14, 5.2, -29.5], fov: 46 }];
-const PLAN = [{ eye: [-13, 32, 8], at: [-13, 1.5, -6.8], fov: 37 }, { eye: [6.3, 31, 4.5], at: [6.3, 0.5, -10.6], fov: 36 }, { eye: [17.5, 45, -5], at: [17.5, 3, -27.2], fov: 40 }];
+const PLAN = [{ eye: [-13.2, 23.6, 11.4], at: [-13.2, 1.5, -4.1], fov: 37 }, { eye: [6.3, 21, 2.85], at: [6.3, 0.5, -11.5], fov: 37 }, { eye: [17.3, 29.8, 5.2], at: [17.3, 3.2, -23.3], fov: 40 }];
 const TOWN = [{ eye: [-13, 7.5, 15], at: [-13, 1.4, -4], fov: 50 }, { eye: [6.3, 6.5, 8.5], at: [6.3, 0.6, -9], fov: 50 }, { eye: [17, 11.5, -1], at: [17, 4.8, -25], fov: 46 }];
 // Fourteen places on each kind of land, for six homes and the town green: [x, height of the ground, z, what kind of place it is].
 // The kinds can be seen in the valley itself: low (below the line of mud), puddle, edge (beside the broken bank), tree, path (beside the path to the river), view (the top of the hill) and dry.
@@ -101,7 +101,7 @@ function valley() {
   land(g, -90, -24, -60, 4, 2.6, '#69b650');                                                  // the wood on the left
   [[-6, -22, -18, 2.0, '#84cc5f'], [-2, -27, -22, 3.6, '#7cc65a'], [2, -32, -27, 5.2, '#84cc5f'], [6, -38, -32, 6.8, '#7cc65a'], [0, -70, -38, 8.4, '#6fbd55']].forEach(([x0, z0, z1, top, c]) => land(g, x0, 90, z0, z1, top, c, '#5fae4c'));   // the hill, in steps
   land(g, -24, 8, -70, -18, 2.0, '#69b650', '#5fae4c'); land(g, -8, 0, -70, -38, 5.2, '#6fbd55', '#5fae4c');
-  for (let k = 0; k < 10; k++) { const x = -120 + k * 27 + hash(k, 2) * 8, z = -84 - hash(k, 9) * 12, h = 13 + hash(k, 5) * 10; B(g, x, z, 36, 16, 0, h * 0.6, '#4c9a58', { shadow: false }); B(g, x + 2, z - 1, 26, 16, h * 0.6, h * 0.4, '#58a862', { shadow: false }); B(g, x + 5, z - 2, 14, 16, h, 4, '#66b56d', { shadow: false }); }   // far green hills, which the haze softens
+  for (let k = 0; k < 10; k++) { const x = -120 + k * 27 + hash(k, 2) * 8, z = -84 - hash(k, 9) * 12, h = 13 + hash(k, 5) * 10; B(g, x, z, 36, 16, 0, h * 0.6, '#1f8f63', { shadow: false }); B(g, x + 2, z - 1, 26, 16, h * 0.6, h * 0.4, '#2a9f70', { shadow: false }); B(g, x + 5, z - 2, 14, 16, h, 4, '#38ad7c', { shadow: false }); }   // far green hills, which the haze softens
   // the front of the raised bank is made of columns, which the river can pull away
   const cols = []; for (let r = 0; r < 2; r++) for (let i = 0; i < 14; i++) { const c = group(g, -24 + 1.5 * i + 0.75, 0, r ? 1.75 : 3.25); B(c, 0, 0, 1.5, 1.5, -3, 4.6, EARTH); texBox(c, 0, 0, 1.5, 1.5, 1.6, 0.3, tileMat('grass', '#9bd86c'), 3.2, 3.2); cols.push({ c, r, i, gone: false }); }
   const fall = (q, sec = 0.9) => { if (q.gone) return; q.gone = true; const d = hash(q.i, q.r + 3); thud(); tw(sec * 0.6, () => {}).then(splash); return tw(sec, (t) => { const e = t * t; q.c.position.y = -2.4 * e; q.c.position.z = (q.r ? 1.75 : 3.25) + 1.1 * e; q.c.rotation.x = 0.5 * e * (0.6 + d); q.c.rotation.z = (d - 0.5) * 0.5 * e; }); };
@@ -167,7 +167,7 @@ function valley() {
     if (o.hut) { q.lm = new THREE.MeshBasicMaterial({ color: hot('#ffd257', 3) }); B(h, 1.5, 1.3, 0.14, 0.14, 0, 0.42, '#1f2a44'); blk(h, 1.5, 1.3, 0.4, 0.4, 0.42, 0.44, '#fff', { mat: q.lm, shadow: false }); B(h, 1.5, 1.3, 0.5, 0.5, 0.86, 0.1, '#1f2a44'); }
     q.light = (on) => { q.lit = on; wm.color.copy(on ? LIT : DARK); if (q.lm) q.lm.color.copy(on ? hot('#ffd257', 3) : DARK); };
     return q; }
-  const huts = HUTS.map((three, i) => three.map((p) => { const q = build(g, p, { hut: true }); q.k = i === 2 ? 1.25 : 1; q.g.visible = false; return q; }));
+  const huts = HUTS.map((three, i) => three.map((p) => { const q = build(g, p, { hut: true }); q.k = i === 2 ? 1.5 : 1; q.g.visible = false; return q; }));
   const tags = plans.map((p, i) => { const t = plate(s, '', [MID[i][0] + (i === 0 ? -0.5 : i === 1 ? -1.5 : -2), MID[i][1] + (i === 2 ? 5.4 : i === 1 ? 3.9 : 4.6), HUTS[i][1][2]], 'pl'); t.el.innerHTML = `${p.icon}<span><b>${esc(p.lines[0])}</b><b>${esc(p.lines[1])}</b></span>`; t.hide = true; return t; });
   const showTags = (on) => tags.forEach((t) => { t.hide = !on; });
   const tip = (q, a, sec = 1) => { const a0 = q.tip; q.tip = a; return tw(sec, (t) => { q.tipNow = lerp(a0, a, ease(t)); q.g.rotation.x = q.tipNow; }); };
@@ -220,14 +220,16 @@ function valley() {
     if (q.family) { FAMILY.forEach((o, k) => fig(f, -1.3 + k * 1.15, 0, 1.75 + (k % 2) * 0.3, { ...o, k: o.k * 1.1, sad: !ok, pack: k ? undefined : '#ffd257', arms: ok ? (k === 1 ? ['down', 'up'] : ['up', 'down']) : ['down', 'down'], turn: (k - 1) * 0.25 })); }
     else { fig(f, -1.1, 0, 1.7, { k: 1.3, shirt: SHIRTS[n % 6], skin: FAMILY[n % 3].skin, hair: FAMILY[(n + 1) % 3].hair, long: n % 2 === 0, sad: !ok, arms: ok ? ['up', 'up'] : ['down', 'down'], turn: 0.2 }); if (n % 2) fig(f, 0.2, 0, 1.9, { k: 0.95, shirt: SHIRTS[(n + 3) % 6], skin: FAMILY[(n + 1) % 3].skin, hair: FAMILY[n % 3].hair, sad: !ok, arms: ok ? ['up', 'down'] : ['down', 'down'], turn: -0.2 }); }
     if (kindOf(q) === 'puddle' || kindOf(q) === 'low') B(f, 0.2, 2.1, 1.5, 0.9, 0.02, 0.05, '#7fb7d6', { unlit: true, shadow: false }); }
-  const say = (q) => { const p = SITES[site][q.i]; talk.el.textContent = saying(q); talk.pos.set(p[0], p[1] + 6.2, p[2]); talk.hide = false; };
-  const famAt = () => { const q = homes.find((h) => h.family); famSign.hide = !q; if (q) { const p = SITES[site][q.i]; famSign.pos.set(p[0], p[1] + 3.1, p[2]); } };
+  let talkN = 0, talkQ = null; const hush = () => { talkN++; talkQ = null; talk.hide = true; };
+  const famAt = () => { const q = homes.find((h) => h.family); famSign.hide = !q || q === talkQ; if (q) { const p = SITES[site][q.i]; famSign.pos.set(p[0], p[1] + 3.1, p[2]); } };
+  // what the people of a home say stands over the home for a few seconds
+  const say = (q) => { const p = SITES[site][q.i], id = ++talkN; talk.el.textContent = saying(q); talk.pos.set(p[0], p[1] + 3.6, p[2]); talk.hide = false; talkQ = q; famAt(); wait(5).then(() => { if (id === talkN) { hush(); if (s.still) famAt(); } }); };
   function addHome(i, family) { const n = homes.length, q = build(g, SITES[site][i], { wall: WALL[(n + i) % 4], roof: family ? '#d2553a' : ROOF[1 + (n + i) % 3], door: family ? '#ffd257' : ['#3f78b5', '#c0562f', '#2e9b5a', '#7a5230'][n % 4] }); q.i = i; q.family = family; homes.push(q);
     q.g.scale.setScalar(0.01); tw(0.45, (t) => q.g.scale.setScalar(Math.max(0.01, back(t)))); folk(q); q.folk.scale.setScalar(0.01); tw(0.5, (t) => q.folk.scale.setScalar(Math.max(0.01, back(t)))); (happy(q) ? chime : () => beep(240, 0.2, 'sine'))(); say(q); famAt(); return q; }
   function addGreen(i) { const p = SITES[site][i], t = group(g, p[0], p[1], p[2]); B(t, 0, 0, 3.3, 3.3, 0, 0.08, '#e6d3a1'); B(t, 0, 0, 3, 3, 0, 0.16, '#58b24a', { tex: 'grass' }); B(t, -0.9, 0.7, 0.2, 0.2, 0, 4, '#f6f1e2'); blk(t, 0, 0.7, 1.7, 0.1, 2.85, 1.1, '#fff', { mat: flagM }); B(t, 0.9, -0.7, 0.3, 0.3, 0, 1, '#7a5230', { tex: 'bark' }); B(t, 0.9, -0.7, 1.5, 1.5, 0.9, 1.2, '#4fae47', { tex: 'leaf' }); B(t, 0.6, 1, 1.2, 0.36, 0.16, 0.3, '#a87645');
     green = { g: t, i }; t.scale.setScalar(0.01); tw(0.45, (k) => t.scale.setScalar(Math.max(0.01, back(k)))); }
   // the homes, their people and the green move to the same numbered places on another kind of land
-  function moveTo(pick) { site = pick; for (const q of homes) { const p = SITES[pick][q.i]; q.g.position.set(p[0], p[1], p[2]); q.g.rotation.set(0, 0, 0); q.tip = 0; q.tipNow = 0; folk(q); } if (green) { const p = SITES[pick][green.i]; green.g.position.set(p[0], p[1], p[2]); } pegs.visible = false; talk.hide = true; famSign.hide = true; }
+  function moveTo(pick) { site = pick; for (const q of homes) { const p = SITES[pick][q.i]; q.g.position.set(p[0], p[1], p[2]); q.g.rotation.set(0, 0, 0); q.tip = 0; q.tipNow = 0; folk(q); } if (green) { const p = SITES[pick][green.i]; green.g.position.set(p[0], p[1], p[2]); } pegs.visible = false; hush(); famSign.hide = true; }
   const clearHuts = () => { showTags(false); huts.flat().forEach((q) => tw(0.5, (t) => { q.g.scale.setScalar(Math.max(0.01, (1 - ease(t)) * q.k)); if (t >= 1) q.g.visible = false; })); };
   s.playBreak = async (pick, api) => { const me = run; site = pick; noBar(); clearHuts(); api.say([words.goesDown]); glide(V0, 1.4); toWeather(0.08, 1, 3.4); riverSound(0.2, 3.5); await toLevel(0, 3.6); if (me !== run) return; brolly.visible = false; await wait(0.9); s.still = true; await glide(PLAN[pick], 2.6); if (me !== run) return;
     const P = SITES[pick], used = new Map(), marks = P.map(([x, y, z]) => glowMarks(place(g, x, z, 2.7, 2.7, y + 0.02))), N = { home: NHOMES, green: 1 }; let tool = 'home', flag = 0, done = false, open = true;
@@ -241,7 +243,7 @@ function valley() {
       const all = !N.home && !N.green; if (all && !done) { done = true; chime(); api.done(words.doneBreak); } else if (!all) { if (done) { done = false; api.tray(tray); } api.say([tool === 'green' ? words.how[2] : homes.some((h) => h.family) ? words.how[1] : words.how[0]]); } }
     api.tray(tray); draw();
     // a tap on a home that has been placed takes it back, so that the child can put it somewhere else
-    const takeBack = (q) => { const k = homes.indexOf(q); if (k < 0) return; homes.splice(k, 1); g.remove(q.g); g.remove(q.folk); used.delete(q.i); N.home++; tool = 'home'; talk.hide = true; beep(300, 0.1); famAt(); draw(); };
+    const takeBack = (q) => { const k = homes.indexOf(q); if (k < 0) return; homes.splice(k, 1); g.remove(q.g); g.remove(q.folk); used.delete(q.i); N.home++; tool = 'home'; hush(); beep(300, 0.1); famAt(); draw(); };
     P.forEach(([x, y, z], i) => hitBox(s, g, x, y, z, 3.3, 2.6, 3.3, () => open && (used.has(i) ? used.get(i) !== 'green' : N[tool] > 0), () => { if (used.has(i)) return takeBack(used.get(i));
       if (tool === 'home') { N.home--; const q = addHome(i, !homes.some((h) => h.family)); used.set(i, q); for (const [dx, dz] of [[-1.45, -1.4], [1.45, -1.4], [-1.45, 1.4], [1.45, 1.4]]) B(pegs, x + dx, z + dz, 0.16, 0.16, y, 0.5, '#e0503a', { raw: true }); }
       else { N.green--; used.set(i, 'green'); addGreen(i); chime(); } draw(); }));
@@ -251,15 +253,15 @@ function valley() {
   const wet = (q) => SITES[site][q.i][1] < HIGH;
   // Florence's sentence about the town. If the child left homes at the foot of the hill, below the line of mud, she says so
   s.afterFor = (i) => (i === 2 && homes.some(wet) ? words.afterHillLow : AFTER[i]);
-  function settle(pick) { if (s.closeBreak) s.closeBreak(); if (s.lineSign) s.lineSign.hide = true; talk.hide = true; famSign.hide = true; s.still = false; kid.visible = mum.visible = dad.visible = false; brolly.visible = false; homes.forEach((q) => { q.light(true); q.folk.visible = true; }); }
+  function settle(pick) { if (s.closeBreak) s.closeBreak(); if (s.lineSign) s.lineSign.hide = true; hush(); famSign.hide = true; s.still = false; kid.visible = mum.visible = dad.visible = false; brolly.visible = false; homes.forEach((q) => { q.light(true); q.folk.visible = true; }); }
   s.town = async (pick) => { const me = run; settle(pick); toWeather(0.05, 1, 1.5); await glide(TOWN[pick], 2.6); if (me !== run) return; chime(); famAt(); };
   // "Try another plan": the same homes stand on the other land, and the rain falls on them
   let swapN = 0;
   s.swap = (pick) => { const id = ++swapN, me = run, off = () => id !== swapN || me !== run; moveTo(pick); settle(pick); setLevel(0); raining = 0; rain.visible = false; glide(TOWN[pick], 1.4);
-    (async () => { clouds.position.x = 60; await toWeather(0.9, 0.2, 1.2); if (off()) return; rain.visible = true; rain.count = NR; raining = 1; rainSound(0.9, 0.8); riverSound(0.9, 2); toLevel(HIGH, 3.6); await wait(2.2); if (off()) return;
-      for (const q of homes.filter(wet)) { q.folk.visible = false; q.light(false); hiss(); await wait(0.15); if (off()) return; } await wait(1.2); if (off()) return;
-      if (pick === 0) { for (const q of cols.filter((c) => !c.gone && c.r)) { fall(q); await wait(0.12); } if (off()) return; const front = homes.filter((q) => kindOf(q) === 'edge'); for (const q of front) { q.folk.visible = false; tip(q, 0.26, 0.9); } await wait(1); if (off()) return; }
-      await wait(0.8); if (off()) return; raining = 0; rainSound(0, 2); riverSound(0.5); tw(2, (t) => { clouds.position.x = 60 - 170 * ease(t); }); await toWeather(0.2, 0.9, 1.8); if (!off()) rain.visible = false; })(); };
+    (async () => { clouds.position.x = 60; await toWeather(0.9, 0.2, 1.2); if (off()) return; homes.forEach((q) => { q.folk.visible = false; }); famSign.hide = true; rain.visible = true; rain.count = NR; raining = 1; rainSound(0.9, 0.8); riverSound(0.9, 2); toLevel(HIGH, 3.6); await wait(2.2); if (off()) return;
+      for (const q of homes.filter(wet)) { q.light(false); hiss(); await wait(0.15); if (off()) return; } await wait(1.2); if (off()) return;
+      if (pick === 0) { for (const q of cols.filter((c) => !c.gone && c.r)) { fall(q); await wait(0.12); } if (off()) return; const front = homes.filter((q) => kindOf(q) === 'edge'); for (const q of front) tip(q, 0.26, 0.9); await wait(1); if (off()) return; }
+      await wait(0.8); if (off()) return; raining = 0; rainSound(0, 2); riverSound(0.5); tw(2, (t) => { clouds.position.x = 60 - 170 * ease(t); }); await toWeather(0.2, 0.9, 1.8); if (off()) return; rain.visible = false; homes.filter((q) => !wet(q)).forEach((q) => { q.folk.visible = true; }); famAt(); })(); };
   // the river goes back down, and the people come out again
   const calm = (sec) => { swapN++; raining = 0; rain.visible = false; rainSound(0, 1); riverSound(0.2, 2); toLevel(0, sec); toWeather(0.05, 1, sec); homes.forEach((q) => { q.folk.visible = true; q.light(true); }); };
 
