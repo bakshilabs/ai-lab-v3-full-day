@@ -4,7 +4,7 @@ Each build carries a version, the commit it was built from and the date. They sh
 
 ## The start page shows the newer 3D island (25 November 2026, later)
 
-The owner prefers the newer island: stepped roofs like the main game's homes, hard-edged shadows and solar tiles (made on 18 November). `js/home/island.js` is that version again.
+The owner prefers the newer island: stepped roofs like the main game's homes, hard-edged shadows and solar tiles (made on 18 November). `js/home/island.js` is that version again. The fourteen still pictures shown while the live island loads (`img/home/<shot>-wide.webp` and `-tall.webp`) were rendered again from the newer island by `game/tools/stills.mjs` (page `tests/visual/stills.html`); before that, the first picture on loading still showed the old roofs.
 
 ## The start page's 3D island put back as it was (25 November 2026)
 

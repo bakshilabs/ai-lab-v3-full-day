@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Start page stills</title>
+<!-- A tool page, not part of the camp: renders one still picture of the start page's island (js/home/island.js) for img/home/<shot>-<wide|tall>.webp.
+     ?shot=hero|town|drone|robots|roads|film|power&tall=1. The page is the size of the picture; tools/stills.mjs takes the pictures. The shift is the start page's own (shiftFor in js/hub.js). -->
+<style>html, body { margin: 0; height: 100%; background: transparent; } canvas { display: block; width: 100%; height: 100%; }</style>
+</head>
+<body>
+<canvas></canvas>
+<script type="module">
+import { createIsland } from '../../js/home/island.js';
+const q = new URLSearchParams(location.search), shot = q.get('shot') || 'hero', tall = q.get('tall') === '1';
+const f = tall ? { x: 0, y: shot === 'hero' ? 0.07 : -0.19, z: shot === 'hero' ? 1.3 : 1.1 } : { x: shot === 'hero' ? 0.22 : 0.24, y: 0, z: 1 };
+const island = createIsland(document.querySelector('canvas'));
+island.setShift(f.x, f.y, f.z);
+requestAnimationFrame(() => requestAnimationFrame(() => { island.still(shot); window.stillReady = true; }));
+</script>
+</body>
+</html>
