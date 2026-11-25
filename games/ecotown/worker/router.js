@@ -16,7 +16,7 @@ const BASE = {
 };
 // the new Eco Town game (eco-town/) opens each level's page in a frame of its own page, so its files may be framed by this site only
 const FRAMED = { ...BASE, 'X-Frame-Options': 'SAMEORIGIN', 'Content-Security-Policy': BASE['Content-Security-Policy'].replace("frame-ancestors 'none'", "frame-ancestors 'self'") };
-const TYPES = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', mp4: 'video/mp4', html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json', bin: 'application/octet-stream', woff2: 'font/woff2', vtt: 'text/vtt; charset=utf-8' };
+const TYPES = { mp3: 'audio/mpeg', webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', mp4: 'video/mp4', html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json', bin: 'application/octet-stream', woff2: 'font/woff2', vtt: 'text/vtt; charset=utf-8' };
 const json = (o, status = 200, extra = {}) => new Response(JSON.stringify(o), { status, headers: { ...BASE, 'Content-Type': 'application/json', ...extra } });
 const text = (s, status = 200) => new Response(s, { status, headers: { ...BASE, 'Content-Type': 'text/plain' } });
 const html = (s, status = 200, base = BASE) => new Response(s, { status, headers: { ...base, 'Content-Type': TYPES.html } });

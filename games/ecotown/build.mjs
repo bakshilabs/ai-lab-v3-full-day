@@ -96,6 +96,7 @@ for (const page of ['leader.html', 'trailer.html', 'welcome.html']) if (fs.exist
     'concepts/game/index.html', 'concepts/game/game.js', 'concepts/game/town.js', 'concepts/game/game.css', 'concepts/trial/index.html', 'concepts/trial/trial.js', 'concepts/trial/home.js'];
   const dirFiles = (rel, ok) => fs.readdirSync(path.join(RD, rel)).filter(ok).map((f) => `${rel}/${f}`);
   want.push(...dirFiles('concepts/level-kit', (f) => f.endsWith('.js') || f === 'kit.css'));
+  want.push(...dirFiles('concepts/level-kit/sounds', (f) => f.endsWith('.mp3'))); // the kit's recorded sounds (Kenney, public domain)
   for (const l of ['land', 'getting-around', 'food', 'power', 'school']) want.push(...dirFiles(`concepts/levels/${l}`, (f) => /\.(js|css)$/.test(f) || f === 'index.html'));
   for (const rel of want) { fs.mkdirSync(path.dirname(path.join(NEW, rel)), { recursive: true }); fs.copyFileSync(path.join(RD, rel), path.join(NEW, rel)); }
   console.log(`eco-town/: the new Eco Town game, ${want.length} files`);
