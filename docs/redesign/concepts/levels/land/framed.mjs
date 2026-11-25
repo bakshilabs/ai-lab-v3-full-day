@@ -8,7 +8,7 @@ const srv = http.createServer((q, r) => { const u = decodeURIComponent(q.url.spl
 await new Promise((r) => srv.once('listening', r));
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }), p = await b.newPage({ viewport: { width: 1440, height: 810 } });
 p.on('pageerror', (e) => console.log('ERR', e.message)); await p.goto(`http://localhost:${srv.address().port}/holder`, { timeout: 300000 }); fs.mkdirSync(out, { recursive: true });
-const f = p.frames()[1]; await f.waitForFunction(() => window.trial, null, { timeout: 180000 }); await p.waitForTimeout(4000); await p.screenshot({ path: `${out}/01-framed-job.jpg`, type: 'jpeg', quality: 82 });
-await f.evaluate(() => window.trial.end()); await p.waitForTimeout(6000); await p.screenshot({ path: `${out}/02-framed-end.jpg`, type: 'jpeg', quality: 82 });
+const f = p.frames()[1]; await f.waitForFunction(() => window.trial, null, { timeout: 180000 }); await p.waitForTimeout(4000); await p.screenshot({ path: `${out}/01-framed-job.jpg`, type: 'jpeg', quality: 82, timeout: 300000 });
+await f.evaluate(() => window.trial.end()); await p.waitForTimeout(6000); await p.screenshot({ path: `${out}/02-framed-end.jpg`, type: 'jpeg', quality: 82, timeout: 300000 });
 console.log('label:', await f.evaluate(() => document.getElementById('label').textContent), '| chip:', await f.evaluate(() => document.querySelector('.chip').innerText), '| buttons:', await f.evaluate(() => [...document.querySelectorAll('#tray button')].map((x) => x.textContent).join(', ')));
 await b.close(); srv.close();

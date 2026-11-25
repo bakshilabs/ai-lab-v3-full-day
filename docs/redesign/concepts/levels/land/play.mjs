@@ -21,8 +21,9 @@ for (const [n, i] of ORDER.entries()) { await tap('place', i); if (n < 3 || n >=
   if (n === 1) { await tap('place', i); await shot('break-home-taken-back', 900); await tap('place', MOVE); await shot('break-home-moved', 900); } }
 await has('Next'); await r.p.click('.sw[data-c="2"]'); await shot('break-done', 900);
 // The scene counts the storms over the town: peaks goes up when the river is at its highest, and passed goes up when the rain has gone
-let storms = 0; const peak = () => r.until((n) => window.trial.cur.peaks > n, storms), passed = () => r.until((n) => window.trial.cur.passed > n, storms++);
-await click('Next'); await peak(); await shot('town-rain', 0); await passed(); await has('Try another plan'); await shot('town-after-rain', 1500);
-if (+other >= 0) { r.tryStart(); await click('Try another plan'); await shot('other-plans', 1200); await r.usePlan(+other); await peak(); await shot('second-rain', 0); await passed(); await shot('what-changed', 1200);
-  await click('Go back to my first plan'); await peak(); await shot('first-again', 0); await passed(); await shot('first-kept', 1200); r.tryEnd(); }
+// hold() keeps the storm at its highest point until the picture is taken, and free() lets it pass
+let storms = 0; const peak = () => r.until((n) => window.trial.cur.peaks > n, storms), passed = () => r.until((n) => window.trial.cur.passed > n, storms++), hold = (on) => r.p.evaluate((on) => { window.trial.cur.hold = on; }, on);
+await hold(true); await click('Next'); await peak(); await shot('town-rain', 0); await hold(false); await passed(); await has('Try another plan'); await shot('town-after-rain', 1500);
+if (+other >= 0) { r.tryStart(); await click('Try another plan'); await shot('other-plans', 1200); await hold(true); await r.usePlan(+other); await peak(); await shot('second-rain', 0); await hold(false); await passed(); await shot('what-changed', 1200);
+  await hold(true); await click('Go back to my first plan'); await peak(); await shot('first-again', 0); await hold(false); await passed(); await shot('first-kept', 1200); r.tryEnd(); }
 await click('Next'); await shot('recap', 3200); await tap('answer', 2); await shot('recap-answer', 1200); await click('Next'); await shot('end', 5500); r.report(); await r.close(); process.exit(0);

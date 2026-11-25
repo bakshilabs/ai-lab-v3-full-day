@@ -21,7 +21,7 @@ export async function openLevel({ page, out, width = 1440, height = 810, speed =
   await new Promise((r) => srv.once('listening', r));
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }), p = await b.newPage({ viewport: { width: +width, height: +height } });
   p.on('pageerror', (e) => console.log('ERR', e.message)); p.on('console', (m) => { if (m.type() === 'error') console.log('CON', m.text()); });
-  await p.goto(`http://localhost:${srv.address().port}/${page}?fps&fx=on&speed=${speed}${query}`, { timeout: 600000 }); await p.waitForFunction(() => window.trial, null, { timeout: 600000 }); if (out) fs.mkdirSync(out, { recursive: true });
+  await p.goto(`http://localhost:${srv.address().port}/${page}?fps&fx=on&speed=${speed}${query}`, { timeout: 600000 }); await p.waitForFunction(() => window.trial, null, { timeout: 600000 }); await p.addStyleTag({ content: '#fps { visibility: hidden; }' });   // the counter is still read for the log, but it is not in the pictures if (out) fs.mkdirSync(out, { recursive: true });
   const close = async () => { await b.close(); srv.close(); };
   // The time a child of 8 to 12 would take is estimated like this: the real time the animations take, plus 0.5 seconds for every new word to read
   // (about 120 words a minute), plus 2 seconds to decide on and press a button and 4 seconds to find and tap a place in the town.
