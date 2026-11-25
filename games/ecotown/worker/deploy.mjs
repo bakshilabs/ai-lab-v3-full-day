@@ -21,7 +21,8 @@ walk(DIST);
 // voice packs are too big for the Worker script: they go to Workers KV (namespace KV_TITLE), served only with a session
 const VOICE_FILES = files.filter((p) => p.includes(`${path.sep}voice${path.sep}`)); for (const v of VOICE_FILES) files.splice(files.indexOf(v), 1);
 // so do Florence's portrait, the build pictures and the build videos (key = their path, e.g. videos/timber.mp4)
-const MEDIA_FILES = files.filter((p) => /^(img|videos)\//.test(path.relative(DIST, p).split(path.sep).join('/'))); for (const m of MEDIA_FILES) files.splice(files.indexOf(m), 1);
+// the new game's background music is large too, so it goes to KV with the pictures and films
+const MEDIA_FILES = files.filter((p) => /^(img|videos)\/|^eco-town\/concepts\/game\/music\//.test(path.relative(DIST, p).split(path.sep).join('/'))); for (const m of MEDIA_FILES) files.splice(files.indexOf(m), 1);
 const KVAPI = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/storage/kv/namespaces`;
 let kvId = null;
 if (VOICE_FILES.length) {

@@ -7,6 +7,7 @@
 import { $, btn, ui, esc, setPlace } from '../level-kit/shell.js';
 import { setScene, start, plate, wait, QS, project } from '../level-kit/stage.js';
 import { beep, chime, jingle } from '../level-kit/sound.js';
+import { playFor, stop as stopMusic, isOn as musicOn, setOn as setMusic } from './music.js';
 import { makeTown } from './town.js';
 
 // ---- the six levels, in the order of the game ------------------------------------------------------------------------------------------
@@ -32,6 +33,7 @@ const W = {
   all: 'You have planned all six places in Eco Town.', again: 'You can play any place again. Click its sign.', seeEnd: 'See the finished town',
   done: 'Done', here: 'Next', squares: 'The six places',
   goOn: 'Go on', back: 'Back to Eco Town', levelOf: (n) => `Level ${n} of 6`, hub: 'AI Lab start page',
+  musicOn: 'Music on', musicOff: 'Music off',
   reset: 'Start a new town', resetAsk: ['Do you want to start a new town?', 'The places you have planned will become empty plots again.'], resetYes: 'Yes, start a new town', resetNo: 'No, keep my town',
   endT: 'Eco Town is planned', endSay: ['It is evening in Eco Town, and every window is lit.', 'You planned this town with me, one place at a time.'], next: 'Next',
   jobsTitle: 'Real jobs that use these skills', jobsLine: 'People do this kind of work every day when they plan real towns.',
@@ -87,12 +89,13 @@ function home() { town = setScene(makeTown({ built: shown, next: nextOf(), onPic
 function open(i) { if (playing >= 0 || !town || !town.open) return; playing = i; beep(660, 0.08);
   const q = new URLSearchParams({ next: W.goOn }); for (const k of ['speed', 'fx', 'plain', 'fps']) if (QS.has(k)) q.set(k, QS.get(k));
   frame = document.createElement('iframe'); frame.title = `${W.levelOf(i + 1)}: ${LEVELS[i].name}`; frame.style.cssText = 'flex:1;border:0;width:100%'; frame.src = `${LEVELS[i].page}?${q}`;
-  $('hold').replaceChildren(frame); bar(); $('play').hidden = false; app.classList.add('asleep'); }
-function bar() { const i = playing, el = $('bar'); el.innerHTML = `<button type="button">${esc(W.back)}</button><span class="where"><b>${esc(W.levelOf(i + 1))}</b> ${esc(LEVELS[i].name)}</span>${squares(i)}`; el.querySelector('button').onclick = leave; }
+  $('hold').replaceChildren(frame); bar(); $('play').hidden = false; app.classList.add('asleep'); playFor(i); }
+function bar() { const i = playing, el = $('bar'); el.innerHTML = `<button type="button" data-back>${esc(W.back)}</button><button type="button" data-music aria-pressed="${musicOn()}">${esc(musicOn() ? W.musicOn : W.musicOff)}</button><span class="where"><b>${esc(W.levelOf(i + 1))}</b> ${esc(LEVELS[i].name)}</span>${squares(i)}`;
+  el.querySelector('[data-back]').onclick = leave; el.querySelector('[data-music]').onclick = () => { setMusic(!musicOn()); bar(); }; } // the level's own music, which the child or the teacher can turn off
 // The level says that it has ended: its last closing picture is showing. From then on it is done
 function ended() { if (playing < 0) return; if (!done.has(playing)) jingle(); done.add(playing); save(); bar(); } // a short tune the first time a level ends
 // back to the town: the frame is taken away, and if the level was done for the first time its place is built in front of the child
-function leave() { if (playing < 0) return; const i = playing; playing = -1; frame = null; $('hold').replaceChildren(); $('play').hidden = true; app.classList.remove('asleep'); arrive(i); }
+function leave() { if (playing < 0) return; const i = playing; playing = -1; stopMusic(); frame = null; $('hold').replaceChildren(); $('play').hidden = true; app.classList.remove('asleep'); arrive(i); }
 async function arrive(i) { const s = town, fresh = done.has(i) && !shown.has(i); s.open = false; signs(); band(i, true);
   if (fresh) { await wait(0.7); if (town !== s) return; if (!await s.build(i)) return; chime(); shown.add(i); signs(); if (nextOf() < 0) { await wait(1.4); if (town === s) ending(); return; } }
   if (!await s.walkTo(nextOf())) return; s.open = true; signs(); band(i); }
