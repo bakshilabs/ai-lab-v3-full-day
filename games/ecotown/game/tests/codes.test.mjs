@@ -55,6 +55,35 @@ test('a 21st learner on a 20-seat organisation is refused; seats count across it
   const [row] = await S.listOrgs(NOW); assert.equal(row.learners, 21); assert.equal(row.groups, 2); assert.equal(row.active, 21); assert.equal(row.state, 'active');
 });
 
+test('a code with a limit "at the same time": 40 play at once, the 41st waits until a place frees up', async () => {
+  const { S } = site(); const { org } = await club(S, { seats: 1000 }, { name: 'Unused' });
+  const X = await S.createGroup(org.id, { name: 'Rangers', code: '30-rangers', atOnce: 40 }, NOW);
+  const G = await S.createGroup(org.id, { name: 'Comets', code: '30 comets', atOnce: 40 }, NOW);
+  assert.equal(X.code, '30-RANGERS'); assert.equal(G.code, '30-COMETS'); assert.equal(X.atOnce, 40);
+  assert.equal(normalise('30 Rangers'), '30-RANGERS'); assert.equal(normalise('otter 1234'), 'OTTER-1234'); assert.equal(normalise('heron 47'), 'HERON-47');
+  await assert.rejects(S.createGroup(org.id, { name: 'Bad', code: '30-rangers' }, NOW), /already in use/);
+  await assert.rejects(S.createGroup(org.id, { name: 'Bad', code: '40-x' }, NOW), /must look like/);
+  await assert.rejects(S.createGroup(org.id, { name: 'Bad', atOnce: -1 }, NOW), /At the same time/);
+  const forty = []; for (let i = 0; i < 40; i++) { const j = await S.join('30-Rangers', '', '', NOW + i); assert.ok(j.ok, 'join ' + i); forty.push(j); }
+  assert.equal((await S.join('30-rangers', '', '', NOW + 50)).reason, 'busy', 'the 41st is refused while 40 play');
+  assert.ok((await S.join('30-comets', '', '', NOW + 50)).ok, 'the other code has its own 40');
+  // a learner who is playing keeps their place: checks, saves, a new device with their badge
+  const later = NOW + 60e3; for (const j of forty.slice(1)) assert.ok((await S.check(j.session, later)).ok);
+  forty[0] = await S.join('30-rangers', forty[0].badge, '', later); assert.ok(forty[0].ok, 'the same badge on a new device keeps its place');
+  // one stops playing: after a few minutes without a word their place frees up, and someone new gets in
+  const gone = forty[5]; const t = NOW + 4 * 60e3; for (const [i, j] of forty.entries()) if (i !== 5) assert.ok((await S.check(j.session, t)).ok);
+  assert.ok((await S.join('30-rangers', '', '', t)).ok, 'a free place');
+  assert.equal((await S.check(gone.session, t + 1)).reason, 'busy', 'the one who left must wait for a place to come back');
+  assert.equal((await S.join('30-rangers', gone.badge, '', t + 1)).reason, 'busy');
+  // logging out frees a place at once
+  await S.logout(forty[7].session); assert.ok((await S.check(gone.session, t + 2)).ok, 'back in after someone logged out');
+  // the limit can be changed, and 0 means no limit
+  await S.updateGroup(org.id, X.group || X.id, { atOnce: 0 }); for (let i = 0; i < 5; i++) assert.ok((await S.join('30-rangers', '', '', t + 3)).ok);
+  const rows = await S.listGroups(org.id, t + 3); assert.equal(rows.find((r) => r.name === 'Rangers').atOnce, 0);
+  // a leader's new group has no limit and cannot set one
+  const L = await S.leaderLogin(org.leaderCode, NOW); const lg = await S.leaderAddGroup(L.session, { name: 'Leader group', atOnce: 1 }, NOW); assert.equal(lg.group.atOnce, 0);
+});
+
 test('joining works only inside the dates (end date inclusive, UTC), and not when switched off', async () => {
   const { S } = site(); const { org, g } = await club(S, {}, { name: 'Week two', starts: '2026-11-08', ends: '2026-11-14' });
   assert.equal((await S.join(g.code, '', '', T('2026-11-07'))).reason, 'not_started');

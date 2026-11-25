@@ -110,5 +110,8 @@ function jobs() { town.aboveCards(); ui({ step: W.jobsTitle, say: [W.jobsLine, W
   over: W.jobs.map(([who, what], k) => `<div class="card job">${JOBPIC[k]}<p><b>${esc(who.replace(/^An? /, '').replace(/^./, (c) => c.toUpperCase()))}</b>${esc(who)} ${esc(what)}</p></div>`).join('') }); }
 
 home(); start();
+// On the live site, the game tells the server once a minute that this child is still playing, so their place on a code with a limit
+// "at the same time" stays theirs (games/ecotown/worker/codes.js); a few minutes after the page closes, the place is free for someone else.
+if (ONSITE) { const beat = () => fetch('/api/heartbeat', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {}); beat(); setInterval(beat, 60e3); }
 // for the script that checks the game and takes its pictures
 window.game = { LEVELS, W, done, open, leave, ending, get town() { return town; }, get playing() { return playing; }, get frame() { return frame; }, project };

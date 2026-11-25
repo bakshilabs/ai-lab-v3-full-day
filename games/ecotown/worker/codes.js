@@ -24,8 +24,8 @@ export const SAVE_MAX = 64 * 1024;            // largest save body accepted, in 
 export const LEADER_FOR = 12 * 3600 * 1000;   // a leader stays logged in this long
 const MAX_GROUPS = 200;
 
-// "otter 1234" -> "OTTER-1234"; also used for badges ("heron 47" -> "HERON-47")
-export const normalise = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^([A-Z]+)(\d+)$/, '$1-$2');
+// "otter 1234" -> "OTTER-1234"; also used for badges ("heron 47" -> "HERON-47"). A chosen code may also start with its number ("30 rangers" -> "30-RANGERS").
+export const normalise = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^([A-Z]+)(\d+)$/, '$1-$2').replace(/^(\d+)([A-Z]+)$/, '$1-$2');
 // "lead otter 1234" -> "LEAD-OTTER-1234"
 export const normaliseLeader = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^LEAD([A-Z]+)(\d+)$/, 'LEAD-$1-$2');
 const dayStart = (d) => Date.parse(d + 'T00:00:00Z');
@@ -97,12 +97,14 @@ function groupFields(org, input, base = {}) {
   if (input.name !== undefined) g.name = String(input.name).trim().slice(0, 60);
   if (input.starts) g.starts = input.starts; if (input.ends) g.ends = input.ends;
   if (input.revoked !== undefined) g.revoked = !!input.revoked;
+  // the most learners who may play on this code at the same time (0 or empty: no limit; the organisation's seats still apply)
+  if (input.atOnce !== undefined) { const n = input.atOnce === '' || input.atOnce === null ? 0 : Math.floor(Number(input.atOnce)); if (!(n >= 0 && n <= 10000)) throw new Error('At the same time must be 0–10000 (0 means no limit)'); g.atOnce = n; }
   g.starts = g.starts || org.starts; g.ends = g.ends || org.ends;
   if (!g.name) throw new Error('Group name is required');
   if (!isDate(g.starts) || !isDate(g.ends)) throw new Error('Dates must be YYYY-MM-DD');
   if (dayStart(g.ends) < dayStart(g.starts)) throw new Error('End date is before start date');
   if (g.starts < org.starts || g.ends > org.ends) throw new Error(`Group dates must be inside the licence dates (${org.starts} to ${org.ends})`);
-  return { revoked: false, ...g };
+  return { revoked: false, atOnce: 0, ...g };
 }
 
 // ---------------- the directory: codes -> organisation
@@ -128,7 +130,7 @@ export function createDirectory(storage) {
     async reserveJoin(org, want) {
       if (!(await storage.get('o:' + org))) throw new Error('No such organisation');
       let code;
-      if (want) { code = normalise(want); if (!/^[A-Z]{3,12}-\d{4}$/.test(code)) throw new Error('A join code must look like WORD-1234'); if (await storage.get('j:' + code)) throw new Error('That join code is already in use'); }
+      if (want) { code = normalise(want); if (!/^[A-Z]{3,12}-\d{4}$/.test(code) && !/^\d{1,4}-[A-Z]{3,12}$/.test(code)) throw new Error('A join code must look like WORD-1234 or 40-WORD'); if (await storage.get('j:' + code)) throw new Error('That join code is already in use'); }
       else code = await fresh('j:', () => `${word()}-${digits()}`);
       const group = randId(4);
       await storage.put('j:' + code, { org, group }); return { code, group };
@@ -152,12 +154,17 @@ export function createOrg(storage) {
     for (const k of (await storage.list({ prefix: `b:${gid}:` })).keys()) await storage.delete(k);
     await storage.delete('c:' + gid); return n;
   }
+  const isActive = (l, now) => !!l.secret && now - l.seen < ACTIVE_FOR;
+  // whether a group with a limit "at the same time" already has that many other learners playing
+  const crowded = async (g, now, except = '') => !!g.atOnce && (await learnersOf(g.id)).filter((l) => l.id !== except && isActive(l, now)).length >= g.atOnce;
   // the learner behind a session, or the reason there is none
   async function session(id, secret, now) {
     const org = await storage.get('org'); const l = org && /^[a-f0-9]{24}$/.test(id || '') && (await storage.get('n:' + id)); if (!l) return fail('none');
     const g = await storage.get('g:' + l.group); const st = groupState(org, g, now);
     if (st !== 'active') return fail(st === 'revoked' ? 'revoked' : st === 'unknown' ? 'none' : 'expired');
     if (!l.secret || l.secret !== secret) return fail('replaced');
+    // coming back after a break (not seen for a while) needs a free place, like joining; a learner who is playing keeps theirs
+    if (!isActive(l, now) && (await crowded(g, now, l.id))) return fail('busy');
     return { ok: true, org, g, l };
   }
   const who = ({ org, g, l }) => ({ ok: true, learner: l.id, badge: l.badge, group: { name: g.name }, ends: earlier(org.ends, g.ends) });
@@ -177,12 +184,12 @@ export function createOrg(storage) {
     },
     // removes everything this organisation holds
     async destroy() { const codes = (await groupsAll()).map((g) => g.code); for (const k of (await storage.list({ prefix: '' })).keys()) await storage.delete(k); return codes; },
-    async addGroup({ id, code, name, starts, ends }, now = Date.now()) {
+    async addGroup({ id, code, name, starts, ends, atOnce }, now = Date.now()) {
       const org = await storage.get('org'); if (!org) throw new Error('No such organisation');
       if (org.revoked) throw new Error('This organisation is switched off');
       if (!GROUP_ID.test(id || '') || !code) throw new Error('Bad group');
       if ((await groupsAll()).length >= MAX_GROUPS) throw new Error(`An organisation can have ${MAX_GROUPS} groups at most`);
-      const g = groupFields(org, { name, starts, ends }, { id, code, created: now }); await storage.put('g:' + id, g); return g;
+      const g = groupFields(org, { name, starts, ends, atOnce }, { id, code, created: now }); await storage.put('g:' + id, g); return g;
     },
     async updateGroup(gid, patch) {
       const org = await storage.get('org'); const g = org && (await storage.get('g:' + gid)); if (!g) throw new Error('No such group');
@@ -224,8 +231,10 @@ export function createOrg(storage) {
       let l;
       if (rawBadge) {
         const id = await storage.get(`b:${gid}:${normalise(rawBadge)}`); l = id && (await storage.get('n:' + id)); if (!l) return fail('no_badge');
+        if (!isActive(l, now) && (await crowded(g, now, l.id))) return fail('busy');
       } else {
         if ((await total()) >= org.seats) return fail('full');
+        if (await crowded(g, now)) return fail('busy');
         let key = '', badge = '';
         for (let i = 0; i < 200 && !badge; i++) { const w = WORDS[randInt(WORDS.length)], n = 10 + randInt(90); key = `b:${gid}:${w}-${n}`; if (!(await storage.get(key))) badge = `${title(w)} ${n}`; }
         if (!badge) return fail('full');
@@ -312,9 +321,10 @@ export function createService(dir, orgOf) {
     const O = orgOf(t.org); const r = await O.leaderCheck(t.secret, now); return r.ok ? fn(O, r.org) : r;
   };
   const admin = (id) => { if (!ORG_ID.test(id || '')) throw new Error('No such organisation'); return orgOf(id); };
-  async function addGroup(O, orgId, input, now, chosen) {
+  // only the admin passes `atOnce` (a leader cannot set or raise a group's limit)
+  async function addGroup(O, orgId, input, now, chosen, atOnce) {
     const { code, group } = await dir.reserveJoin(orgId, chosen);
-    try { return await O.addGroup({ id: group, code, name: input?.name, starts: input?.starts, ends: input?.ends }, now); } catch (e) { await dir.release(code); throw e; }
+    try { return await O.addGroup({ id: group, code, name: input?.name, starts: input?.starts, ends: input?.ends, atOnce }, now); } catch (e) { await dir.release(code); throw e; }
   }
   return {
     // ---------------- learners
@@ -356,8 +366,8 @@ export function createService(dir, orgOf) {
     },
     async deleteOrg(id) { await admin(id).destroy(); await dir.removeOrg(id); },
     listGroups: (id, now = Date.now()) => admin(id).groups(now),
-    createGroup: (id, input, now = Date.now()) => addGroup(admin(id), id, input, now, input?.code), // admin may choose the join code
-    updateGroup: (id, gid, patch) => { const { name, starts, ends, revoked } = patch || {}; return admin(id).updateGroup(gid, { name, starts, ends, revoked }); },
+    createGroup: (id, input, now = Date.now()) => addGroup(admin(id), id, input, now, input?.code, input?.atOnce), // admin may choose the join code and the limit
+    updateGroup: (id, gid, patch) => { const { name, starts, ends, revoked, atOnce } = patch || {}; return admin(id).updateGroup(gid, { name, starts, ends, revoked, atOnce }); },
     async deleteGroup(id, gid) { const { code } = await admin(id).deleteGroup(gid); await dir.release(code); },
   };
 }
