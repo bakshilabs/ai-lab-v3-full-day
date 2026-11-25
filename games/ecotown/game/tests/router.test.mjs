@@ -41,11 +41,11 @@ test('the landing page is open to everyone; the game, its files and other pages 
   for (const p of ['/play.html', '/leader.html']) assert.match((await call('GET', p)).text, /Type your group’s code/, p);
   for (const p of ['/assets/app-0123abcd.js', '/img/home/../florence.png', '/videos/episodes/e1.mp4', '/videos/trailer/t.mp4', '/voice/pack-junior.json']) assert.equal((await call('GET', p)).status, 403, p);
   // the landing page's pictures and its eight build films live in KV and are open; other media are not
-  const kv = new Map([['img/home/hero-wide.webp', 'H'], ['img/home/tiles/wind.webp', 'T'], ['videos/wind.mp4', 'V'], ['videos/house.mp4', 'X']]);
+  const kv = new Map([['img/home/hero-wide.webp', 'H'], ['img/home/tiles/wind.webp', 'T'], ['videos/wind.mp4', 'V'], ['videos/house.mp4', 'X'], ['home-music/flowerbed-fields.mp3', 'M']]);
   const env = fakeEnv(); env.VOICE = { get: async (k) => (kv.has(k) ? new TextEncoder().encode(kv.get(k)).buffer : null) };
   const handle = makeHandler({ files: FILES, adminHtml: '', leaderHtml: '', access: async () => false });
   const get = (p) => handle(new Request('https://test.example' + p), env);
-  for (const [p, type] of [['/img/home/hero-wide.webp', 'image/webp'], ['/img/home/tiles/wind.webp', 'image/webp'], ['/videos/wind.mp4', 'video/mp4']]) { const r = await get(p); assert.equal(r.status, 200, p); assert.equal(r.headers.get('Content-Type'), type); }
+  for (const [p, type] of [['/img/home/hero-wide.webp', 'image/webp'], ['/img/home/tiles/wind.webp', 'image/webp'], ['/videos/wind.mp4', 'video/mp4'], ['/home-music/flowerbed-fields.mp3', 'audio/mpeg']]) { const r = await get(p); assert.equal(r.status, 200, p); assert.equal(r.headers.get('Content-Type'), type); }
   assert.equal((await get('/videos/house.mp4')).status, 403);
 });
 

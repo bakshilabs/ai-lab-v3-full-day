@@ -103,6 +103,10 @@ for (const page of ['leader.html', 'trailer.html', 'welcome.html']) if (fs.exist
   console.log(`eco-town/: the new Eco Town game, ${want.length} files`);
 }
 
+// 5c2. the start page's background music (served from KV like the pictures, open to everyone like the start page): Land's piece
+fs.mkdirSync(path.join(OUT, 'home-music'), { recursive: true });
+fs.copyFileSync(path.join(here, '..', '..', 'docs', 'redesign', 'concepts', 'game', 'music', 'flowerbed-fields.mp3'), path.join(OUT, 'home-music', 'flowerbed-fields.mp3'));
+
 // 5d. the welcome page's one small script (it marks the welcome as watched)
 fs.copyFileSync(path.join(SRC, 'welcome-page.js'), path.join(OUT, 'welcome-page.js'));
 

@@ -6,6 +6,7 @@
 import { PARTS, LABEL, WELCOME_KEY, SAVE_KEY, progress, partHref } from './series.js';
 import { GAME, buildLabel } from './version.js';
 import { createFlorence } from './home/florence.js';
+import { startMusic } from './home/music.js';
 
 document.documentElement.classList.add('js');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -116,3 +117,6 @@ if (!calm) document.addEventListener('click', (e) => {
   setTimeout(() => { location.href = a.href; }, 380);
 });
 addEventListener('pageshow', () => $$('.opening').forEach((o) => o.remove()));
+
+// background music for the start page: it starts at the visitor's first click, and the button in the corner turns it off
+startMusic('home-music/flowerbed-fields.mp3', document.querySelector('[data-music]'));
