@@ -24,7 +24,7 @@ export const STUCK_AFTER = 5 * 60 * 1000;     // no change for this long while p
 export const KEEP_DAYS = 30;                  // learner records are deleted this many days after the group's end date
 export const SAVE_MAX = 64 * 1024;            // largest save body accepted, in bytes
 export const LEADER_FOR = 12 * 3600 * 1000;   // a leader stays logged in this long
-export const TESTER = { days: 30, seats: 10 }; // a tester's own test organisation: how long it lasts and how many learners it holds
+export const TESTER = { days: 30, seats: 15 }; // a tester's own test organisation: how long it lasts and how many learners it holds
 const MAX_GROUPS = 200;
 
 // "otter 1234" -> "OTTER-1234"; also used for badges ("heron 47" -> "HERON-47"). A chosen code may also start with its number ("30 rangers" -> "30-RANGERS").
