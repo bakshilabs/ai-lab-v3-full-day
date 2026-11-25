@@ -31,7 +31,7 @@ const W = {
   nextIs: (n, name) => `The next place is number ${n}, ${name}.`, carry: 'Carry on',
   all: 'You have planned all six places in Eco Town.', again: 'You can play any place again. Click its sign.', seeEnd: 'See the finished town',
   done: 'Done', here: 'Next', squares: 'The six places',
-  goOn: 'Go on', back: 'Back to Eco Town', levelOf: (n) => `Level ${n} of 6`,
+  goOn: 'Go on', back: 'Back to Eco Town', levelOf: (n) => `Level ${n} of 6`, hub: 'AI Lab start page',
   reset: 'Start a new town', resetAsk: ['Do you want to start a new town?', 'The places you have planned will become empty plots again.'], resetYes: 'Yes, start a new town', resetNo: 'No, keep my town',
   endT: 'Eco Town is planned', endSay: ['It is evening in Eco Town, and every window is lit.', 'You planned this town with me, one place at a time.'], next: 'Next',
   jobsTitle: 'Real jobs that use these skills', jobsLine: 'People do this kind of work every day when they plan real towns.',
@@ -54,6 +54,7 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...done]));
 const shown = new Set(done);                                    // the places that the town already shows as built
 const nextOf = () => LEVELS.findIndex((_, i) => !done.has(i));   // the first level that is not done, or -1 when all six are done
 let town = null, playing = -1, frame = null;
+const ONSITE = /\/eco-town\/concepts\/game\//.test(location.pathname);
 
 // ---- the page ----------------------------------------------------------------------------------------------------------------------------------------
 setPlace({ number: 1, town: W.title, level: '', label: W.label });
@@ -73,7 +74,9 @@ function band(arrived = -1, busy = false) { const n = nextOf(), count = done.siz
   else if (n < 0) { say = [W.all, W.again]; go = btn(W.seeEnd, 'sun big', ending); }
   else { say = [arrived >= 0 && done.has(arrived) ? W.added(LEVELS[arrived].name) : W.soFar(count), W.nextIs(n + 1, LEVELS[n].name)]; go = btn(W.carry, 'sun big', () => open(n)); }
   go.disabled = busy; const fresh = btn(W.reset, 'small', askReset); fresh.disabled = busy;
-  document.body.classList.add('home'); ui({ stepHtml: titleHtml, say, tray: [prog, ...(count ? [fresh] : []), go], over: '' }); }
+  // on the AI Lab site (eco-town/concepts/game/ under the start page) one more button goes back to the start page (owner, 25 Nov 2026)
+  const hub = ONSITE ? [btn(W.hub, 'small', () => { location.href = new URL('../../../', location.href).href; })] : [];
+  document.body.classList.add('home'); ui({ stepHtml: titleHtml, say, tray: [prog, ...hub, ...(count ? [fresh] : []), go], over: '' }); }
 function askReset() { ui({ stepHtml: titleHtml, say: W.resetAsk, tray: [btn(W.resetNo, 'sun', () => band()), btn(W.resetYes, '', () => { done.clear(); shown.clear(); save(); home(); })], over: '' }); }
 // the town by day, with the places that are done already built
 function home() { town = setScene(makeTown({ built: shown, next: nextOf(), onPick: (i) => open(i) })); signs(); band(); }

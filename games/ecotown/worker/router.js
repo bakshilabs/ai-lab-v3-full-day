@@ -175,7 +175,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     }
     // Florence's portrait, build pictures, build videos and the story episodes (videos/episodes/) also live in KV. Videos need byte ranges (Safari/iPad).
     if (/^\/(img|videos)\//.test(file) && env.VOICE) {
-      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|img\/home\/(tiles\/)?[a-z0-9_-]+\.webp|videos\/((episodes|trailer)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt))$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
+      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|img\/home\/(tiles\/)?[a-z0-9_-]+\.webp|videos\/((episodes|trailer|welcome)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt))$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
       const v = await env.VOICE.get(key, 'arrayBuffer'); if (!v) return new Response('Not found', { status: 404, headers: BASE });
       const type = TYPES[key.split('.').pop()] || 'application/octet-stream';
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get('Range') || '');

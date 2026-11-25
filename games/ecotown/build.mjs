@@ -85,7 +85,7 @@ let hub = fs.readFileSync(path.join(SRC, 'start.html'), 'utf8');
 hub = hub.replaceAll('fonts/', 'assets/fonts/').replace('<script type="module" src="js/hub.js"></script>', `<script type="module" src="assets/${hubName}"></script>`).replaceAll('href="index.html', 'href="play.html');
 fs.writeFileSync(path.join(OUT, 'index.html'), hub);
 // 5b. the club leader's one-page plan: a plain page, no scripts beyond its print button
-for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(SRC, page))) fs.writeFileSync(path.join(OUT, page), fs.readFileSync(path.join(SRC, page), 'utf8').replaceAll('href="start.html"', 'href="./"').replaceAll('href="index.html"', 'href="play.html"'));
+for (const page of ['leader.html', 'trailer.html', 'welcome.html']) if (fs.existsSync(path.join(SRC, page))) fs.writeFileSync(path.join(OUT, page), fs.readFileSync(path.join(SRC, page), 'utf8').replaceAll('href="start.html"', 'href="./"').replaceAll('href="index.html"', 'href="play.html"'));
 
 // 5c. the new Eco Town game (owner, 25 Nov 2026): the six levels of the redesign, joined into one game, replace the old Eco Town part on the start page.
 // The files are copied as they are from docs/redesign, keeping its folders, because the game opens each level's own page in a frame by a relative address.
@@ -100,6 +100,9 @@ for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(
   for (const rel of want) { fs.mkdirSync(path.dirname(path.join(NEW, rel)), { recursive: true }); fs.copyFileSync(path.join(RD, rel), path.join(NEW, rel)); }
   console.log(`eco-town/: the new Eco Town game, ${want.length} files`);
 }
+
+// 5d. the welcome page's one small script (it marks the welcome as watched)
+fs.copyFileSync(path.join(SRC, 'welcome-page.js'), path.join(OUT, 'welcome-page.js'));
 
 // 6. security headers for Cloudflare Pages
 fs.copyFileSync(path.join(here, '_headers'), path.join(OUT, '_headers'));
