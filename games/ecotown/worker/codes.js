@@ -2,12 +2,14 @@
 // storage: { get(key), put(key, value), delete(key), list({ prefix }) -> Map } (Durable Object storage API).
 // Two kinds of store use this file:
 //  - the directory (one for the whole site): which organisation a join code or a leader code belongs to.
-//    Keys: o:<orgId> -> { id, name, leaderCode, created }, j:<JOINCODE> -> { org, group }, l:<LEADERCODE> -> { org }.
+//    Keys: o:<orgId> -> { id, name, leaderCode, created }, j:<JOINCODE> -> { org, group }, l:<LEADERCODE> -> { org },
+//    t:<email> -> { org } (a club leader who signed in by email code to test the game; their own small test organisation).
 //  - one store per organisation: its record, groups, learners and their progress. Nothing of another organisation is in it.
 //    Keys: org -> organisation, g:<groupId> -> group, c:<groupId> -> number of learners in the group,
 //          n:<learnerId> -> learner (the id starts with the group id), b:<groupId>:<BADGE> -> learnerId,
 //          s:<learnerId> -> save { at, v, data }, k:<secret> -> leader session { created }.
-// No name, email or anything a child typed is stored: a learner is a random id and a made-up badge.
+// No name, email or anything a child typed is stored: a learner is a random id and a made-up badge. The only email
+// addresses kept are those of adult testers who signed in by email code (directory key t:, and their organisation's name).
 
 export const WORDS = ('OTTER MAPLE RIVER CEDAR FERN MEADOW HERON ACORN BADGER BEACON BIRCH BRAMBLE BREEZE BROOK CANYON CLOVER COMET CORAL CRANE '
   + 'DAISY DELTA DUNE EAGLE EMBER FALCON FINCH FJORD FLINT FOREST FOX GARDEN GLACIER GROVE HARBOR HAZEL HEDGE HILL HONEY IRIS ISLAND IVY '
@@ -22,6 +24,7 @@ export const STUCK_AFTER = 5 * 60 * 1000;     // no change for this long while p
 export const KEEP_DAYS = 30;                  // learner records are deleted this many days after the group's end date
 export const SAVE_MAX = 64 * 1024;            // largest save body accepted, in bytes
 export const LEADER_FOR = 12 * 3600 * 1000;   // a leader stays logged in this long
+export const TESTER = { days: 30, seats: 10 }; // a tester's own test organisation: how long it lasts and how many learners it holds
 const MAX_GROUPS = 200;
 
 // "otter 1234" -> "OTTER-1234"; also used for badges ("heron 47" -> "HERON-47"). A chosen code may also start with its number ("30 rangers" -> "30-RANGERS").
@@ -121,8 +124,15 @@ export function createDirectory(storage) {
     async renameOrg(id, name) { const o = await storage.get('o:' + id); if (o) { o.name = String(name).slice(0, 120); await storage.put('o:' + id, o); } },
     // forgets an organisation and frees every code it held
     async removeOrg(id) {
-      for (const p of ['j:', 'l:']) for (const [k, v] of await storage.list({ prefix: p })) if (v.org === id) await storage.delete(k);
+      for (const p of ['j:', 'l:', 't:']) for (const [k, v] of await storage.list({ prefix: p })) if (v.org === id) await storage.delete(k);
       await storage.delete('o:' + id);
+    },
+    // a tester who signed in by email code: their organisation, made here the first time (fresh: the caller still sets it up)
+    async tester(email, now = Date.now()) {
+      const t = await storage.get('t:' + email); const o = t && (await storage.get('o:' + t.org));
+      if (o) return { id: o.id, leaderCode: o.leaderCode, fresh: false };
+      const { id, leaderCode } = await this.addOrg('Tester ' + email, now); await storage.put('t:' + email, { org: id });
+      return { id, leaderCode, fresh: true };
     },
     async listOrgs() { return [...(await storage.list({ prefix: 'o:' })).values()].sort((a, b) => b.created - a.created); },
     // a new group gets its id and its join code here, so a join code is unique across every organisation
@@ -292,7 +302,7 @@ export function createOrg(storage) {
 }
 
 // ---------------- what one Durable Object answers: call(kind, method, ...args), kind 'dir' or 'org'
-const DIR_METHODS = ['addOrg', 'renameOrg', 'removeOrg', 'listOrgs', 'reserveJoin', 'release', 'lookup', 'leader'];
+const DIR_METHODS = ['addOrg', 'renameOrg', 'removeOrg', 'listOrgs', 'reserveJoin', 'release', 'lookup', 'leader', 'tester'];
 const ORG_METHODS = ['init', 'summary', 'update', 'destroy', 'addGroup', 'updateGroup', 'deleteGroup', 'groups', 'learners', 'purge', 'join', 'check', 'getSave', 'putSave', 'logout', 'leaderLogin', 'leaderCheck', 'leaderLogout'];
 export function createCodeStore(storage) {
   const dir = createDirectory(storage), org = createOrg(storage); let purged = 0;
@@ -352,6 +362,29 @@ export function createService(dir, orgOf) {
     leaderAddGroup: (token, input, now = Date.now()) => leader(token, now, async (O, org) => ({ ok: true, group: await addGroup(O, org.id, input, now) })),
     leaderLearners: (token, gid, now = Date.now()) => leader(token, now, async (O) => ({ ok: true, learners: await O.learners(gid, now) })),
     async leaderLogout(token) { const t = parseLeader(token); if (t) await orgOf(t.org).leaderLogout(t.secret); },
+
+    // ---------------- testers: a club leader who signed in by email code (Cloudflare Access checked the address).
+    // The first time, they get a small test organisation of their own (TESTER days, TESTER seats) with one group.
+    // Every time, they are logged in as its leader and, on this device, as a learner in that group, so they can play and see /leader.
+    // Returns { ok, leader, learner?, code, ends, reason? } (learner is missing when the group is full, ended or switched off; reason says why).
+    async testerLogin(rawEmail, token, now = Date.now()) {
+      const email = String(rawEmail || '').trim().toLowerCase();
+      if (!/^[^@\s]{1,64}@[^@\s]{1,190}$/.test(email)) return fail('none');
+      const { id, leaderCode, fresh } = await dir.tester(email, now);
+      const O = orgOf(id);
+      if (fresh) {
+        try {
+          const day = (n) => new Date(dayStart(new Date(now).toISOString().slice(0, 10)) + n * DAY).toISOString().slice(0, 10);
+          await O.init({ id, ...orgFields({ name: 'Tester ' + email, note: 'Signed in by email code', starts: day(0), ends: day(TESTER.days - 1), seats: TESTER.seats }), leaderCode, created: now });
+          await addGroup(O, id, { name: 'Test group' }, now);
+        } catch (e) { await dir.removeOrg(id); throw e; }
+      }
+      const lead = await O.leaderLogin(leaderCode, now); if (!lead.ok) return lead;
+      const g = (await O.groups(now))[0]; if (!g) return fail('unknown');
+      const out = { ok: true, leader: `${id}.${lead.secret}`, code: g.code, ends: g.ends };
+      const j = await this.join(g.code, '', token, now);
+      return j.ok ? { ...out, learner: j.session } : { ...out, reason: j.reason };
+    },
 
     // ---------------- admin (the company)
     async createOrg(input, now = Date.now()) {

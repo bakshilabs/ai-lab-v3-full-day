@@ -191,3 +191,37 @@ test('a game page opened by one learner cannot save or check in under another le
   assert.equal((await call('PUT', '/api/save', { cookie: b.cookie, body: { learner: b.data.learner, at: Date.now(), v: 1, data: { cells: [] } } })).status, 200);
   assert.equal((await call('POST', '/api/heartbeat', { cookie: a.cookie, body: {} })).status, 200);
 });
+
+test('a tester signed in by email code gets their own test organisation, plays and sees the leader page', async () => {
+  const env = fakeEnv(); let email = '';
+  const handle = makeHandler({ files: FILES, adminHtml: 'ADMIN PAGE', leaderHtml: 'LEADER PAGE', access: async () => true, tester: async () => email });
+  const go = async (method, path, cookie = '', body) => handle(new Request('https://test.example' + path, { method, headers: { ...(cookie ? { Cookie: cookie } : {}), 'Content-Type': 'application/json' }, body: body && JSON.stringify(body) }), env);
+  // without Cloudflare's checked sign-in, nothing is made and no cookie is set
+  let r = await go('GET', '/tester'); assert.equal(r.status, 403); assert.deepEqual(r.headers.getSetCookie(), []);
+  email = 'Leader.One@Example.org';
+  r = await go('GET', '/tester'); assert.equal(r.status, 200);
+  const page = await r.text(); assert.match(page, /leader\.one@example\.org/); assert.match(page, /Placeholder words/);
+  const cookies = r.headers.getSetCookie().map((c) => c.split(';')[0]); assert.equal(cookies.length, 2, 'a leader cookie and a learner cookie');
+  assert.ok(r.headers.getSetCookie().every((c) => /HttpOnly; Secure; SameSite=Strict/.test(c)));
+  const jar = cookies.join('; ');
+  assert.equal(await (await go('GET', '/play.html', jar)).text(), '<h1>the game</h1>', 'the tester can play');
+  const groups = await (await go('GET', '/api/leader/groups', jar)).json();
+  assert.ok(groups.ok); assert.equal(groups.groups.length, 1); assert.equal(groups.org.seats, 10); assert.equal(groups.groups[0].learners, 1);
+  assert.ok(page.includes(groups.groups[0].code), 'the page shows the group code');
+  // signing in again on the same device keeps the same organisation and the same learner
+  r = await go('GET', '/tester', jar); assert.equal(r.status, 200);
+  const again = await (await go('GET', '/api/leader/groups', r.headers.getSetCookie().map((c) => c.split(';')[0]).join('; '))).json();
+  assert.equal(again.groups[0].code, groups.groups[0].code); assert.equal(again.groups[0].learners, 1);
+  // admin sees it; deleting it frees the address, and the next sign-in makes a new organisation
+  const orgs = (await (await go('GET', '/admin/api/orgs')).json()).filter((o) => o.name.startsWith('Tester '));
+  assert.equal(orgs.length, 1); assert.equal(orgs[0].name, 'Tester leader.one@example.org');
+  await go('DELETE', `/admin/api/orgs/${orgs[0].id}`);
+  r = await go('GET', '/tester'); assert.equal(r.status, 200);
+  const fresh = (await (await go('GET', '/admin/api/orgs')).json()).filter((o) => o.name.startsWith('Tester '));
+  assert.equal(fresh.length, 1); assert.notEqual(fresh[0].id, orgs[0].id);
+  // a second tester gets an organisation of their own; a switched-off one is told so
+  email = 'two@example.org'; r = await go('GET', '/tester'); assert.equal(r.status, 200);
+  const two = (await (await go('GET', '/admin/api/orgs')).json()).find((o) => o.name === 'Tester two@example.org');
+  await go('PATCH', `/admin/api/orgs/${two.id}`, '', { revoked: true });
+  r = await go('GET', '/tester'); assert.equal(r.status, 403); assert.match(await r.text(), /switched off/);
+});

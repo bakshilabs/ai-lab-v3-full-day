@@ -3,11 +3,15 @@
 //  - Learners: the join page in place of any other page, then the protected game (only with a valid session cookie). A whole group shares one
 //    join code; each device that joins becomes its own learner with a made-up badge. One device per badge at a time.
 //  - Leaders: /leader, with the organisation's leader code. A leader only ever reaches their own organisation.
+//  - Testers (club leaders trying the game): /tester, behind a second Cloudflare Access app that lets anyone in who confirms
+//    their email address with a six-digit code sent by Cloudflare. They get a small test organisation of their own (codes.js testerLogin).
 //  - Admin (the company): /admin, behind Cloudflare Access AND verified here (Access login token).
 import { createService, SAVE_MAX, LEADER_FOR } from './codes.js';
 
 const TEAM = 'https://lively-silence-ec13.cloudflareaccess.com';
 const AUD = '2fd6668e3bbe8607cd949c86d1da34d104d9486ff85529c348f09fdb581987dc';
+// Access app "Eco Town testers" (ce58d76b-edc5-4162-86d5-9ae4dacccc89, path /tester, policy: everyone who signs in by email code)
+const TESTER_AUD = 'b7e41a5b004248e4f1c3fb73630c4c9e79dd1a921d6ba177f6f26ad05d688bdc';
 const COOKIE = 'eco_s', LEADER = 'eco_l';
 const BASE = {
   'Cache-Control': 'no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow, noarchive', 'X-Frame-Options': 'DENY',
@@ -25,19 +29,22 @@ const html = (s, status = 200, base = BASE) => new Response(s, { status, headers
 // ---------------- Cloudflare Access token check (admin)
 let keys = null, keysAt = 0;
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
-async function accessOK(req, env) {
+// the checked login token's claims, or null. `aud`: which Access app it must be for.
+async function accessClaims(req, aud) {
   const token = req.headers.get('Cf-Access-Jwt-Assertion') || (req.headers.get('Cookie') || '').match(/CF_Authorization=([^;]+)/)?.[1];
-  if (!token) return false;
+  if (!token) return null;
   try {
     const [h, p, sig] = token.split('.'); const header = JSON.parse(new TextDecoder().decode(b64u(h))); const claims = JSON.parse(new TextDecoder().decode(b64u(p)));
     if (!keys || Date.now() - keysAt > 3600e3) { keys = (await (await fetch(TEAM + '/cdn-cgi/access/certs')).json()).keys; keysAt = Date.now(); }
-    const jwk = keys.find((k) => k.kid === header.kid); if (!jwk || header.alg !== 'RS256') return false;
+    const jwk = keys.find((k) => k.kid === header.kid); if (!jwk || header.alg !== 'RS256') return null;
     const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
     const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64u(sig), new TextEncoder().encode(h + '.' + p));
-    const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    return ok && aud.includes(AUD) && claims.iss === TEAM && claims.exp * 1000 > Date.now();
-  } catch { return false; }
+    const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+    return ok && auds.includes(aud) && claims.iss === TEAM && claims.exp * 1000 > Date.now() ? claims : null;
+  } catch { return null; }
 }
+const accessOK = async (req) => !!(await accessClaims(req, AUD));
+const testerEmail = async (req) => { const c = await accessClaims(req, TESTER_AUD); return (c && typeof c.email === 'string' && c.email) || ''; };
 
 
 // the directory is one object; every organisation has its own. Both answer call(kind, method, ...args).
@@ -80,7 +87,7 @@ async function readJson(req, max = 4096) {
 }
 
 // files: { '/index.html': body, ... }; access: the admin check (only tests pass their own)
-export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', access = accessOK } = {}) {
+export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', access = accessOK, tester = testerEmail } = {}) {
   return async function fetch(req, env) {
     const url = new URL(req.url); const p = url.pathname; const S = service(env); const now = Date.now();
 
@@ -105,6 +112,20 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
         }
       } catch (e) { return oops(e); }
       return json({ error: 'not found' }, 404);
+    }
+
+    // ---------------- tester sign-in (email code by Cloudflare Access). Answers a page, not a redirect: the cookies are
+    // SameSite=Strict, and a browser does not send them on a redirect that started on Cloudflare's sign-in page.
+    if (p === '/tester' || p === '/tester/') {
+      const email = await tester(req, env); if (!email) return html(testerPage({ error: TESTER_WORDS.noLogin }), 403);
+      try {
+        const r = await S.testerLogin(email, cookie(req, COOKIE), now);
+        if (!r.ok) return html(testerPage({ error: LEADER_MESSAGES[r.reason] || TESTER_WORDS.failed }), 403);
+        const H = new Headers({ ...BASE, 'Content-Type': TYPES.html });
+        H.append('Set-Cookie', setCookie(LEADER, r.leader, LEADER_FOR / 1000)['Set-Cookie']);
+        if (r.learner) { recent.delete(cookie(req, COOKIE)); H.append('Set-Cookie', setCookie(COOKIE, r.learner, 2592000)['Set-Cookie']); }
+        return new Response(testerPage({ email: email.trim().toLowerCase(), code: r.code, ends: r.ends, note: r.learner ? '' : MESSAGES[r.reason] || '' }), { headers: H });
+      } catch (e) { return html(testerPage({ error: TESTER_WORDS.failed }), 500); }
     }
 
     // ---------------- leader (facilitator) side. The organisation is always the one in the leader's own cookie.
@@ -193,6 +214,33 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     if (body === undefined) return new Response('Not found', { status: 404, headers: BASE });
     return new Response(body, { headers: { ...H, ...(hashed(file) ? KEEP : {}), 'Content-Type': TYPES[file.split('.').pop()] || 'application/octet-stream' } });
   };
+}
+
+// The tester's page after signing in. PLACEHOLDER WORDS written by Claude (owner, 25 Nov 2026: "Claude writes placeholders");
+// OpenAI rewrites them when the account has credits again. Every line a tester reads is in TESTER_WORDS.
+const TESTER_WORDS = {
+  title: 'You are signed in', signedInAs: 'Signed in as', play: 'Play the game', leader: 'Open the leader page',
+  codeIs: 'Your group code is', codeHelp: 'Children can join your test group with this code on their own devices.',
+  endsOn: 'Your test ends on', noLogin: 'Please sign in with your email address first.', failed: 'Sorry, signing in did not work. Please try again.',
+  again: 'Try again', placeholder: 'Placeholder words',
+};
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
+function testerPage({ email = '', code = '', ends = '', note = '', error = '' }) {
+  const W = TESTER_WORDS;
+  const body = error ? `<h1>Eco Town</h1><p class="msg">${esc(error)}</p><a class="btn" href="/tester">${esc(W.again)}</a>`
+    : `<h1>${esc(W.title)}</h1><p>${esc(W.signedInAs)} <b>${esc(email)}</b></p>
+<a class="btn" href="/">${esc(W.play)}</a><a class="btn alt" href="/leader">${esc(W.leader)}</a>
+${note ? `<p class="msg">${esc(note)}</p>` : ''}
+<p>${esc(W.codeIs)}</p><p class="code">${esc(code)}</p><p class="small">${esc(W.codeHelp)}</p><p class="small">${esc(W.endsOn)} ${esc(ends)}.</p>`;
+  return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Eco Town testers</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font:500 18px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;color:#3b2a1e;background:radial-gradient(ellipse at top,#bfe3ff,#3f8fe6)}
+.card{background:#fffaf0;border-radius:28px;padding:30px 28px;width:min(460px,calc(100vw - 28px));box-shadow:0 14px 40px rgba(0,0,0,.25),inset 0 0 0 2px #e6d3b0;text-align:center}
+h1{margin:0 0 8px;font-size:1.9em;letter-spacing:-.02em}p{margin:6px 0}.small{font-size:.85em;color:#7a6450}.msg{color:#b0331f;font-weight:700}
+.btn{display:block;margin-top:12px;min-height:54px;line-height:54px;border-radius:16px;background:#2e9b5a;color:#fff;font-weight:800;text-decoration:none;box-shadow:inset 0 -4px 0 #1f7a44}
+.btn.alt{background:#2b3a55;box-shadow:inset 0 -4px 0 #1a2438}.code{font:800 1.6em/1.2 system-ui,sans-serif;letter-spacing:.06em}
+.chip{display:inline-block;margin-top:16px;background:#f3d9a4;border-radius:999px;padding:2px 10px;font-size:.7em;font-weight:800}
+</style></head><body><main class="card">${body}<span class="chip">${esc(W.placeholder)}</span></main></body></html>`;
 }
 
 // the join page: one code for the whole group; a badge only when coming back on another device
