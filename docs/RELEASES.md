@@ -2,6 +2,10 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## Background music for each level (25 November 2026)
+
+The owner chose four pieces: Flowerbed Fields (Zane Little Music), Summer Sunday (celestialghost8) and Summer Park (Scribe), all public domain from OpenGameArt, and "8 bit music on medium" by moodmode (Pixabay, free to use), which the owner uploaded. The owner asked for different music in each level and to reuse two pieces for now: Land and Power play Flowerbed Fields, Getting around and School play Summer Park, Homes plays Summer Sunday and Food plays the 8-bit piece. The music loops quietly while a level is open, fades in and out, and stops in the town. A "Music on / Music off" button in the game's top bar turns it off; the choice is remembered on the device. The music files are served from KV with a join code (`docs/redesign/concepts/game/music.js`, `music/`).
+
 ## Real sounds in the new Eco Town game (25 November 2026)
 
 The owner uploaded four of Kenney's free sound packs (public domain, CC0). The shared level kit (`docs/redesign/concepts/level-kit/sound.js`) now plays recordings from them instead of plain computer tones: a recorded note for taps and parts going in (played at each level's own pitches, so the levels' little tunes stay tunes), a ding for the end of a step, and a short steel-drum tune the first time a level ends. Long hums and buzzes that a level chose stay as they were. The sounds were chosen by measuring them (length, pitch, whether a tune rises), because nobody in the session can hear them. Land's own rain, river and thunder are unchanged. There is no background music yet.

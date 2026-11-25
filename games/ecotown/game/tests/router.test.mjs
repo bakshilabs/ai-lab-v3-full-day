@@ -79,6 +79,19 @@ test('the new Eco Town game needs a join code like the old one, and only this si
   const old = await call('GET', '/play.html', { cookie: j.cookie }); assert.equal(old.headers.get('X-Frame-Options'), 'DENY'); assert.match(old.headers.get('Content-Security-Policy'), /frame-ancestors 'none'/);
 });
 
+test('the music of the new game comes from KV, with a join code only', async () => {
+  const kv = new Map([['eco-town/concepts/game/music/summer-park.mp3', 'MUSIC']]);
+  const env = fakeEnv(); env.VOICE = { get: async (k) => (kv.has(k) ? new TextEncoder().encode(kv.get(k)).buffer : null) };
+  const handle = makeHandler({ files: FILES, adminHtml: 'ADMIN PAGE', leaderHtml: '', access: async () => true });
+  const call = async (method, p, { body, cookie } = {}) => handle(new Request('https://test.example' + p, { method, headers: { ...(cookie ? { Cookie: cookie } : {}), 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) }), env);
+  assert.equal((await call('GET', '/eco-town/concepts/game/music/summer-park.mp3')).status, 403);
+  const org = await (await call('POST', '/admin/api/orgs', { body: { name: 'Oak', starts: today, ends: later, seats: 5 } })).json();
+  const g = await (await call('POST', `/admin/api/orgs/${org.id}/groups`, { body: { name: 'Club' } })).json();
+  const j = await call('POST', '/api/join', { body: { code: g.code } }); const cookie = j.headers.get('Set-Cookie').split(';')[0];
+  const r = await call('GET', '/eco-town/concepts/game/music/summer-park.mp3', { cookie }); assert.equal(r.status, 200); assert.equal(r.headers.get('Content-Type'), 'audio/mpeg'); assert.equal(await r.text(), 'MUSIC');
+  assert.equal((await call('GET', '/eco-town/concepts/game/music/../game.js', { cookie })).status, 404);
+});
+
 test('heartbeat carries a status; a badge on a second device replaces the first', async () => {
   const { call } = app(); const { g } = await club(call);
   const a = await call('POST', '/api/join', { body: { code: g.code } });
