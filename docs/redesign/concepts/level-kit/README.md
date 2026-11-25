@@ -24,7 +24,7 @@ Please do not change the files in this folder while you build a level. Other lev
 
 `flow.js` is the order of the steps. A level calls `runLevel` once and hands it the words, the plans, the results and a scene. The steps are listed at the top of the file and in the next section.
 
-`sound.js` gives two small sounds, `beep` and `chime`. The kit never plays a sound by itself, because sound belongs to the level.
+`sound.js` gives three small sounds: `beep` (a recorded note played at the pitch asked for), `chime` (a ding) and `jingle` (a short tune for the end of a level). The recordings are in `sounds/`, from Kenney's free packs (public domain). The kit never plays a sound by itself, because sound belongs to the level.
 
 `record.mjs` is a helper for the script that plays a level through and saves a picture of every step.
 

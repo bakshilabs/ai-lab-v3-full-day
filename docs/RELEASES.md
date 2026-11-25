@@ -2,6 +2,10 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## Real sounds in the new Eco Town game (25 November 2026)
+
+The owner uploaded four of Kenney's free sound packs (public domain, CC0). The shared level kit (`docs/redesign/concepts/level-kit/sound.js`) now plays recordings from them instead of plain computer tones: a recorded note for taps and parts going in (played at each level's own pitches, so the levels' little tunes stay tunes), a ding for the end of a step, and a short steel-drum tune the first time a level ends. Long hums and buzzes that a level chose stay as they were. The sounds were chosen by measuring them (length, pitch, whether a tune rises), because nobody in the session can hear them. Land's own rain, river and thunder are unchanged. There is no background music yet.
+
 ## The start page shows the newer 3D island (25 November 2026, later)
 
 The owner prefers the newer island: stepped roofs like the main game's homes, hard-edged shadows and solar tiles (made on 18 November). `js/home/island.js` is that version again. The fourteen still pictures shown while the live island loads (`img/home/<shot>-wide.webp` and `-tall.webp`) were rendered again from the newer island by `game/tools/stills.mjs` (page `tests/visual/stills.html`); before that, the first picture on loading still showed the old roofs.

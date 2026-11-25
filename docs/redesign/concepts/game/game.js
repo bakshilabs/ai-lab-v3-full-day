@@ -6,7 +6,7 @@
 // Nothing is sent anywhere, and no outside file is loaded. EVERY WORD BELOW IS A PLACEHOLDER.
 import { $, btn, ui, esc, setPlace } from '../level-kit/shell.js';
 import { setScene, start, plate, wait, QS, project } from '../level-kit/stage.js';
-import { beep, chime } from '../level-kit/sound.js';
+import { beep, chime, jingle } from '../level-kit/sound.js';
 import { makeTown } from './town.js';
 
 // ---- the six levels, in the order of the game ------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ function open(i) { if (playing >= 0 || !town || !town.open) return; playing = i;
   $('hold').replaceChildren(frame); bar(); $('play').hidden = false; app.classList.add('asleep'); }
 function bar() { const i = playing, el = $('bar'); el.innerHTML = `<button type="button">${esc(W.back)}</button><span class="where"><b>${esc(W.levelOf(i + 1))}</b> ${esc(LEVELS[i].name)}</span>${squares(i)}`; el.querySelector('button').onclick = leave; }
 // The level says that it has ended: its last closing picture is showing. From then on it is done
-function ended() { if (playing < 0) return; done.add(playing); save(); bar(); }
+function ended() { if (playing < 0) return; if (!done.has(playing)) jingle(); done.add(playing); save(); bar(); } // a short tune the first time a level ends
 // back to the town: the frame is taken away, and if the level was done for the first time its place is built in front of the child
 function leave() { if (playing < 0) return; const i = playing; playing = -1; frame = null; $('hold').replaceChildren(); $('play').hidden = true; app.classList.remove('asleep'); arrive(i); }
 async function arrive(i) { const s = town, fresh = done.has(i) && !shown.has(i); s.open = false; signs(); band(i, true);
