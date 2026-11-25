@@ -2,6 +2,16 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## Codes with a limit on how many play at the same time (25 November 2026)
+
+The owner asked for two codes of their own choosing, each allowing 40 children to play at the same time.
+- **The limit.** A group (one join code) may now have a limit "at the same time" (`atOnce` in `worker/codes.js`; 0 means no limit). When that many learners on the code are playing, a new learner is refused, and so is a learner coming back after a break. A learner counts as playing if the server has heard from them in the last three minutes (`ACTIVE_FOR`). A learner who is playing keeps their place, also when they move to a new device with their badge. Logging out frees a place at once; closing the page frees it after three minutes. The organisation's seats (all learners ever) still apply, so an organisation for such codes needs plenty of seats.
+- **Who sets it.** Only the admin, on `/admin`: a field "At the same time" when adding a group, a "Change limit" button, and the column "Active now / limit". A leader's new group has no limit and cannot set one.
+- **Chosen codes** may now also look like `40-WORD` (a number first). Children may type them in any case, with a space or a dash.
+- **The new game checks in.** `docs/redesign/concepts/game/game.js` tells the server once a minute that the child is still playing (on the live site only).
+- **The message** a child sees when a code is at its limit is, for now, the existing "This group is full. Tell your leader." OpenAI was asked for a line of its own but the account has no credits (25 Nov 2026).
+- **Not stored in this repository:** the codes themselves. The repository is public, so the owner creates them on `/admin`.
+
 ## Background music on the start page (25 November 2026)
 
 The owner asked for background music on the landing page and left the choice to Claude: Flowerbed Fields, one of the owner's four pieces and the music of Land, the first level. It starts at the visitor's first click or key (a browser allows no sound before that), fades in quietly and loops. A "Music on / Music off" button sits in the top right corner (shorter words on narrow phones) and shares its remembered choice with the game's own music button. The file is `home-music/flowerbed-fields.mp3`, open to everyone like the start page (`js/home/music.js`).

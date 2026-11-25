@@ -62,7 +62,9 @@ const MESSAGES = {
   other: 'Another learner has joined on this device.',
   unknown: 'That code wasn’t recognised. Check it and try again.', revoked: 'This code has been switched off. Ask your leader.',
   not_started: 'This code isn’t active yet. Ask your leader when it starts.', expired: 'Your access has ended. Ask your leader.',
-  full: 'This group is full. Tell your leader.', no_badge: 'That badge isn’t in this group. Check it and try again.',
+  full: 'This group is full. Tell your leader.',
+  // a code with a limit "at the same time" that is reached. Placeholder: the existing "full" line, until OpenAI writes its own (no credits, 25 Nov 2026).
+  busy: 'This group is full. Tell your leader.', no_badge: 'That badge isn’t in this group. Check it and try again.',
   none: 'Please type your group’s code.', replaced: 'Your badge is now being used on another device. Join again to play here.',
 };
 const LEADER_MESSAGES = { unknown: 'That leader code wasn’t recognised.', revoked: 'This organisation has been switched off.', none: 'Please log in with your leader code.' };
