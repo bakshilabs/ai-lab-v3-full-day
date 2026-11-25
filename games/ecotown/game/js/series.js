@@ -6,21 +6,21 @@ export const WELCOME_KEY = 'ecotown.welcome'; export const SAVE_KEY = 'ecotown.s
 export const PARTS = [
   // href: the new Eco Town game (the six levels of the redesign, owner 25 Nov 2026); the old Eco Town game stays in play.html?part=town as an archive, not linked
   { id: 'town', n: 1, icon: '🏡', title: 'Eco Town', time: 'about an hour', query: '?part=town', href: 'eco-town/concepts/game/index.html',
-    blurb: 'Build your own town with Florence, your AI helper. She is clever and sometimes wrong. Check her plans before you trust them.',
-    how: ['Pick a build at the bottom, then tap a tile on the island.', 'The line at the top left always says your next step.', 'The AI Lab button opens a mission when its number shows.'] },
-  { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', time: 'about an hour', query: '?module=drone',
+    blurb: 'Plan six places in a new town with Florence, your AI helper. Ask her for plans, test them in the town, then choose the best one.',
+    how: ['Tap a word for each gap, then ask Florence for plans.', 'Press the big button to test every plan in the town.', 'Choose a plan, then build it. Each place joins your town.'] },
+  { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', time: 'about an hour', query: '?module=drone', soon: true,
     blurb: 'Six jobs drones do: safety checks, flying by hand, deliveries, farm maps, inspecting a turbine and a bridge, and search and rescue.',
     how: ['Pick a mission on the map. They open one after another.', 'Hold the arrow keys, or the arrows on the screen, to fly.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'robots', n: 3, icon: '🤖', title: 'Robots at work', time: 'about an hour', query: '?module=robots',
+  { id: 'robots', n: 3, icon: '🤖', title: 'Robots at work', time: 'about an hour', query: '?module=robots', soon: true,
     blurb: 'Six jobs robots do: sensing, a greenhouse arm, hospital deliveries, recycling, farm weeding and flood rescue. Program them, teach them and test them.',
     how: ['Pick a mission on the map. They open one after another.', 'Tap tiles to build a program or rules, then press Run to test it.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', time: 'about an hour', query: '?module=roads',
+  { id: 'roads', n: 4, icon: '🚗', title: 'Self-driving cars', time: 'about an hour', query: '?module=roads', soon: true,
     blurb: 'Six jobs behind a self-driving car: its sensors, labelling pictures, rules of the road, testing, a shared fleet and redesigning the street.',
     how: ['Pick a mission on the map. They open one after another.', 'Choose, label or set things, then press Run or Test to see what the car does.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'film', n: 5, icon: '🎬', title: 'Town film studio', time: 'about an hour', query: '?module=film',
+  { id: 'film', n: 5, icon: '🎬', title: 'Town film studio', time: 'about an hour', query: '?module=film', soon: true,
     blurb: 'Six jobs in film and TV: naming shots, storyboarding, directing, editing, captions for everyone, and checking if a picture is real.',
     how: ['Pick a mission on the map. They open one after another.', 'Tap a card or a tile to choose, then press Film or Watch to see it.', 'Every mission says the real job first, and what you can now do at the end.'] },
-  { id: 'power', n: 6, icon: '⚡', title: 'Power control room', time: 'about an hour', query: '?module=power',
+  { id: 'power', n: 6, icon: '⚡', title: 'Power control room', time: 'about an hour', query: '?module=power', soon: true,
     blurb: 'Six jobs in a control room: balancing the grid, forecasting, batteries, writing rules, moving demand, and a storm night.',
     how: ['Pick a mission on the map. They open one after another.', 'Use the buttons and tiles on the desk, then press Run to try your plan.', 'Every mission says the real job first, and what you can now do at the end.'] },
 ];
@@ -49,12 +49,12 @@ export function progress(save, welcomeSeen = false, levelsDone = null) {
     welcome: welcomeSeen ? 'done' : 'new', hasTown: !!(save && save.cells && save.band),
     town: levelsDone !== null ? state(townDone, levelsDone > 0) : state(townDone, !!(save && save.cells && (save.cells.length || labs))),
     townNote: levelsDone === null && labs ? `${labs} of 6 missions done` : '',
-    ...Object.fromEntries(PARTS.filter((p) => p.id !== 'town').map((p) => [p.id, state(!!mods[p.id]?.done, !!mods[p.id])])),
+    ...Object.fromEntries(PARTS.filter((p) => p.id !== 'town').map((p) => [p.id, p.soon ? 'soon' : state(!!mods[p.id]?.done, !!mods[p.id])])),
     // what to do next: the welcome, then the parts in order
-    next: !welcomeSeen ? 'welcome' : (PARTS.find((p) => state(p.id === 'town' ? townDone : !!mods[p.id]?.done, false) !== 'done')?.id || null),
+    next: !welcomeSeen ? 'welcome' : (PARTS.find((p) => !p.soon && state(p.id === 'town' ? townDone : !!mods[p.id]?.done, false) !== 'done')?.id || null),
   };
 }
-export const LABEL = { done: '✓ Done', started: '▶ Carry on', new: 'Not started yet' };
+export const LABEL = { done: '✓ Done', started: '▶ Carry on', new: 'Not started yet', soon: 'Coming soon' };
 
 // The discussion section that ends every part (docs/full-day-plan.md): screens down, the teacher leads, the game shows
 // these questions large and waits. j: ages 8–12, s: ages 13–17. The take-home page and the leader's page use them too.

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Welcome to Eco Town</title>
+<!-- The welcome film of the new Eco Town game (owner, 25 Nov 2026), made by voice/welcome-film.py. Its words are placeholders, like every word in the new game. -->
+<style>
+  :root { --ink: #3b2a1e; --ink2: #5e4936; --edge: #b08a55; --green: #2e9b5a; --greend: #1f7a44; --paper: #fff9ec; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: #f6ead2; color: var(--ink); font: 16px/1.45 Inter, system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 22px 26px; background: var(--paper); border-radius: 18px; box-shadow: inset 0 0 0 2px var(--edge); }
+  h1 { margin: 0 0 4px; font-size: 1.8em; } h1 span { color: var(--green); }
+  p { margin: 6px 0; } .lead { color: var(--ink2); font-weight: 600; } .note { color: var(--ink2); font-size: .85em; }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #2b3a55; margin: 14px 0; }
+  .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .actions a { font: 800 1.05em Inter, system-ui, sans-serif; padding: 12px 20px; border-radius: 14px; text-decoration: none; color: var(--ink); background: #fff; box-shadow: inset 0 0 0 2px var(--edge), 0 4px 0 #7a5a33; }
+  .actions a.go { background: var(--green); color: #fff; box-shadow: inset 0 -4px 0 var(--greend), 0 4px 0 #17613a; }
+  .actions a:focus-visible { outline: 3px solid #ffd257; outline-offset: 3px; }
+  @media (max-width: 600px) { body { padding: 0; } main { border-radius: 0; padding: 16px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Welcome to <span>Eco Town</span></h1>
+  <p class="lead">Florence shows you the six places you will plan, and how each one works. About a minute and a half.</p>
+  <video controls playsinline preload="metadata" poster="videos/welcome/eco-town-welcome.jpg" data-welcome>
+    <source src="videos/welcome/eco-town-welcome.mp4" type="video/mp4">
+    <track kind="captions" src="videos/welcome/eco-town-welcome.vtt" srclang="en" label="English" default>
+  </video>
+  <div class="actions">
+    <a class="go" href="eco-town/concepts/game/index.html">Start Eco Town ➜</a>
+    <a href="./">Back to the start page</a>
+  </div>
+  <p class="note">The words in this film are placeholders.</p>
+</main>
+<script type="module" src="welcome-page.js"></script>
+</body>
+</html>

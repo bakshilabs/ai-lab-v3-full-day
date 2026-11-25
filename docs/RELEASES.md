@@ -2,6 +2,15 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## The start page for the new Eco Town game (25 November 2026, later the same day)
+
+Asked by the owner: the Eco Town card's words, a way back from the game to the start page, a new welcome film, the ribbon of pictures from the new game, and parts 2 to 6 shown as coming soon.
+- **Eco Town card.** New words describing the new game (placeholders; no OpenAI for this build). They no longer say Florence is sometimes wrong.
+- **Way back.** The new game's town page has an "AI Lab start page" button when it runs on the site.
+- **Welcome film.** `welcome.html` plays `videos/welcome/eco-town-welcome.mp4` (82 seconds, 1920 x 1080, with captions), made by `voice/welcome-film.py` from the levels' own recordings and Florence's recorded voice (Kokoro, `af_bella`). Its words are placeholders. The welcome card opens it, and starting the film marks the welcome as watched. The old welcome in `play.html?welcome=1` is no longer linked.
+- **Ribbon.** Twelve still pictures from the six levels (`img/home/tiles/`) replace the old game's eight build films.
+- **Coming soon.** Drones, robots, self-driving cars, the film studio and the power control room show "Coming soon" and cannot be opened from the start page. They are still in the site.
+
 ## The new Eco Town game on the live site (25 November 2026)
 
 The owner asked for the new Eco Town game (the six levels of the redesign, `docs/redesign/concepts/`) to replace the old Eco Town part on `ecotown-future.deltaops.workers.dev`. Owner's decisions (25 Nov 2026): keep the live start page with its latest updates; archive the old Eco Town game; keep the old join codes; no OpenAI words for this build.

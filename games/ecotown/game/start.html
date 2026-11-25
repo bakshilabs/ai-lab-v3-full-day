@@ -109,6 +109,11 @@
   .part .arrow { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--accent, var(--green)); color: #fff; font-size: 1.5rem; font-weight: 800; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18); transition: transform .4s var(--spring); }
   .part:hover .arrow { transform: translateX(6px) scale(1.08); }
   .part.done .num { color: var(--greend); }
+  /* parts 2 to 6 are coming soon (owner, 25 Nov 2026): the card shows, but cannot be opened */
+  .chapter.seen a.card.part.soon { opacity: .78; cursor: default; }
+  .chapter.seen a.card.part.soon:hover, .chapter.seen a.card.part.soon:active { transform: none; box-shadow: 0 10px 0 #7a5a33, 0 40px 60px -30px rgba(59, 42, 30, .55), inset 0 0 0 2.5px var(--edge); }
+  .part.soon .num { color: #b9a78c; }
+  .state.soon { background: #2b3a55; color: #fff; }
   .chapter[data-shot="town"] { --accent: #2e9b5a; } .chapter[data-shot="drone"] { --accent: #3d7cc9; } .chapter[data-shot="robots"] { --accent: #9b4f96; } .chapter[data-shot="roads"] { --accent: #c9642f; }
   .chapter:nth-child(even) { justify-content: flex-start; }
 
@@ -179,9 +184,9 @@
         </header>
         <div class="foot">
           <div class="flo" data-florence role="img" aria-label="Florence, a wooden robot"><i></i></div>
-          <a class="card welcome" data-part="welcome" href="index.html?welcome=1">
+          <a class="card welcome" data-part="welcome" href="welcome.html">
             <h2>Start here: welcome</h2>
-            <p>A short film about the four parts of today, and how to get around in each one. About two minutes.</p>
+            <p>A short film with Florence about Eco Town: the six places you will plan, and how each one works. About a minute and a half.</p>
             <span class="state" data-state="welcome">Not watched yet</span>
             <span class="go"><span class="tri" aria-hidden="true">▶</span> Watch the welcome</span><span class="nexttag">Start here</span>
           </a>

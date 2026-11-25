@@ -15,11 +15,11 @@ try { save = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); seen = !!loca
 try { const d = JSON.parse(localStorage.getItem('eco-town-game-1') || '[]'); levels = Array.isArray(d) ? new Set(d.filter((i) => Number.isInteger(i) && i >= 0 && i < 6)).size : 0; } catch { /* nothing remembered */ }
 const P = progress(save, seen, levels);
 
-document.querySelector('[data-part="welcome"]').href = `${GAME}?welcome=1`;
-document.querySelector('[data-parts]').innerHTML = PARTS.map((p, i) => `<section class="chapter" data-shot="${p.id}" style="--i:${i}"><a class="card part${P.next === p.id ? ' next' : ''}${P[p.id] === 'done' ? ' done' : ''}" data-part="${p.id}" href="${partHref(p, GAME)}">
+document.querySelector('[data-part="welcome"]').href = 'welcome.html'; // the welcome film of the new Eco Town game (owner, 25 Nov 2026)
+document.querySelector('[data-parts]').innerHTML = PARTS.map((p, i) => `<section class="chapter" data-shot="${p.id}" style="--i:${i}"><a class="card part${p.soon ? ' soon' : ''}${P.next === p.id ? ' next' : ''}${P[p.id] === 'done' ? ' done' : ''}" data-part="${p.id}"${p.soon ? ' aria-disabled="true"' : ` href="${partHref(p, GAME)}"`}>
   <span class="num" aria-hidden="true">${p.n}</span><span class="nexttag">Next</span>
   <h3>${esc(p.title)}</h3>${p.time ? `<span class="time">${esc(p.time)}</span>` : ''}<div class="more"><div><p>${esc(p.blurb)}</p></div></div>
-  <div class="row2"><span class="state ${P[p.id]}" data-state="${p.id}">${esc(p.id === 'town' && P.town === 'started' && P.townNote ? `▶ ${P.townNote}` : p.id === 'town' && P.town === 'started' ? '▶ Carry on building' : LABEL[P[p.id]])}</span><span class="arrow" aria-hidden="true">→</span></div></a></section>`).join('');
+  <div class="row2"><span class="state ${P[p.id]}" data-state="${p.id}">${esc(p.id === 'town' && P.town === 'started' && P.townNote ? `▶ ${P.townNote}` : p.id === 'town' && P.town === 'started' ? '▶ Carry on building' : LABEL[P[p.id]])}</span>${p.soon ? '' : '<span class="arrow" aria-hidden="true">→</span>'}</div></a></section>`).join('');
 const w = document.querySelector('[data-state="welcome"]'); if (P.welcome === 'done') { w.textContent = '✓ Watched'; w.classList.add('done'); }
 if (P.next === 'welcome') document.querySelector('[data-part="welcome"]').classList.add('next');
 document.querySelector('[data-version]').textContent = `Eco Town ${buildLabel()}`;
@@ -37,25 +37,10 @@ const scene = $('[data-scene]'), hero = $('.hero'), strip = $('[data-strip]'), c
 // Florence waves hello, then points at the welcome; she waves again when touched
 const flo = createFlorence($('[data-florence]'), { calm });
 
-// the film strip: the game's own build films; each plays only while it is on screen
-const FILMS = ['timber', 'wind', 'solar', 'orchard', 'cycle', 'greenroof', 'tram', 'hives'];
+// the picture strip: still pictures from the six levels of the new Eco Town game (owner, 25 Nov 2026; the old game's build films are no longer shown)
+const TILES = ['land-rain', 'paths-draw', 'homes-open', 'food-winter', 'power-night', 'school-crossing', 'land-town', 'paths-walk', 'homes-night', 'food-market', 'power-turbines', 'school-bell'];
 const rows = $$('.strip .row');
-FILMS.forEach((f, i) => { rows[i % 2].insertAdjacentHTML('beforeend', `<div class="tile" style="background-image:url(img/home/tiles/${f}.webp)">${light ? '' : `<video muted loop playsinline preload="none" data-src="videos/${f}.mp4"></video>`}</div>`); });
-if (!light && 'IntersectionObserver' in window) {
-  const vio = new IntersectionObserver((es) => es.forEach(({ target: v, isIntersecting }) => {
-    // the tile's still picture stays until the film is really showing frames; a slow or failed film just leaves the picture
-    if (isIntersecting) {
-      if (!v.src) {
-        const show = () => v.classList.add('playing');
-        v.addEventListener('playing', () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(show) : show()), { once: true });
-        v.addEventListener('error', () => v.remove(), { once: true });
-        v.src = v.dataset.src;
-      }
-      v.play().catch(() => {});
-    } else v.pause();
-  }), { threshold: 0.3 });
-  $$('.tile video').forEach((v) => vio.observe(v));
-}
+TILES.forEach((f, i) => { rows[i < TILES.length / 2 ? 0 : 1].insertAdjacentHTML('beforeend', `<div class="tile" style="background-image:url(img/home/tiles/${f}.webp)"></div>`); });
 
 // the island: a still picture at once, the live one after the first paint
 let island = null, shot = 'hero';
@@ -123,7 +108,7 @@ if (!light && webgl2() && !(navigator.deviceMemory && navigator.deviceMemory < 2
 
 // opening a part: the card grows to fill the screen, then the game loads
 if (!calm) document.addEventListener('click', (e) => {
-  const a = e.target.closest('a.card'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest('a.card[href]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   e.preventDefault(); const r = a.getBoundingClientRect(); const o = document.createElement('div'); o.className = 'opening';
   o.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;background:${getComputedStyle(a).backgroundColor}`;
   document.body.appendChild(o); o.getBoundingClientRect();
