@@ -200,13 +200,13 @@ test('a tester signed in by email code gets their own test organisation, plays a
   let r = await go('GET', '/tester'); assert.equal(r.status, 403); assert.deepEqual(r.headers.getSetCookie(), []);
   email = 'Leader.One@Example.org';
   r = await go('GET', '/tester'); assert.equal(r.status, 200);
-  const page = await r.text(); assert.match(page, /leader\.one@example\.org/); assert.match(page, /Placeholder words/);
+  const page = await r.text(); assert.match(page, /leader\.one@example\.org/); assert.doesNotMatch(page, /Placeholder/i);
   const cookies = r.headers.getSetCookie().map((c) => c.split(';')[0]); assert.equal(cookies.length, 2, 'a leader cookie and a learner cookie');
   assert.ok(r.headers.getSetCookie().every((c) => /HttpOnly; Secure; SameSite=Strict/.test(c)));
   const jar = cookies.join('; ');
   assert.equal(await (await go('GET', '/play.html', jar)).text(), '<h1>the game</h1>', 'the tester can play');
   const groups = await (await go('GET', '/api/leader/groups', jar)).json();
-  assert.ok(groups.ok); assert.equal(groups.groups.length, 1); assert.equal(groups.org.seats, 10); assert.equal(groups.groups[0].learners, 1);
+  assert.ok(groups.ok); assert.equal(groups.groups.length, 1); assert.equal(groups.org.seats, 15); assert.equal(groups.groups[0].learners, 1);
   assert.ok(page.includes(groups.groups[0].code), 'the page shows the group code');
   // signing in again on the same device keeps the same organisation and the same learner
   r = await go('GET', '/tester', jar); assert.equal(r.status, 200);

@@ -222,7 +222,7 @@ const TESTER_WORDS = {
   title: 'You are signed in', signedInAs: 'Signed in as', play: 'Play the game', leader: 'Open the leader page',
   codeIs: 'Your group code is', codeHelp: 'Children can join your test group with this code on their own devices.',
   endsOn: 'Your test ends on', noLogin: 'Please sign in with your email address first.', failed: 'Sorry, signing in did not work. Please try again.',
-  again: 'Try again', placeholder: 'Placeholder words',
+  again: 'Try again',
 };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
 function testerPage({ email = '', code = '', ends = '', note = '', error = '' }) {
@@ -239,8 +239,7 @@ ${note ? `<p class="msg">${esc(note)}</p>` : ''}
 h1{margin:0 0 8px;font-size:1.9em;letter-spacing:-.02em}p{margin:6px 0}.small{font-size:.85em;color:#7a6450}.msg{color:#b0331f;font-weight:700}
 .btn{display:block;margin-top:12px;min-height:54px;line-height:54px;border-radius:16px;background:#2e9b5a;color:#fff;font-weight:800;text-decoration:none;box-shadow:inset 0 -4px 0 #1f7a44}
 .btn.alt{background:#2b3a55;box-shadow:inset 0 -4px 0 #1a2438}.code{font:800 1.6em/1.2 system-ui,sans-serif;letter-spacing:.06em}
-.chip{display:inline-block;margin-top:16px;background:#f3d9a4;border-radius:999px;padding:2px 10px;font-size:.7em;font-weight:800}
-</style></head><body><main class="card">${body}<span class="chip">${esc(W.placeholder)}</span></main></body></html>`;
+</style></head><body><main class="card">${body}</main></body></html>`;
 }
 
 // the join page: one code for the whole group; a badge only when coming back on another device
