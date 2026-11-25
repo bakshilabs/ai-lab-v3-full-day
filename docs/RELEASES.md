@@ -2,6 +2,10 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## Background music on the start page (25 November 2026)
+
+The owner asked for background music on the landing page and left the choice to Claude: Flowerbed Fields, one of the owner's four pieces and the music of Land, the first level. It starts at the visitor's first click or key (a browser allows no sound before that), fades in quietly and loops. A "Music on / Music off" button sits in the top right corner (shorter words on narrow phones) and shares its remembered choice with the game's own music button. The file is `home-music/flowerbed-fields.mp3`, open to everyone like the start page (`js/home/music.js`).
+
 ## Background music for each level (25 November 2026)
 
 The owner chose four pieces: Flowerbed Fields (Zane Little Music), Summer Sunday (celestialghost8) and Summer Park (Scribe), all public domain from OpenGameArt, and "8 bit music on medium" by moodmode (Pixabay, free to use), which the owner uploaded. The owner asked for different music in each level and to reuse two pieces for now: Land and Power play Flowerbed Fields, Getting around and School play Summer Park, Homes plays Summer Sunday and Food plays the 8-bit piece. The music loops quietly while a level is open, fades in and out, and stops in the town. A "Music on / Music off" button in the game's top bar turns it off; the choice is remembered on the device. The music files are served from KV with a join code (`docs/redesign/concepts/game/music.js`, `music/`).

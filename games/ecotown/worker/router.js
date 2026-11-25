@@ -51,7 +51,7 @@ const KEEP = { 'Cache-Control': 'private, max-age=604800, immutable' };
 // its pictures and the eight short build films of its film strip (FILMS in js/hub.js). The game, its voices, the other
 // pictures and films, and every other page still need a session.
 const PUBLIC = (f) => f === '/index.html' || /^\/assets\/(hub|island)-[a-f0-9]{8,}\.js$/.test(f) || /^\/assets\/fonts\/[a-z0-9_-]+\.woff2$/.test(f)
-  || /^\/img\/home\/(tiles\/)?[a-z0-9_-]+\.webp$/.test(f) || /^\/videos\/(timber|wind|solar|orchard|cycle|greenroof|tram|hives)\.mp4$/.test(f);
+  || /^\/img\/home\/(tiles\/)?[a-z0-9_-]+\.webp$/.test(f) || /^\/home-music\/[a-z0-9-]+\.mp3$/.test(f) || /^\/videos\/(timber|wind|solar|orchard|cycle|greenroof|tram|hives)\.mp4$/.test(f);
 const hashed = (f) => /^\/assets\/(app|m)-[a-f0-9]{8,}\.[a-z]+$/.test(f) || /^\/voice\/pack-[a-z]+-[a-f0-9]{8,}\.bin$/.test(f);
 const cookie = (req, name) => (req.headers.get('Cookie') || '').match(new RegExp('(?:^|; ?)' + name + '=([^;]+)'))?.[1] || '';
 const setCookie = (name, value, age) => ({ 'Set-Cookie': `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${age}` });
@@ -174,8 +174,8 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
       return new Response(v, { headers: { ...BASE, ...(hashed(file) ? KEEP : {}), 'Content-Type': name.endsWith('.json') ? 'application/json' : 'audio/mpeg' } });
     }
     // Florence's portrait, build pictures, build videos and the story episodes (videos/episodes/) also live in KV. Videos need byte ranges (Safari/iPad).
-    if (/^\/(img|videos|eco-town\/concepts\/game\/music)\//.test(file) && env.VOICE) {
-      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|img\/home\/(tiles\/)?[a-z0-9_-]+\.webp|videos\/((episodes|trailer|welcome)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt)|eco-town\/concepts\/game\/music\/[a-z0-9-]+\.mp3)$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
+    if (/^\/(img|videos|home-music|eco-town\/concepts\/game\/music)\//.test(file) && env.VOICE) {
+      const key = file.slice(1); if (!/^(img\/(thumbs\/)?[a-z0-9_-]+\.png|img\/home\/(tiles\/)?[a-z0-9_-]+\.webp|videos\/((episodes|trailer|welcome)\/)?[a-z0-9_-]+\.(mp4|jpg|json|vtt)|eco-town\/concepts\/game\/music\/[a-z0-9-]+\.mp3|home-music\/[a-z0-9-]+\.mp3)$/.test(key)) return new Response('Not found', { status: 404, headers: BASE });
       const v = await env.VOICE.get(key, 'arrayBuffer'); if (!v) return new Response('Not found', { status: 404, headers: BASE });
       const type = TYPES[key.split('.').pop()] || 'application/octet-stream';
       const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get('Range') || '');
