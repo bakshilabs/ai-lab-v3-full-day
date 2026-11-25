@@ -91,7 +91,7 @@ function applySettings() {
 applySettings();
 
 // ---------------- render loop
-let last = performance.now(); const T0 = last; let slowAvg = 16, slowFor = 0;
+let last = performance.now(); const T0 = last; let slowAvg = 16, slowFor = 0, fastFor = 0; const drops = {}; // drops: how often each level was stepped down from
 // ?fps=1 shows a small frame-rate readout, for testing on real school devices (see docs/DEVICE-AND-CHILD-TESTS.md)
 let fpsBox = null, fpsN = 0, fpsT = 0, fpsMax = 0;
 if (new URLSearchParams(location.search).has('fps')) { fpsBox = document.createElement('div'); fpsBox.id = 'fpsbox'; fpsBox.setAttribute('aria-hidden', 'true'); document.getElementById('app').appendChild(fpsBox); }
@@ -100,9 +100,12 @@ function loop(now) {
   const raw = now - last;
   const dt = Math.min(0.05, raw / 1000); last = now; const t = (now - T0) / 1000;
   // Graphics "auto" keeps watching: the start-up check measures an empty island, and a full town on a school laptop
-  // can be much slower. Four seconds under about 22 frames a second steps the quality down one level (never back up).
+  // can be much slower. Four seconds under about 22 frames a second steps the quality down one level. Thirty smooth
+  // seconds (about 40 frames a second) step it back up, up to the start-up level, but never to a level it has had to leave twice.
   if (app.settings.quality === 'auto' && app.G && !document.hidden && raw < 500) {
-    slowAvg += (raw - slowAvg) * 0.05; if (slowAvg > 45) { slowFor += raw; if (slowFor > 4000 && stage.tier !== 'low') { stage.setTier(stage.tier === 'high' ? 'mid' : 'low'); slowFor = 0; slowAvg = 16; } } else slowFor = 0;
+    slowAvg += (raw - slowAvg) * 0.05; if (slowAvg > 45) { slowFor += raw; if (slowFor > 4000 && stage.tier !== 'low') { drops[stage.tier] = (drops[stage.tier] || 0) + 1; stage.setTier(stage.tier === 'high' ? 'mid' : 'low'); slowFor = 0; fastFor = 0; slowAvg = 16; } } else slowFor = 0;
+    const up = stage.tier === 'low' ? 'mid' : stage.tier === 'mid' ? 'high' : null, ORDER = { low: 0, mid: 1, high: 2 };
+    if (up && app.topTier && ORDER[up] <= ORDER[app.topTier] && (drops[up] || 0) < 2 && slowAvg < 25) { fastFor += raw; if (fastFor > 30000) { stage.setTier(up); fastFor = 0; slowAvg = 16; } } else fastFor = 0;
   }
   rig.update(dt);
   app.moduleFrame?.(dt, t); // a module of the town of the future may place the camera itself (js/modules/loader.js)
@@ -201,6 +204,7 @@ async function start() {
   app.modelP = loadModel('./models/').catch(() => {});
   document.getElementById('boot')?.remove();
   const quality = app.settings.quality === 'auto' ? probeTier(stage) : Promise.resolve(app.settings.quality);
+  quality.then((t) => { app.topTier = t; }); // the highest level "auto" may climb back to
   // ---- showing towns (stage 4). ?town=<code> opens that town read-only and never starts the building game, so
   // nothing can be saved over the player's own town. ?visit=1 and ?wall=1 open their cards on the first screen
   // (below); ?carry=1 goes straight back to the saved town ("Back to my town").

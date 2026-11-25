@@ -42,8 +42,10 @@ export function createLife(stage, world, terrain) {
 
   // ---------- cars on roads, smoke from gas-heated homes
   // vehicles at the houses' fine scale: cars with wheels and windows, bikes with riders, a tram at the stop
+  // Sizes (18 Nov 2026): cars were drawn at 0.5 and stood lower than the people beside them; cars are now 0.65 and people
+  // a fifth smaller, so a car is about 1.4 times a grown-up's height and nearly three times as long.
   const CARC = ['#c8553d', '#3d6e8a', '#e8d9b0', '#5a6d50', '#e6a15a', '#6b5b8a'];
-  const carMesh = (c) => { const v = new Vox(); v.jitter = 0.02; for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { v.set(i, 0, j, (i === 1 || i === 4) && j !== 1 ? '#22262a' : c); v.set(i, 1, j, c); } for (let i = 1; i < 5; i++) for (let j = 0; j < 3; j++) v.set(i, 2, j, i === 1 || i === 4 ? '#bfe6ff' : j === 1 ? c : '#9fd0ee'); v.set(5, 1, 0, '#ffe9a8'); v.set(5, 1, 2, '#ffe9a8'); const m = v.mesh({ scale: 0.5, offset: [-1.5, 0, -0.75] }); return m; };
+  const carMesh = (c) => { const v = new Vox(); v.jitter = 0.02; for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { v.set(i, 0, j, (i === 1 || i === 4) && j !== 1 ? '#22262a' : c); v.set(i, 1, j, c); } for (let i = 1; i < 5; i++) for (let j = 0; j < 3; j++) v.set(i, 2, j, i === 1 || i === 4 ? '#bfe6ff' : j === 1 ? c : '#9fd0ee'); v.set(5, 1, 0, '#ffe9a8'); v.set(5, 1, 2, '#ffe9a8'); const m = v.mesh({ scale: 0.65, offset: [-1.5, 0, -0.75] }); return m; };
   const bikeMesh = (c) => { const v = new Vox(); v.jitter = 0.02; for (const x of [0, 3]) { v.set(x, 0, 0, '#22262a'); v.set(x, 1, 0, '#22262a'); } v.box(1, 1, 0, 2, 1, 0, c); v.set(2, 2, 0, c); v.set(0, 2, 0, '#3a4752'); return v.mesh({ scale: 0.32, offset: [-0.64, 0, -0.16] }); };
   const tramMesh = () => { const v = new Vox(); v.jitter = 0.02; for (let i = 0; i < 11; i++) for (let j = 0; j < 4; j++) { v.set(i, 0, j, i % 5 === 1 && (j === 0 || j === 3) ? '#22262a' : '#c8553d'); v.set(i, 1, j, '#c8553d'); v.set(i, 2, j, (i === 0 || i === 10 || i % 3 === 0) ? '#f1e6d0' : '#bfe6ff'); v.set(i, 3, j, '#f1e6d0'); } v.box(4, 4, 1, 6, 4, 2, '#3a4752'); return v.mesh({ scale: 0.5, offset: [-2.75, 0, -1] }); };
   const cars = []; const bikes = []; const trams = [];
@@ -85,7 +87,7 @@ export function createLife(stage, world, terrain) {
     // a varied crowd: skin, hair colour and style, skirts, a few elders with sticks; children are smaller
     const child = i % 4 === 3, elder = !child && i % 7 === 5, style = STYLES[(i * 3 + 1) % STYLES.length];
     const g = person({ shirt: opts.shirt || SHIRTS[i % SHIRTS.length], skin: SKINS[(i * 5 + 2) % SKINS.length], hair: style === 'scarf' ? SCARF[i % SCARF.length] : HAIR[(i * 7 + 3) % HAIR.length],
-      style, skirt: !child && i % 5 === 1 ? SHIRTS[(i + 3) % SHIRTS.length] : null, elder, cap: SHIRTS[(i + 1) % SHIRTS.length], s: opts.s || (child ? 0.14 : 0.19) });
+      style, skirt: !child && i % 5 === 1 ? SHIRTS[(i + 3) % SHIRTS.length] : null, elder, cap: SHIRTS[(i + 1) % SHIRTS.length], s: opts.s || (child ? 0.11 : 0.15) });
     root.add(g); return g;
   }
   life.setTown = (sim, cells, tier) => {
@@ -100,7 +102,7 @@ export function createLife(stage, world, terrain) {
       const g = makePerson(i); life.residents.push({ g, home, dest, ph: rand(i, 3) * 6, off: [rand(i, 1) * 3 - 1.5, rand(i, 2) * 3 - 1.5], cold: (sim.homes.find((h) => h.k === home)?.temp ?? 20) < 18 });
     }
     // the followed family: two adults and a child, a little larger
-    if (!life.family) life.family = { members: [makePerson(0, { shirt: '#ff8a5c', s: 0.21 }), makePerson(1, { shirt: '#2f6fd8', s: 0.21 }), makePerson(2, { shirt: '#ffd23f', s: 0.16 })], home: null };
+    if (!life.family) life.family = { members: [makePerson(0, { shirt: '#ff8a5c', s: 0.17 }), makePerson(1, { shirt: '#2f6fd8', s: 0.17 }), makePerson(2, { shirt: '#ffd23f', s: 0.13 })], home: null };
     life.family.home = homes[0]?.k || null; life.family.door = life.family.home ? doorOffset(life.family.home) : [0, 3.4];
     for (const m of life.family.members) m.visible = !!life.family.home;
     // wildlife visibility from the simulation
@@ -115,7 +117,7 @@ export function createLife(stage, world, terrain) {
     for (const c of cars) root.remove(c.m); cars.length = 0;
     let ci = 0; for (const [k, c] of cells) if (c.item === 'road') { for (let j = 0; j < 2; j++) { const m = carMesh(CARC[(ci++) % CARC.length]); root.add(m); cars.push({ m, k, ph: j * 0.5 + rand(ci, 2), back: j === 1 }); } }
     for (const b of bikes) { root.remove(b.m); root.remove(b.rider); } bikes.length = 0;
-    let bi = 0; for (const [k, c] of cells) if (c.item === 'cycle') { const m = bikeMesh(CARC[(bi + 2) % CARC.length]); const rider = makePerson(bi + 40, { s: 0.17 }); root.remove(rider); root.add(m, rider); bikes.push({ m, rider, k, ph: rand(bi++, 9) }); }
+    let bi = 0; for (const [k, c] of cells) if (c.item === 'cycle') { const m = bikeMesh(CARC[(bi + 2) % CARC.length]); const rider = makePerson(bi + 40, { s: 0.14 }); root.remove(rider); root.add(m, rider); bikes.push({ m, rider, k, ph: rand(bi++, 9) }); }
     for (const tr of trams) root.remove(tr.m); trams.length = 0;
     for (const [k, c] of cells) if (c.item === 'tram') { const m = tramMesh(); root.add(m); trams.push({ m, k, ph: rand(trams.length, 11) * 10 }); }
     chimneys = []; for (const hm of sim.homes.filter((h) => h.gas)) { const L = world.layers.get(hm.k); for (const c of L?.rec?.chimneys || []) chimneys.push(new THREE.Vector3(L.ox + c[0], L.oy + 1 + c[1], L.oz + c[2])); }

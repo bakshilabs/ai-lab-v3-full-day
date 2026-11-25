@@ -24,9 +24,11 @@ export const ease = {
 // composer, whose targets have no samples, so they smooth edges themselves: mid with an SMAA pass at the end
 // (FXAA was cheaper but smeared the small voxel detail by about a third),
 // high with a multisampled scene target (msaa: 4x, or 2x on high-DPI screens).
+// Sharpness (18 Nov 2026): low and mid drew at 1 and 1.25 pixels per screen pixel, so on a sharp (2x) screen the town
+// was stretched and looked blurry next to the start page's island; they now draw at 1.5 and 1.75.
 export const TIERS = {
-  low:  { ratio: 1,    shadows: false, shadowSize: 1024, post: false, bloom: false, aa: 'canvas', particles: 0.4, residents: 10, grass: 0.35 },
-  mid:  { ratio: 1.25, shadows: true,  shadowSize: 2048, post: true,  bloom: false, aa: 'smaa',   particles: 0.7, residents: 18, grass: 0.7 },
+  low:  { ratio: 1.5,  shadows: false, shadowSize: 1024, post: false, bloom: false, aa: 'canvas', particles: 0.4, residents: 10, grass: 0.35 },
+  mid:  { ratio: 1.75, shadows: true,  shadowSize: 2048, post: true,  bloom: false, aa: 'smaa',   particles: 0.7, residents: 18, grass: 0.7 },
   high: { ratio: 2,    shadows: true,  shadowSize: 4096, post: true,  bloom: true,  aa: 'msaa',   particles: 1,   residents: 28, grass: 1 },
 };
 
@@ -34,7 +36,7 @@ export const TIERS = {
 const SKY = [
   [0,    '#0a1436', '#1b2c5c', '#8fa0ff', 0.0, 0.32],
   [5,    '#2b2d5e', '#d8846e', '#ffb48a', 0.5, 0.5],
-  [7,    '#6d8fd0', '#ffd2b0', '#ffd9b0', 2.0, 0.95],
+  [7,    '#5f9ce4', '#f7dcc4', '#ffe0bc', 2.7, 1.0], // a clear blue morning (was a dusky purple, #6d8fd0 over #ffd2b0)
   [10,   '#4b93df', '#f1dcc2', '#ffe6c4', 3.3, 0.78],
   [14.5, '#4b93df', '#f4d8b8', '#ffdfb4', 3.3, 0.76],
   [16.5, '#7a8fd6', '#ffcf9c', '#ffd2a0', 2.8, 0.74],
@@ -45,9 +47,11 @@ const SKY = [
 ];
 const C = (h) => new THREE.Color(h);
 
+// a light warm grade with a faint vignette (18 Nov 2026: was contrast 1.08, vignette 0.18, warm 0.07, which made the town
+// dark and muddy next to the start page's island)
 // warm colour grade with vignette (linear HDR in, before tone mapping in OutputPass)
 const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, sat: { value: 1.0 }, contrast: { value: 1.08 }, vignette: { value: 0.18 }, warm: { value: 0.07 } },
+  uniforms: { tDiffuse: { value: null }, sat: { value: 0.94 }, contrast: { value: 1.0 }, vignette: { value: 0.05 }, warm: { value: 0.03 } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
   fragmentShader: `uniform sampler2D tDiffuse; uniform float sat, contrast, vignette, warm; varying vec2 vUv;
     void main(){ vec4 c = texture2D(tDiffuse, vUv); vec3 col = c.rgb; float l = dot(col, vec3(0.2126,0.7152,0.0722));
@@ -69,9 +73,9 @@ function skyDome() {
         // looking down past the island: a warm haze just under the horizon that deepens, in a few soft steps, to a cool
         // blue far below, so the sky behind the island has depth instead of one flat colour
         vec3 haze = mix(bottom, top, 0.35);
-        vec3 deep = mix(top, vec3(0.16, 0.25, 0.66) * (1.0 - 0.8 * night), 0.5);
+        vec3 deep = mix(top, mix(vec3(0.55, 0.76, 0.97), vec3(0.16, 0.25, 0.66), night), 0.5); // a light clear blue by day, as on the start page (was a dusky purple)
         float t = pow(1.0 - smoothstep(0.0, 0.46, h), 0.8);          // (never smoothstep with its edges reversed: undefined on some GPUs)
-        vec3 under = mix(haze, deep, t) * (1.0 - 0.24 * (1.0 - smoothstep(0.2, 0.5, h)));   // darker further down (the tone mapping lifts it again)
+        vec3 under = mix(haze, deep, t) * (1.0 - (0.06 + 0.18 * night) * (1.0 - smoothstep(0.2, 0.5, h)));   // a little darker further down (more at night) (the tone mapping lifts it again)
         c = mix(c, under, 1.0 - smoothstep(0.44, 0.52, h));
         c += bottom * 0.22 * exp(-pow((h - 0.5) * 9.0, 2.0));
         // the sunny side of the sky is warmer and lighter all the way down
@@ -92,7 +96,7 @@ function skyDome() {
 export function createStage(canvas, skyEl) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12;
+  renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.1; // neutral, not ACES: ACES darkened and greyed the town's clear colours
   renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.localClippingEnabled = true;
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0xd4ecff, 900, 2600);
@@ -162,12 +166,12 @@ export function createStage(canvas, skyEl) {
       dome.material.uniforms.top.value.copy(top); dome.material.uniforms.bottom.value.copy(bot); scene.fog.color.copy(bot);
       // the sun swings low across the south so shadows stay long and soft
       const k = clamp((this.hour - 6) / 13); const elev = Math.sin(k * Math.PI);
-      sun.position.set(-110 + k * 160, 26 + elev * (winter ? 50 : 72), 80 - elev * 20); // low and golden: long, soft shadows
+      sun.position.set(-110 + k * 160, 40 + elev * (winter ? 60 : 100), 80 - elev * 20); // higher than before (was 26 + 72): shorter shadows, a clearer town
       sun.color.copy(C(a[3]).lerp(C(b[3]), t)); sun.intensity = lerp(a[4], b[4], t) * (winter ? 0.85 : 1);
       hemi.intensity = lerp(a[5], b[5], t); hemi.color.set(winter ? 0xe4eeff : 0xd8e6ff);
       this.night = clamp(1 - lerp(a[4], b[4], t) / 1.2);
       // night stays readable: a bright moon and a floor under the sky light, so builds never turn into black shapes
-      moon.intensity = this.night * 1.9; fill.intensity = 0.45 * (1 - this.night) + 0.25 * this.night; hemi.intensity = Math.max(hemi.intensity, 0.75);
+      moon.intensity = this.night * 1.9; fill.intensity = 0.45 * (1 - this.night) + 0.25 * this.night; hemi.intensity = Math.max(hemi.intensity, 0.9);
       dome.material.uniforms.sunDir.value.copy(sun.position).normalize(); dome.material.uniforms.sunCol.value.copy(sun.color); dome.material.uniforms.sunAmt.value = 1 - this.night; dome.material.uniforms.night.value = this.night;
       WORLD.snow.value = winter;
     },
