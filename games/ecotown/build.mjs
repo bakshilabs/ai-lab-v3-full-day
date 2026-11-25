@@ -87,6 +87,20 @@ fs.writeFileSync(path.join(OUT, 'index.html'), hub);
 // 5b. the club leader's one-page plan: a plain page, no scripts beyond its print button
 for (const page of ['leader.html', 'trailer.html']) if (fs.existsSync(path.join(SRC, page))) fs.writeFileSync(path.join(OUT, page), fs.readFileSync(path.join(SRC, page), 'utf8').replaceAll('href="start.html"', 'href="./"').replaceAll('href="index.html"', 'href="play.html"'));
 
+// 5c. the new Eco Town game (owner, 25 Nov 2026): the six levels of the redesign, joined into one game, replace the old Eco Town part on the start page.
+// The files are copied as they are from docs/redesign, keeping its folders, because the game opens each level's own page in a frame by a relative address.
+// Its start page is eco-town/concepts/game/index.html. Its words are the design agents' labelled placeholders (owner: no OpenAI for this build).
+{
+  const RD = path.join(here, '..', '..', 'docs', 'redesign'), NEW = path.join(OUT, 'eco-town');
+  const want = ['ui/tokens.css', 'concepts/kit-v2.js', 'animation/vox.js', 'animation/three.module.min.js', 'animation/inter.woff2', 'animation/bricolage.woff2', 'animation/florence-sprite.webp',
+    'concepts/game/index.html', 'concepts/game/game.js', 'concepts/game/town.js', 'concepts/game/game.css', 'concepts/trial/index.html', 'concepts/trial/trial.js', 'concepts/trial/home.js'];
+  const dirFiles = (rel, ok) => fs.readdirSync(path.join(RD, rel)).filter(ok).map((f) => `${rel}/${f}`);
+  want.push(...dirFiles('concepts/level-kit', (f) => f.endsWith('.js') || f === 'kit.css'));
+  for (const l of ['land', 'getting-around', 'food', 'power', 'school']) want.push(...dirFiles(`concepts/levels/${l}`, (f) => /\.(js|css)$/.test(f) || f === 'index.html'));
+  for (const rel of want) { fs.mkdirSync(path.dirname(path.join(NEW, rel)), { recursive: true }); fs.copyFileSync(path.join(RD, rel), path.join(NEW, rel)); }
+  console.log(`eco-town/: the new Eco Town game, ${want.length} files`);
+}
+
 // 6. security headers for Cloudflare Pages
 fs.copyFileSync(path.join(here, '_headers'), path.join(OUT, '_headers'));
 

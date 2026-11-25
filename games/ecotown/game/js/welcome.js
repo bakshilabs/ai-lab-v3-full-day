@@ -6,7 +6,7 @@ import { h, esc } from './ui/ui.js';
 import { speak, stopSpeech, loadVoices } from './ui/voice.js';
 import { simulate } from './sim/sim.js';
 import { seedTo } from './game/seed.js';
-import { PARTS, SCENES, EVERYWHERE, WELCOME_KEY } from './series.js';
+import { PARTS, SCENES, EVERYWHERE, WELCOME_KEY, partHref } from './series.js';
 import { HUB, GAME } from './version.js';
 
 const CSS = `#welcome { position: absolute; inset: 0; pointer-events: none; font-family: Inter, system-ui, sans-serif; color: #3b2a1e; }
@@ -87,5 +87,5 @@ export async function runWelcome({ stage, world, life, terrain, bot, app }) {
     <div class="weach"><b>In every part</b><ul>${EVERYWHERE.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
     <div class="wend"><button data-hub>All six parts</button><button class="go" data-start>Start part 1: Eco Town ➜</button></div></div>`;
   speak('Six parts, in this order. Each one tells you what to do as you go.', { voice: 'narrator' });
-  root.querySelector('[data-hub]').onclick = () => leave(HUB); root.querySelector('[data-start]').onclick = () => leave(GAME + PARTS[0].query); root.querySelector('[data-start]').focus();
+  root.querySelector('[data-hub]').onclick = () => leave(HUB); root.querySelector('[data-start]').onclick = () => leave(partHref(PARTS[0], GAME)); root.querySelector('[data-start]').focus();
 }

@@ -45,6 +45,17 @@ test('the start page keeps its ways in, and its motion respects reduced motion',
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)/); assert.match(html, /data-state="welcome"/);
   assert.doesNotMatch(html, /\b(coins?|budget|money|price)\b/i, 'no money words');
   const hub = readFileSync(new URL('../js/hub.js', import.meta.url), 'utf8'); const motion = readFileSync(new URL('../js/landing.js', import.meta.url), 'utf8');
-  assert.match(hub, /\$\{GAME\}\$\{p\.query\}/, 'each part links to its own query'); assert.match(motion, /prefers-reduced-motion: reduce/);
+  assert.match(hub, /partHref\(p, GAME\)/, 'each part links to its own address'); assert.match(motion, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(hub + motion, /https?:\/\//, 'nothing loaded from outside');
+});
+
+test('Eco Town opens the new game; the other parts open their module; the town tick follows the new game', async () => {
+  const { PARTS, partHref, progress } = await import('../js/series.js');
+  assert.equal(partHref(PARTS[0], 'play.html'), 'eco-town/concepts/game/index.html');
+  for (const p of PARTS.slice(1)) assert.equal(partHref(p, 'play.html'), `play.html?module=${p.id}`);
+  const oldDone = { cells: [1], band: 'junior', labs: { a: 1, b: 1, c: 1, d: 1, e: 1, f: 1 } };
+  assert.equal(progress(oldDone, true, 0).town, 'new', 'an old town does not tick the new game');
+  assert.equal(progress(null, true, 3).town, 'started'); assert.equal(progress(null, true, 6).town, 'done');
+  assert.equal(progress(null, true, 6).next, 'drone'); assert.equal(progress(null, true, 2).next, 'town');
+  assert.equal(progress(oldDone, true).town, 'done', 'without the new count the old rule stands');
 });

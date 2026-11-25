@@ -15,7 +15,8 @@ function fakeEnv() {
   return { objects, CODES: { idFromName: (n) => n, get: (name) => ({ call: async (...a) => structuredClone(await get(name).store.call(...structuredClone(a))) }) } };
 }
 const FILES = { '/index.html': '<h1>the landing page</h1>', '/play.html': '<h1>the game</h1>', '/leader.html': '<h1>run sheet</h1>', '/assets/app-0123abcd.js': 'console.log(1)',
-  '/assets/hub-0123abcd.js': 'hub', '/assets/island-0123abcd.js': 'island', '/assets/fonts/inter.woff2': 'font' };
+  '/assets/hub-0123abcd.js': 'hub', '/assets/island-0123abcd.js': 'island', '/assets/fonts/inter.woff2': 'font',
+  '/eco-town/concepts/game/index.html': '<h1>the new game</h1>', '/eco-town/concepts/levels/land/level.js': 'land', '/eco-town/animation/florence-sprite.webp': 'sprite' };
 function app({ admin = true } = {}) {
   const env = fakeEnv(); const handle = makeHandler({ files: FILES, adminHtml: 'ADMIN PAGE', leaderHtml: 'LEADER PAGE', access: async () => admin });
   const call = async (method, path, { body, cookie, raw } = {}) => {
@@ -64,6 +65,18 @@ test('the join page shows until a learner joins; then the game and its files are
   const alias = await call('POST', '/api/login', { body: { code: g.code } }); assert.ok(alias.data.ok, '/api/login still works'); assert.notEqual(alias.data.learner, j.data.learner);
   const out = await call('POST', '/api/logout', { cookie: j.cookie }); assert.match(out.set, /Max-Age=0/);
   assert.match((await call('GET', '/play.html', { cookie: j.cookie })).text, /Type your group’s code/);
+});
+
+test('the new Eco Town game needs a join code like the old one, and only this site may frame its pages', async () => {
+  const { call } = app(); const { g } = await club(call);
+  const page = await call('GET', '/eco-town/concepts/game/index.html'); assert.match(page.text, /Type your group’s code/); assert.equal(page.headers.get('X-Frame-Options'), 'SAMEORIGIN');
+  assert.equal((await call('GET', '/eco-town/concepts/levels/land/level.js')).status, 403);
+  const j = await call('POST', '/api/join', { body: { code: g.code } });
+  const game = await call('GET', '/eco-town/concepts/game/index.html', { cookie: j.cookie }); assert.equal(game.text, '<h1>the new game</h1>');
+  assert.equal(game.headers.get('X-Frame-Options'), 'SAMEORIGIN'); assert.match(game.headers.get('Content-Security-Policy'), /frame-ancestors 'self'/);
+  const sprite = await call('GET', '/eco-town/animation/florence-sprite.webp', { cookie: j.cookie }); assert.equal(sprite.status, 200); assert.equal(sprite.headers.get('Content-Type'), 'image/webp');
+  // every other page still refuses every frame
+  const old = await call('GET', '/play.html', { cookie: j.cookie }); assert.equal(old.headers.get('X-Frame-Options'), 'DENY'); assert.match(old.headers.get('Content-Security-Policy'), /frame-ancestors 'none'/);
 });
 
 test('heartbeat carries a status; a badge on a second device replaces the first', async () => {

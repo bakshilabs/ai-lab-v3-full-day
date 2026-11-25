@@ -14,10 +14,12 @@ const BASE = {
   'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
 };
+// the new Eco Town game (eco-town/) opens each level's page in a frame of its own page, so its files may be framed by this site only
+const FRAMED = { ...BASE, 'X-Frame-Options': 'SAMEORIGIN', 'Content-Security-Policy': BASE['Content-Security-Policy'].replace("frame-ancestors 'none'", "frame-ancestors 'self'") };
 const TYPES = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', mp4: 'video/mp4', html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json', bin: 'application/octet-stream', woff2: 'font/woff2', vtt: 'text/vtt; charset=utf-8' };
 const json = (o, status = 200, extra = {}) => new Response(JSON.stringify(o), { status, headers: { ...BASE, 'Content-Type': 'application/json', ...extra } });
 const text = (s, status = 200) => new Response(s, { status, headers: { ...BASE, 'Content-Type': 'text/plain' } });
-const html = (s, status = 200) => new Response(s, { status, headers: { ...BASE, 'Content-Type': TYPES.html } });
+const html = (s, status = 200, base = BASE) => new Response(s, { status, headers: { ...base, 'Content-Type': TYPES.html } });
 
 
 // ---------------- Cloudflare Access token check (admin)
@@ -153,6 +155,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
 
     // ---------------- game files: only with a valid session
     const file = p === '/' ? '/index.html' : p; const page = file.endsWith('.html'); // a page asked for without a session shows the join page
+    const H = file.startsWith('/eco-town/') ? FRAMED : BASE;
     // The page itself and every heartbeat ask the organisation's store. The other files of one page load (about a hundred)
     // reuse a recent "yes" for a minute, so a class starting together is one store call each, not a hundred.
     if (!PUBLIC(file)) {
@@ -160,7 +163,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
       const r = hit && now - hit < 60e3 ? { ok: true } : await S.check(sess, now, { touch: page });
       if (r.ok && !hit) { if (recent.size > 5000) recent.clear(); recent.set(sess, now); } else if (!r.ok) recent.delete(sess);
       if (!r.ok) {
-        if (page) return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''));
+        if (page) return html(joinPage(r.reason === 'none' ? '' : MESSAGES[r.reason] || ''), 200, H);
         return text('Login required', 403);
       }
     }
@@ -186,7 +189,7 @@ export function makeHandler({ files = {}, adminHtml = '', leaderHtml = '', acces
     }
     const body = files[file];
     if (body === undefined) return new Response('Not found', { status: 404, headers: BASE });
-    return new Response(body, { headers: { ...BASE, ...(hashed(file) ? KEEP : {}), 'Content-Type': TYPES[file.split('.').pop()] || 'application/octet-stream' } });
+    return new Response(body, { headers: { ...H, ...(hashed(file) ? KEEP : {}), 'Content-Type': TYPES[file.split('.').pop()] || 'application/octet-stream' } });
   };
 }
 
