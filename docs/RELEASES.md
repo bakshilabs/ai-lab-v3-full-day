@@ -2,6 +2,10 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## The start page's 3D island put back as it was (25 November 2026)
+
+The owner asked to keep the start page's 3D island unchanged. The release of the new game had also taken live some island changes from 18 November that were only on the working branch (stepped roofs, hard-edged shadows, solar tiles). `js/home/island.js` is back to the version that was live before 25 November. Only two hooks for the test page `tests/visual/walk.html` were kept, and they change nothing that the start page shows.
+
 ## The start page for the new Eco Town game (25 November 2026, later the same day)
 
 Asked by the owner: the Eco Town card's words, a way back from the game to the start page, a new welcome film, the ribbon of pictures from the new game, and parts 2 to 6 shown as coming soon.
