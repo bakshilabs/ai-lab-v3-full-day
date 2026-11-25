@@ -2,6 +2,16 @@
 
 Each build carries a version, the commit it was built from and the date. They show at the foot of the game's menu. Feedback should quote them. The version number is in `games/ecotown/package.json`.
 
+## The new Eco Town game on the live site (25 November 2026)
+
+The owner asked for the new Eco Town game (the six levels of the redesign, `docs/redesign/concepts/`) to replace the old Eco Town part on `ecotown-future.deltaops.workers.dev`. Owner's decisions (25 Nov 2026): keep the live start page with its latest updates; archive the old Eco Town game; keep the old join codes; no OpenAI words for this build.
+- `build.mjs` copies the game and its six levels into `dist/eco-town/`, keeping their folders. Its start page is `eco-town/concepts/game/index.html`. Its words are the design agents' labelled placeholders, and each screen says so.
+- The start page's Eco Town card and the welcome's start button open the new game (`partHref` in `js/series.js`). The card's tick follows the new game's levels on this device.
+- The old Eco Town game is archived: it is still in `play.html?part=town`, because the other five parts run in `play.html`, but nothing links to it.
+- The new game needs a join code like every other page. Its files may be framed by the site itself (`X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'`), because it opens each level in a frame; every other page still refuses every frame.
+- `main` now also holds the branch the live site was built from (`claude/jolly-goldberg-e9txp9`: the landing page open to everyone, the sharper town).
+- Checked: 625 unit tests, including a new server test; the built start page is the same as the live one; on this machine the Eco Town card opens the new game and Start opens Land with no errors. Not checked: the whole game played through by hand on the live site.
+
 ## 3.1.0 (in progress, not deployed)
 
 Started 15 November 2026 from the copy of Eco Town v3.0. **This build has not been deployed anywhere and has not been played by children.** Checked by 295 unit tests, a full play-through of all six missions in both age routes in a headless browser, and a joint browser test of the game with the new server run on this machine.

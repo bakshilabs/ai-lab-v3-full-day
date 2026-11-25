@@ -1,0 +1,74 @@
+<title>Eco Town Film</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout: one column. The film sits on top as a large block with a hard shadow, and the eight chapters are a row of plain blocks underneath. */
+:root {
+  --bg: #e9f3ee; --panel: #ffffff; --ink: #1d2b3a; --soft: #51606f;
+  --line: #1d2b3a; --accent: #f2b632; --accent-ink: #1d2b3a; --done: #2f8f5b;
+  --display: 'Space Grotesk', 'Trebuchet MS', sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15202b; --panel: #1f2d3b; --ink: #eef3f6; --soft: #a9b7c4;
+  --line: #0a1118; --accent: #f2b632; --accent-ink: #1d2b3a; --done: #6fd09a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15202b; --panel: #1f2d3b; --ink: #eef3f6; --soft: #a9b7c4;
+  --line: #0a1118; --accent: #f2b632; --accent-ink: #1d2b3a; --done: #6fd09a; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px; }
+h1 { font: 700 clamp(28px, 5vw, 40px)/1.1 var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 65ch; color: var(--soft); }
+.screen { border: 3px solid var(--line); border-radius: 10px; box-shadow: 6px 6px 0 var(--line); background: #000; overflow: hidden; }
+video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+.now { font: 600 18px/1.3 var(--display); color: var(--ink); max-width: none; }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
+.chapters button { width: 100%; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 14px; background: var(--panel); color: var(--ink); font: inherit;
+  border: 3px solid var(--line); border-radius: 10px; box-shadow: 4px 4px 0 var(--line); }
+.chapters button:hover { transform: translate(-1px, -1px); }
+.chapters button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.chapters button[aria-current="true"] { background: var(--accent); color: var(--accent-ink); }
+.chapters .name { font: 600 17px/1.25 var(--display); }
+.chapters .time { font-size: 14px; color: var(--soft); font-variant-numeric: tabular-nums; }
+.chapters button[aria-current="true"] .time { color: var(--accent-ink); }
+@media (prefers-reduced-motion: reduce) { .chapters button:hover { transform: none; } }
+</style>
+
+<div class="wrap">
+  <h1>Eco Town Film</h1>
+  <p>This film shows how all six levels of Eco Town could look and sound in the finished game. It lasts 27 and a half minutes and is split into eight chapters. The chapters play one after another, and you can choose any chapter below.</p>
+  <div class="screen"><video id="v" controls playsinline preload="metadata" poster="poster.jpg"></video></div>
+  <p class="now" id="now" aria-live="polite"></p>
+  <ol class="chapters" id="list"></ol>
+  <p>The film is a design proposal. The words on screen come from the wireframes, and some details are still being improved.</p>
+</div>
+
+<script>
+const CH = [
+  ['Opening', 67], ['Level 1: Land', 256], ['Level 2: Getting around', 266], ['Level 3: Homes', 237],
+  ['Level 4: Food', 248], ['Level 5: Power', 267], ['Level 6: A school for everyone', 254], ['Ending', 59]
+];
+const v = document.getElementById('v'), list = document.getElementById('list'), now = document.getElementById('now');
+const mins = s => Math.floor(s / 60) + ' min ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
+let cur = 0;
+function show(i, play) {
+  cur = i;
+  v.src = 'chapter-' + i + '.mp4';
+  now.textContent = 'Chapter ' + (i + 1) + ' of ' + CH.length + ': ' + CH[i][0];
+  [...list.children].forEach((li, k) => li.firstChild.setAttribute('aria-current', k === i ? 'true' : 'false'));
+  if (play) v.play().catch(() => {});
+}
+CH.forEach(([name, secs], i) => {
+  const li = document.createElement('li'), b = document.createElement('button');
+  b.type = 'button'; b.id = 'chapter-button-' + i;
+  const n = document.createElement('span'); n.className = 'name'; n.textContent = name;
+  const t = document.createElement('span'); t.className = 'time'; t.textContent = mins(secs);
+  b.append(n, t); b.addEventListener('click', () => show(i, true));
+  li.append(b); list.append(li);
+});
+v.addEventListener('ended', () => { if (cur < CH.length - 1) show(cur + 1, true); });
+show(0, false);
+</script>

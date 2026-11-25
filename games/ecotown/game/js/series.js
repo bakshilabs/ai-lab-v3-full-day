@@ -4,7 +4,8 @@ export const WELCOME_KEY = 'ecotown.welcome'; export const SAVE_KEY = 'ecotown.s
 
 // how: three short lines on getting around in that part (shown in the welcome's guide and on the start page)
 export const PARTS = [
-  { id: 'town', n: 1, icon: '🏡', title: 'Eco Town', time: 'about an hour', query: '?part=town',
+  // href: the new Eco Town game (the six levels of the redesign, owner 25 Nov 2026); the old Eco Town game stays in play.html?part=town as an archive, not linked
+  { id: 'town', n: 1, icon: '🏡', title: 'Eco Town', time: 'about an hour', query: '?part=town', href: 'eco-town/concepts/game/index.html',
     blurb: 'Build your own town with Florence, your AI helper. She is clever and sometimes wrong. Check her plans before you trust them.',
     how: ['Pick a build at the bottom, then tap a tile on the island.', 'The line at the top left always says your next step.', 'The AI Lab button opens a mission when its number shows.'] },
   { id: 'drone', n: 2, icon: '🚁', title: 'Drones at work', time: 'about an hour', query: '?module=drone',
@@ -39,16 +40,18 @@ export const SCENES = [
 ];
 
 // What has been done, from the saved town (or null): for the ticks on the start page.
-export function progress(save, welcomeSeen = false) {
+// levelsDone: how many of the new Eco Town game's six levels are done on this device (null on a page that does not know); it decides the town's tick in place of the old game's save
+export function progress(save, welcomeSeen = false, levelsDone = null) {
   const labs = save?.labs ? Object.values(save.labs).filter(Boolean).length : 0; const mods = save?.modules || {};
   const state = (done, started) => (done ? 'done' : started ? 'started' : 'new');
+  const townDone = levelsDone !== null ? levelsDone >= 6 : (labs >= 6 || !!save?.sessionDone || !!save?.completeShown);
   return {
     welcome: welcomeSeen ? 'done' : 'new', hasTown: !!(save && save.cells && save.band),
-    town: state(labs >= 6 || !!save?.sessionDone || !!save?.completeShown, !!(save && save.cells && (save.cells.length || labs))),
-    townNote: labs ? `${labs} of 6 missions done` : '',
+    town: levelsDone !== null ? state(townDone, levelsDone > 0) : state(townDone, !!(save && save.cells && (save.cells.length || labs))),
+    townNote: levelsDone === null && labs ? `${labs} of 6 missions done` : '',
     ...Object.fromEntries(PARTS.filter((p) => p.id !== 'town').map((p) => [p.id, state(!!mods[p.id]?.done, !!mods[p.id])])),
     // what to do next: the welcome, then the parts in order
-    next: !welcomeSeen ? 'welcome' : (PARTS.find((p) => state(p.id === 'town' ? (labs >= 6 || !!save?.sessionDone || !!save?.completeShown) : !!mods[p.id]?.done, false) !== 'done')?.id || null),
+    next: !welcomeSeen ? 'welcome' : (PARTS.find((p) => state(p.id === 'town' ? townDone : !!mods[p.id]?.done, false) !== 'done')?.id || null),
   };
 }
 export const LABEL = { done: '✓ Done', started: '▶ Carry on', new: 'Not started yet' };
@@ -97,4 +100,6 @@ export const JOBS = {
     ['🌩️', 'Emergency planner', 'Plans what to do when storms or floods hit.', 'Plans who gets help first in an emergency and how to restore services safely.']],
 };
 // The part after this one, for the break screen (null after the last part of the day).
+// the address that opens a part: the new Eco Town game has its own page, the other parts open in the game page
+export const partHref = (p, game) => p.href || `${game}${p.query}`;
 export const nextPart = (id) => { const i = PARTS.findIndex((p) => p.id === id); return i >= 0 ? PARTS[i + 1] || null : null; };

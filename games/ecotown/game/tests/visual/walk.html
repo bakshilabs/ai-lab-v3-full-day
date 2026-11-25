@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Island walk</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: linear-gradient(#bfe6fb, #eaf7ff); touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { width: 100vw; height: 100vh; display: block; cursor: grab; }
+  #stick { position: fixed; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; background: rgba(43, 58, 85, .18); display: none; pointer-events: none; }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(43, 58, 85, .5); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="stick"><i></i></div>
+<script type="module">
+// A test page, not part of the camp: walk a small figure round the start page's island (js/home/island.js).
+// Keys: W A S D or arrows to walk, Shift to run, Space to jump, drag to look, wheel to zoom.
+// Touch: drag on the left half to walk, on the right half to look, tap with a second finger to jump.
+import { createIsland } from '../../js/home/island.js';
+
+const canvas = document.getElementById('c');
+const island = createIsland(canvas);
+const { THREE, world, camera, inside, zone, houses, trees, turbines, cars } = island.parts;
+
+// ---------- the figure: a few boxes, in the island's own palette
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+const part = (parent, w, h, d, x, y, z, color) => { const m = new THREE.Mesh(BOX, new THREE.MeshLambertMaterial({ color })); m.scale.set(w, h, d); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m; };
+const limb = (parent, w, h, d, x, y, z, color) => { const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); part(g, w, h, d, 0, -h / 2, 0, color); return g; };
+const player = new THREE.Group(); world.add(player);
+const body = new THREE.Group(); player.add(body);
+part(body, 0.42, 0.46, 0.26, 0, 0.63, 0, '#e0503a');           // jumper
+part(body, 0.36, 0.34, 0.34, 0, 1.03, 0, '#f2c79a');           // head
+part(body, 0.4, 0.12, 0.38, 0, 1.24, 0, '#7a5a33');            // hair
+part(body, 0.07, 0.07, 0.03, -0.09, 1.05, 0.17, '#2b3a55'); part(body, 0.07, 0.07, 0.03, 0.09, 1.05, 0.17, '#2b3a55'); // eyes
+const legL = limb(body, 0.17, 0.4, 0.2, -0.11, 0.4, 0, '#2b3a55'), legR = limb(body, 0.17, 0.4, 0.2, 0.11, 0.4, 0, '#2b3a55');
+const armL = limb(body, 0.13, 0.42, 0.16, -0.28, 0.84, 0, '#e0503a'), armR = limb(body, 0.13, 0.42, 0.16, 0.28, 0.84, 0, '#e0503a');
+
+// ---------- what is in the way: houses are squares, trees and turbine towers are posts
+const R = 0.24; // the figure's own half-width
+const squares = houses.map((h) => [h.position.x, h.position.z, 0.95 + R]);
+const posts = [...trees.map((t) => [t.position.x, t.position.z, 0.28 + R]), ...turbines.map((t) => [t.position.x, t.position.z, 0.32 + R])];
+const free = (x, z) => {
+  if (!inside(x, z, 0.955)) return false;
+  for (const [a, b, h] of squares) if (Math.abs(x - a) < h && Math.abs(z - b) < h) return false;
+  for (const [a, b, r] of posts) if ((x - a) ** 2 + (z - b) ** 2 < r * r) return false;
+  return true;
+};
+const groundAt = (x, z) => (zone(Math.floor(x), Math.floor(z)) === 'water' ? -0.38 : 0);
+
+// ---------- input
+const keys = new Set();
+addEventListener('keydown', (e) => { keys.add(e.code); if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault(); });
+addEventListener('keyup', (e) => keys.delete(e.code));
+addEventListener('blur', () => keys.clear());
+const look = { th: 0.5, phi: 1.02, r: 9 };
+const stick = { id: null, x0: 0, y0: 0, x: 0, y: 0 }, stickEl = document.getElementById('stick');
+let lookId = null, lx = 0, ly = 0, jumpAsked = false;
+canvas.addEventListener('pointerdown', (e) => {
+  canvas.setPointerCapture(e.pointerId);
+  if (e.pointerType === 'touch' && e.clientX < innerWidth * 0.45 && stick.id === null) {
+    Object.assign(stick, { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: 0, y: 0 });
+    stickEl.style.display = 'block'; stickEl.style.left = e.clientX + 'px'; stickEl.style.top = e.clientY + 'px'; stickEl.firstChild.style.transform = '';
+  } else if (lookId === null) { lookId = e.pointerId; lx = e.clientX; ly = e.clientY; }
+  else jumpAsked = true;
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerId === stick.id) {
+    let dx = e.clientX - stick.x0, dy = e.clientY - stick.y0; const d = Math.hypot(dx, dy), max = 45; if (d > max) { dx *= max / d; dy *= max / d; }
+    stick.x = dx / max; stick.y = dy / max; stickEl.firstChild.style.transform = `translate(${dx}px, ${dy}px)`;
+  } else if (e.pointerId === lookId) {
+    look.th -= (e.clientX - lx) * 0.006; look.phi = Math.min(1.45, Math.max(0.35, look.phi - (e.clientY - ly) * 0.005)); lx = e.clientX; ly = e.clientY;
+  }
+});
+const up = (e) => { if (e.pointerId === stick.id) { stick.id = null; stick.x = stick.y = 0; stickEl.style.display = 'none'; } if (e.pointerId === lookId) lookId = null; };
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); look.r = Math.min(30, Math.max(4, look.r * (e.deltaY > 0 ? 1.1 : 0.9))); }, { passive: false });
+
+// ---------- each frame: move the figure, then put the camera behind it
+const pos = player.position.set(6, 0, 6.8); let vy = 0, facing = Math.PI, stride = 0, moving = 0;
+const eye = new THREE.Vector3(), at = new THREE.Vector3(pos.x, 0.9, pos.z), tmp = new THREE.Vector3();
+const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
+island.drive((dt) => {
+  let ix = stick.x + (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
+  let iz = -stick.y + (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0);
+  const len = Math.hypot(ix, iz); if (len > 1) { ix /= len; iz /= len; }
+  const floor = groundAt(pos.x, pos.z), wading = floor < 0 && pos.y < -0.1;
+  const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 5.2 : 3.2) * (wading ? 0.55 : 1);
+  // forward is away from the camera
+  const dx = (-Math.sin(look.th) * iz + Math.cos(look.th) * ix) * speed * dt, dz = (-Math.cos(look.th) * iz - Math.sin(look.th) * ix) * speed * dt;
+  if (free(pos.x + dx, pos.z + dz)) { pos.x += dx; pos.z += dz; } else if (free(pos.x + dx, pos.z)) pos.x += dx; else if (free(pos.x, pos.z + dz)) pos.z += dz;
+  // jump and fall; the river bed is a little lower than the grass
+  const g2 = groundAt(pos.x, pos.z);
+  if ((keys.has('Space') || jumpAsked) && pos.y <= g2 + 0.01) vy = 5.2; jumpAsked = false;
+  vy -= 15 * dt; pos.y += vy * dt; if (pos.y <= g2) { pos.y = g2; vy = 0; }
+  // turn to face the way it walks, swing the limbs
+  const want = Math.min(1, Math.hypot(ix, iz)); moving = damp(moving, want, 10, dt);
+  if (want > 0.05) { const a = Math.atan2(dx, dz); let d = a - facing; d = Math.atan2(Math.sin(d), Math.cos(d)); facing += d * (1 - Math.exp(-12 * dt)); }
+  player.rotation.y = facing; stride += dt * speed * 3.1 * want;
+  const sw = Math.sin(stride) * 0.75 * moving; legL.rotation.x = sw; legR.rotation.x = -sw; armL.rotation.x = -sw; armR.rotation.x = sw;
+  body.position.y = Math.abs(Math.sin(stride)) * 0.04 * moving;
+  // the camera, in the scene's own space (the island is scaled and lowered a little)
+  tmp.set(pos.x, Math.max(pos.y, 0) + 0.9, pos.z); world.localToWorld(tmp);
+  at.x = damp(at.x, tmp.x, 9, dt); at.y = damp(at.y, tmp.y, 5, dt); at.z = damp(at.z, tmp.z, 9, dt);
+  eye.set(at.x + look.r * Math.sin(look.phi) * Math.sin(look.th), at.y + look.r * Math.cos(look.phi), at.z + look.r * Math.sin(look.phi) * Math.cos(look.th));
+  camera.position.copy(eye); camera.lookAt(at);
+});
+island.start();
+document.addEventListener('visibilitychange', () => (document.visibilityState === 'visible' ? island.start() : island.stop()));
+window.walk = { island, player, look, keys }; // for checks
+</script>
+</body>
+</html>

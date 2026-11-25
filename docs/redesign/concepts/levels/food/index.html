@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eco Town: Food (trial level, placeholder words)</title>
+<!-- A playable trial of level 4, "Food", in the market square form. Every word on the page is a placeholder. -->
+<link rel="stylesheet" href="../../../ui/tokens.css">
+<link rel="stylesheet" href="../../level-kit/kit.css">
+<style>
+  /* The sign that keeps the first result in view: this level's sentences are long, so the sign is kept narrow and each sentence wraps beside its mark. (A change for this level only; the kit is untouched.) */
+  .first { max-width: 400px; }
+  .first > span:not(.pl) { display: block; position: relative; padding-right: 32px; font-weight: 600; font-size: 14px; }
+  .first > span:not(.pl) > .mark { position: absolute; right: 0; top: 1px; display: grid; }
+  /* the small pictures in front of a sentence keep their own shape inside the sign */
+  .first > span:not(.pl) span { display: inline; }
+  .first > span:not(.pl) span.mbar { display: inline-flex; gap: 2px; vertical-align: -2px; }
+  /* the two lines of the plan's name stand one under the other, so that a long name stays inside the sign */
+  .first > span.pl > span { display: block; }
+  /* the sign stands on the side of the picture away from the plan that is being shown */
+  .first.right { left: auto; right: 16px; top: 112px; }
+  @media (max-width: 1100px) { .first { max-width: 300px; top: 62px; } .first.right { top: 100px; } .first > span:not(.pl) { font-size: 12px; } }
+</style>
+</head>
+<body>
+<script type="module" src="level.js"></script>
+</body>
+</html>

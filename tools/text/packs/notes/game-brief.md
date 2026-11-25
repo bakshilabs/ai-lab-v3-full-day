@@ -223,11 +223,11 @@ Eco Town teaches sustainable town planning and AI literacy. Children build a tow
 5. **Water, power and waste** — Florence uses solar only and plans for an average day. Children use the Winter test. Clearer idea: power for a still winter night, with storage.
 6. **A school for everyone** — Florence puts the school in the map middle. Children use Walking-time lens. Clearer instruction: “School within a 15-minute walk of every home.”
 
-Eco Town jobs named in the broader design include town planner, environmental scientist and data analyst, and the guide also links to architects, ecologists, transport planners, energy engineers and community engagement officers.
+Eco Town jobs named in the broader design are town planner, architect and engineer (changed by the owner on 21 November 2026, to simple job names that really do this work), and the guide also links to architects, ecologists, transport planners, energy engineers and community engagement officers.
 
 ## Part 2: Drones at work (`drone`)
 
-Final title: **Drones at work**. It teaches that drones are used for many real jobs, not just delivery. Jobs that use this: drone pilot, survey and mapping technician, infrastructure inspector, search and rescue drone operator.
+Final title: **Drones at work**. It teaches that drones are used for many real jobs, not just delivery. Jobs that use this: drone pilot (flies drones safely), map maker (uses photographs from the air to draw maps), bridge inspector (checks bridges and towers for damage), rescue worker (searches for people who are lost).
 
 Missions:
 
@@ -242,7 +242,7 @@ Senior route includes battery in watt-hours against distance and wind, overlap a
 
 ## Part 3: Robots at work (`robots`)
 
-Final title: **Robots at work**. It teaches how robots sense, think, act, follow programs and rules, learn from examples, use confidence thresholds and are designed for hard places. Jobs that use this: robotics engineer, robot technician, agricultural engineer, test engineer.
+Final title: **Robots at work**. It teaches how robots sense, think, act, follow programs and rules, learn from examples, use confidence thresholds and are designed for hard places. Jobs that use this: robot engineer (designs and builds robots), robot mechanic (keeps robots working and mends them), farmer (grows food, sometimes with the help of machines), tester (checks that a machine does its job properly).
 
 Missions:
 
@@ -257,7 +257,7 @@ There is no typing in this module. Florence’s lines are built from fixed words
 
 ## Part 4: Self-driving cars (`roads`)
 
-Final title: **Self-driving cars**. It teaches how autonomous systems sense, classify, follow road rules, get tested, work in shared fleets and affect street design. Jobs that use this: autonomous vehicle engineer, transport planner, safety test driver, traffic data analyst.
+Final title: **Self-driving cars**. It teaches how autonomous systems sense, classify, follow road rules, get tested, work in shared fleets and affect street design. Jobs that use this: car engineer (designs cars and the parts that help them see), transport planner (decides how streets, buses and crossings should work), test driver (tries out new cars to check that they are safe), road safety officer (looks for ways to make streets safer).
 
 Missions:
 
@@ -272,7 +272,7 @@ Senior route uses stopping distance against speed/rain and the trade-off between
 
 ## Part 5: Town film studio (`film`)
 
-Final title: **Town film studio**. It teaches media-making with AI: shot language, storyboarding, directing an AI helper, editing, accessibility and checking truth/permission. Jobs that use this: director, video editor, content producer, accessibility producer.
+Final title: **Town film studio**. It teaches media-making with AI: shot language, storyboarding, directing an AI helper, editing, accessibility and checking truth/permission. Jobs that use this: director (decides how a film tells its story), film editor (chooses which shots to keep and puts them in order), camera operator (films the shots), caption writer (adds words to a film for people who cannot hear it).
 
 The module needs something in the town to film. If there is nothing, it says there is nothing here to film yet and asks the child to go back to the town.
 
@@ -289,7 +289,7 @@ Mission 3 saved progress never stores anything typed.
 
 ## Part 6: Power control room (`power`)
 
-Final title: **Power control room**. It teaches how a power grid is balanced, forecast, stored, automated, shifted through demand response and restored in an emergency. Jobs that use this: grid control engineer, energy analyst, renewable energy technician, emergency planner.
+Final title: **Power control room**. It teaches how a power grid is balanced, forecast, stored, automated, shifted through demand response and restored in an emergency. Jobs that use this: power engineer (keeps electricity flowing to homes), wind turbine technician (looks after wind turbines), solar panel fitter (puts solar panels on roofs), emergency planner (decides what to do when something breaks).
 
 Missions:
 

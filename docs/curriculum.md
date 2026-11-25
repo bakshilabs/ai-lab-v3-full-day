@@ -2,6 +2,8 @@
 
 *Approved by the user on 15 November 2026 ("agree. this is terrific."): the uses and jobs, the new titles, six missions of about seven minutes then the talk and the break, and all five modules in the day in this order. Being built.*
 
+*The job lists were changed by the owner on 21 November 2026. They now use simple job names that a child knows, and only jobs that really do the work of that hour. The older lists named jobs such as data analyst and environmental scientist, which do not do this work.*
+
 ## What the user asked for (word for word)
 > "extending each module from 10 minutes to 1 hour cannot be more of the same skill. each topic is extensive and complex, and there is a lot to teach in the form of a game. by playing the game, the students will learn real skills they can apply to future careers in robotics, or becoming a drone pilot, etc."
 >
@@ -17,7 +19,7 @@
 - Progress is saved after every mission; a child who stops early keeps what they finished.
 
 ## 1. Eco Town (already one hour)
-Unchanged: planning a town with an AI that can be confidently wrong, and checking it with evidence. Jobs: town planner, environmental scientist, data analyst.
+Unchanged: planning a town with an AI that can be confidently wrong, and checking it with evidence. Jobs: town planner (decides where homes, streets and parks should go), architect (designs homes and schools), engineer (designs roads, bridges and power lines).
 
 ## 2. Drones: from delivery to rescue
 | # | Real use | What the child does | Skill learnt |
@@ -30,7 +32,7 @@ Unchanged: planning a town with an AI that can be confidently wrong, and checkin
 | 6 | **Search and rescue at dusk** | A walker is lost. Choose the heat camera, plan a search pattern, find them, and guide the rescue team. | Choosing the right sensor; search patterns; working as part of a team. |
 
 Ages 13–17 also: battery in watt-hours against distance and wind, overlap as a percentage, the 120-metre height limit on a side view.
-Jobs: drone pilot, survey and mapping technician, infrastructure inspector, search and rescue drone operator.
+Jobs: drone pilot (flies drones safely), map maker (uses photographs from the air to draw maps), bridge inspector (checks bridges and towers for damage), rescue worker (searches for people who are lost).
 
 ## 3. Robots: sense, think, act
 | # | Real use | What the child does | Skill learnt |
@@ -43,7 +45,7 @@ Jobs: drone pilot, survey and mapping technician, infrastructure inspector, sear
 | 6 | **Flood rescue robot** | Design a robot for a flooded street: body (wheels, tracks, legs, boat), sensors, power. Test it in a simulation and improve it. | Engineering design trade-offs; test, then improve. |
 
 Ages 13–17 also: coordinates for the arm, a confusion table for the sorter and the farm robot, battery life against weight.
-Jobs: robotics engineer, robot technician, agricultural engineer, test engineer.
+Jobs: robot engineer (designs and builds robots), robot mechanic (keeps robots working and mends them), farmer (grows food, sometimes with the help of machines), tester (checks that a machine does its job properly).
 
 ## 4. Self-driving cars and the street
 | # | Real use | What the child does | Skill learnt |
@@ -56,7 +58,7 @@ Jobs: robotics engineer, robot technician, agricultural engineer, test engineer.
 | 6 | **Redesigning the street** (built) | Redesign the street for shared cars and choose what the old car park becomes. | Designing for everyone who uses a street. |
 
 Ages 13–17 also: stopping distance against speed and rain, the trade between waiting time and number of cars.
-Jobs: autonomous vehicle engineer, transport planner, safety test driver, traffic data analyst.
+Jobs: car engineer (designs cars and the parts that help them see), transport planner (decides how streets, buses and crossings should work), test driver (tries out new cars to check that they are safe), road safety officer (looks for ways to make streets safer).
 
 ## 5. Town film studio: making media with AI
 | # | Real use | What the child does | Skill learnt |
@@ -68,7 +70,7 @@ Jobs: autonomous vehicle engineer, transport planner, safety test driver, traffi
 | 5 | **Making it for everyone** | Add captions and a described version for someone who cannot see the screen. | Accessibility in media. |
 | 6 | **True or made up?** | Spot which shots were changed or made by a machine; check permission before filming people. | Checking media; consent and honesty. |
 
-Jobs: director, video editor, content producer, accessibility producer.
+Jobs: director (decides how a film tells its story), film editor (chooses which shots to keep and puts them in order), camera operator (films the shots), caption writer (adds words to a film for people who cannot hear it).
 
 ## 6. Power control room: keeping the lights on
 | # | Real use | What the child does | Skill learnt |
@@ -81,7 +83,7 @@ Jobs: director, video editor, content producer, accessibility producer.
 | 6 | **Storm night** | A storm cuts a line. Decide who gets power first (the hospital, the school shelter) and restore the town in order. | Priorities in an emergency; restoring a system safely. |
 
 Ages 13–17 also: kilowatts against kilowatt-hours, a supply and demand chart, battery percentage thresholds.
-Jobs: grid control engineer, energy analyst, renewable energy technician, emergency planner.
+Jobs: power engineer (keeps electricity flowing to homes), wind turbine technician (looks after wind turbines), solar panel fitter (puts solar panels on roofs), emergency planner (decides what to do when something breaks).
 
 ## Decided
 - Titles: **Drones at work**, **Robots at work**, **Self-driving cars**, **Town film studio**, **Power control room**. Module ids stay `drone`, `robots`, `roads`, `film`, `power`.

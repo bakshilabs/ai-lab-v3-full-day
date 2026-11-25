@@ -3,18 +3,20 @@
 // Motion: a live 3D island behind the page (js/home/island.js, loaded after the first paint), Florence as a sprite
 // that waves and points, a strip of the game's build films, and one screen per part that the island glides to.
 // With reduced motion, Save-Data or no WebGL the island is a still picture per part and no film plays.
-import { PARTS, LABEL, WELCOME_KEY, SAVE_KEY, progress } from './series.js';
+import { PARTS, LABEL, WELCOME_KEY, SAVE_KEY, progress, partHref } from './series.js';
 import { GAME, buildLabel } from './version.js';
 import { createFlorence } from './home/florence.js';
 
 document.documentElement.classList.add('js');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let save = null, seen = false;
+let save = null, seen = false, levels = 0;
 try { save = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); seen = !!localStorage.getItem(WELCOME_KEY); } catch { /* storage off: everything shows as not started */ }
-const P = progress(save, seen);
+// the new Eco Town game keeps the levels done in its own key (docs/redesign/concepts/game/game.js)
+try { const d = JSON.parse(localStorage.getItem('eco-town-game-1') || '[]'); levels = Array.isArray(d) ? new Set(d.filter((i) => Number.isInteger(i) && i >= 0 && i < 6)).size : 0; } catch { /* nothing remembered */ }
+const P = progress(save, seen, levels);
 
 document.querySelector('[data-part="welcome"]').href = `${GAME}?welcome=1`;
-document.querySelector('[data-parts]').innerHTML = PARTS.map((p, i) => `<section class="chapter" data-shot="${p.id}" style="--i:${i}"><a class="card part${P.next === p.id ? ' next' : ''}${P[p.id] === 'done' ? ' done' : ''}" data-part="${p.id}" href="${GAME}${p.query}">
+document.querySelector('[data-parts]').innerHTML = PARTS.map((p, i) => `<section class="chapter" data-shot="${p.id}" style="--i:${i}"><a class="card part${P.next === p.id ? ' next' : ''}${P[p.id] === 'done' ? ' done' : ''}" data-part="${p.id}" href="${partHref(p, GAME)}">
   <span class="num" aria-hidden="true">${p.n}</span><span class="nexttag">Next</span>
   <h3>${esc(p.title)}</h3>${p.time ? `<span class="time">${esc(p.time)}</span>` : ''}<div class="more"><div><p>${esc(p.blurb)}</p></div></div>
   <div class="row2"><span class="state ${P[p.id]}" data-state="${p.id}">${esc(p.id === 'town' && P.town === 'started' && P.townNote ? `▶ ${P.townNote}` : p.id === 'town' && P.town === 'started' ? '▶ Carry on building' : LABEL[P[p.id]])}</span><span class="arrow" aria-hidden="true">→</span></div></a></section>`).join('');

@@ -20,12 +20,12 @@ export function createIsland(canvas, { reduced = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: (window.devicePixelRatio || 1) < 2, powerPreference: 'default', preserveDrawingBuffer: false });
   let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   renderer.setPixelRatio(dpr); renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap; // hard-edged shadows: nothing on the island is soft
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 400);
   scene.add(new THREE.HemisphereLight('#fff6e8', '#8a7a5a', 1.55));
   const sun = new THREE.DirectionalLight('#fff0d0', 2.1); sun.position.set(-18, 34, 20); sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 90 }); sun.shadow.bias = -0.0015; sun.shadow.normalBias = 0.04;
+  sun.shadow.mapSize.set(4096, 4096); Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 90 }); sun.shadow.bias = -0.0015; sun.shadow.normalBias = 0.04;
   scene.add(sun);
   const world = new THREE.Group(); scene.add(world);
 
@@ -90,10 +90,19 @@ export function createIsland(canvas, { reduced = false } = {}) {
     const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = (i % 2) * Math.PI / 2; world.add(g);
     const wall = PAL.wall[i % 3]; const tall = i % 3 === 1 ? 2.1 : 1.45;
     box(g, 1.9, tall, 1.9, 0, tall / 2, 0, i % 4 === 2 ? PAL.timber : wall);
-    const roof = box(g, 1.45, 1.45, 2.15, 0, tall, 0, i % 5 === 3 ? PAL.green : PAL.roof[i % 3]); roof.rotation.z = Math.PI / 4;
+    // a stepped roof like the main game's homes: one course of tiles per step, in two shades, overhanging the walls by a
+    // step all round; the end walls step up to the ridge in the wall's colour; every third home has solar tiles on one slope
+    const u = 0.95 / 4, rc = i % 5 === 3 ? PAL.green : PAL.roof[i % 3], dark = '#' + C(rc).multiplyScalar(0.86).getHexString(), wc = i % 4 === 2 ? PAL.timber : wall;
+    for (let r = 0; r <= 4; r++) {
+      if (r < 4) box(g, 2 * (0.95 - r * u), u, 1.9, 0, tall + (r + 0.5) * u, 0, wc);
+      for (const sd of r < 4 ? [1, -1] : [1]) for (let k = 0; k < 10; k++) {
+        const sun = i % 3 === 0 && sd > 0 && r >= 1 && r <= 3 && k >= 2 && k <= 7;
+        box(g, r < 4 ? u : 2 * u, u, u, r < 4 ? sd * (0.95 + (0.5 - r) * u) : 0, tall + (r + 0.5) * u, (k - 4.5) * u, sun ? PAL.solar : (k + r) % 2 ? rc : dark);
+      }
+    }
+    if (i % 3) { box(g, u, 3.6 * u, u, -2.5 * u, tall + 3.3 * u, -2.5 * u, '#9a5a3c'); box(g, u * 1.3, u * 0.5, u * 1.3, -2.5 * u, tall + 5.35 * u, -2.5 * u, '#5b4a40', false); }
     box(g, 0.42, 0.75, 0.06, 0.4, 0.38, 0.97, '#7a5a33', false);
     box(g, 0.42, 0.38, 0.06, -0.45, tall * 0.62, 0.97, '#9fd0f5', false);
-    if (i % 3 === 0) { const p = box(g, 0.08, 0.9, 1.7, 0.55, tall + 0.48, 0, PAL.solar, false); p.rotation.z = Math.PI / 4; }
     bake(g); houses.push(g); return g;
   };
   [[4, -5.5], [7.2, -5.5], [10, -5], [4, -2.2], [7.5, -2], [4.2, 1.6], [7.3, 2], [10, 1.2], [10.2, -2.3]].forEach(([x, z], i) => house(x, z, i));
@@ -171,6 +180,7 @@ export function createIsland(canvas, { reduced = false } = {}) {
   let shot = 'hero'; const cam = { t: new THREE.Vector3(1.5, -1.5, 0.5), r: 70, phi: 1.2, th: 0.2, sx: 0, sy: 0 };
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 }; let heroP = 0, zoom = 1, shift = { x: 0, y: 0 }; let orbit = 0;
   const tmp = new THREE.Vector3(), wp = new THREE.Vector3(), Q0 = new THREE.Quaternion();
+  let driver = null; // a test page can take the camera over (tests/visual/walk.html)
   let W = 1, H = 1; let T = 0, last = 0, running = false, raf = 0, ema = 0.016, frames = 0, downgraded = false;
 
   function resize() {
@@ -218,7 +228,7 @@ export function createIsland(canvas, { reduced = false } = {}) {
     if (!running) return;
     raf = requestAnimationFrame(tick);
     const raw = Math.min(0.25, (now - (last || now)) / 1000); const dt = raw; last = now; // real time, so a slow device still builds in about two seconds
-    animate(reduced ? 0 : dt); frameCamera(raw || 0.016); renderer.render(scene, camera);
+    animate(reduced ? 0 : dt); if (driver) driver(raw || 0.016, T); else frameCamera(raw || 0.016); renderer.render(scene, camera);
     // a slow device gets fewer pixels and no shadows, once
     ema = ema * 0.95 + dt * 0.05; frames++;
     if (!downgraded && frames > 90 && ema > 0.034) { downgraded = true; dpr = 1; renderer.setPixelRatio(1); renderer.shadowMap.enabled = false; scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); resize(); }
@@ -238,6 +248,9 @@ export function createIsland(canvas, { reduced = false } = {}) {
     setShift(x, y, z = 1) { shift = { x, y }; zoom = z; },
     // for still pictures: jump straight to a shot at a given time
     still(name, t = 8) { shot = name; T = t; animate(0); for (let i = 0; i < 400; i++) frameCamera(0.05); renderer.render(scene, camera); },
+    // for the walk-about test page: the island's parts, and a way to take the camera over each frame
+    parts: { THREE, world, camera, inside, zone, houses, trees, turbines, cars },
+    drive(fn) { driver = fn; camera.clearViewOffset(); },
     dispose() { this.stop(); ro.disconnect(); renderer.dispose(); },
   };
 }

@@ -1,0 +1,239 @@
+/* Eco Town redesign: design tokens and component styles for the interface that sits over the 3D town.
+   Import this file as it is into the film and into the game. Every class starts with "ui-" so that it cannot
+   collide with the classes of the first film attempt. Sizes are in pixels for a 1280 by 720 stage. The layout is
+   fluid between 1024 and 1280 pixels wide; above 1280 the game should scale the whole .ui layer up, not reflow it.
+   DESIGN.md explains every decision in full sentences.
+
+   Fonts: the page that imports this file must declare the two faces, for example
+     @font-face { font-family: 'Inter'; src: url('inter.woff2') format('woff2'); font-weight: 400 900; }
+     @font-face { font-family: 'Bricolage'; src: url('bricolage.woff2') format('woff2'); font-weight: 400 900; }
+   Florence: set --ui-florence-sprite on .ui to url(...) of florence-sprite.webp (6 columns by 5 rows). */
+
+.ui {
+  /* ---- colour: one ink, one paper, one "yours" colour, three result colours, one town tint ---- */
+  --ui-ink: #1f2a44;            /* every outline, every word, every hard shadow */
+  --ui-ink-soft: #4a556e;       /* quieter words on paper (7 to 1 on paper) */
+  --ui-paper: #fffaf0;          /* every surface */
+  --ui-paper-dim: #efe6d2;      /* a flat inset on paper: an empty gap, a disabled button */
+  --ui-white: #ffffff;          /* a thing that can be tapped and has not been tapped yet */
+  --ui-sun: #ffd257;            /* "this is yours": a chosen word, a chosen plan, the test button, the level you are on */
+  --ui-sun-deep: #e9ad1c;       /* the pressed face of a sun button */
+  --ui-good: #1c7a45;           /* tick */
+  --ui-fair: #5d6577;           /* dash (a neutral grey-blue, so that it is not read as a warning) */
+  --ui-poor: #b3243a;           /* cross (a berry red, kept away from Eco Town's terracotta) */
+  --ui-town: #c8643f;           /* the tint of the town: identity only (badge, level sign), never a button */
+  --ui-shade: rgba(31, 42, 68, 0.3); /* the soft flat shadow under surfaces that cannot be pressed */
+
+  /* ---- type ---- */
+  --ui-display: 'Bricolage', 'Inter', system-ui, sans-serif;
+  --ui-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ui-t-title: 800 56px/1 var(--ui-display);        /* the level sign */
+  --ui-t-test: 800 34px/1.05 var(--ui-display);      /* the test button */
+  --ui-t-button: 800 24px/1.1 var(--ui-display);     /* every other button */
+  --ui-t-name: 700 22px/1.15 var(--ui-display);      /* a plan's name, a panel heading */
+  --ui-t-sentence: 600 26px/1.5 var(--ui-body);      /* the child's sentence */
+  --ui-t-speech: 600 24px/1.3 var(--ui-body);        /* Florence */
+  --ui-t-chip: 600 22px/1.15 var(--ui-body);         /* a word button */
+  --ui-t-read: 600 20px/1.25 var(--ui-body);         /* what a plan is, what happened, instructions */
+  --ui-t-label: 700 16px/1.2 var(--ui-body);         /* the smallest words allowed anywhere */
+
+  /* ---- space, shape, depth ---- */
+  --ui-gutter: 16px;            /* from the edge of the screen to any element */
+  --ui-gap: 12px;               /* between neighbours */
+  --ui-pad: 16px;               /* inside a surface */
+  --ui-touch: 56px;             /* the smallest height or width of anything that can be tapped */
+  --ui-line: 3px;               /* every outline */
+  --ui-r-s: 10px; --ui-r-m: 16px; --ui-r-l: 22px; --ui-r-pill: 999px;
+  --ui-lift: 6px;               /* how far a button stands off the page */
+  --ui-shadow-press: 0 var(--ui-lift) 0 var(--ui-ink);   /* hard ink shadow: "you can press me" */
+  --ui-shadow-rest: 0 5px 0 var(--ui-shade);             /* soft flat shadow: "I am a surface" */
+  --ui-florence-w: 193px; --ui-florence-h: 250px;   /* one cell of the sprite sheet; Florence herself is about 95 by 200 inside it */
+  --ui-florence-room: 116px;    /* the room the dock leaves for her on the left */
+
+  /* ---- motion ---- */
+  --ui-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);        /* things arriving */
+  --ui-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);     /* things arriving with a small bounce */
+  --ui-ease-in: cubic-bezier(0.5, 0, 0.9, 0.4);         /* things leaving */
+  --ui-ease-move: cubic-bezier(0.65, 0, 0.35, 1);       /* things travelling, and the camera */
+  --ui-d-press: 90ms; --ui-d-pop: 220ms; --ui-d-move: 320ms; --ui-d-panel: 380ms; --ui-d-camera: 1200ms;
+
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; container: ui / inline-size;
+  color: var(--ui-ink); font: var(--ui-t-read); -webkit-font-smoothing: antialiased; text-wrap: pretty;
+}
+.ui *, .ui *::before, .ui *::after { box-sizing: border-box; }
+.ui p, .ui h2, .ui h3 { margin: 0; }
+.ui button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+.ui :focus-visible { outline: 4px solid var(--ui-white); outline-offset: 2px; box-shadow: 0 0 0 9px var(--ui-ink); }
+
+/* ================= top of the screen: where am I, and how far along ================= */
+.ui-top { position: absolute; left: var(--ui-gutter); right: var(--ui-gutter); top: var(--ui-gutter); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-gap); z-index: 2; }
+.ui-place { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 18px 0 6px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-pill); box-shadow: var(--ui-shadow-rest); font: 700 18px/1 var(--ui-body); white-space: nowrap; }
+.ui-place b { display: grid; place-items: center; height: 34px; padding: 0 14px; border-radius: var(--ui-r-pill); background: var(--ui-town); color: #fff; font: 800 18px/1 var(--ui-display); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+.ui-place span { color: var(--ui-ink-soft); }
+.ui-place strong { font: 800 20px/1 var(--ui-display); }
+
+.ui-progress { display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); box-shadow: var(--ui-shadow-rest); list-style: none; margin: 0; }
+.ui-progress li { display: grid; place-items: center; width: 30px; height: 30px; border: var(--ui-line) solid var(--ui-ink); border-radius: 8px; background: var(--ui-paper-dim); color: var(--ui-ink-soft); font: 800 16px/1 var(--ui-display); }
+.ui-progress .is-done { background: var(--ui-good); color: transparent; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 100% 100%; }
+.ui-progress .is-now { width: 40px; height: 40px; background: var(--ui-sun); color: var(--ui-ink); font-size: 22px; border-radius: 10px; }
+
+/* the level sign: arrives large in the middle, then settles here under the top bar */
+.ui-sign { position: absolute; left: 50%; top: 84px; transform: translateX(-50%); display: flex; align-items: center; gap: 18px; padding: 14px 30px 16px 16px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-l); box-shadow: var(--ui-shadow-rest); white-space: nowrap; }
+.ui-sign em { display: grid; place-items: center; width: 76px; height: 76px; border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); background: var(--ui-town); color: #fff; font: 800 52px/1 var(--ui-display); font-style: normal; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); }
+.ui-sign small { display: block; font: 700 18px/1.2 var(--ui-body); color: var(--ui-ink-soft); margin-bottom: 4px; }
+.ui-sign strong { display: block; font: var(--ui-t-title); }
+
+/* ================= the dock: Florence on the left, speech and the main button above, the working tray below ================= */
+.ui-dock { position: absolute; left: var(--ui-gutter); right: var(--ui-gutter); bottom: var(--ui-gutter); padding-left: var(--ui-florence-room); display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+.ui-dock > * { pointer-events: auto; }
+
+.ui-florence { position: absolute; left: -46px; bottom: -20px; width: var(--ui-florence-w); height: var(--ui-florence-h); background: var(--ui-florence-sprite) 0 0 / 600% 500% no-repeat; filter: drop-shadow(0 5px 0 var(--ui-shade)); pointer-events: none;
+  /* frame n of the sheet: set --col to n % 6 and --row to floor(n / 6) */
+  background-position: calc(var(--col, 0) * 20%) calc(var(--row, 0) * 25%); }
+.ui-florence.is-looking { transform: translateX(-20px) scaleX(-1); }   /* the pointing frames face left on the sheet; mirrored, she looks up at the town */
+
+.ui-say { display: flex; align-items: flex-end; gap: var(--ui-gap); min-height: 64px; }
+.ui-bubble { position: relative; flex: 0 1 auto; max-width: 780px; margin-right: auto; padding: 14px 22px 15px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-l) var(--ui-r-l) var(--ui-r-l) 6px; box-shadow: var(--ui-shadow-rest); font: var(--ui-t-speech); }
+.ui-bubble::before { content: ''; position: absolute; left: -12px; bottom: 10px; width: 18px; height: 18px; background: var(--ui-paper); border-left: var(--ui-line) solid var(--ui-ink); border-bottom: var(--ui-line) solid var(--ui-ink); transform: rotate(45deg); }
+.ui-bubble .ui-untyped { color: transparent; }        /* the part of the line that has not been typed yet keeps its space */
+.ui-bubble small { display: block; margin-top: 4px; font: var(--ui-t-read); color: var(--ui-ink-soft); }
+.ui-bubble--dots { display: flex; gap: 9px; padding: 22px 26px; }
+.ui-bubble--dots i { width: 14px; height: 14px; border-radius: 4px; background: var(--ui-ink); animation: ui-think 900ms var(--ui-ease-move) infinite; }
+.ui-bubble--dots i:nth-child(2) { animation-delay: 150ms; } .ui-bubble--dots i:nth-child(3) { animation-delay: 300ms; }
+.ui-actions { display: flex; align-items: flex-end; gap: var(--ui-gap); margin-left: auto; flex: none; }
+
+/* ================= buttons ================= */
+.ui-btn { display: inline-grid; place-items: center; min-height: 64px; min-width: 150px; padding: 0 28px; margin-bottom: var(--ui-lift); background: var(--ui-ink); color: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); box-shadow: 0 var(--ui-lift) 0 #0b1122; font: var(--ui-t-button); white-space: nowrap; cursor: pointer; transition: transform var(--ui-d-press) var(--ui-ease-out), box-shadow var(--ui-d-press) var(--ui-ease-out); }
+.ui .ui-btn { color: var(--ui-paper); font: var(--ui-t-button); }
+.ui-btn--quiet, .ui .ui-btn--quiet { background: var(--ui-white); color: var(--ui-ink); box-shadow: var(--ui-shadow-press); }
+.ui-btn--test, .ui .ui-btn--test { min-height: 88px; min-width: 300px; padding: 0 34px; gap: 14px; grid-auto-flow: column; background: var(--ui-sun); color: var(--ui-ink); border-radius: var(--ui-r-l); box-shadow: 0 8px 0 var(--ui-ink); margin-bottom: 8px; font: var(--ui-t-test); }
+.ui-btn--test.is-inviting { animation: ui-invite 1400ms var(--ui-ease-move) infinite; }
+.ui-btn.is-pressed, .ui-btn:active { transform: translateY(calc(var(--ui-lift) - 1px)); box-shadow: 0 1px 0 #0b1122; }
+.ui-btn--quiet.is-pressed, .ui-btn--quiet:active { box-shadow: 0 1px 0 var(--ui-ink); }
+.ui-btn--test.is-pressed, .ui-btn--test:active { transform: translateY(7px); box-shadow: 0 1px 0 var(--ui-ink); background: var(--ui-sun-deep); }
+.ui-btn--test.is-running { transform: translateY(7px); box-shadow: 0 1px 0 var(--ui-ink); background: var(--ui-paper); cursor: default; }
+.ui-btn.is-disabled, .ui-btn[disabled] { transform: translateY(var(--ui-lift)); box-shadow: none; background: var(--ui-paper-dim); color: var(--ui-ink-soft); border-style: dashed; cursor: default; }
+/* the little picture inside the test button while the test runs: three blocks that rise and fall, not a bar that fills (a bar reads as a timer) */
+.ui-busy { display: inline-flex; gap: 5px; align-items: flex-end; height: 26px; }
+.ui-busy i { width: 9px; height: 9px; background: var(--ui-ink); border-radius: 2px; animation: ui-think 700ms var(--ui-ease-move) infinite; }
+.ui-busy i:nth-child(2) { animation-delay: 120ms; } .ui-busy i:nth-child(3) { animation-delay: 240ms; }
+
+/* ================= the tray: the one surface the child works on ================= */
+.ui-tray { display: flex; flex-direction: column; gap: 8px; padding: 12px var(--ui-pad) 14px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-l); box-shadow: var(--ui-shadow-rest); }
+.ui-tray--flat { flex-direction: row; align-items: baseline; gap: 14px; padding: 10px var(--ui-pad) 12px; }
+.ui-how { font: var(--ui-t-read); color: var(--ui-ink-soft); }
+.ui-label { font: var(--ui-t-label); color: var(--ui-ink-soft); white-space: nowrap; }
+.ui-heading { font: 800 28px/1.1 var(--ui-display); }
+
+/* the sentence and its gaps */
+.ui-sentence { font: var(--ui-t-sentence); }
+.ui-gap { display: inline-block; vertical-align: baseline; min-width: 150px; height: 34px; margin: 0 2px; padding: 0 12px; border: var(--ui-line) dashed var(--ui-ink-soft); border-radius: var(--ui-r-s); background: var(--ui-paper-dim); line-height: 28px; text-align: center; color: transparent; }
+.ui-gap.is-active { border-color: var(--ui-ink); border-style: dashed; background: var(--ui-white); animation: ui-gap 1200ms var(--ui-ease-move) infinite; }
+.ui-gap.is-filled { min-width: 0; border-style: solid; border-color: var(--ui-ink); background: var(--ui-sun); color: var(--ui-ink); cursor: pointer; }
+.ui-sentence--small { font: 600 21px/1.5 var(--ui-body); }
+.ui-sentence--small .ui-gap { height: 30px; line-height: 24px; padding: 0 8px; }
+
+/* word buttons */
+.ui-chips { display: flex; flex-wrap: wrap; gap: var(--ui-gap) var(--ui-gap); padding-bottom: var(--ui-lift); }
+.ui-chip, .ui .ui-chip { display: inline-grid; place-items: center; min-height: var(--ui-touch); padding: 0 20px; background: var(--ui-white); color: var(--ui-ink); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-pill); box-shadow: var(--ui-shadow-press); font: var(--ui-t-chip); cursor: pointer; transition: transform var(--ui-d-press) var(--ui-ease-out), box-shadow var(--ui-d-press) var(--ui-ease-out); }
+.ui-chip.is-pressed, .ui-chip:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--ui-ink); }
+.ui-chip.is-chosen { transform: translateY(5px); box-shadow: 0 1px 0 var(--ui-ink); background: var(--ui-sun); }
+.ui-chip.is-disabled { transform: translateY(var(--ui-lift)); box-shadow: none; background: var(--ui-paper-dim); color: var(--ui-ink-soft); border-style: dashed; cursor: default; }
+.ui-chip--big, .ui .ui-chip--big { min-height: 64px; min-width: 120px; padding: 0 34px; font: var(--ui-t-button); margin-bottom: var(--ui-lift); }
+.ui-chip--line, .ui .ui-chip--line { border-radius: var(--ui-r-m); justify-items: start; text-align: left; padding: 10px 20px; }   /* a whole sentence as a button (the reasons in level 6) */
+.ui-chip--fly { position: absolute; z-index: 6; box-shadow: 0 10px 0 var(--ui-shade); transform: translate(-50%, -50%) rotate(-3deg); background: var(--ui-sun); pointer-events: none; }
+
+/* ================= plans ================= */
+.ui-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-gap); align-items: stretch; padding-bottom: var(--ui-lift); }
+.ui-plans--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ui-plan { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px 12px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); box-shadow: var(--ui-shadow-rest); text-align: left; transition: transform var(--ui-d-pop) var(--ui-ease-pop), background var(--ui-d-press) linear; }
+.ui-plan.is-tappable { background: var(--ui-white); box-shadow: var(--ui-shadow-press); cursor: pointer; }
+.ui-plan.is-chosen { background: var(--ui-sun); box-shadow: 0 10px 0 var(--ui-ink); transform: translateY(-4px); }
+.ui-plan.is-testing { background: var(--ui-white); transform: translateY(-4px); box-shadow: 0 9px 0 var(--ui-shade); }
+.ui-plan.is-waiting { background: var(--ui-paper-dim); box-shadow: none; }
+.ui-plan.is-first { background: var(--ui-paper-dim); box-shadow: none; border-style: dashed; }   /* the plan the child tried first: flat, still readable */
+.ui-plan__head { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+.ui-plan__name { font: var(--ui-t-name); }
+.ui-plan__what { font: var(--ui-t-read); }
+.ui-plan__tag { position: absolute; right: 12px; top: -15px; padding: 4px 12px 5px; background: var(--ui-ink); color: var(--ui-paper); border-radius: var(--ui-r-pill); font: var(--ui-t-label); white-space: nowrap; }
+.ui-plan--tab { flex-direction: row; align-items: center; padding: 8px 14px 9px; min-height: 56px; }
+.ui-plan .ui-btn { align-self: stretch; margin-top: auto; }
+.ui-letter { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--ui-r-s); background: var(--ui-ink); color: var(--ui-paper); font: 800 22px/1 var(--ui-display); }
+
+/* one result: a mark and a sentence about what happened */
+.ui-result { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding-top: 6px; border-top: 2px solid rgba(31, 42, 68, 0.18); font: var(--ui-t-read); }
+.ui-result p { padding-top: 4px; min-height: 54px; }   /* two lines, so that the same check sits on the same row in every card */
+.ui-mark { flex: none; display: block; width: 34px; height: 34px; background-color: var(--ui-fair); background-repeat: no-repeat; background-position: center; background-size: 100% 100%; }
+/* three shapes as well as three colours and three signs: a round tick, a square dash, an eight-sided cross */
+.ui-mark--good { background-color: var(--ui-good); border-radius: 50%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4L18 8' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.ui-mark--fair { background-color: var(--ui-fair); border-radius: 9px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 12h10' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.ui-mark--poor { background-color: var(--ui-poor); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.ui-mark.is-stamping { animation: ui-stamp var(--ui-d-pop) var(--ui-ease-pop) both; }
+
+/* the small picture of the first result */
+.ui-thumb { position: relative; flex: none; width: 168px; height: 96px; border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-s); background: #cfe6c4 center / cover no-repeat; }
+.ui-thumb .ui-mark { position: absolute; right: -10px; bottom: -10px; outline: 3px solid var(--ui-paper); }
+.ui-thumb .ui-letter { position: absolute; left: -8px; top: -8px; outline: 3px solid var(--ui-paper); }
+
+/* ================= things that sit on the town itself ================= */
+.ui-stage { position: absolute; inset: 0; pointer-events: none; }   /* place each child with left and top from the 3D position of its place */
+.ui-flag { position: absolute; transform: translate(-50%, -100%); display: grid; justify-items: center; pointer-events: auto; }
+.ui-flag b { position: relative; display: grid; place-items: center; width: 56px; height: 56px; background: var(--ui-ink); color: var(--ui-paper); border: var(--ui-line) solid var(--ui-paper); border-radius: var(--ui-r-m); box-shadow: 0 0 0 var(--ui-line) var(--ui-ink); font: 800 30px/1 var(--ui-display); }
+.ui-flag::after { content: ''; width: 6px; height: 22px; margin-top: 3px; background: var(--ui-ink); border-radius: 0 0 3px 3px; box-shadow: 0 0 0 2px var(--ui-paper); }
+.ui-flag.is-chosen b { background: var(--ui-sun); color: var(--ui-ink); border-color: var(--ui-ink); }
+.ui-flag.is-waiting { opacity: 0.55; }
+.ui-flag .ui-mark { position: absolute; right: -27px; top: -25px; width: 38px; height: 38px; outline: 3px solid var(--ui-paper); }
+.ui-flag--town b { width: auto; height: 48px; padding: 0 18px 0 8px; grid-auto-flow: column; gap: 10px; background: var(--ui-paper); color: var(--ui-ink); border-color: var(--ui-ink); box-shadow: var(--ui-shadow-rest); border-radius: var(--ui-r-pill); font: 800 22px/1 var(--ui-display); white-space: nowrap; }
+.ui-flag--town i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ui-town); color: #fff; font-style: normal; }
+
+.ui-tapring { position: absolute; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%; border: 6px dashed var(--ui-paper); box-shadow: 0 0 0 4px var(--ui-ink), inset 0 0 0 4px var(--ui-ink); pointer-events: auto; animation: ui-ring 1600ms var(--ui-ease-move) infinite; }
+.ui-tapring.is-hit { border-style: solid; border-color: var(--ui-sun); background: rgba(255, 210, 87, 0.4); animation: ui-stamp var(--ui-d-pop) var(--ui-ease-pop) both; }
+.ui-tag { position: absolute; transform: translate(-50%, 0); padding: 8px 16px 9px; background: var(--ui-sun); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-pill); font: var(--ui-t-name); white-space: nowrap; }
+.ui-pointer { position: absolute; z-index: 9; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); border: var(--ui-line) solid var(--ui-ink); box-shadow: 0 5px 0 var(--ui-shade); pointer-events: none; }   /* the film's finger; the game does not draw it */
+.ui-pointer.is-down { transform: scale(0.82); background: var(--ui-sun); box-shadow: 0 1px 0 var(--ui-shade); }
+
+/* ================= the welcome and the end of the hour ================= */
+.ui-checks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ui-gap); }
+.ui-check { display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: 4px 10px; padding: 10px 12px 12px; background: var(--ui-white); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); }
+.ui-check svg { width: 36px; height: 36px; }
+.ui-check b { font: var(--ui-t-name); }
+.ui-check span { grid-column: 1 / -1; font: 600 17px/1.25 var(--ui-body); }
+.ui-panel { position: absolute; right: var(--ui-gutter); top: 80px; bottom: var(--ui-gutter); width: 560px; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; background: var(--ui-paper); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-l); box-shadow: var(--ui-shadow-rest); pointer-events: auto; }
+.ui-job { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 10px 14px; background: var(--ui-white); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); font: var(--ui-t-read); }
+.ui-job i { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--ui-r-s); background: var(--ui-town); }
+.ui-talk { margin-top: auto; padding: 12px 16px 14px; background: var(--ui-sun); border: var(--ui-line) solid var(--ui-ink); border-radius: var(--ui-r-m); font: 600 21px/1.3 var(--ui-body); }
+.ui-talk b { display: block; font: var(--ui-t-name); margin-bottom: 4px; }
+
+/* ================= entrances (add the class for one play) ================= */
+.ui-in-up { animation: ui-in-up var(--ui-d-panel) var(--ui-ease-out) both; }
+.ui-in-pop { animation: ui-in-pop var(--ui-d-pop) var(--ui-ease-pop) both; }
+.ui-out-down { animation: ui-out-down 200ms var(--ui-ease-in) both; }
+
+@keyframes ui-in-up { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ui-in-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ui-out-down { to { transform: translateY(24px); opacity: 0; } }
+@keyframes ui-stamp { 0% { transform: scale(1.9); opacity: 0; } 60% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes ui-think { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+@keyframes ui-gap { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 210, 87, 0); } 50% { box-shadow: 0 0 0 6px rgba(255, 210, 87, 0.9); } }
+@keyframes ui-invite { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes ui-ring { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+/* a child or a school that asks for less motion gets the same screens without the loops and the bounces */
+@media (prefers-reduced-motion: reduce) {
+  .ui *, .ui *::before, .ui *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}
+
+/* ================= narrower screens (a tablet held sideways is 1024 wide) ================= */
+@container ui (max-width: 1100px) {
+  .ui-place span { display: none; }
+  .ui-bubble { font-size: 22px; }
+  .ui-sentence { font-size: 24px; }
+  .ui .ui-btn--test { min-width: 240px; font-size: 30px; }
+  .ui-checks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ui-result { grid-template-columns: 28px 1fr; gap: 8px; font-size: 18px; }
+  .ui-result .ui-mark { width: 28px; height: 28px; }
+  .ui-plan__name { font-size: 20px; }
+  .ui .ui-chip { font-size: 20px; padding: 0 16px; }
+  .ui .ui-chip--big { font-size: 24px; padding: 0 30px; }
+  .ui-panel { width: 480px; }
+}

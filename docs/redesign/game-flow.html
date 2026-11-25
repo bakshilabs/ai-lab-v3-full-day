@@ -1,0 +1,181 @@
+<title>AI Lab Game Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* layout: three figures down one column: one mission, the six levels, then every module level by level */
+  :root {
+    --bg: #f6f8f4; --panel: #ffffff; --fg: #23301f; --muted: #5b6a55; --line: #d9e0d2; --accent: #2f7d4f; --soft: #e8f1e6; --good: #2f7d4f; --bad: #b8452f;
+    --display: 'Space Grotesk', 'Trebuchet MS', system-ui, sans-serif; --body: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #334032; --accent: #7fd19c; --soft: #243024; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141a14; --panel: #1c241c; --fg: #e8efe2; --muted: #a4b39c; --line: #334032; --accent: #7fd19c; --soft: #243024; --good: #7fd19c; --bad: #f08a70; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 34px; }
+  h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); } h2 { font-size: 1.35rem; } h3 { font-size: 1rem; }
+  p { margin: 0; max-width: 70ch; } .lede { color: var(--muted); font-size: 1.05rem; }
+  header, section { display: flex; flex-direction: column; gap: 12px; }
+  .tag { font: 600 0.75rem var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  figcaption { color: var(--muted); font-size: 0.9rem; max-width: 80ch; }
+  .scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  .scroll svg { display: block; min-width: 940px; width: 100%; height: auto; color: var(--fg); font-family: var(--body); }
+  svg .box { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+  svg .chip { fill: var(--soft); stroke: var(--accent); stroke-width: 1; }
+  svg .card { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  svg .h { font: 700 15px var(--display); fill: currentColor; } svg .n { font: 700 12px var(--display); fill: var(--bg); }
+  svg .t { font-size: 12px; fill: currentColor; } svg .m { font-size: 11.5px; fill: var(--muted); }
+  svg .ok { font: 700 15px var(--body); fill: var(--good); } svg .no { font: 700 15px var(--body); fill: var(--bad); }
+  svg .arr { stroke: currentColor; stroke-width: 1.6; fill: none; } svg .loop { stroke: var(--accent); stroke-width: 2; fill: none; stroke-dasharray: 6 4; } svg .lt { font: 600 12px var(--body); fill: var(--accent); }
+  svg .dot { fill: var(--fg); }
+
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 900px; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  tr:last-child > * { border-bottom: 0; } tr > *:last-child { border-right: 0; }
+  thead th { font: 700 0.85rem var(--display); background: var(--soft); } thead th small { display: block; font: 500 0.78rem var(--body); color: var(--muted); }
+  tbody th { font-weight: 600; width: 13%; background: var(--bg); }
+  .lv b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--fg); color: var(--bg); font: 700 0.78rem var(--display); margin-right: 6px; }
+  .bars { display: flex; gap: 3px; margin-bottom: 5px; } .bars i { width: 14px; height: 8px; border-radius: 2px; background: var(--accent); } .bars i.o { background: var(--line); }
+  .mods tbody th { border-left: 6px solid var(--c); width: 15%; } .mods tbody th small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; }
+  .mods td strong { display: block; } .mods td span { color: var(--muted); }
+  .mods td.end { background: var(--soft); width: 11%; }
+  .role { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .role div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .role p { font-size: 0.94rem; }
+  ul, ol { margin: 0; padding-left: 1.25em; max-width: 72ch; display: flex; flex-direction: column; gap: 7px; }
+  .ask { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .step h3 b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--fg); color: var(--bg); font: 700 0.8rem var(--display); margin-right: 8px; }
+  .step p { font-size: 0.95rem; }
+  .townbox { background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--c); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .townbox ol { gap: 8px; max-width: 78ch; } .townbox .l { color: var(--muted); font-size: 0.94rem; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="tag">A proposal for how the new game plays</span>
+    <h1>Ask, compare, choose</h1>
+    <p class="lede">In the new game, children do not build freely. Every level works the same way. The child asks Florence for help by building a sentence from word buttons. Florence offers different solutions. The child looks at the result of each solution and chooses one.</p>
+    <p class="lede">Florence is never wrong on purpose, and she never says how sure she is. Her solutions all work. They are good at different things, and the child decides what matters most.</p>
+  </header>
+
+  <section>
+    <h2>Part 1. How one level works</h2>
+    <p>This picture shows one level from start to finish. The example is the level in Drone City where a parcel has to be delivered.</p>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 1100 392" role="img" aria-label="One level: the job, the child's prompt built from word buttons, Florence's three scenarios, the lenses that score each scenario, and the decision, with a loop back to the prompt when no scenario is good enough.">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker></defs>
+
+          <!-- 1 the job -->
+          <rect class="box" x="10" y="40" width="170" height="250" rx="10"/>
+          <circle class="dot" cx="32" cy="64" r="11"/><text class="n" x="32" y="68" text-anchor="middle">1</text><text class="h" x="50" y="69">The job</text>
+          <text class="m" x="24" y="96">The game gives a real job.</text>
+          <rect class="card" x="24" y="112" width="142" height="74" rx="6"/>
+          <text class="t" x="34" y="134">A parcel has to get</text><text class="t" x="34" y="151">from Drone City</text><text class="t" x="34" y="168">to Eco Town.</text>
+          <text class="m" x="24" y="212">The child can see the</text><text class="m" x="24" y="228">place on the screen.</text>
+
+          <!-- 2 prompt -->
+          <rect class="box" x="230" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="252" cy="64" r="11"/><text class="n" x="252" y="68" text-anchor="middle">2</text><text class="h" x="270" y="69">The child asks</text>
+          <text class="m" x="244" y="96">Each button adds some words.</text>
+          <rect class="chip" x="244" y="110" width="104" height="26" rx="13"/><text class="t" x="296" y="127" text-anchor="middle">Fly the parcel</text>
+          <rect class="chip" x="244" y="142" width="92" height="26" rx="13"/><text class="t" x="290" y="159" text-anchor="middle">to Eco Town</text>
+          <rect class="chip" x="244" y="174" width="162" height="26" rx="13"/><text class="t" x="325" y="191" text-anchor="middle">keeping clear of people</text>
+          <rect class="chip" x="244" y="206" width="146" height="26" rx="13"/><text class="t" x="317" y="223" text-anchor="middle">with battery to spare</text>
+          <text class="m" x="244" y="258">Older children can type</text><text class="m" x="244" y="274">the sentence instead.</text>
+
+          <!-- 3 scenarios -->
+          <rect class="box" x="470" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="492" cy="64" r="11"/><text class="n" x="492" y="68" text-anchor="middle">3</text><text class="h" x="510" y="69">Florence offers</text>
+          <text class="m" x="484" y="96">She shows three solutions.</text>
+          <rect class="card" x="484" y="110" width="162" height="46" rx="6"/><text class="h" x="496" y="139">A</text><text class="t" x="518" y="130">Straight over</text><text class="t" x="518" y="146">the hospital</text>
+          <rect class="card" x="484" y="162" width="162" height="46" rx="6"/><text class="h" x="496" y="191">B</text><text class="t" x="518" y="182">Round by</text><text class="t" x="518" y="198">the river</text>
+          <rect class="card" x="484" y="214" width="162" height="46" rx="6"/><text class="h" x="496" y="243">C</text><text class="t" x="518" y="234">High over</text><text class="t" x="518" y="250">the towers</text>
+          <text class="m" x="484" y="278">All three of them would work.</text>
+
+          <!-- 4 lenses -->
+          <rect class="box" x="710" y="40" width="190" height="250" rx="10"/>
+          <circle class="dot" cx="732" cy="64" r="11"/><text class="n" x="732" y="68" text-anchor="middle">4</text><text class="h" x="750" y="69">The child compares</text>
+          <text class="m" x="724" y="96">Each lens shows one result.</text>
+          <text class="h" x="806" y="128" text-anchor="middle">A</text><text class="h" x="842" y="128" text-anchor="middle">B</text><text class="h" x="878" y="128" text-anchor="middle">C</text>
+          <line class="arr" x1="724" y1="138" x2="890" y2="138" style="stroke:var(--line)"/>
+          <text class="t" x="724" y="162">Safety</text><text class="no" x="806" y="163" text-anchor="middle">✗</text><text class="ok" x="842" y="163" text-anchor="middle">✓</text><text class="ok" x="878" y="163" text-anchor="middle">✓</text>
+          <text class="t" x="724" y="194">Battery</text><text class="ok" x="806" y="195" text-anchor="middle">✓</text><text class="ok" x="842" y="195" text-anchor="middle">✓</text><text class="no" x="878" y="195" text-anchor="middle">✗</text>
+          <text class="t" x="724" y="226">Wind</text><text class="ok" x="806" y="227" text-anchor="middle">✓</text><text class="no" x="842" y="227" text-anchor="middle">✗</text><text class="ok" x="878" y="227" text-anchor="middle">✓</text>
+          <text class="m" x="724" y="258">A tick is a good result.</text><text class="m" x="724" y="274">A cross is a poor result.</text>
+
+          <!-- 5 decide -->
+          <rect class="box" x="950" y="40" width="140" height="250" rx="10"/>
+          <circle class="dot" cx="972" cy="64" r="11"/><text class="n" x="972" y="68" text-anchor="middle">5</text><text class="h" x="990" y="69">The choice</text>
+          <text class="m" x="964" y="96">The child chooses</text><text class="m" x="964" y="112">one solution.</text>
+          <rect class="chip" x="964" y="128" width="112" height="30" rx="6"/><text class="t" x="1020" y="148" text-anchor="middle">Use B</text>
+          <rect class="card" x="964" y="166" width="112" height="30" rx="6"/><text class="t" x="1020" y="186" text-anchor="middle">Ask again</text>
+          <text class="m" x="964" y="226">The town then</text><text class="m" x="964" y="242">shows the chosen</text><text class="m" x="964" y="258">solution happening.</text>
+
+          <line class="arr" x1="180" y1="165" x2="226" y2="165" marker-end="url(#ah)"/>
+          <line class="arr" x1="420" y1="165" x2="466" y2="165" marker-end="url(#ah)"/>
+          <line class="arr" x1="660" y1="165" x2="706" y2="165" marker-end="url(#ah)"/>
+          <line class="arr" x1="900" y1="165" x2="946" y2="165" marker-end="url(#ah)"/>
+          <path class="loop" d="M1020 290 V340 H325 V294" marker-end="url(#ah2)"/>
+          <text class="lt" x="672" y="362" text-anchor="middle">If the child wants a better result, they can change the sentence and ask Florence again.</text>
+        </svg>
+      </div>
+      <figcaption>Read the picture from left to right. In this example, route A is poor for safety because it flies over the hospital. Route B is poor in the wind. Route C uses too much battery. The child has to decide which of these matters most, or change the sentence and ask again. I wrote the example words myself. In the real game, the words on the buttons would be written by OpenAI, as they are now.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Part 2. How the six levels get harder</h2>
+    <p>Every town has six levels. In the first level Florence does most of the work. In each level after that, the child does a little more. This is the same in every town.</p>
+    <div class="steps">
+      <div class="step"><h3><b>1</b>Level 1</h3><p>Florence starts the sentence and the child chooses one word to finish it. Florence shows two solutions. The child is given one lens, looks at both results, and chooses the better one.</p></div>
+      <div class="step"><h3><b>2</b>Level 2</h3><p>The child fills in two parts of the sentence. Florence shows two solutions. The child is given two lenses, and each solution does better under a different lens. The child has to decide which result matters more.</p></div>
+      <div class="step"><h3><b>3</b>Level 3</h3><p>The child builds the whole sentence from word buttons. It says what to do, where to do it, and one thing to be careful about. Florence shows three solutions and the child compares them with two lenses.</p></div>
+      <div class="step"><h3><b>4</b>Level 4</h3><p>The child builds the whole sentence and looks at three solutions with three lenses. The child then adds to the sentence and asks again, and sees that a more complete sentence brings better solutions.</p></div>
+      <div class="step"><h3><b>5</b>Level 5</h3><p>The child builds the whole sentence. This time the child also chooses which lenses to use, because the results that matter are different for each job.</p></div>
+      <div class="step"><h3><b>6</b>Level 6</h3><p>This is the biggest job in the town. The child writes the sentence, chooses the lenses, picks a solution and chooses a reason for it. The teacher uses that reason in the discussion that follows.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Part 3. What happens in each town</h2>
+    <p>These are the thirty-six levels of the day, six in each town. The names of the levels are the ones you have already approved. Next to each name is what Florence offers in that level. The names of the lenses are my suggestions.</p>
+      <div class="townbox" style="--c:#c8643f"><h3>Town 1: Eco Town</h3><p class="l">The lenses in Eco Town are Flood, Walking time, Carbon, Nature, Winter power and Fairness.</p><ol><li><strong>Land.</strong> Florence offers three places where the town could stand. The child compares how each place copes with flooding.</li><li><strong>Getting around.</strong> Florence offers three ways to lay out the paths and streets. The child compares how long people would have to walk.</li><li><strong>Homes.</strong> Florence offers three materials for building the homes. The child compares how much carbon each one causes.</li><li><strong>Food.</strong> Florence offers three places for the farms. The child compares what each one does to wildlife.</li><li><strong>Power.</strong> Florence offers three ways to power the town. The child compares how well each one works in winter.</li><li><strong>A school for everyone.</strong> Florence offers three places for the school. The child compares how fair each place is to every family.</li></ol></div>
+      <div class="townbox" style="--c:#3f78b5"><h3>Town 2: Drone City</h3><p class="l">The lenses in Drone City are Safety, Battery, Wind and Coverage. Coverage shows how much of the ground the drone has seen.</p><ol><li><strong>Ground school.</strong> Florence offers three plans for today: fly now, wait until later, or fly somewhere else. The child compares how safe each plan is.</li><li><strong>Hand flying.</strong> Florence offers three ways to keep the drone steady and land it in a side wind.</li><li><strong>Delivery.</strong> Florence offers three routes for carrying a parcel to the landing pad in Eco Town.</li><li><strong>Farm survey.</strong> Florence offers three flight patterns for photographing the fields at Robot Farm.</li><li><strong>Inspection.</strong> Florence offers three ways to fly close to a wind turbine and the bridge to look for damage.</li><li><strong>Search and rescue.</strong> Florence offers three plans for finding a lost walker as it gets dark.</li></ol></div>
+      <div class="townbox" style="--c:#6f9a3a"><h3>Town 3: Robot Farm</h3><p class="l">The lenses at Robot Farm are Accuracy, Safety near people, Speed and Cost of a mistake.</p><ol><li><strong>How a robot works.</strong> Florence offers three different sensors for a job the robot has to do.</li><li><strong>Robot arm.</strong> Florence offers three different orders of steps for the arm to pack a tray of seedlings.</li><li><strong>Hospital delivery.</strong> Florence offers three sets of rules for a robot carrying medicine along a busy corridor.</li><li><strong>Recycling sorter.</strong> Florence offers three sets of examples to teach the sorting robot with.</li><li><strong>Farm robot.</strong> Florence offers three settings for how sure the robot must be before it pulls up a plant.</li><li><strong>Flood rescue.</strong> Florence offers three designs for a robot that can work in a flooded street.</li></ol></div>
+      <div class="townbox" style="--c:#8d6f9c"><h3>Town 4: Crossways</h3><p class="l">The lenses in Crossways are Safety, Waiting time, Fairness and Weather.</p><ol><li><strong>How the car sees.</strong> Florence offers three combinations of camera, radar and laser sensors for the car.</li><li><strong>Recognising things.</strong> Florence offers three sets of street pictures to teach the car with.</li><li><strong>Rules of the road.</strong> Florence offers three choices of speed and safe gap for the car at a crossing and near the school.</li><li><strong>Testing.</strong> Florence offers three changes to make after the car fails a test drive.</li><li><strong>A shared fleet.</strong> Florence offers three plans for how many shared cars the town has and where they wait.</li><li><strong>Redesign the street.</strong> Florence offers three new layouts for the street and the old car park.</li></ol></div>
+      <div class="townbox" style="--c:#d0558a"><h3>Town 5: Studio Bay</h3><p class="l">The lenses in Studio Bay are Story, Feeling, Easy to follow and Honesty.</p><ol><li><strong>Crew language.</strong> Florence offers three different camera shots for the same scene.</li><li><strong>Storyboard.</strong> Florence offers three different orders for the shots in a story.</li><li><strong>Directing.</strong> Florence offers three first versions of the film.</li><li><strong>Editing.</strong> Florence offers three versions with different pacing and music.</li><li><strong>For everyone.</strong> Florence offers three ways to add captions and a spoken description of the pictures.</li><li><strong>True or made up?.</strong> Florence offers three versions that use real shots and machine-made shots in different ways. The child decides which one is honest to show.</li></ol></div>
+      <div class="townbox" style="--c:#c79a2e"><h3>Town 6: Power Ridge</h3><p class="l">The lenses at Power Ridge are Keeping the lights on, Clean power, People’s needs and Risk.</p><ol><li><strong>Balance.</strong> Florence offers three ways to supply enough power as the town wakes up.</li><li><strong>Forecast.</strong> Florence offers three plans for a day with little wind and little sun.</li><li><strong>Storage.</strong> Florence offers three choices of when to fill the town battery and when to use it.</li><li><strong>Automation rules.</strong> Florence offers three sets of rules for the power system to follow by itself.</li><li><strong>Smart demand.</strong> Florence offers three ways to move jobs such as car charging to times when there is spare power.</li><li><strong>Storm night.</strong> Florence offers three orders in which to bring power back to the towns after a storm.</li></ol></div>
+    <p>At the end of each town, the game shows the real jobs that use these skills. Then the teacher leads the discussion, the children have a break, and they move on to the next town.</p>
+  </section>
+
+  <section>
+    <h2>Part 4. What stays the same all day</h2>
+    <div class="steps">
+      <div class="step"><h3>Florence behaves the same in every town</h3><p>She offers different solutions to the job. All of them would work. The game never asks the child to catch her making a mistake.</p></div>
+      <div class="step"><h3>There are two kinds of solution</h3><p>Some solutions are about design. They decide where something goes or what it is made of, such as a route, a street layout or the body of a robot. Other solutions are about how something is run, such as a set of rules, a timetable or the order of the work. Every town has both kinds.</p></div>
+      <div class="step"><h3>The last level uses the whole world</h3><p>Power Ridge sends power to every town. In the last level of the day, a storm cuts the power, and the child chooses which towns get it back first.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What this would change in the plan you approved</h2>
+    <ul>
+      <li>Eco Town would stop teaching that an AI can be confidently wrong. It would also stop showing a percentage next to Florence’s plans. Eco Town would play in the same way as the other five towns.</li>
+      <li>Children would no longer build a town of their own in Eco Town. The six missions would fill the hour.</li>
+      <li>Some approved levels ask the child to do something by hand, such as flying a drone, labelling pictures or editing a film. In this design, Florence would offer ways of doing those things, and the child would compare them.</li>
+    </ul>
+  </section>
+
+  <section class="ask">
+    <h2>Three questions for you</h2>
+    <ol>
+      <li>Should the levels that used to be done by hand keep a short part where the child does the task? For example, the child could fly the last ten seconds of the route they chose.</li>
+      <li>If a child chooses a weaker solution, should the game allow it and show what happens? Or should the game stop the child until they choose a better one? I would allow it.</li>
+      <li>Should every town start again at the easy first level? Or should later towns start at a harder level, because the child already knows how the game works?</li>
+    </ol>
+  </section>
+</div>
